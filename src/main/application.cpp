@@ -47,11 +47,11 @@ void Application::run() {
 
     auto imgui_render_pass = graphDescriptor.pass<RenderGraphRenderPass>("imgui_render_pass");
     imgui_render_pass->outTextureAttachmentDescriptors.push_back(output_texture);
-
     imgui_render_pass->width = 1024;
     imgui_render_pass->height = 1024;
+    imgui_render_pass->is_submit_pass = true;
 
-    RenderGraph renderGraph(device_, swapChain_, &graphDescriptor, 3);
+    RenderGraph renderGraph(device_, {WIDTH, HEIGHT}, &graphDescriptor, 3);
 
     renderGraph.createLayouts();
 
@@ -59,6 +59,8 @@ void Application::run() {
 
     auto simple_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("simple_render_pass");
     auto imgui_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("imgui_render_pass");
+
+    imgui_render_pass_obj->is_submit_pass = true;
 
     auto simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
             device_, "simple_render_system",
@@ -118,7 +120,7 @@ void Application::run() {
     ImGui_ImplVulkan_InitInfo init_info = {};
     device_.fillImGuiInitInfo(init_info);
     init_info.DescriptorPool = imguiPool;
-    init_info.RenderPass = imgui_render_pass_obj->renderPass->renderPass;
+    init_info.RenderPass = renderGraph.swapChain_->getRenderPass();
     init_info.Subpass = 0;
     init_info.MinImageCount = 2;
     init_info.ImageCount = 2;
@@ -139,17 +141,28 @@ void Application::run() {
     while (not glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        auto result = swapChain_.acquireNextImage(&currentFrame);
+        auto result = renderGraph.swapChain_->acquireNextImage(&currentFrame);
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        renderGraph.render(renderGraph.commandBuffers[currentFrame], currentFrame);
+        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplVulkan_NewFrame();
+        ImGui::NewFrame();
+
+        auto render_result = renderGraph.render(renderGraph.commandBuffers[currentFrame], currentFrame);
+
+        if (render_result == VK_ERROR_OUT_OF_DATE_KHR || render_result == VK_SUBOPTIMAL_KHR || window_.wasWindowResized()) {
+            window_.resetWindowResizedFlag();
+            auto extent = window_.getExtent();
+            while (extent.width == 0 || extent.height == 0) {
+                extent = window_.getExtent();
+                glfwWaitEvents();
+            }
+            vkDeviceWaitIdle(device_.device());
+            renderGraph.recreateSwapChain(extent);
+        }
 
         currentFrame = (currentFrame + 1) % 2;
     }

@@ -17,10 +17,8 @@ private:
     VklWindow window_{WIDTH, HEIGHT};
     VklDevice device_;
 
-    VklSwapChain swapChain_;
-
 public:
-    Application() : device_(window_), swapChain_(device_, {WIDTH, HEIGHT}){};
+    Application() : device_(window_) {};
     ~Application();
 
     Application(const Application &) = delete;

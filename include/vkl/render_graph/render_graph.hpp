@@ -158,6 +158,7 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
     std::vector<RenderGraphPassInstance<RenderGraphRenderPass> *> instances;
     RenderGraphPassDescriptor<RenderGraphRenderPass> *descriptor_p;
     std::unique_ptr<VklRenderPass> renderPass;
+    bool is_submit_pass = false;
 
     std::optional<std::function<void(VkCommandBuffer, uint32_t)>> recordFunction = std::nullopt;
 
@@ -189,6 +190,7 @@ private:
 
 template <> struct RenderGraphPassDescriptor<RenderGraphRenderPass> : public RenderGraphPassDescriptorBase {
     uint32_t width, height;
+    bool is_submit_pass = false;
 
     std::vector<RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> *> inTextureAttachmentDescriptors;
     std::vector<RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> *> outTextureAttachmentDescriptors;
@@ -271,7 +273,7 @@ struct RenderGraphDescriptor {
 struct RenderGraph {
 
     VklDevice &device_;
-    VklSwapChain &swapChain_;
+    std::unique_ptr<VklSwapChain> swapChain_;
 
     uint32_t instance_n_;
     std::vector<VkCommandBuffer> commandBuffers;
@@ -427,16 +429,54 @@ struct RenderGraph {
         }
     };
 
-    explicit RenderGraph(VklDevice &device, VklSwapChain &swapChain, RenderGraphDescriptor *renderGraphDescriptor,
+    void recreateSwapChain(VkExtent2D extent) {
+        vkDeviceWaitIdle(device_.device());
+
+        if (swapChain_ == nullptr) {
+            swapChain_ = std::make_unique<VklSwapChain>(device_, extent);
+        } else {
+            std::shared_ptr<VklSwapChain> oldSwapChain = std::move(swapChain_);
+            swapChain_ = std::make_unique<VklSwapChain>(device_, extent, oldSwapChain);
+
+            if (!oldSwapChain->compareSwapFormats(*swapChain_.get())) {
+                throw std::runtime_error("Swap chain image(or depth) format has changed!");
+            }
+        }
+    }
+
+    void createCommandBuffers() {
+        /**
+         * create command buffers for the render graph
+         */
+        commandBuffers.resize(instance_n_);
+
+        VkCommandBufferAllocateInfo allocateInfo;
+        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocateInfo.commandPool = device_.getCommandPool();
+        allocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+        allocateInfo.pNext = nullptr;
+
+        if (vkAllocateCommandBuffers(device_.device(), &allocateInfo, commandBuffers.data()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+    }
+
+    explicit RenderGraph(VklDevice &device, VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor,
                          uint32_t instance_n)
-        : device_(device), instance_n_(instance_n), swapChain_(swapChain) {
+        : device_(device), instance_n_(instance_n) {
         renderGraphDescriptor_ = renderGraphDescriptor;
+        recreateSwapChain(extent);
 
         /**
          * create node/edge objects
          */
         constructor_copy_pass_detail<RenderGraphPassTypeList::size - 1>(renderGraphDescriptor);
         constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(renderGraphDescriptor);
+
+        for (auto renderPass: passes_generator<RenderGraphRenderPass>()) {
+            renderPass->is_submit_pass = renderPass->descriptor_p->is_submit_pass;
+        }
 
         /**
          * copy attachent informations to the pass objects
@@ -472,21 +512,7 @@ struct RenderGraph {
             // }
         }
 
-        /**
-         * create command buffers for the render graph
-         */
-        commandBuffers.resize(instance_n);
-
-        VkCommandBufferAllocateInfo allocateInfo;
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocateInfo.commandPool = device_.getCommandPool();
-        allocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-        allocateInfo.pNext = nullptr;
-
-        if (vkAllocateCommandBuffers(device_.device(), &allocateInfo, commandBuffers.data()) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate command buffers!");
-        }
+        createCommandBuffers();
     }
 
     ~RenderGraph() {
@@ -717,7 +743,7 @@ struct RenderGraph {
 
                 for (auto edge : node->get_output_attachment_vector<RenderGraphTextureAttachment>()) {
                     if (edge->descriptor_p->isSwapChain) {
-                        attachmentImageViews.push_back(swapChain_.getImageView(i));
+                        attachmentImageViews.push_back(swapChain_->getImageView(i));
                     } else {
                         attachmentImageViews.push_back(edge->instances[i]->texture->getTextureImageView());
                     }
@@ -728,7 +754,7 @@ struct RenderGraph {
         }
     }
 
-    void render(VkCommandBuffer commandBuffer, uint32_t frame_index) {
+    VkResult render(VkCommandBuffer commandBuffer, uint32_t frame_index) {
         // begin command buffer
 
         VkCommandBufferBeginInfo beginInfo{};
@@ -743,7 +769,7 @@ struct RenderGraph {
         viewport.y = 0.0f;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, {1024, 1024}};
+        VkRect2D scissor{{0, 0}, swapChain_->getSwapChainExtent()};
 
         /**
          * Execute render passes
@@ -752,9 +778,16 @@ struct RenderGraph {
             uint32_t width = render_pass->descriptor_p->width;
             uint32_t height = render_pass->descriptor_p->height;
 
+            if (render_pass->is_submit_pass) {
+                auto swap_chain_extent = swapChain_->getSwapChainExtent();
+                width = swap_chain_extent.width;
+                height = swap_chain_extent.height;
+            }
+
             viewport.width = width;
             viewport.height = height;
             scissor.extent = {width, height};
+
             vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
             vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -765,6 +798,11 @@ struct RenderGraph {
 
             renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = {width, height};
+
+            if (render_pass->is_submit_pass) {
+                renderPassInfo.renderPass = swapChain_->getRenderPass();
+                renderPassInfo.framebuffer = swapChain_->getFrameBuffer(frame_index);
+            }
 
             std::array<VkClearValue, 2> clearValues{};
             clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
@@ -784,6 +822,8 @@ struct RenderGraph {
         // end command buffer
         vkEndCommandBuffer(commandBuffers[frame_index]);
         std::vector<VkCommandBuffer> commandBufferToSubmit = {commandBuffers[frame_index]};
-        swapChain_.submitCommandBuffers(commandBufferToSubmit, &frame_index);
+        auto result = swapChain_->submitCommandBuffers(commandBufferToSubmit, &frame_index);
+
+        return result;
     }
 };
