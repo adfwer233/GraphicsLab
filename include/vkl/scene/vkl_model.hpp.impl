@@ -249,7 +249,9 @@ void VklModelTemplate<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDe
             uniformBuffers[key].resize(VklSwapChain::MAX_FRAMES_IN_FLIGHT);
 
         std::vector<VklDescriptorWriter> writer;
-        writer.resize(VklSwapChain::MAX_FRAMES_IN_FLIGHT, {setLayout, pool});
+        for (int i = 0; i < VklSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+            writer.emplace_back(setLayout, pool);
+        }
         for (auto &uniformBufferDescriptor : key.uniformDescriptors) {
             for (int i = 0; i < uniformBuffers[key].size(); i++) {
                 uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(device_, uniformBufferDescriptor.size, 1,

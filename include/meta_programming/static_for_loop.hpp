@@ -2,21 +2,23 @@
 
 #include "type_list.hpp"
 
+#include <functional>
+
 namespace MetaProgramming {
 
-template <size_t... idx> struct LoopIndices {
+template <std::size_t... idx> struct LoopIndices {
     struct IsLoopIndices {};
 
-    constexpr static size_t size = sizeof...(idx);
+    constexpr static std::size_t size = sizeof...(idx);
 
-    template <size_t new_idx> using append = LoopIndices<idx..., new_idx>;
+    template <std::size_t new_idx> using append = LoopIndices<idx..., new_idx>;
 };
 
 namespace details {
 template <typename T>
 concept LI = requires { typename T::IsLoopIndices; };
 
-template <size_t num> struct GetZeroLoopIndices {
+template <std::size_t num> struct GetZeroLoopIndices {
     using type = GetZeroLoopIndices<num - 1>::type::template append<0>;
 };
 
@@ -31,7 +33,7 @@ concept StaticLoopFunction = requires {
     { T::loop_body(typename GetZeroLoopIndices<T::nested_loop_num>::type()) };
 };
 
-template <StaticLoopFunction Function, size_t... idx> void static_loop_invoke(LoopIndices<idx...>) {
+template <StaticLoopFunction Function, std::size_t... idx> void static_loop_invoke(LoopIndices<idx...>) {
     std::invoke(Function::template loop_body<idx...>, LoopIndices<idx...>());
 }
 

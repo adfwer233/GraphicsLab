@@ -36,30 +36,30 @@ template <TL In, typename T> struct IndexOf;
 template <typename... Ts> struct index_of {};
 
 template <typename T, typename First, typename... Rest> struct index_of<T, First, Rest...> {
-    static constexpr size_t value = std::is_same_v<T, First> ? 0 : 1 + index_of<T, Rest...>::value;
+    static constexpr std::size_t value = std::is_same_v<T, First> ? 0 : 1 + index_of<T, Rest...>::value;
 };
 
 template <typename T> struct index_of<T> {
-    static constexpr size_t value = std::numeric_limits<size_t>::max();
+    static constexpr std::size_t value = std::numeric_limits<std::size_t>::max();
 };
 
 template <typename T, typename... Ts> struct IndexOf<TypeList<Ts...>, T> : index_of<T, Ts...> {};
 
 // KthOf
 
-template <TL In, size_t index> struct KthOf;
+template <TL In, std::size_t index> struct KthOf;
 
-template <size_t index, typename... Ts> struct kth_of {};
+template <std::size_t index, typename... Ts> struct kth_of {};
 
 template <typename First, typename... Rest> struct kth_of<0, First, Rest...> {
     using type = First;
 };
 
-template <size_t index, typename First, typename... Rest> struct kth_of<index, First, Rest...> {
+template <std::size_t index, typename First, typename... Rest> struct kth_of<index, First, Rest...> {
     using type = kth_of<index - 1, Rest...>::type;
 };
 
-template <size_t index, typename... Ts> struct KthOf<TypeList<Ts...>, index> : kth_of<index, Ts...> {};
+template <std::size_t index, typename... Ts> struct KthOf<TypeList<Ts...>, index> : kth_of<index, Ts...> {};
 
 // IsAnyOf
 
