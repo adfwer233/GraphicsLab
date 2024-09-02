@@ -72,7 +72,7 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
 endforeach(GLSL)
 
 add_custom_target(
-        Shaders
+        ${PROJECT_NAME}_shader
         DEPENDS ${SPIRV_BINARY_FILES}
 )
 
@@ -82,5 +82,5 @@ add_custom_command(
 )
 
 if (GLSL_VALIDATOR)
-    add_dependencies(${PROJECT_NAME} Shaders)
+    add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_shader)
 endif ()

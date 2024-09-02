@@ -105,6 +105,7 @@ add_subdirectory(src/bezier_curve)
 add_subdirectory(src/geometry)
 add_subdirectory(src/simulation)
 add_subdirectory(src/rendergraph_demo)
+add_subdirectory(src/main)
 add_subdirectory(test)
 
 find_package(OpenMP)

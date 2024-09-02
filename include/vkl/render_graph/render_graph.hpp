@@ -8,7 +8,9 @@
 #include "../core/vkl_renderer.hpp"
 #include "meta_programming/type_list.hpp"
 
-#include "../core/vkl_texture.hpp"
+#include "vkl/core/vkl_texture.hpp"
+#include "vkl/core/vkl_framebuffer.hpp"
+#include "vkl/core/vkl_render_pass.hpp"
 
 #include "coroutine/generator.hpp"
 
@@ -86,6 +88,10 @@ template <RenderGraphPass T> struct RenderGraphPassInstance : public RenderGraph
 template <RenderGraphAttachment T> struct RenderGraphAttachmentDerived : public RenderGraphAttachmentBase {
     RenderGraphAttachmentDescriptor<T> *descriptor_p;
     std::vector<RenderGraphAttachmentInstance<T> *> instances;
+
+    ~RenderGraphAttachmentDerived() {
+        for (auto instance: instances) delete instance;
+    }
 };
 
 struct RenderGraphPassBase : public RenderGraphObjectsBase {
@@ -117,34 +123,6 @@ template <RenderGraphPass T> struct RenderGraphPassDerived : public RenderGraphP
     std::vector<RenderGraphPassInstance<T> *> instances;
 };
 
-template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public RenderGraphPassBase {
-    std::vector<RenderGraphPassInstance<RenderGraphRenderPass> *> instances;
-    RenderGraphPassDescriptor<RenderGraphRenderPass> *descriptor_p;
-    VkRenderPass renderPass;
-
-    std::optional<std::function<void(VkCommandBuffer, uint32_t)>> recordFunction = std::nullopt;
-
-    template <typename RenderSystemType>
-    RenderSystemType *getRenderSystem(VklDevice &device, const std::string &name,
-                                      std::vector<VklShaderModuleInfo> &&shader_info) {
-        if (render_system_cache.contains(name)) {
-            auto casted_ptr = dynamic_cast<RenderSystemType *>(render_system_cache[name]);
-            if (casted_ptr != nullptr) {
-                return casted_ptr;
-            } else {
-                throw std::runtime_error("render system type error");
-            }
-        } else {
-            auto render_system = new RenderSystemType(device, renderPass, shader_info);
-            render_system_cache[name] = dynamic_cast<BaseRenderSystem *>(render_system);
-            return render_system;
-        }
-    }
-
-  private:
-    std::unordered_map<std::string, BaseRenderSystem *> render_system_cache;
-};
-
 template <> struct RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> {
     std::string name;
 
@@ -170,10 +148,43 @@ template <> struct RenderGraphAttachmentInstance<RenderGraphTextureAttachment> {
 };
 
 template <> struct RenderGraphPassInstance<RenderGraphRenderPass> {
-    VkFramebuffer framebuffer;
+    std::unique_ptr<VklFramebuffer> framebuffer;
 
     std::vector<RenderGraphAttachmentInstance<RenderGraphTextureAttachment>> in;
     std::vector<RenderGraphAttachmentInstance<RenderGraphTextureAttachment>> out;
+};
+
+template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public RenderGraphPassBase {
+    std::vector<RenderGraphPassInstance<RenderGraphRenderPass> *> instances;
+    RenderGraphPassDescriptor<RenderGraphRenderPass> *descriptor_p;
+    std::unique_ptr<VklRenderPass> renderPass;
+
+    std::optional<std::function<void(VkCommandBuffer, uint32_t)>> recordFunction = std::nullopt;
+
+    ~RenderGraphPassDerived<RenderGraphRenderPass>() {
+        for (auto instance: instances) delete instance;
+        for (auto [name, render_system]: render_system_cache) delete render_system;
+    }
+
+    template <typename RenderSystemType>
+    RenderSystemType *getRenderSystem(VklDevice &device, const std::string &name,
+                                      std::vector<VklShaderModuleInfo> &&shader_info) {
+        if (render_system_cache.contains(name)) {
+            auto casted_ptr = dynamic_cast<RenderSystemType *>(render_system_cache[name]);
+            if (casted_ptr != nullptr) {
+                return casted_ptr;
+            } else {
+                throw std::runtime_error("render system type error");
+            }
+        } else {
+            auto render_system = new RenderSystemType(device, renderPass->renderPass, shader_info);
+            render_system_cache[name] = dynamic_cast<BaseRenderSystem *>(render_system);
+            return render_system;
+        }
+    }
+
+private:
+    std::unordered_map<std::string, BaseRenderSystem *> render_system_cache;
 };
 
 template <> struct RenderGraphPassDescriptor<RenderGraphRenderPass> : public RenderGraphPassDescriptorBase {
@@ -263,6 +274,7 @@ struct RenderGraph {
     VklSwapChain &swapChain_;
 
     uint32_t instance_n_;
+    std::vector<VkCommandBuffer> commandBuffers;
 
     std::vector<RenderGraphPassBase *> passes;
     std::vector<RenderGraphAttachmentBase *> attachments;
@@ -459,6 +471,27 @@ struct RenderGraph {
             //     node->output_attachments.push_back(att);
             // }
         }
+
+        /**
+         * create command buffers for the render graph
+         */
+        commandBuffers.resize(instance_n);
+
+        VkCommandBufferAllocateInfo allocateInfo;
+        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocateInfo.commandPool = device_.getCommandPool();
+        allocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+        allocateInfo.pNext = nullptr;
+
+        if (vkAllocateCommandBuffers(device_.device(), &allocateInfo, commandBuffers.data()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+    }
+
+    ~RenderGraph() {
+        for (auto edge: attachments_generator<RenderGraphTextureAttachment>()) delete edge;
+        for (auto node: passes_generator<RenderGraphRenderPass>()) delete node;
     }
 
     void createLayouts() {
@@ -628,10 +661,7 @@ struct RenderGraph {
             renderPassCreateInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
             renderPassCreateInfo.pDependencies = dependencies.data();
 
-            if (vkCreateRenderPass(device_.device(), &renderPassCreateInfo, nullptr, &renderNode->renderPass) !=
-                VK_SUCCESS) {
-                throw std::runtime_error("Failed to create render pass in render graph.");
-            }
+            renderNode->renderPass = std::make_unique<VklRenderPass>(device_, renderPassCreateInfo);
         }
 
         /**
@@ -664,10 +694,8 @@ struct RenderGraph {
              */
             for (auto edge : attachments_generator<RenderGraphTextureAttachment>()) {
                 std::cout << std::format("create instance for texture {}, instance id {}", edge->name, i) << std::endl;
-                auto tmp_texture = new VklTexture(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4);
                 edge->instances[i]->texture = std::move(
                     std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4));
-                int x = 0;
             }
 
             /**
@@ -695,24 +723,21 @@ struct RenderGraph {
                     }
                 }
 
-                VkFramebufferCreateInfo framebufferCreateInfo{};
-                framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-                framebufferCreateInfo.renderPass = node->renderPass;
-                framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachmentImageViews.size());
-                framebufferCreateInfo.pAttachments = attachmentImageViews.data();
-                framebufferCreateInfo.width = node->descriptor_p->width;
-                framebufferCreateInfo.height = node->descriptor_p->height;
-                framebufferCreateInfo.layers = 1;
-
-                if (vkCreateFramebuffer(device_.device(), &framebufferCreateInfo, nullptr,
-                                        &(node->instances[i]->framebuffer)) != VK_SUCCESS) {
-                    throw std::runtime_error("Failed to create framebuffer!");
-                }
+                node->instances[i]->framebuffer = std::make_unique<VklFramebuffer>(device_, node->renderPass->renderPass, static_cast<uint32_t>(attachmentImageViews.size()), attachmentImageViews.data(), node->descriptor_p->width, node->descriptor_p->height);
             }
         }
     }
 
     void render(VkCommandBuffer commandBuffer, uint32_t frame_index) {
+        // begin command buffer
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(commandBuffers[frame_index], &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
@@ -735,8 +760,8 @@ struct RenderGraph {
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = render_pass->renderPass;
-            renderPassInfo.framebuffer = render_pass->instances[frame_index]->framebuffer;
+            renderPassInfo.renderPass = render_pass->renderPass->renderPass;
+            renderPassInfo.framebuffer = render_pass->instances[frame_index]->framebuffer->framebuffer;
 
             renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = {width, height};
@@ -755,5 +780,10 @@ struct RenderGraph {
 
             vkCmdEndRenderPass(commandBuffer);
         }
+
+        // end command buffer
+        vkEndCommandBuffer(commandBuffers[frame_index]);
+        std::vector<VkCommandBuffer> commandBufferToSubmit = {commandBuffers[frame_index]};
+        swapChain_.submitCommandBuffers(commandBufferToSubmit, &frame_index);
     }
 };

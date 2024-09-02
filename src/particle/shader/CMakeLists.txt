@@ -31,10 +31,10 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
 endforeach(GLSL)
 
 add_custom_target(
-        particle_shader
+        LAB_particle_shader
         DEPENDS ${SPIRV_BINARY_FILES}
 )
 
 if (GLSL_VALIDATOR)
-    add_dependencies(${PROJECT_NAME} particle_shader)
+    add_dependencies(${PROJECT_NAME} LAB_particle_shader)
 endif ()
