@@ -10,6 +10,7 @@ class VklTexture {
     VkSampler textureSampler_;
     VkImageView textureImageView;
 
+    VkImageUsageFlags usage_;
   public:
     VkImage image_ = VK_NULL_HANDLE;
     VkDeviceMemory memory_ = VK_NULL_HANDLE;

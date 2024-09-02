@@ -4,6 +4,10 @@
 #include "vkl/scene/vkl_scene.hpp"
 #include "vkl/system/render_system/simple_render_system.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 Application::~Application() {
 }
 
@@ -30,10 +34,22 @@ void Application::run() {
     output_texture->width = 1024;
     output_texture->height = 1024;
 
+    auto render_texture = graphDescriptor.attachment<RenderGraphTextureAttachment>("render_result");
+    render_texture->isSwapChain = false;
+    render_texture->format = VK_FORMAT_R8G8B8A8_SRGB;
+    render_texture->width = 1024;
+    render_texture->height = 1024;
+
     auto simple_render_pass = graphDescriptor.pass<RenderGraphRenderPass>("simple_render_pass");
-    simple_render_pass->outTextureAttachmentDescriptors.push_back(output_texture);
+    simple_render_pass->outTextureAttachmentDescriptors.push_back(render_texture);
     simple_render_pass->width = 1024;
     simple_render_pass->height = 1024;
+
+    auto imgui_render_pass = graphDescriptor.pass<RenderGraphRenderPass>("imgui_render_pass");
+    imgui_render_pass->outTextureAttachmentDescriptors.push_back(output_texture);
+
+    imgui_render_pass->width = 1024;
+    imgui_render_pass->height = 1024;
 
     RenderGraph renderGraph(device_, swapChain_, &graphDescriptor, 3);
 
@@ -42,6 +58,7 @@ void Application::run() {
     renderGraph.createInstances();
 
     auto simple_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("simple_render_pass");
+    auto imgui_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("imgui_render_pass");
 
     auto simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
             device_, "simple_render_system",
@@ -60,10 +77,71 @@ void Application::run() {
         simple_render_system->renderObject(frameInfo);
     };
 
+    // =============================== IMGUI DATA ======================================================================
+    VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+                                         {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                                         {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+                                         {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+                                         {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+                                         {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+                                         {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+                                         {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+                                         {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                                         {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                                         {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000;
+    pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+
+    VkDescriptorPool imguiPool;
+    vkCreateDescriptorPool(device_.device(), &pool_info, nullptr, &imguiPool);
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForVulkan(window, true);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    device_.fillImGuiInitInfo(init_info);
+    init_info.DescriptorPool = imguiPool;
+    init_info.RenderPass = imgui_render_pass_obj->renderPass->renderPass;
+    init_info.Subpass = 0;
+    init_info.MinImageCount = 2;
+    init_info.ImageCount = 2;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+    ImGui_ImplVulkan_Init(&init_info);
+
+    // =============================== IMGUI DATA END ==================================================================
+
+    imgui_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
+        ImGui::ShowDemoWindow();
+        ImGui::Render();
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+    };
+
     uint32_t currentFrame = 0;
 
     while (not glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
         auto result = swapChain_.acquireNextImage(&currentFrame);
 
@@ -78,4 +156,10 @@ void Application::run() {
 
     vkDeviceWaitIdle(device_.device());
 
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    /** destroy imgui descriptor pool*/
+    vkDestroyDescriptorPool(device_.device(), imguiPool, nullptr);
 }

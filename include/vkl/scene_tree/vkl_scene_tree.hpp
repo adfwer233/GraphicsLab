@@ -5,6 +5,10 @@
 #include "meta_programming/type_list.hpp"
 
 namespace SceneTree{
+    enum class NodeType {
+        GeometryNode, LightSourceNode, CameraNode
+    };
+
     struct PointLightSource{};
     struct AreaLightSource{};
 
@@ -40,10 +44,20 @@ namespace SceneTree{
     };
 
     template<SupportedGeometryType GeometryType>
-    struct GeometryNode: public TreeNode {};
+    struct GeometryNode: public TreeNode {
+        const NodeType nodeType = NodeType::GeometryNode;
 
-    struct CameraNode: public TreeNode {};
-    struct LightNode: public TreeNode {};
+        GeometryType data;
+    };
+
+    template<SupportedLightTypes LightTypes >
+    struct LightNode: public TreeNode {
+        const NodeType nodeType = NodeType::LightSourceNode;
+    };
+
+    struct CameraNode: public TreeNode {
+        const NodeType nodeType = NodeType::CameraNode;
+    };
 }
 
 struct VklSceneTree {

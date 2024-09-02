@@ -7,9 +7,13 @@ VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texCh
     if (texChannels == 3) {
         throw std::runtime_error("unsupported texture type \n");
     } else if (texChannels == 4) {
+        usage_ = usage;
         device_.createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, usage,
                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, this->image_, this->memory_);
         device_.createSampler(this->textureSampler_);
+
+        if (usage == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+            device_.transitionImageLayout(this->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         this->textureImageView = device_.createImageView(image_, VK_FORMAT_R8G8B8A8_SRGB);
     } else {
         throw std::runtime_error("wrong texture channel number \n");
