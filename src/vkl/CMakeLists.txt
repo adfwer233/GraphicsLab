@@ -1,4 +1,4 @@
-project(vkl VERSION 1.0 DESCRIPTION "Vulkan Learning Project Engine" LANGUAGES CXX)
+project(LAB_vkl VERSION 1.0 DESCRIPTION "Vulkan Learning Project Engine" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -36,7 +36,7 @@ endif ()
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glm glfw geometry)
+target_link_libraries(${PROJECT_NAME} glm glfw LAB_geometry)
 
 ############## Build SHADERS #######################
 
@@ -82,5 +82,5 @@ add_custom_command(
 )
 
 if (GLSL_VALIDATOR)
-    add_dependencies(vkl Shaders)
+    add_dependencies(${PROJECT_NAME} Shaders)
 endif ()

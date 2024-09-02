@@ -36,5 +36,5 @@ add_custom_target(
 )
 
 if (GLSL_VALIDATOR)
-    add_dependencies(particle particle_shader)
+    add_dependencies(${PROJECT_NAME} particle_shader)
 endif ()

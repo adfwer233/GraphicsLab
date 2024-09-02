@@ -1,4 +1,4 @@
-project(particle VERSION 1.0 DESCRIPTION "Particles Moving in Compute Shader" LANGUAGES CXX)
+project(LAB_particle VERSION 1.0 DESCRIPTION "Particles Moving in Compute Shader" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -17,4 +17,4 @@ add_subdirectory(shader)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glm glfw vkl ray_tracer)
+target_link_libraries(${PROJECT_NAME} glm glfw LAB_vkl LAB_ray_tracer)

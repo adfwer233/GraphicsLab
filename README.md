@@ -1,1 +1,3 @@
-- Repository for learning Vulkan programming
+- Codebase for my computer graphics research
+
+

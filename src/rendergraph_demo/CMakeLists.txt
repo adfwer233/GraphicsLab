@@ -1,4 +1,4 @@
-project(rendergraph_demo VERSION 1.0 DESCRIPTION "RenderGraph Demo Application" LANGUAGES CXX)
+project(LAB_rendergraph_demo VERSION 1.0 DESCRIPTION "RenderGraph Demo Application" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
