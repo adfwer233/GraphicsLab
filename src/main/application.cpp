@@ -51,7 +51,7 @@ void Application::run() {
     imgui_render_pass->height = 1024;
     imgui_render_pass->is_submit_pass = true;
 
-    RenderGraph renderGraph(device_, {WIDTH, HEIGHT}, &graphDescriptor, 3);
+    RenderGraph renderGraph(device_, {WIDTH, HEIGHT}, &graphDescriptor);
 
     renderGraph.createLayouts();
 

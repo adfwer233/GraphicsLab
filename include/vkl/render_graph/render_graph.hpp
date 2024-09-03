@@ -102,7 +102,7 @@ template<> struct RenderGraphAttachmentDerived<RenderGraphTextureAttachment>: pu
     RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> *descriptor_p{};
     std::vector<RenderGraphAttachmentInstance<RenderGraphTextureAttachment> *> instances;
 
-    ~RenderGraphAttachmentDerived<RenderGraphTextureAttachment>() override {
+    ~RenderGraphAttachmentDerived() override {
         for (auto instance: instances) delete instance;
     }
 
@@ -182,7 +182,7 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
 
     std::optional<std::function<void(VkCommandBuffer, uint32_t)>> recordFunction = std::nullopt;
 
-    ~RenderGraphPassDerived<RenderGraphRenderPass>() {
+    ~RenderGraphPassDerived() {
         for (auto instance: instances) delete instance;
         for (auto [name, render_system]: render_system_cache) delete render_system;
     }
@@ -483,11 +483,12 @@ struct RenderGraph {
         }
     }
 
-    explicit RenderGraph(VklDevice &device, VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor,
-                         uint32_t instance_n)
-        : device_(device), instance_n_(instance_n) {
+    explicit RenderGraph(VklDevice &device, VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor)
+        : device_(device) {
         renderGraphDescriptor_ = renderGraphDescriptor;
         recreateSwapChain(extent);
+
+        instance_n_ = swapChain_->imageCount();
 
         /**
          * create node/edge objects

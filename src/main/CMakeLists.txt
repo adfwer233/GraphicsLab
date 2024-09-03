@@ -11,6 +11,10 @@ add_executable(${PROJECT_NAME} ${SRC_FILE})
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
 add_definitions(-DSHADER_DIR="${CMAKE_SOURCE_DIR}/src/vkl/shader")
 
+if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_definitions(-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS)
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 
