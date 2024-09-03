@@ -6,6 +6,10 @@
 
 #include "vkl/imgui/imgui_context.hpp"
 
+#include "geometry/geometry.hpp"
+#include "vkl/scene_tree/vkl_geometry_mesh.hpp"
+#include "vkl/scene_tree/vkl_mesh.hpp"
+
 Application::~Application() {
 }
 

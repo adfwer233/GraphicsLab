@@ -6,8 +6,8 @@
 
 using namespace MetaProgramming;
 
-struct MeshGeometry {};
-META_REGISTER_TYPE(RenderableGeometryTag, MeshGeometry);
+struct MeshGeometryType {};
+META_REGISTER_TYPE(RenderableGeometryTag, MeshGeometryType);
 
 class GeometryBase {};
 

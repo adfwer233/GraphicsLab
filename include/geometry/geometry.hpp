@@ -8,7 +8,7 @@
 #include "meta_programming/type_list.hpp"
 
 using BuiltinVertexTypes = MetaProgramming::TypeList<Vertex2D, Vertex2DRaw, Vertex3D, Vertex3DRaw>;
-using BuiltinMeshTypes = MetaProgramming::TypeList<Mesh2D, Mesh3D, TensorProductBezierSurface, BezierCurve2D>;
+using BuiltinGeometryTypes = MetaProgramming::TypeList<Mesh2D, Mesh3D, PointCloud2D, PointCloud3D, TensorProductBezierSurface, BezierCurve2D>;
 
 template<typename T>
 concept ValidGeometryType = requires {
