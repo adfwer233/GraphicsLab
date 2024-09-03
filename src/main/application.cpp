@@ -130,9 +130,20 @@ void Application::run() {
 
     ImGui_ImplVulkan_Init(&init_info);
 
+    auto render_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("render_result");
+    auto render_texture_imgui = render_texture_object->getImguiTextures();
+
     // =============================== IMGUI DATA END ==================================================================
 
     imgui_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
+
+        ImGui::Begin("Render Result");
+        {
+            auto wsize = ImGui::GetContentRegionMax();
+            ImGui::Image(render_texture_imgui[frame_index], wsize);
+        }
+        ImGui::End();
+
         ImGui::ShowDemoWindow();
         ImGui::Render();
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);

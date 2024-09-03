@@ -11,6 +11,7 @@ class VklTexture {
     VkImageView textureImageView;
 
     VkImageUsageFlags usage_;
+    VkImageLayout layout_;
   public:
     VkImage image_ = VK_NULL_HANDLE;
     VkDeviceMemory memory_ = VK_NULL_HANDLE;
@@ -26,6 +27,9 @@ class VklTexture {
     }
     VkImageView getTextureImageView() {
         return textureImageView;
+    }
+    VkImageLayout getImageLayout() {
+        return layout_;
     }
     VkDescriptorImageInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 };

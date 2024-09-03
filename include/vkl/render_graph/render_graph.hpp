@@ -86,11 +86,33 @@ template <RenderGraphPass T> struct RenderGraphPassDescriptor : public RenderGra
 template <RenderGraphPass T> struct RenderGraphPassInstance : public RenderGraphObjectsBase {};
 
 template <RenderGraphAttachment T> struct RenderGraphAttachmentDerived : public RenderGraphAttachmentBase {
-    RenderGraphAttachmentDescriptor<T> *descriptor_p;
+    RenderGraphAttachmentDescriptor<T> *descriptor_p{};
     std::vector<RenderGraphAttachmentInstance<T> *> instances;
 
-    ~RenderGraphAttachmentDerived() {
+    ~RenderGraphAttachmentDerived() override {
         for (auto instance: instances) delete instance;
+    }
+};
+
+template <> struct RenderGraphAttachmentInstance<RenderGraphTextureAttachment> {
+    std::unique_ptr<VklTexture> texture;
+};
+
+template<> struct RenderGraphAttachmentDerived<RenderGraphTextureAttachment>: public RenderGraphAttachmentBase {
+    RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> *descriptor_p{};
+    std::vector<RenderGraphAttachmentInstance<RenderGraphTextureAttachment> *> instances;
+
+    ~RenderGraphAttachmentDerived<RenderGraphTextureAttachment>() override {
+        for (auto instance: instances) delete instance;
+    }
+
+    auto getImguiTextures() {
+        std::vector<VkDescriptorSet> result;
+        for (auto instance: instances) {
+            auto tex = ImGui_ImplVulkan_AddTexture(instance->texture->getTextureSampler(), instance->texture->getTextureImageView(), instance->texture->getImageLayout());
+            result.push_back(tex);
+        }
+        return result;
     }
 };
 
@@ -143,10 +165,6 @@ template <> struct RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>
     bool clear{false};
     bool input_flag{false};
     bool output_flag{false};
-};
-
-template <> struct RenderGraphAttachmentInstance<RenderGraphTextureAttachment> {
-    std::unique_ptr<VklTexture> texture;
 };
 
 template <> struct RenderGraphPassInstance<RenderGraphRenderPass> {
@@ -382,8 +400,9 @@ struct RenderGraph {
         return res;
     }
 
-    [[nodiscard]] RenderGraphAttachmentBase *getAttachment(const std::string &name) {
-        for (auto att : all_attachments_generator()) {
+    template <RenderGraphAttachment AttachmentType>
+    [[nodiscard]] RenderGraphAttachmentDerived<AttachmentType> *getAttachment(const std::string &name) {
+        for (auto att : attachments_generator<AttachmentType>()) {
             if (att->name == name) {
                 return att;
             }
@@ -487,17 +506,14 @@ struct RenderGraph {
         for (auto pass : passes_generator<RenderGraphRenderPass>()) {
             auto &pass_texture_input = pass->get_input_attachment_vector<RenderGraphTextureAttachment>();
             for (auto input_desc : pass->descriptor_p->inTextureAttachmentDescriptors) {
-                auto att = getAttachment(input_desc->name);
-                pass_texture_input.push_back(dynamic_cast<RenderGraphAttachmentDerived<RenderGraphTextureAttachment> *>(
-                    getAttachment(input_desc->name)));
+                auto att = getAttachment<RenderGraphTextureAttachment>(input_desc->name);
+                pass_texture_input.push_back(att);
             }
 
             auto &pass_texture_output = pass->get_output_attachment_vector<RenderGraphTextureAttachment>();
             for (auto output_desc : pass->descriptor_p->outTextureAttachmentDescriptors) {
-                auto att = getAttachment(output_desc->name);
-                pass_texture_output.push_back(
-                    dynamic_cast<RenderGraphAttachmentDerived<RenderGraphTextureAttachment> *>(
-                        getAttachment(output_desc->name)));
+                auto att = getAttachment<RenderGraphTextureAttachment>(output_desc->name);
+                pass_texture_output.push_back(att);
             }
         }
 
@@ -723,7 +739,7 @@ struct RenderGraph {
             for (auto edge : attachments_generator<RenderGraphTextureAttachment>()) {
                 std::cout << std::format("create instance for texture {}, instance id {}", edge->name, i) << std::endl;
 
-                VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+                VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
                 if (edge->descriptor_p->input_flag) imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
                 edge->instances[i]->texture = std::move(
