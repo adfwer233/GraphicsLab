@@ -36,6 +36,7 @@ void Application::run() {
 
     auto render_texture = graphDescriptor.attachment<RenderGraphTextureAttachment>("render_result");
     render_texture->isSwapChain = false;
+    render_texture->input_flag = true;
     render_texture->format = VK_FORMAT_R8G8B8A8_SRGB;
     render_texture->width = 1024;
     render_texture->height = 1024;
@@ -47,6 +48,7 @@ void Application::run() {
 
     auto imgui_render_pass = graphDescriptor.pass<RenderGraphRenderPass>("imgui_render_pass");
     imgui_render_pass->outTextureAttachmentDescriptors.push_back(output_texture);
+    imgui_render_pass->inTextureAttachmentDescriptors.push_back(render_texture);
     imgui_render_pass->width = 1024;
     imgui_render_pass->height = 1024;
     imgui_render_pass->is_submit_pass = true;

@@ -16,7 +16,8 @@ class VklTexture {
     VkDeviceMemory memory_ = VK_NULL_HANDLE;
 
     VklTexture(VklDevice &device_, int texWidth, int texHeight, int texChannels,
-               VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+               VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+               VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
     VklTexture(VklDevice &device, VkImage image);
     ~VklTexture();
 

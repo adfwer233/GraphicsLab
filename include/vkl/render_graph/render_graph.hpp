@@ -141,6 +141,8 @@ template <> struct RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>
 
     bool isSwapChain{false};
     bool clear{false};
+    bool input_flag{false};
+    bool output_flag{false};
 };
 
 template <> struct RenderGraphAttachmentInstance<RenderGraphTextureAttachment> {
@@ -720,8 +722,12 @@ struct RenderGraph {
              */
             for (auto edge : attachments_generator<RenderGraphTextureAttachment>()) {
                 std::cout << std::format("create instance for texture {}, instance id {}", edge->name, i) << std::endl;
+
+                VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+                if (edge->descriptor_p->input_flag) imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+
                 edge->instances[i]->texture = std::move(
-                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT));
+                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, imageUsage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL));
             }
 
             /**

@@ -2,7 +2,7 @@
 
 #include "vkl/core/vkl_texture.hpp"
 
-VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texChannels, VkImageUsageFlags usage)
+VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texChannels, VkImageUsageFlags usage, VkImageLayout layout)
     : texWidth_(texWidth), texHeight_(texHeight), texChannels_(texChannels), device_(device) {
     if (texChannels == 3) {
         throw std::runtime_error("unsupported texture type \n");
@@ -12,8 +12,8 @@ VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texCh
                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, this->image_, this->memory_);
         device_.createSampler(this->textureSampler_);
 
-        if (usage == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-            device_.transitionImageLayout(this->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        if (layout != VK_IMAGE_LAYOUT_UNDEFINED)
+            device_.transitionImageLayout(this->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, layout);
         this->textureImageView = device_.createImageView(image_, VK_FORMAT_R8G8B8A8_SRGB);
     } else {
         throw std::runtime_error("wrong texture channel number \n");
