@@ -20,7 +20,7 @@ void SceneInfoUI::renderImgui() {
             std::visit(
                 [](auto &&arg) {
                     using T = std::decay_t<decltype(arg)>;
-                    if constexpr (std::is_same_v<T, MeshGeometry>) {
+                    if constexpr (std::is_same_v<T, MeshGeometryType>) {
                         ImGui::Text("Mesh Geometry");
                     } else if (std::is_same_v<T, TensorProductBezierSurface>) {
                         ImGui::Text("Tensor Product Bezier Surface");
