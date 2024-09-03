@@ -1,0 +1,30 @@
+name: Format Code with Clang-Format
+
+on:
+  schedule:
+    - cron: '0 20 * * *'  # Runs every day at 8:00 PM UTC, which is 4:00 AM UTC+8
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Clang
+        run: pip install clang-format
+
+      - name: Run clang-format
+        run: python scripts/clang-formatter.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "[BOT] Apply clang-format nightly"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

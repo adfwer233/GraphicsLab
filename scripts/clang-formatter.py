@@ -7,13 +7,13 @@ print("running clang format")
 
 file_extends = ["*.hpp", "*.cpp", "*.cuh", "*.cu", "*.hpp.impl"]
 
-target_dirs = [".\\src", ".\\include"]
+target_dirs = [os.path.join(".", "src"), os.path.join(".", "include")]
 
 source_file_list = []
 
 for dir in target_dirs:
     for extend in file_extends:
-        res = glob.glob(f"{dir}\\**\\{extend}", recursive=True)
+        res = glob.glob(os.path.join(dir, "**", extend), recursive=True)
         source_file_list += res
 
 
@@ -29,12 +29,15 @@ def split_list_generator(listTemp, n):
 
 
 def run_clang_format_dispatcher(total_list):
+    ts = []
     for cur_file_list in split_list_generator(total_list, 10):
         thread = threading.Thread(target=run_clang_format, args=(cur_file_list,))
+        ts.append(thread)
         thread.start()
 
+    for t in ts:
+        t.join()
 
-traverse_thread = threading.Thread(target=run_clang_format_dispatcher, args=(source_file_list,))
-traverse_thread.start()
+print(source_file_list)
 
-traverse_thread.join()
+run_clang_format_dispatcher(source_file_list)
