@@ -19,7 +19,7 @@ template <typename VertexType, typename IndicesType> class MeshModelTemplate {
 };
 
 template <typename VertexType, typename IndicesType> class MeshGeometry {
-public:
+  public:
     using vertex_type = VertexType;
     using indices_type = IndicesType;
 

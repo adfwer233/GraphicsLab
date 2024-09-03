@@ -2,7 +2,8 @@
 
 #include "vkl/core/vkl_texture.hpp"
 
-VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texChannels, VkImageUsageFlags usage, VkImageLayout layout)
+VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texChannels, VkImageUsageFlags usage,
+                       VkImageLayout layout)
     : texWidth_(texWidth), texHeight_(texHeight), texChannels_(texChannels), device_(device), layout_(layout) {
     if (texChannels == 3) {
         throw std::runtime_error("unsupported texture type \n");

@@ -24,7 +24,7 @@ class Application {
 
   public:
     Application()
-        : device_(window_){
+        : device_(window_) {
 
           };
     ~Application();

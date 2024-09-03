@@ -20,7 +20,7 @@ class Application {
     VklSwapChain swapChain_;
 
   public:
-    Application() : device_(window_), swapChain_(device_, {WIDTH, HEIGHT}){};
+    Application() : device_(window_), swapChain_(device_, {WIDTH, HEIGHT}) {};
     ~Application();
 
     Application(const Application &) = delete;

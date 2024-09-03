@@ -8,9 +8,9 @@
 #include "../core/vkl_renderer.hpp"
 #include "meta_programming/type_list.hpp"
 
-#include "vkl/core/vkl_texture.hpp"
 #include "vkl/core/vkl_framebuffer.hpp"
 #include "vkl/core/vkl_render_pass.hpp"
+#include "vkl/core/vkl_texture.hpp"
 
 #include "coroutine/generator.hpp"
 
@@ -90,7 +90,8 @@ template <RenderGraphAttachment T> struct RenderGraphAttachmentDerived : public 
     std::vector<RenderGraphAttachmentInstance<T> *> instances;
 
     ~RenderGraphAttachmentDerived() override {
-        for (auto instance: instances) delete instance;
+        for (auto instance : instances)
+            delete instance;
     }
 };
 
@@ -98,18 +99,21 @@ template <> struct RenderGraphAttachmentInstance<RenderGraphTextureAttachment> {
     std::unique_ptr<VklTexture> texture;
 };
 
-template<> struct RenderGraphAttachmentDerived<RenderGraphTextureAttachment>: public RenderGraphAttachmentBase {
+template <> struct RenderGraphAttachmentDerived<RenderGraphTextureAttachment> : public RenderGraphAttachmentBase {
     RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> *descriptor_p{};
     std::vector<RenderGraphAttachmentInstance<RenderGraphTextureAttachment> *> instances;
 
     ~RenderGraphAttachmentDerived() override {
-        for (auto instance: instances) delete instance;
+        for (auto instance : instances)
+            delete instance;
     }
 
     auto getImguiTextures() {
         std::vector<VkDescriptorSet> result;
-        for (auto instance: instances) {
-            auto tex = ImGui_ImplVulkan_AddTexture(instance->texture->getTextureSampler(), instance->texture->getTextureImageView(), instance->texture->getImageLayout());
+        for (auto instance : instances) {
+            auto tex = ImGui_ImplVulkan_AddTexture(instance->texture->getTextureSampler(),
+                                                   instance->texture->getTextureImageView(),
+                                                   instance->texture->getImageLayout());
             result.push_back(tex);
         }
         return result;
@@ -183,8 +187,10 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
     std::optional<std::function<void(VkCommandBuffer, uint32_t)>> recordFunction = std::nullopt;
 
     ~RenderGraphPassDerived() {
-        for (auto instance: instances) delete instance;
-        for (auto [name, render_system]: render_system_cache) delete render_system;
+        for (auto instance : instances)
+            delete instance;
+        for (auto [name, render_system] : render_system_cache)
+            delete render_system;
     }
 
     template <typename RenderSystemType>
@@ -204,7 +210,7 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
         }
     }
 
-private:
+  private:
     std::unordered_map<std::string, BaseRenderSystem *> render_system_cache;
 };
 
@@ -496,7 +502,7 @@ struct RenderGraph {
         constructor_copy_pass_detail<RenderGraphPassTypeList::size - 1>(renderGraphDescriptor);
         constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(renderGraphDescriptor);
 
-        for (auto renderPass: passes_generator<RenderGraphRenderPass>()) {
+        for (auto renderPass : passes_generator<RenderGraphRenderPass>()) {
             renderPass->is_submit_pass = renderPass->descriptor_p->is_submit_pass;
         }
 
@@ -535,8 +541,10 @@ struct RenderGraph {
     }
 
     ~RenderGraph() {
-        for (auto edge: attachments_generator<RenderGraphTextureAttachment>()) delete edge;
-        for (auto node: passes_generator<RenderGraphRenderPass>()) delete node;
+        for (auto edge : attachments_generator<RenderGraphTextureAttachment>())
+            delete edge;
+        for (auto node : passes_generator<RenderGraphRenderPass>())
+            delete node;
     }
 
     void createLayouts() {
@@ -741,10 +749,12 @@ struct RenderGraph {
                 std::cout << std::format("create instance for texture {}, instance id {}", edge->name, i) << std::endl;
 
                 VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-                if (edge->descriptor_p->input_flag) imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+                if (edge->descriptor_p->input_flag)
+                    imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
                 edge->instances[i]->texture = std::move(
-                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, imageUsage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL));
+                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4,
+                                                 imageUsage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL));
             }
 
             /**
@@ -772,7 +782,9 @@ struct RenderGraph {
                     }
                 }
 
-                node->instances[i]->framebuffer = std::make_unique<VklFramebuffer>(device_, node->renderPass->renderPass, static_cast<uint32_t>(attachmentImageViews.size()), attachmentImageViews.data(), node->descriptor_p->width, node->descriptor_p->height);
+                node->instances[i]->framebuffer = std::make_unique<VklFramebuffer>(
+                    device_, node->renderPass->renderPass, static_cast<uint32_t>(attachmentImageViews.size()),
+                    attachmentImageViews.data(), node->descriptor_p->width, node->descriptor_p->height);
             }
         }
     }

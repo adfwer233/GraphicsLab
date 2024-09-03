@@ -2,13 +2,15 @@
 #include "vkl_device.hpp"
 
 class VklFramebuffer {
-private:
+  private:
     VklDevice &device_;
 
-public:
+  public:
     VkFramebuffer framebuffer;
 
-    VklFramebuffer(VklDevice &device, VkRenderPass renderPass, size_t attachmentSize, const VkImageView* pAttachments, int width, int height): device_(device) {
+    VklFramebuffer(VklDevice &device, VkRenderPass renderPass, size_t attachmentSize, const VkImageView *pAttachments,
+                   int width, int height)
+        : device_(device) {
         VkFramebufferCreateInfo framebufferCreateInfo{};
         framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferCreateInfo.renderPass = renderPass;

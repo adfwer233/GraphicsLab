@@ -20,10 +20,10 @@ void Application::run() {
 
     VklModel::BuilderFromImmediateData builder;
     builder.vertices = {
-            {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-            {{0.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-            {{1.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-            {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
+        {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
+        {{0.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
+        {{1.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
+        {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
     };
 
     scene.addObject(builder);
@@ -67,17 +67,17 @@ void Application::run() {
     imgui_render_pass_obj->is_submit_pass = true;
 
     auto simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
-            device_, "simple_render_system",
-            {{std::format("{}/first_triangle_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-             {std::format("{}/first_triangle_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+        device_, "simple_render_system",
+        {{std::format("{}/first_triangle_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+         {std::format("{}/first_triangle_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
     simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
         FrameInfo<VklModel> frameInfo{
-                .frameIndex = static_cast<int>(frame_index) % 2,
-                .frameTime = 0,
-                .commandBuffer = commandBuffer,
-                .camera = scene.camera,
-                .model = *scene.objects.front()->models.front(),
+            .frameIndex = static_cast<int>(frame_index) % 2,
+            .frameTime = 0,
+            .commandBuffer = commandBuffer,
+            .camera = scene.camera,
+            .model = *scene.objects.front()->models.front(),
         };
 
         simple_render_system->renderObject(frameInfo);
@@ -92,7 +92,6 @@ void Application::run() {
     // =============================== IMGUI DATA END ==================================================================
 
     imgui_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
-
         ImGui::Begin("Render Result");
         {
             auto wsize = ImGui::GetContentRegionMax();
@@ -122,7 +121,8 @@ void Application::run() {
 
         auto render_result = renderGraph.render(renderGraph.commandBuffers[currentFrame], currentFrame);
 
-        if (render_result == VK_ERROR_OUT_OF_DATE_KHR || render_result == VK_SUBOPTIMAL_KHR || window_.wasWindowResized()) {
+        if (render_result == VK_ERROR_OUT_OF_DATE_KHR || render_result == VK_SUBOPTIMAL_KHR ||
+            window_.wasWindowResized()) {
             window_.resetWindowResizedFlag();
             auto extent = window_.getExtent();
             while (extent.width == 0 || extent.height == 0) {

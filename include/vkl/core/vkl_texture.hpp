@@ -12,6 +12,7 @@ class VklTexture {
 
     VkImageUsageFlags usage_;
     VkImageLayout layout_;
+
   public:
     VkImage image_ = VK_NULL_HANDLE;
     VkDeviceMemory memory_ = VK_NULL_HANDLE;

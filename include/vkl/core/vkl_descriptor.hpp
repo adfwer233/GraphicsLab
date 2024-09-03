@@ -59,7 +59,7 @@ class VklDescriptorSetLayout {
         VklDescriptorSetLayoutKey descriptorSetLayoutKey;
 
       public:
-        explicit Builder(VklDevice &device) : device_(device){};
+        explicit Builder(VklDevice &device) : device_(device) {};
 
         Builder &addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
                             uint32_t count = 1);

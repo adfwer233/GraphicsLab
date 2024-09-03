@@ -59,5 +59,5 @@ class VklPipeline {
         return buffer;
     }
 
-    explicit VklPipeline(VklDevice &device) : device_(device){};
+    explicit VklPipeline(VklDevice &device) : device_(device) {};
 };
