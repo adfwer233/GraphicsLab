@@ -7,9 +7,9 @@
 #include "geometry/autodiff/autodiff.hpp"
 #include "surface.hpp"
 
+#include "geometry/curve/bezier_curve_2d.hpp"
 #include "geometry/loop/path_2d.hpp"
-#include "geometry/mesh/mesh_model_template.hpp"
-#include "geometry/parameter_space/bezier_curve_2d.hpp"
+#include "geometry/mesh/mesh.hpp"
 /**
  * @brief Tensor Product Bezier Surface with automatic differentiation
  */

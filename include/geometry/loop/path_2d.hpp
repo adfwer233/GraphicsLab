@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../parameter_space/bezier_curve_2d.hpp"
+#include "geometry/curve/bezier_curve_2d.hpp"
 
 class Path2D {
   public:

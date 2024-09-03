@@ -1,4 +1,4 @@
-#include "geometry/parameter_space/bezier_curve_2d.hpp"
+#include "geometry/curve/bezier_curve_2d.hpp"
 
 #include <set>
 
@@ -9,8 +9,8 @@
 
 #include <numbers>
 
-#include "geometry/parameter_space/bezier_clipping.hpp"
-#include "geometry/parameter_space/bezier_root_finder.hpp"
+#include "geometry/curve/bezier_clipping.hpp"
+#include "geometry/curve/bezier_root_finder.hpp"
 
 std::tuple<float, float> BezierCurve2D::projection(glm::vec2 test_point) {
     auto target_poly =

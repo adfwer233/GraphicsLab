@@ -1,5 +1,5 @@
-#include "geometry/parameter_space/bezier_clipping.hpp"
-#include "geometry/parameter_space/bezier_root_finder.hpp"
+#include "geometry/curve/bezier_clipping.hpp"
+#include "geometry/curve/bezier_root_finder.hpp"
 
 #include <algorithm>
 #include <ranges>

@@ -3,7 +3,7 @@
 #include "geometry/function/bernstein.hpp"
 #include "glm/glm.hpp"
 
-#include <boost/math/tools/polynomial.hpp>
+#include "boost/math/tools/polynomial.hpp"
 
 #include <vector>
 

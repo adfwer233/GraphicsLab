@@ -21,7 +21,7 @@
 
 #include "vkl/system/compute_system/path_tracing_compute_system.hpp"
 
-#include "geometry/parameter_space/bezier_curve_2d.hpp"
+#include "geometry/curve/bezier_curve_2d.hpp"
 
 #include "geometry_processing/variable_manager.hpp"
 

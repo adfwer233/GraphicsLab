@@ -5,7 +5,7 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "geometry/parameter_space/bezier_root_finder.hpp"
+#include "geometry/curve/bezier_root_finder.hpp"
 
 double BezierRootFinder::evaluate(double param) {
     double h = 1.0;

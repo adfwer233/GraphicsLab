@@ -16,7 +16,7 @@
 
 #include "vkl/templates/vkl_concept.hpp"
 
-#include "geometry/mesh/mesh_model_template.hpp"
+#include "geometry/mesh/mesh.hpp"
 #include "geometry/renderable_geometry.hpp"
 #include "geometry/surface/tensor_product_bezier.hpp"
 #include "geometry/vertex/null_index.hpp"

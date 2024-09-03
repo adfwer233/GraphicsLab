@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "geometry/parameter_space/bezier_curve_2d.hpp"
+#include "geometry/curve/bezier_curve_2d.hpp"
 
 #include "effolkronium/random.hpp"
 

@@ -6,11 +6,11 @@ set(SRC_FILE
         autodiff/autodiff.cpp
         surface/tensor_product_bezier.cpp
         function/bernstein.cpp
-        parameter_space/bezier_curve_2d.cpp
+        curve/bezier_curve_2d.cpp
         io/svg_importer.cpp
         loop/path_2d.cpp
-        parameter_space/bezier_root_finder.cpp
-        parameter_space/bezier_clipping.cpp
+        curve/bezier_root_finder.cpp
+        curve/bezier_clipping.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
