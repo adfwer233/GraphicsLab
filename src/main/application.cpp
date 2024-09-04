@@ -11,6 +11,8 @@
 #include "vkl/scene_tree/vkl_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
+#include "ui/ui_manager.hpp"
+
 Application::~Application() {
 }
 
@@ -86,7 +88,7 @@ void Application::run() {
 
         auto key = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
-        auto mesh3d_buffer = SceneTree::VklGeometryMeshBuffer<Mesh3D>::instance();
+        auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
         for (auto mesh3d_nodes: scene_tree.traverse_geometry_nodes<Mesh3D>()) {
             auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
 
@@ -112,6 +114,7 @@ void Application::run() {
     auto imguiContext = std::make_unique<ImguiContext>(device_, window, renderGraph.swapChain_->getRenderPass());
     auto render_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("render_result");
     auto render_texture_imgui = render_texture_object->getImguiTextures();
+    UIManager uiManager(scene_tree);
 
     // =============================== IMGUI DATA END ==================================================================
 
@@ -122,6 +125,8 @@ void Application::run() {
             ImGui::Image(render_texture_imgui[frame_index], wsize);
         }
         ImGui::End();
+
+        uiManager.render();
 
         ImGui::ShowDemoWindow();
         ImGui::Render();
@@ -163,5 +168,5 @@ void Application::run() {
     vkDeviceWaitIdle(device_.device());
 
     imguiContext.reset();
-    SceneTree::VklGeometryMeshBuffer<Mesh3D>::free_instance();
+    SceneTree::VklNodeMeshBuffer<Mesh3D>::free_instance();
 }

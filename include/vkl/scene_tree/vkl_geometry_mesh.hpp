@@ -10,27 +10,27 @@
 
 namespace SceneTree {
 
-template <typename T> class VklGeometryMesh {};
+template <typename T> class VklNodeMesh {};
 
-template <typename T> class VklGeometryMeshBuffer {
+template <typename T> class VklNodeMeshBuffer {
 public:
-    VklGeometryMesh<T> *getGeometryModel(VklDevice &device, GeometryNode<T> *ptr) {
+  VklNodeMesh<T> *getGeometryModel(VklDevice &device, GeometryNode<T> *ptr) {
         if (map_.contains(ptr))
             return map_[ptr];
         else {
-            map_[ptr] = new VklGeometryMesh<T>(device, ptr);
+            map_[ptr] = new VklNodeMesh<T>(device, ptr);
             return map_[ptr];
         }
     }
 
-    static VklGeometryMeshBuffer<T> *instance() {
+    static VklNodeMeshBuffer<T> *instance() {
         if (instance_ == nullptr) {
-            instance_ = new VklGeometryMeshBuffer<T>();
+            instance_ = new VklNodeMeshBuffer<T>();
         }
         return instance_;
     }
 
-    ~VklGeometryMeshBuffer() {
+    ~VklNodeMeshBuffer() {
         for (auto &[k, v] : map_) {
             delete v;
         }
@@ -43,12 +43,12 @@ public:
     }
 
 private:
-    std::map<GeometryNode<T> *, VklGeometryMesh<T> *> map_;
-    static inline VklGeometryMeshBuffer<T> *instance_ = nullptr;
+    std::map<GeometryNode<T> *, VklNodeMesh<T> *> map_;
+    static inline VklNodeMeshBuffer<T> *instance_ = nullptr;
     // VklGeometryModelBuffer<T>() = default;
 };
 
-// template <> class VklGeometryMesh<BezierCurve2D> {
+// template <> class VklNodeMesh<BezierCurve2D> {
 //   public:
 //     BezierCurve2D *curve_;
 //     VklDevice &device_;
@@ -63,7 +63,7 @@ private:
 //     std::unique_ptr<extreme_point_render_type> extremePointMesh;
 //     std::unique_ptr<derivative_bound_render_type> derivativeBoundMesh;
 //
-//     VklGeometryMesh(VklDevice &device, BezierCurve2D *curve) : device_(device), curve_(curve) {
+//     VklNodeMesh(VklDevice &device, BezierCurve2D *curve) : device_(device), curve_(curve) {
 //         createControlPointsMesh();
 //
 //         if (curve->control_point_vec2.size() >= 2)
@@ -179,7 +179,7 @@ private:
 //     }
 // };
 //
-// template <> class VklGeometryMesh<TensorProductBezierSurface> {
+// template <> class VklNodeMesh<TensorProductBezierSurface> {
 //   public:
 //     TensorProductBezierSurface *surface_;
 //     VklDevice &device_;
@@ -190,7 +190,7 @@ private:
 //     std::vector<std::unique_ptr<boundary_render_type>> boundary_3d;
 //     std::vector<std::unique_ptr<parameter_render_type>> boundary_2d;
 //
-//     VklGeometryMesh(VklDevice &device, TensorProductBezierSurface *surf) : device_(device), surface_(surf) {
+//     VklNodeMesh(VklDevice &device, TensorProductBezierSurface *surf) : device_(device), surface_(surf) {
 //         createBoundaryModels();
 //         createParameterBoundaryModels();
 //     }
@@ -229,7 +229,7 @@ private:
 //     };
 // };
 
-template <VklVertexType VertexType, VklIndexType IndexType> class VklGeometryMesh<MeshGeometry<VertexType, IndexType>> {
+template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<MeshGeometry<VertexType, IndexType>> {
     SceneTree::GeometryNode<MeshGeometry<VertexType, IndexType>> *node_;
 
     VklDevice &device_;
@@ -251,7 +251,7 @@ public:
     using render_type = VklMesh<VertexType, IndexType>;
     std::unique_ptr<render_type> mesh;
 
-    VklGeometryMesh(VklDevice &device, decltype(node_) node)
+    VklNodeMesh(VklDevice &device, decltype(node_) node)
         : device_(device), node_(node) {
         createMesh();
     }
