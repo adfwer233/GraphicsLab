@@ -9,35 +9,41 @@ namespace SceneTree {
 
 template <typename T> class VklGeometryMesh {};
 
-    template <typename T> class VklGeometryMeshBuffer {
-    public:
-        VklGeometryMesh<T> *getGeometryModel(VklDevice &device, T *ptr) {
-            if (map_.contains(ptr))
-                return map_[ptr];
-            else {
-                map_[ptr] = new VklGeometryMesh<T>(device, ptr);
-                return map_[ptr];
-            }
+template <typename T> class VklGeometryMeshBuffer {
+public:
+    VklGeometryMesh<T> *getGeometryModel(VklDevice &device, T *ptr) {
+        if (map_.contains(ptr))
+            return map_[ptr];
+        else {
+            map_[ptr] = new VklGeometryMesh<T>(device, ptr);
+            return map_[ptr];
         }
+    }
 
-        static VklGeometryMeshBuffer<T> *instance() {
-            if (instance_ == nullptr) {
-                instance_ = new VklGeometryMeshBuffer<T>();
-            }
-            return instance_;
+    static VklGeometryMeshBuffer<T> *instance() {
+        if (instance_ == nullptr) {
+            instance_ = new VklGeometryMeshBuffer<T>();
         }
+        return instance_;
+    }
 
-        ~VklGeometryMeshBuffer() {
-            for (auto &[k, v] : map_) {
-                delete v;
-            }
+    ~VklGeometryMeshBuffer() {
+        for (auto &[k, v] : map_) {
+            delete v;
         }
+    }
 
-    private:
-        std::map<T *, VklGeometryMesh<T> *> map_;
-        static inline VklGeometryMeshBuffer<T> *instance_ = nullptr;
-        // VklGeometryModelBuffer<T>() = default;
-    };
+    static void free_instance() {
+        for (auto [geometry, mesh]: instance_->map_) {
+            delete mesh;
+        }
+    }
+
+private:
+    std::map<T *, VklGeometryMesh<T> *> map_;
+    static inline VklGeometryMeshBuffer<T> *instance_ = nullptr;
+    // VklGeometryModelBuffer<T>() = default;
+};
 
 template <> class VklGeometryMesh<BezierCurve2D> {
   public:

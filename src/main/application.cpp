@@ -163,4 +163,5 @@ void Application::run() {
     vkDeviceWaitIdle(device_.device());
 
     imguiContext.reset();
+    SceneTree::VklGeometryMeshBuffer<Mesh3D>::free_instance();
 }

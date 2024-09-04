@@ -140,8 +140,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
         for (const auto &buffer : resources.storage_buffers) {
             uint32_t setShaderId = compiler.get_decoration(buffer.id, spv::DecorationDescriptorSet);
             uint32_t bindingIndex = compiler.get_decoration(buffer.id, spv::DecorationBinding);
-            std::cout << std::format("Storage Buffer {}, shader id {}, binding {} \n", buffer.name, setShaderId,
-                                     bindingIndex);
+            spdlog::info("Storage Buffer {}, shader id {}, binding {} \n", buffer.name, setShaderId, bindingIndex);
         }
 
         descriptorSetLayoutBuilder.addBindingsFromResource(compiler, resources);
