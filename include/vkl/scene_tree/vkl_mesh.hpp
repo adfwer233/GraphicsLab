@@ -46,7 +46,7 @@ class VklMesh {
     struct Builder {
         std::vector<VertexType> vertices{};
         std::vector<IndexType> indices{};
-        std::vector<std::string> texturePaths{};
+        std::vector<VklTexture*> textures{};
     };
 
   private:
@@ -146,12 +146,7 @@ void VklMesh<VertexType, IndexType, BoxType>::bind(VkCommandBuffer commandBuffer
 }
 
 template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
-VklMesh<VertexType, IndexType, BoxType>::~VklMesh() {
-    /** free texture objects */
-    for (auto texture : textures_) {
-        delete texture;
-    }
-}
+VklMesh<VertexType, IndexType, BoxType>::~VklMesh() {}
 
 template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
 void VklMesh<VertexType, IndexType, BoxType>::createTextureImage(const std::string &texturePath) {
@@ -244,9 +239,7 @@ VklMesh<VertexType, IndexType, BoxType>::VklMesh(VklDevice &device, VklMesh::Bui
     createVertexBuffers(builder.vertices);
     createIndexBuffers(builder.indices);
 
-    for (const auto &path : builder.texturePaths) {
-        createTextureImage(path);
-    }
+    std::ranges::copy(builder.textures, std::back_inserter(textures_));
 }
 
 } // namespace SceneTree

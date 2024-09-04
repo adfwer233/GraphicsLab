@@ -8,6 +8,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "vkl_material.hpp"
+
 namespace SceneTree {
 enum class NodeType {
     InternalNode,
@@ -42,22 +44,19 @@ template <SupportedLightTypes LightType> consteval size_t light_type_index() {
     return MetaProgramming::TypeListFunctions::IndexOf<LightTypes, LightType>::value;
 }
 
-struct Material {
-    aiColor4D diffuse;
-    aiColor4D specular;
-    aiColor4D ambient;
-    aiColor4D emissive;
-    float shininess{};
-
-    std::vector<VklTexture*> textures;
-};
+struct VklSceneTree;
 
 struct TreeNode {
     std::vector<std::unique_ptr<TreeNode>> children;
     std::string name;
 
+    VklSceneTree* scene = nullptr;
+
     template <SupportedNodeType NodeType> void addTreeNode(std::unique_ptr<NodeType> node) {
         children.push_back(std::move(node));
+        for (auto & child: children) {
+            child->scene = scene;
+        }
     }
 
     virtual NodeType type() = 0;
@@ -71,6 +70,8 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     NodeType type() override { return NodeType::GeometryNode; }
 
     GeometryType data;
+
+    size_t material_index;
 
     explicit GeometryNode(GeometryType &&t_data) {
         data = std::move(t_data);
@@ -196,6 +197,7 @@ private:
         // Process each child node recursively
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
             auto childNode = processNode(node->mChildren[i], scene);
+            childNode->scene = internalNode->scene;
             internalNode->children.push_back(std::move(childNode));
         }
 
@@ -222,11 +224,11 @@ private:
             mesh_converted.indices.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
         }
 
-        // @todo: add material importer
+        auto mesh_node = std::make_unique<GeometryNode<Mesh3D>>(std::move(mesh_converted));
 
-        auto mesh_mode = std::make_unique<GeometryNode<Mesh3D>>(std::move(mesh_converted));
+        mesh_node->material_index = mesh->mMaterialIndex;
 
-        return std::move(mesh_mode);
+        return std::move(mesh_node);
     }
 };
 
@@ -249,12 +251,21 @@ struct VklSceneTree {
         AssimpImporter assimpImporter(device_, path);
         root = assimpImporter.importScene();
         materials = assimpImporter.importMaterial();
+        set_scene_to_nodes(root.get());
     }
 
     template<SupportedGeometryType GeometryType>
     Generator<GeometryNode<GeometryType>*> traverse_geometry_nodes() {
         for (auto node: traverse_geometry_nodes_internal<GeometryType>(root.get())) {
             co_yield node;
+        }
+    }
+
+    ~VklSceneTree() {
+        for (auto &mat: materials) {
+            for (auto tex: mat.textures) {
+                delete tex;
+            }
         }
     }
 private:
@@ -268,6 +279,13 @@ private:
             for (auto geometryNode : traverse_geometry_nodes_internal<GeometryType>(child.get())) {
                 co_yield geometryNode;
             }
+        }
+    }
+
+    void set_scene_to_nodes(TreeNode* node) {
+        node->scene = this;
+        for (auto& child: node->children) {
+            set_scene_to_nodes(child.get());
         }
     }
 };

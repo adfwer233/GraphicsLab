@@ -17,7 +17,7 @@ Application::~Application() {
 void Application::run() {
     GLFWwindow *window = window_.getGLFWwindow();
 
-    VklScene scene(device_, {0, 0, 10}, {0, 1, 0});
+    VklScene scene(device_, {0, 0, 20}, {0, 1, 0});
 
     VklModel::BuilderFromImmediateData builder;
     builder.vertices = {
@@ -73,7 +73,7 @@ void Application::run() {
     auto simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
         device_, "simple_render_system",
         {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-         {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+         {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
     simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
         GlobalUbo ubo{};
@@ -88,7 +88,7 @@ void Application::run() {
 
         auto mesh3d_buffer = SceneTree::VklGeometryMeshBuffer<Mesh3D>::instance();
         for (auto mesh3d_nodes: scene_tree.traverse_geometry_nodes<Mesh3D>()) {
-            auto node_mesh = mesh3d_buffer->getGeometryModel(device_, &mesh3d_nodes->data);
+            auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
 
             if (node_mesh->mesh->uniformBuffers.contains(key)) {
                 node_mesh->mesh->uniformBuffers[key][frame_index]->writeToBuffer(&ubo);
