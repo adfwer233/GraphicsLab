@@ -75,12 +75,12 @@ class Camera {
 
     float theta, phi;
 
-    Camera(glm::vec3 pos, glm::vec3 up, float t_yaw = default_yaw, float t_pitch = default_pitch)
+    Camera(glm::vec3 pos, glm::vec3 up, glm::vec3 target = glm::vec3(0.0f), float t_yaw = default_yaw, float t_pitch = default_pitch)
         : zoom(45), move_speed(2.5), mouse_sensitivity(0.1f) {
         position = pos;
         camera_up_axis = up;
         world_up = up;
-        camera_target = glm::vec3(0.0f);
+        camera_target = target;
         theta = 90.0f;
         phi = 0.0f;
 

@@ -3,7 +3,7 @@
 #include <functional>
 
 #include "vkl/scene/vkl_object.hpp"
-#include "vkl/utils/vkl_camera.hpp"
+#include "vkl/scene_tree/vkl_camera.hpp"
 
 #include "ray_tracer/ray_picker.hpp"
 

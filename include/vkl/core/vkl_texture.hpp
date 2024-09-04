@@ -19,7 +19,7 @@ class VklTexture {
 
     VklTexture(VklDevice &device_, int texWidth, int texHeight, int texChannels,
                VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-               VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
+               VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED, VkFormat format = VK_FORMAT_R8G8B8A8_SRGB);
     VklTexture(VklDevice &device, VkImage image);
     ~VklTexture();
 

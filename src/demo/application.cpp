@@ -41,7 +41,7 @@ Application::~Application() {
 
 void Application::run() {
 
-    VklScene scene(device_, {0, 0, 10}, {0, 1, 0});
+    VklScene scene(device_, {0, 0, 50}, {0, 1, 0});
 
     auto boxModel = VklBoxModel3D(device_, getStandardBox3D());
 

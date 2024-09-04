@@ -48,7 +48,20 @@ class SceneTreeComponent: public UIComponent {
                 if (auto mesh3d_node = dynamic_cast<SceneTree::GeometryNode<Mesh3D>*>(node)) {
                     ImGui::Text("Mesh3D: %s", mesh3d_node->name.c_str());
                 }
-                // Add more material properties if needed
+            }
+
+            if (node->type() == SceneTree::NodeType::CameraNode) {
+                auto camera_node = reinterpret_cast<SceneTree::CameraNode*>(node);
+                auto camera = camera_node->camera;
+                ImGui::Text(std::format("Position {:.3f} {:.3f} {:.3f}", camera.position.x, camera.position.y, camera.position.z).c_str());
+                ImGui::Text(std::format("Front {:.3f} {:.3f} {:.3f}", camera.camera_up_axis.x, camera.camera_up_axis.y, camera.camera_up_axis.z).c_str());
+                ImGui::Text(std::format("Up {:.3f} {:.3f} {:.3f}", camera.camera_front.x, camera.camera_front.y, camera.camera_front.z).c_str());
+
+                if (camera_node != sceneTree_.active_camera) {
+                    if (ImGui::Button("Activate")) {
+                        sceneTree_.active_camera = camera_node;
+                    }
+                }
             }
 
             // Recursively render child nodes

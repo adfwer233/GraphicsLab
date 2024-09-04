@@ -2,9 +2,9 @@
 
 #include "vkl/core/vkl_offscreen_renderer.hpp"
 #include "vkl/scene/vkl_geometry_model.hpp"
+#include "vkl/scene_tree/vkl_camera.hpp"
 #include "vkl/system/render_system/param_line_render_system.hpp"
 #include "vkl/system/render_system/simple_render_system_2d.hpp"
-#include "vkl/utils/vkl_camera.hpp"
 #include "vkl/utils/vkl_curve_model.hpp"
 
 #include "nlohmann/json.hpp"

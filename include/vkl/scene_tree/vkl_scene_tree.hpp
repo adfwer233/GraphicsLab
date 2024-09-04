@@ -9,6 +9,7 @@
 #include <assimp/postprocess.h>
 
 #include "vkl_material.hpp"
+#include "vkl_camera.hpp"
 
 namespace SceneTree {
 enum class NodeType {
@@ -85,6 +86,10 @@ template <SupportedLightTypes LightTypes> struct LightNode : public TreeNode {
 
 struct CameraNode : public TreeNode {
     NodeType type() override { return NodeType::CameraNode; }
+
+    Camera camera;
+
+    explicit CameraNode(Camera t_camera): camera(t_camera) {}
 };
 
 class AssimpImporter {
@@ -104,7 +109,7 @@ private:
 
     std::unique_ptr<TreeNode> importScene() {
         Assimp::Importer importer;
-        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
@@ -237,6 +242,8 @@ struct VklSceneTree {
     std::unique_ptr<SceneTree::TreeNode> root;
     std::vector<Material> materials;
 
+    CameraNode* active_camera = nullptr;
+
     explicit VklSceneTree(VklDevice &device): device_(device) {
         root = std::make_unique<SceneTree::InternalNode>();
     }
@@ -245,6 +252,17 @@ struct VklSceneTree {
     void addGeometryNode(GeometryType &&Geometry) {
         auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(Geometry);
         root->children.push_back(std::move(geometry_node));
+    }
+
+    void addCameraNode(const std::string &name, Camera camera) {
+        if (root != nullptr) {
+            auto camera_node = std::make_unique<CameraNode>(camera);
+            camera_node->name = name;
+            if (active_camera == nullptr) {
+                active_camera = camera_node.get();
+            }
+            root->children.push_back(std::move(camera_node));
+        }
     }
 
     void importFromPath(const std::string& path) {
@@ -268,6 +286,7 @@ struct VklSceneTree {
             }
         }
     }
+
 private:
     template <SupportedGeometryType GeometryType>
     Generator<GeometryNode<GeometryType>*> traverse_geometry_nodes_internal(TreeNode* node) {

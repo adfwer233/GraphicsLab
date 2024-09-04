@@ -19,20 +19,10 @@ Application::~Application() {
 void Application::run() {
     GLFWwindow *window = window_.getGLFWwindow();
 
-    VklScene scene(device_, {0, 0, 20}, {0, 1, 0});
-
-    VklModel::BuilderFromImmediateData builder;
-    builder.vertices = {
-        {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-        {{0.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-        {{1.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-        {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
-    };
-
     SceneTree::VklSceneTree scene_tree(device_);
     scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
-
-    scene.addObject(builder);
+    scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
+    scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 
     RenderGraphDescriptor graphDescriptor;
 
@@ -43,14 +33,26 @@ void Application::run() {
     output_texture->height = 1024;
 
     auto render_texture = graphDescriptor.attachment<RenderGraphTextureAttachment>("render_result");
+    render_texture->clear = true;
     render_texture->isSwapChain = false;
     render_texture->input_flag = true;
     render_texture->format = VK_FORMAT_R8G8B8A8_SRGB;
     render_texture->width = 1024;
     render_texture->height = 1024;
 
+    auto render_depth_texture = graphDescriptor.attachment<RenderGraphTextureAttachment>("render_depth");
+    render_depth_texture->clear = true;
+    render_depth_texture->type = RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment;
+    render_depth_texture->isSwapChain = false;
+    render_depth_texture->input_flag = false;
+    render_depth_texture->format = device_.findSupportedFormat({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                                                         VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);;
+    render_depth_texture->width = 1024;
+    render_depth_texture->height = 1024;
+
     auto simple_render_pass = graphDescriptor.pass<RenderGraphRenderPass>("simple_render_pass");
     simple_render_pass->outTextureAttachmentDescriptors.push_back(render_texture);
+    simple_render_pass->outTextureAttachmentDescriptors.push_back(render_depth_texture);
     simple_render_pass->width = 1024;
     simple_render_pass->height = 1024;
 
@@ -80,11 +82,11 @@ void Application::run() {
     simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
         GlobalUbo ubo{};
 
-        ubo.view = scene.camera.get_view_transformation();
-        ubo.proj = scene.camera.get_proj_transformation();
+        ubo.view = scene_tree.active_camera->camera.get_view_transformation();
+        ubo.proj = scene_tree.active_camera->camera.get_proj_transformation();
         ubo.model = glm::mat4(1.0f);
-        ubo.pointLight = scene.pointLight;
-        ubo.cameraPos = scene.camera.position;
+        ubo.pointLight = PointLight({0, 10, 0, 1.0}, {1.0, 1.0, 1.0, 0.0});
+        ubo.cameraPos = scene_tree.active_camera->camera.position;
 
         auto key = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
@@ -101,7 +103,7 @@ void Application::run() {
                     .frameIndex = static_cast<int>(frame_index) % 2,
                     .frameTime = 0,
                     .commandBuffer = commandBuffer,
-                    .camera = scene.camera,
+                    .camera = scene_tree.active_camera->camera,
                     .model = *node_mesh->mesh.get(),
             };
 

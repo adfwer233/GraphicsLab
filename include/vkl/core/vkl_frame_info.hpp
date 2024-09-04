@@ -3,7 +3,7 @@
 #include "glm/glm.hpp"
 #include "vulkan/vulkan.h"
 
-#include "vkl/utils/vkl_camera.hpp"
+#include "vkl/scene_tree/vkl_camera.hpp"
 
 #include "vkl/templates/vkl_concept.hpp"
 
