@@ -755,16 +755,16 @@ struct RenderGraph {
                 if (edge->descriptor_p->input_flag)
                     imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
-                if (edge->descriptor_p->type == RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
+                if (edge->descriptor_p->type ==
+                    RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
                     imageUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
                     layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
                 }
 
                 VkFormat format = edge->descriptor_p->format;
 
-                edge->instances[i]->texture = std::move(
-                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4,
-                                                 imageUsage, layout, format));
+                edge->instances[i]->texture = std::move(std::make_unique<VklTexture>(
+                    device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, imageUsage, layout, format));
             }
 
             /**

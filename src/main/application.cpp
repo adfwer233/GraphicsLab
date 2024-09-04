@@ -42,11 +42,14 @@ void Application::run() {
 
     auto render_depth_texture = graphDescriptor.attachment<RenderGraphTextureAttachment>("render_depth");
     render_depth_texture->clear = true;
-    render_depth_texture->type = RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment;
+    render_depth_texture->type =
+        RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment;
     render_depth_texture->isSwapChain = false;
     render_depth_texture->input_flag = false;
-    render_depth_texture->format = device_.findSupportedFormat({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-                                                         VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);;
+    render_depth_texture->format =
+        device_.findSupportedFormat({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                                    VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    ;
     render_depth_texture->width = 1024;
     render_depth_texture->height = 1024;
 
@@ -91,7 +94,7 @@ void Application::run() {
         auto key = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
         auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
-        for (auto mesh3d_nodes: scene_tree.traverse_geometry_nodes<Mesh3D>()) {
+        for (auto mesh3d_nodes : scene_tree.traverse_geometry_nodes<Mesh3D>()) {
             auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
 
             if (node_mesh->mesh->uniformBuffers.contains(key)) {
@@ -100,11 +103,11 @@ void Application::run() {
             }
 
             FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                    .frameIndex = static_cast<int>(frame_index) % 2,
-                    .frameTime = 0,
-                    .commandBuffer = commandBuffer,
-                    .camera = scene_tree.active_camera->camera,
-                    .model = *node_mesh->mesh.get(),
+                .frameIndex = static_cast<int>(frame_index) % 2,
+                .frameTime = 0,
+                .commandBuffer = commandBuffer,
+                .camera = scene_tree.active_camera->camera,
+                .model = *node_mesh->mesh.get(),
             };
 
             simple_render_system->renderObject(frameInfo);

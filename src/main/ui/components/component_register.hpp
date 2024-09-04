@@ -2,4 +2,4 @@
 
 #include "meta_programming/type_register/type_register.hpp"
 
-struct MainComponentRegisterTag{};
+struct MainComponentRegisterTag {};

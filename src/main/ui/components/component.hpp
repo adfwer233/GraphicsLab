@@ -12,7 +12,7 @@ class UIComponent {
   protected:
     SceneTree::VklSceneTree &sceneTree_;
 
-    explicit UIComponent(SceneTree::VklSceneTree &sceneTree): sceneTree_(sceneTree) {};
+    explicit UIComponent(SceneTree::VklSceneTree &sceneTree) : sceneTree_(sceneTree) {};
 
   public:
     virtual void render() = 0;

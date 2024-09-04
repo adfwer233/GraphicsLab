@@ -3,9 +3,9 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "spdlog/spdlog.h"
 #include "spirv_cross.hpp"
 #include "spirv_glsl.hpp"
-#include "spdlog/spdlog.h"
 
 template <uint32_t Subpass, VklPushConstantInfoListConcept PushConstantInfoList,
           VklPipelineModifierType PipelineModifierType>

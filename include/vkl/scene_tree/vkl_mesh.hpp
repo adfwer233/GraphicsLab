@@ -46,7 +46,7 @@ class VklMesh {
     struct Builder {
         std::vector<VertexType> vertices{};
         std::vector<IndexType> indices{};
-        std::vector<VklTexture*> textures{};
+        std::vector<VklTexture *> textures{};
     };
 
   private:
@@ -85,7 +85,7 @@ class VklMesh {
     };
 };
 
-template<VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
+template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
 void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorSetLayout &setLayout,
                                                                   VklDescriptorPool &pool) {
     auto key = setLayout.descriptorSetLayoutKey;
@@ -146,7 +146,8 @@ void VklMesh<VertexType, IndexType, BoxType>::bind(VkCommandBuffer commandBuffer
 }
 
 template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
-VklMesh<VertexType, IndexType, BoxType>::~VklMesh() {}
+VklMesh<VertexType, IndexType, BoxType>::~VklMesh() {
+}
 
 template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
 void VklMesh<VertexType, IndexType, BoxType>::createTextureImage(const std::string &texturePath) {

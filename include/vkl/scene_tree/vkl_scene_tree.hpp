@@ -5,11 +5,11 @@
 #include "vkl/scene/vkl_model.hpp"
 
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
-#include "vkl_material.hpp"
 #include "vkl_camera.hpp"
+#include "vkl_material.hpp"
 
 namespace SceneTree {
 enum class NodeType {
@@ -31,11 +31,12 @@ concept SupportedGeometryType = MetaProgramming::TypeListFunctions::IsAnyOf<Geom
 template <typename T>
 concept SupportedLightTypes = MetaProgramming::TypeListFunctions::IsAnyOf<LightTypes, T>::value;
 
-template<SupportedGeometryType T> struct GeometryNode;
+template <SupportedGeometryType T> struct GeometryNode;
 template <SupportedLightTypes LightTypes> struct LightNode;
 
 template <typename T>
-concept SupportedNodeType = MetaProgramming::TypeListFunctions::IsAnyOf<GeometryTypes::monad<GeometryNode>, T>::value || MetaProgramming::TypeListFunctions::IsAnyOf<LightTypes::monad<LightNode>, T>::value;
+concept SupportedNodeType = MetaProgramming::TypeListFunctions::IsAnyOf<GeometryTypes::monad<GeometryNode>, T>::value ||
+                            MetaProgramming::TypeListFunctions::IsAnyOf<LightTypes::monad<LightNode>, T>::value;
 
 template <SupportedGeometryType GeometryType> consteval size_t geometry_type_index() {
     return MetaProgramming::TypeListFunctions::IndexOf<GeometryTypes, GeometryType>::value;
@@ -51,11 +52,11 @@ struct TreeNode {
     std::vector<std::unique_ptr<TreeNode>> children;
     std::string name;
 
-    VklSceneTree* scene = nullptr;
+    VklSceneTree *scene = nullptr;
 
     template <SupportedNodeType NodeType> void addTreeNode(std::unique_ptr<NodeType> node) {
         children.push_back(std::move(node));
-        for (auto & child: children) {
+        for (auto &child : children) {
             child->scene = scene;
         }
     }
@@ -63,12 +64,16 @@ struct TreeNode {
     virtual NodeType type() = 0;
 };
 
-struct InternalNode: public TreeNode {
-    NodeType type() override { return NodeType::InternalNode; }
+struct InternalNode : public TreeNode {
+    NodeType type() override {
+        return NodeType::InternalNode;
+    }
 };
 
 template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeNode {
-    NodeType type() override { return NodeType::GeometryNode; }
+    NodeType type() override {
+        return NodeType::GeometryNode;
+    }
 
     GeometryType data;
 
@@ -77,28 +82,33 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     explicit GeometryNode(GeometryType &&t_data) {
         data = std::move(t_data);
     }
-
 };
 
 template <SupportedLightTypes LightTypes> struct LightNode : public TreeNode {
-    NodeType type() override { return NodeType::LightSourceNode; }
+    NodeType type() override {
+        return NodeType::LightSourceNode;
+    }
 };
 
 struct CameraNode : public TreeNode {
-    NodeType type() override { return NodeType::CameraNode; }
+    NodeType type() override {
+        return NodeType::CameraNode;
+    }
 
     Camera camera;
 
-    explicit CameraNode(Camera t_camera): camera(t_camera) {}
+    explicit CameraNode(Camera t_camera) : camera(t_camera) {
+    }
 };
 
 class AssimpImporter {
-private:
+  private:
     VklDevice &device_;
     const std::string path;
     std::string directory;
+
   public:
-    AssimpImporter(VklDevice &device, const std::string& filePath): device_(device), path(filePath) {
+    AssimpImporter(VklDevice &device, const std::string &filePath) : device_(device), path(filePath) {
         Assimp::Importer importer;
         auto scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs);
         this->directory = path.substr(0, path.find_last_of('/'));
@@ -109,7 +119,8 @@ private:
 
     std::unique_ptr<TreeNode> importScene() {
         Assimp::Importer importer;
-        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+        auto scene =
+            importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
@@ -145,7 +156,8 @@ private:
                 aiString str;
                 material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, j, &str);
 
-                mat.textures.push_back(createTextureImage(std::format("{}/{}", this->directory, std::string(str.C_Str()))));
+                mat.textures.push_back(
+                    createTextureImage(std::format("{}/{}", this->directory, std::string(str.C_Str()))));
             }
 
             materials.push_back(mat);
@@ -155,7 +167,7 @@ private:
     }
 
   private:
-    VklTexture* createTextureImage(const std::string &texturePath) {
+    VklTexture *createTextureImage(const std::string &texturePath) {
         int texWidth, texHeight, texChannels;
         stbi_uc *pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * texChannels;
@@ -188,12 +200,12 @@ private:
         return texture;
     }
 
-    std::unique_ptr<TreeNode> processNode(aiNode* node, const aiScene* scene) {
+    std::unique_ptr<TreeNode> processNode(aiNode *node, const aiScene *scene) {
         auto internalNode = std::make_unique<InternalNode>();
 
         // Process each mesh located at the current node
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
             auto geometryNode = convertMeshToGeometryNode(mesh);
             geometryNode->name = mesh->mName.C_Str();
             internalNode->addTreeNode<GeometryNode<Mesh3D>>(std::move(geometryNode));
@@ -242,14 +254,13 @@ struct VklSceneTree {
     std::unique_ptr<SceneTree::TreeNode> root;
     std::vector<Material> materials;
 
-    CameraNode* active_camera = nullptr;
+    CameraNode *active_camera = nullptr;
 
-    explicit VklSceneTree(VklDevice &device): device_(device) {
+    explicit VklSceneTree(VklDevice &device) : device_(device) {
         root = std::make_unique<SceneTree::InternalNode>();
     }
 
-    template<SupportedGeometryType GeometryType>
-    void addGeometryNode(GeometryType &&Geometry) {
+    template <SupportedGeometryType GeometryType> void addGeometryNode(GeometryType &&Geometry) {
         auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(Geometry);
         root->children.push_back(std::move(geometry_node));
     }
@@ -265,45 +276,44 @@ struct VklSceneTree {
         }
     }
 
-    void importFromPath(const std::string& path) {
+    void importFromPath(const std::string &path) {
         AssimpImporter assimpImporter(device_, path);
         root = assimpImporter.importScene();
         materials = assimpImporter.importMaterial();
         set_scene_to_nodes(root.get());
     }
 
-    template<SupportedGeometryType GeometryType>
-    Generator<GeometryNode<GeometryType>*> traverse_geometry_nodes() {
-        for (auto node: traverse_geometry_nodes_internal<GeometryType>(root.get())) {
+    template <SupportedGeometryType GeometryType> Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes() {
+        for (auto node : traverse_geometry_nodes_internal<GeometryType>(root.get())) {
             co_yield node;
         }
     }
 
     ~VklSceneTree() {
-        for (auto &mat: materials) {
-            for (auto tex: mat.textures) {
+        for (auto &mat : materials) {
+            for (auto tex : mat.textures) {
                 delete tex;
             }
         }
     }
 
-private:
+  private:
     template <SupportedGeometryType GeometryType>
-    Generator<GeometryNode<GeometryType>*> traverse_geometry_nodes_internal(TreeNode* node) {
-        if (auto geometryNode = dynamic_cast<GeometryNode<GeometryType>*>(node)) {
+    Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes_internal(TreeNode *node) {
+        if (auto geometryNode = dynamic_cast<GeometryNode<GeometryType> *>(node)) {
             co_yield geometryNode;
         }
 
-        for (auto& child : node->children) {
+        for (auto &child : node->children) {
             for (auto geometryNode : traverse_geometry_nodes_internal<GeometryType>(child.get())) {
                 co_yield geometryNode;
             }
         }
     }
 
-    void set_scene_to_nodes(TreeNode* node) {
+    void set_scene_to_nodes(TreeNode *node) {
         node->scene = this;
-        for (auto& child: node->children) {
+        for (auto &child : node->children) {
             set_scene_to_nodes(child.get());
         }
     }

@@ -175,7 +175,8 @@ class VklDevice {
 
     void createSampler(VkSampler &sampler);
 
-    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
+    VkImageView createImageView(VkImage image, VkFormat format,
+                                VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
 
     void createImageWithInfo(const VkImageCreateInfo &imageInfo, VkMemoryPropertyFlags properties, VkImage &image,
                              VkDeviceMemory &imageMemory);

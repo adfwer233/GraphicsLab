@@ -13,8 +13,8 @@ namespace SceneTree {
 template <typename T> class VklNodeMesh {};
 
 template <typename T> class VklNodeMeshBuffer {
-public:
-  VklNodeMesh<T> *getGeometryModel(VklDevice &device, GeometryNode<T> *ptr) {
+  public:
+    VklNodeMesh<T> *getGeometryModel(VklDevice &device, GeometryNode<T> *ptr) {
         if (map_.contains(ptr))
             return map_[ptr];
         else {
@@ -37,12 +37,12 @@ public:
     }
 
     static void free_instance() {
-        for (auto [geometry, mesh]: instance_->map_) {
+        for (auto [geometry, mesh] : instance_->map_) {
             delete mesh;
         }
     }
 
-private:
+  private:
     std::map<GeometryNode<T> *, VklNodeMesh<T> *> map_;
     static inline VklNodeMeshBuffer<T> *instance_ = nullptr;
     // VklGeometryModelBuffer<T>() = default;
@@ -247,12 +247,11 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<Me
         mesh = std::make_unique<render_type>(device_, builder);
     }
 
-public:
+  public:
     using render_type = VklMesh<VertexType, IndexType>;
     std::unique_ptr<render_type> mesh;
 
-    VklNodeMesh(VklDevice &device, decltype(node_) node)
-        : device_(device), node_(node) {
+    VklNodeMesh(VklDevice &device, decltype(node_) node) : device_(device), node_(node) {
         createMesh();
     }
 };
