@@ -42,6 +42,16 @@ template <SupportedLightTypes LightType> consteval size_t light_type_index() {
     return MetaProgramming::TypeListFunctions::IndexOf<LightTypes, LightType>::value;
 }
 
+struct Material {
+    aiColor4D diffuse;
+    aiColor4D specular;
+    aiColor4D ambient;
+    aiColor4D emissive;
+    float shininess{};
+
+    std::vector<VklTexture*> textures;
+};
+
 struct TreeNode {
     std::vector<std::unique_ptr<TreeNode>> children;
     std::string name;
@@ -77,10 +87,23 @@ struct CameraNode : public TreeNode {
 };
 
 class AssimpImporter {
+private:
+    VklDevice &device_;
+    const std::string path;
+    std::string directory;
   public:
-    std::unique_ptr<TreeNode> importScene(const std::string& filePath) {
+    AssimpImporter(VklDevice &device, const std::string& filePath): device_(device), path(filePath) {
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+        auto scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+        this->directory = path.substr(0, path.find_last_of('/'));
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+            throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
+        }
+    }
+
+    std::unique_ptr<TreeNode> importScene() {
+        Assimp::Importer importer;
+        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
@@ -89,7 +112,76 @@ class AssimpImporter {
         return processNode(scene->mRootNode, scene);
     }
 
+    auto importMaterial() {
+        Assimp::Importer importer;
+        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+            throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
+        }
+
+        std::vector<Material> materials;
+
+        for (int i = 0; i < scene->mNumMaterials; i++) {
+            auto material = scene->mMaterials[i];
+
+            Material mat;
+
+            material->Get(AI_MATKEY_COLOR_DIFFUSE, mat.diffuse);
+            material->Get(AI_MATKEY_COLOR_SPECULAR, mat.specular);
+            material->Get(AI_MATKEY_COLOR_AMBIENT, mat.ambient);
+            material->Get(AI_MATKEY_COLOR_EMISSIVE, mat.emissive);
+            material->Get(AI_MATKEY_SHININESS, mat.shininess);
+
+            int count = material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
+
+            for (int j = 0; j < material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE); j++) {
+                aiString str;
+                material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, j, &str);
+
+                mat.textures.push_back(createTextureImage(std::format("{}/{}", this->directory, std::string(str.C_Str()))));
+            }
+
+            materials.push_back(mat);
+        }
+
+        return materials;
+    }
+
   private:
+    VklTexture* createTextureImage(const std::string &texturePath) {
+        int texWidth, texHeight, texChannels;
+        stbi_uc *pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        VkDeviceSize imageSize = texWidth * texHeight * texChannels;
+
+        if (!pixels) {
+            throw std::runtime_error("failed to load texture image!");
+        }
+
+        if (texChannels == 3) {
+            throw std::runtime_error("unsupported texture info");
+        }
+
+        VklBuffer stagingBuffer{device_, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
+        stagingBuffer.map();
+        stagingBuffer.writeToBuffer((void *)pixels);
+        stagingBuffer.unmap();
+
+        auto texture = new VklTexture(device_, texWidth, texHeight, texChannels);
+
+        device_.transitionImageLayout(texture->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
+                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        device_.copyBufferToImage(stagingBuffer.getBuffer(), texture->image_, static_cast<uint32_t>(texWidth),
+                                  static_cast<uint32_t>(texHeight), 1);
+        device_.transitionImageLayout(texture->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+        stbi_image_free(pixels);
+
+        return texture;
+    }
+
     std::unique_ptr<TreeNode> processNode(aiNode* node, const aiScene* scene) {
         auto internalNode = std::make_unique<InternalNode>();
 
@@ -139,9 +231,11 @@ class AssimpImporter {
 };
 
 struct VklSceneTree {
+    VklDevice &device_;
     std::unique_ptr<SceneTree::TreeNode> root;
+    std::vector<Material> materials;
 
-    VklSceneTree() {
+    explicit VklSceneTree(VklDevice &device): device_(device) {
         root = std::make_unique<SceneTree::InternalNode>();
     }
 
@@ -152,8 +246,9 @@ struct VklSceneTree {
     }
 
     void importFromPath(const std::string& path) {
-        AssimpImporter assimpImporter;
-        root = assimpImporter.importScene(path);
+        AssimpImporter assimpImporter(device_, path);
+        root = assimpImporter.importScene();
+        materials = assimpImporter.importMaterial();
     }
 
     template<SupportedGeometryType GeometryType>

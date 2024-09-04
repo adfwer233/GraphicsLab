@@ -27,7 +27,7 @@ void Application::run() {
         {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
     };
 
-    SceneTree::VklSceneTree scene_tree;
+    SceneTree::VklSceneTree scene_tree(device_);
     scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
 
     scene.addObject(builder);
