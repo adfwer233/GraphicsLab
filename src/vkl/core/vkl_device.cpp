@@ -5,6 +5,8 @@
 
 #include "vkl/memory/vkl_buffer_destroy_list.hpp"
 
+#include "spdlog/spdlog.h"
+
 /**
  * @brief local callback function, debug messenger callback
  */
@@ -218,7 +220,7 @@ void VklDevice::pickPhysicalDevice() {
     if (deviceCount == 0) {
         throw std::runtime_error("failed to find GPUs with Vulkan support!");
     }
-    std::cout << "Device count: " << deviceCount << std::endl;
+    spdlog::info("Device count: {}", deviceCount);
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance_, &deviceCount, devices.data());
 
@@ -234,7 +236,7 @@ void VklDevice::pickPhysicalDevice() {
     }
 
     vkGetPhysicalDeviceProperties(physicalDevice_, &properties_);
-    std::cout << "physical device: " << properties_.deviceName << std::endl;
+    spdlog::info("physical device: {}", properties_.deviceName);
 }
 
 QueueFamilyIndices VklDevice::findQueueFamilies(VkPhysicalDevice device) {

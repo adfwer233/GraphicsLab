@@ -5,6 +5,7 @@
 
 #include "spirv_cross.hpp"
 #include "spirv_glsl.hpp"
+#include "spdlog/spdlog.h"
 
 template <uint32_t Subpass, VklPushConstantInfoListConcept PushConstantInfoList,
           VklPipelineModifierType PipelineModifierType>
@@ -58,22 +59,22 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
 
         spirv_cross::Compiler compiler(bytecode.data(), bytecode.size());
 
-        std::cout << "compiling " << shaderInfo.shaderPath_ << std::endl;
+        spdlog::info("compiling ", shaderInfo.shaderPath_);
 
         auto entryPoints = compiler.get_entry_points_and_stages();
 
         switch (entryPoints[0].execution_model) {
         case spv::ExecutionModel::ExecutionModelVertex:
-            std::cout << "Vertex Shader" << std::endl;
+            spdlog::info("Vertex Shader");
             break;
         case spv::ExecutionModel::ExecutionModelGeometry:
-            std::cout << "Geometry Shader" << std::endl;
+            spdlog::info("Geometry Shader");
             break;
         case spv::ExecutionModel::ExecutionModelFragment:
-            std::cout << "Fragment Shader" << std::endl;
+            spdlog::info("Fragment Shader");
             break;
         case spv::ExecutionModel::ExecutionModelGLCompute:
-            std::cout << "Compute Shader" << std::endl;
+            spdlog::info("Compute Shader");
         default:
             break;
         }
@@ -89,7 +90,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
                 uint32_t size = GetTypeSize(compiler, base_type);
 
                 this->attributeDescriptions.push_back({location, 0, VK_FORMAT_R32G32B32_SFLOAT, size});
-                std::cout << input.name << ' ' << location << ' ' << ' ' << size << std::endl;
+                spdlog::info("{} {} {}", input.name, location, size);
             }
 
             uint32_t offset = 0;
@@ -118,8 +119,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
             auto &type2 = compiler.get_type(buffer.base_type_id);
             auto declaredSize = static_cast<uint32_t>(compiler.get_declared_struct_size(type));
 
-            std::cout << std::format("Uniform Buffer {}, shader id {}, binding {}\n", buffer.name, setShaderId,
-                                     bindingIndex);
+            spdlog::info("Uniform Buffer {}, shader id {}, binding {}\n", buffer.name, setShaderId, bindingIndex);
             if (setShaderId >= setResources.size())
                 setResources.resize(setShaderId + 1);
             setResources[setShaderId].uniformBuffers.push_back(buffer);
@@ -131,8 +131,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
         for (const auto &image : resources.sampled_images) {
             uint32_t setShaderId = compiler.get_decoration(image.id, spv::DecorationDescriptorSet);
             uint32_t bindingIndex = compiler.get_decoration(image.id, spv::DecorationBinding);
-            std::cout << std::format("Sampled Images {}, shader id {}, binding {}\n", image.name, setShaderId,
-                                     bindingIndex);
+            spdlog::info("Sampled Images {}, shader id {}, binding {}\n", image.name, setShaderId, bindingIndex);
 
             // descriptorSetLayoutBuilder.addBinding(bindingIndex, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             // VK_SHADER_STAGE_FRAGMENT_BIT);

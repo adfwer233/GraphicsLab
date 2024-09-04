@@ -17,6 +17,8 @@
 #include "vkl/core/vkl_shader_module.hpp"
 #include "vkl/system/render_system/render_system_base.hpp"
 
+#include "spdlog/spdlog.h"
+
 struct RenderGraphRenderPass {};
 struct RenderGraphComputePass {};
 struct RenderGraphTransferPass {};
@@ -746,7 +748,7 @@ struct RenderGraph {
              * create texture instances
              */
             for (auto edge : attachments_generator<RenderGraphTextureAttachment>()) {
-                std::cout << std::format("create instance for texture {}, instance id {}", edge->name, i) << std::endl;
+                spdlog::info("create instance for texture {}, instance id {}", edge->name, i);
 
                 VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
                 if (edge->descriptor_p->input_flag)
