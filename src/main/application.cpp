@@ -9,6 +9,7 @@
 #include "geometry/geometry.hpp"
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_mesh.hpp"
+#include "vkl/scene_tree/vkl_scene_tree.hpp"
 
 Application::~Application() {
 }
@@ -25,6 +26,9 @@ void Application::run() {
         {{1.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
         {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0}},
     };
+
+    SceneTree::VklSceneTree scene_tree;
+    scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
 
     scene.addObject(builder);
 
