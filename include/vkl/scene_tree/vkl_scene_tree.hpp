@@ -155,6 +155,26 @@ struct VklSceneTree {
         AssimpImporter assimpImporter;
         root = assimpImporter.importScene(path);
     }
+
+    template<SupportedGeometryType GeometryType>
+    Generator<GeometryNode<GeometryType>*> traverse_geometry_nodes() {
+        for (auto node: traverse_geometry_nodes_internal<GeometryType>(root.get())) {
+            co_yield node;
+        }
+    }
+private:
+    template <SupportedGeometryType GeometryType>
+    Generator<GeometryNode<GeometryType>*> traverse_geometry_nodes_internal(TreeNode* node) {
+        if (auto geometryNode = dynamic_cast<GeometryNode<GeometryType>*>(node)) {
+            co_yield geometryNode;
+        }
+
+        for (auto& child : node->children) {
+            for (auto geometryNode : traverse_geometry_nodes_internal<GeometryType>(child.get())) {
+                co_yield geometryNode;
+            }
+        }
+    }
 };
 
 } // namespace SceneTree

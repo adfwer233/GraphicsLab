@@ -72,19 +72,39 @@ void Application::run() {
 
     auto simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
         device_, "simple_render_system",
-        {{std::format("{}/first_triangle_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-         {std::format("{}/first_triangle_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+        {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+         {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
     simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
-        FrameInfo<VklModel> frameInfo{
-            .frameIndex = static_cast<int>(frame_index) % 2,
-            .frameTime = 0,
-            .commandBuffer = commandBuffer,
-            .camera = scene.camera,
-            .model = *scene.objects.front()->models.front(),
-        };
+        GlobalUbo ubo{};
 
-        simple_render_system->renderObject(frameInfo);
+        ubo.view = scene.camera.get_view_transformation();
+        ubo.proj = scene.camera.get_proj_transformation();
+        ubo.model = glm::mat4(1.0f);
+        ubo.pointLight = scene.pointLight;
+        ubo.cameraPos = scene.camera.position;
+
+        auto key = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+
+        auto mesh3d_buffer = SceneTree::VklGeometryMeshBuffer<Mesh3D>::instance();
+        for (auto mesh3d_nodes: scene_tree.traverse_geometry_nodes<Mesh3D>()) {
+            auto node_mesh = mesh3d_buffer->getGeometryModel(device_, &mesh3d_nodes->data);
+
+            if (node_mesh->mesh->uniformBuffers.contains(key)) {
+                node_mesh->mesh->uniformBuffers[key][frame_index]->writeToBuffer(&ubo);
+                node_mesh->mesh->uniformBuffers[key][frame_index]->flush();
+            }
+
+            FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                    .frameIndex = static_cast<int>(frame_index) % 2,
+                    .frameTime = 0,
+                    .commandBuffer = commandBuffer,
+                    .camera = scene.camera,
+                    .model = *node_mesh->mesh.get(),
+            };
+
+            simple_render_system->renderObject(frameInfo);
+        }
     };
 
     // =============================== IMGUI DATA ======================================================================
@@ -109,11 +129,11 @@ void Application::run() {
     };
 
     uint32_t currentFrame = 0;
-
+    uint32_t current_image_index = 0;
     while (not glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        auto result = renderGraph.swapChain_->acquireNextImage(&currentFrame);
+        auto result = renderGraph.swapChain_->acquireNextImage(&current_image_index);
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");

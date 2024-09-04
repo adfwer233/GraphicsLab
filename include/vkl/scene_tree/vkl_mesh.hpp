@@ -74,12 +74,55 @@ class VklMesh {
     void bind(VkCommandBuffer commandBuffer);
     void draw(VkCommandBuffer commandBuffer);
 
+    std::map<VklDescriptorSetLayoutKey, std::vector<std::unique_ptr<VklBuffer>>> uniformBuffers;
+    std::map<VklDescriptorSetLayoutKey, std::vector<VkDescriptorSet>> descriptorSetsMap;
+    void allocDescriptorSets(VklDescriptorSetLayout &setLayout, VklDescriptorPool &pool);
+
     int materialIndex = 0;
 
     VkBuffer getVertexBuffer(size_t index) {
         return vertexBuffer_[index]->getBuffer();
     };
 };
+
+template<VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
+void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorSetLayout &setLayout,
+                                                                  VklDescriptorPool &pool) {
+    auto key = setLayout.descriptorSetLayoutKey;
+    if (not descriptorSetsMap.contains(key)) {
+        descriptorSetsMap[key].clear();
+        descriptorSetsMap[key].resize(VklSwapChain::MAX_FRAMES_IN_FLIGHT);
+        if (not key.uniformDescriptors.empty())
+            uniformBuffers[key].resize(VklSwapChain::MAX_FRAMES_IN_FLIGHT);
+
+        std::vector<VklDescriptorWriter> writer;
+        for (int i = 0; i < VklSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+            writer.emplace_back(setLayout, pool);
+        }
+        for (auto &uniformBufferDescriptor : key.uniformDescriptors) {
+            for (int i = 0; i < uniformBuffers[key].size(); i++) {
+                uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(device_, uniformBufferDescriptor.size, 1,
+                                                                               VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT));
+                uniformBuffers[key][i]->map();
+                auto bufferInfo = uniformBuffers[key][i]->descriptorInfo();
+                writer[i].writeBuffer(uniformBufferDescriptor.binding, &bufferInfo);
+            }
+        }
+
+        for (int i = 0; auto &sampledImages : key.sampledImageBufferDescriptors) {
+            auto imageInfo = textures_[i]->descriptorInfo();
+            for (int j = 0; j < VklSwapChain::MAX_FRAMES_IN_FLIGHT; j++) {
+                writer[j].writeImage(sampledImages.binding, &imageInfo);
+            }
+            i++;
+        }
+
+        for (int i = 0; i < VklSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+            writer[i].build(descriptorSetsMap[key][i]);
+        }
+    }
+}
 
 template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
 void VklMesh<VertexType, IndexType, BoxType>::draw(VkCommandBuffer commandBuffer) {

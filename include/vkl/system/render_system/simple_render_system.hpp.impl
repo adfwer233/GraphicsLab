@@ -48,7 +48,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
         default:
             throw std::runtime_error("Unsupported type");
         }
-        return size * type.columns * type.vecsize / 8;
+        return size * type.columns * type.vecsize;
     };
 
     auto descriptorSetLayoutBuilder = VklDescriptorSetLayout::Builder(device_);
@@ -100,7 +100,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
                 offset += size;
             }
 
-            bindingDescriptions.push_back({.binding = 0, .stride = 44, .inputRate = VK_VERTEX_INPUT_RATE_VERTEX});
+            bindingDescriptions.push_back({.binding = 0, .stride = offset, .inputRate = VK_VERTEX_INPUT_RATE_VERTEX});
         }
 
         struct SetResources {

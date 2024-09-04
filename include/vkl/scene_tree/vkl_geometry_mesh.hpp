@@ -9,6 +9,36 @@ namespace SceneTree {
 
 template <typename T> class VklGeometryMesh {};
 
+    template <typename T> class VklGeometryMeshBuffer {
+    public:
+        VklGeometryMesh<T> *getGeometryModel(VklDevice &device, T *ptr) {
+            if (map_.contains(ptr))
+                return map_[ptr];
+            else {
+                map_[ptr] = new VklGeometryMesh<T>(device, ptr);
+                return map_[ptr];
+            }
+        }
+
+        static VklGeometryMeshBuffer<T> *instance() {
+            if (instance_ == nullptr) {
+                instance_ = new VklGeometryMeshBuffer<T>();
+            }
+            return instance_;
+        }
+
+        ~VklGeometryMeshBuffer() {
+            for (auto &[k, v] : map_) {
+                delete v;
+            }
+        }
+
+    private:
+        std::map<T *, VklGeometryMesh<T> *> map_;
+        static inline VklGeometryMeshBuffer<T> *instance_ = nullptr;
+        // VklGeometryModelBuffer<T>() = default;
+    };
+
 template <> class VklGeometryMesh<BezierCurve2D> {
   public:
     BezierCurve2D *curve_;
@@ -192,15 +222,8 @@ template <> class VklGeometryMesh<TensorProductBezierSurface> {
 
 template <VklVertexType VertexType, VklIndexType IndexType> class VklGeometryMesh<MeshGeometry<VertexType, IndexType>> {
     MeshGeometry<VertexType, IndexType> *mesh_geometry_;
-    using render_type = VklMesh<VertexType, IndexType>;
 
-    std::unique_ptr<render_type> mesh;
     VklDevice &device_;
-
-    VklGeometryMesh(VklDevice &device, MeshGeometry<VertexType, IndexType> mesh_geometry)
-        : device_(device), mesh_geometry_(mesh_geometry) {
-        createMesh();
-    }
 
     void createMesh() {
         typename render_type::Builder builder;
@@ -209,6 +232,15 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklGeometryMes
         builder.indices = mesh_geometry_->indices;
 
         mesh = std::make_unique<render_type>(device_, builder);
+    }
+
+public:
+    using render_type = VklMesh<VertexType, IndexType>;
+    std::unique_ptr<render_type> mesh;
+
+    VklGeometryMesh(VklDevice &device, MeshGeometry<VertexType, IndexType> *mesh_geometry)
+        : device_(device), mesh_geometry_(mesh_geometry) {
+        createMesh();
     }
 };
 } // namespace SceneTree
