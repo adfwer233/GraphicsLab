@@ -300,8 +300,8 @@ struct RenderGraphDescriptor {
     template <RenderGraphAttachment AttachmentType>
     RenderGraphAttachmentDescriptor<AttachmentType> *getAttachment(const std::string &name) {
         constexpr uint32_t index =
-                MetaProgramming::TypeListFunctions::IndexOf<RenderGraphAttachmentTypeList, AttachmentType>::value;
-        for (auto att: std::get<index>(renderGraphAttachmentDescriptorPtrVectors)) {
+            MetaProgramming::TypeListFunctions::IndexOf<RenderGraphAttachmentTypeList, AttachmentType>::value;
+        for (auto att : std::get<index>(renderGraphAttachmentDescriptorPtrVectors)) {
             if (att->name == name)
                 return att;
         }

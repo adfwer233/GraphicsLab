@@ -11,8 +11,8 @@
 #include "vkl/scene_tree/vkl_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
-#include "ui/ui_manager.hpp"
 #include "render/render_manager.hpp"
+#include "ui/ui_manager.hpp"
 
 #include "boost/di.hpp"
 
@@ -29,10 +29,8 @@ void Application::run() {
     scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 
-    auto env_injector = di::make_injector(
-                di::bind<SceneTree::VklSceneTree>().to(scene_tree),
-                di::bind<VklDevice>().to(device_)
-            );
+    auto env_injector =
+        di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_));
 
     RenderGraphDescriptor graphDescriptor;
     auto renderPassManager = env_injector.create<RenderPassManager>();

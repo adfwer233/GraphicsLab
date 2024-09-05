@@ -5,13 +5,16 @@
 #include "render_pass_base.hpp"
 #include "render_pass_register.hpp"
 
-class ImguiPass: public RenderPassDeclarationBase {
+class ImguiPass : public RenderPassDeclarationBase {
     std::vector<VkDescriptorSet> render_texture_imgui;
     UIManager &uiManager_;
-public:
-    ImguiPass(SceneTree::VklSceneTree &sceneTree, UIManager &uiManager): RenderPassDeclarationBase(sceneTree), uiManager_(uiManager) {}
 
-    virtual void descriptorStage(RenderGraphDescriptor& descriptor) final {
+  public:
+    ImguiPass(SceneTree::VklSceneTree &sceneTree, UIManager &uiManager)
+        : RenderPassDeclarationBase(sceneTree), uiManager_(uiManager) {
+    }
+
+    virtual void descriptorStage(RenderGraphDescriptor &descriptor) final {
         auto output_texture = descriptor.attachment<RenderGraphTextureAttachment>("output_image");
         output_texture->isSwapChain = true;
         output_texture->format = VK_FORMAT_R8G8B8A8_SRGB;
@@ -28,14 +31,16 @@ public:
         imgui_render_pass->is_submit_pass = true;
     };
 
-    virtual void instanceStage(RenderGraph& renderGraph) final {
-        // =============================== IMGUI DATA ======================================================================
+    virtual void instanceStage(RenderGraph &renderGraph) final {
+        // =============================== IMGUI DATA
+        // ======================================================================
 
         auto render_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("render_result");
         auto imgui_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("imgui_render_pass");
         render_texture_imgui = render_texture_object->getImguiTextures();
 
-        // =============================== IMGUI DATA END ==================================================================
+        // =============================== IMGUI DATA END
+        // ==================================================================
 
         imgui_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             ImGui::Begin("Render Result");

@@ -16,14 +16,13 @@ using PassTypeList = META_GET_REGISTERED_TYPES(RenderGraphPassRegisterTag);
 
 class RenderPassManager {
     std::vector<RenderPassDeclarationBase *> component_ptrs;
-public:
-    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIManager &uiManager) {
-        auto injector = di::make_injector(
-                di::bind<SceneTree::VklSceneTree>().to(sceneTree),
-                di::bind<UIManager>().to(uiManager)
-                );
 
-        create_component_instances(injector, PassTypeList {});
+  public:
+    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIManager &uiManager) {
+        auto injector =
+            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<UIManager>().to(uiManager));
+
+        create_component_instances(injector, PassTypeList{});
 
         spdlog::info("[Controller Address] {}", (void *)&controller);
     }
@@ -35,12 +34,13 @@ public:
     }
 
     void instanceStage(RenderGraph &renderGraph) {
-        for (auto com: component_ptrs)
+        for (auto com : component_ptrs)
             com->instanceStage(renderGraph);
     };
 
-private:
-    template <typename InjectorType, typename... ts> void create_component_instances(InjectorType &injector, MetaProgramming::TypeList<ts...>) {
-        (component_ptrs.push_back(injector.template create<ts*>()), ...);
+  private:
+    template <typename InjectorType, typename... ts>
+    void create_component_instances(InjectorType &injector, MetaProgramming::TypeList<ts...>) {
+        (component_ptrs.push_back(injector.template create<ts *>()), ...);
     }
 };

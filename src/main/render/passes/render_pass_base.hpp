@@ -6,13 +6,14 @@
 namespace di = boost::di;
 
 class RenderPassDeclarationBase {
-protected:
+  protected:
     SceneTree::VklSceneTree &sceneTree_;
 
-public:
-    explicit RenderPassDeclarationBase(SceneTree::VklSceneTree &sceneTree): sceneTree_(sceneTree) {}
+  public:
+    explicit RenderPassDeclarationBase(SceneTree::VklSceneTree &sceneTree) : sceneTree_(sceneTree) {
+    }
 
-    virtual void descriptorStage(RenderGraphDescriptor& descriptor) = 0;
+    virtual void descriptorStage(RenderGraphDescriptor &descriptor) = 0;
 
-    virtual void instanceStage(RenderGraph& renderGraph) = 0;
+    virtual void instanceStage(RenderGraph &renderGraph) = 0;
 };
