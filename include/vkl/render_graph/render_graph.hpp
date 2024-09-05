@@ -296,6 +296,16 @@ struct RenderGraphDescriptor {
         std::get<index>(renderGraphAttachmentDescriptorPtrVectors).push_back(edge);
         return edge;
     }
+
+    template <RenderGraphAttachment AttachmentType>
+    RenderGraphAttachmentDescriptor<AttachmentType> *getAttachment(const std::string &name) {
+        constexpr uint32_t index =
+                MetaProgramming::TypeListFunctions::IndexOf<RenderGraphAttachmentTypeList, AttachmentType>::value;
+        for (auto att: std::get<index>(renderGraphAttachmentDescriptorPtrVectors)) {
+            if (att->name == name)
+                return att;
+        }
+    }
 };
 
 struct RenderGraph {
@@ -308,6 +318,23 @@ struct RenderGraph {
 
     std::vector<RenderGraphPassBase *> passes;
     std::vector<RenderGraphAttachmentBase *> attachments;
+
+    uint32_t currentFrame = 0;
+    uint32_t current_image_index = 0;
+
+    uint32_t beginFrame() {
+        auto result = swapChain_->acquireNextImage(&current_image_index);
+
+        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
+
+        return currentFrame;
+    }
+
+    void endFrame() {
+        currentFrame = (currentFrame + 1) % 2;
+    }
 
     using RenderGraphPassObjectPtrVectorsType =
         RenderGraphPassTypeList::monad<RenderGraphPassDerived>::to_ptr::monad<std::vector>::to<std::tuple>;
