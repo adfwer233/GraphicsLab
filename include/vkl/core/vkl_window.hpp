@@ -3,6 +3,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
+#include <string>
+
 /**
  * \page windowPage GLFW window
  *
@@ -19,7 +21,7 @@ class VklWindow {
     GLFWwindow *window_{nullptr};
 
   public:
-    VklWindow(int w, int h);
+    VklWindow(int w, int h, std::string name = "Graphics Lab");
 
     void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 

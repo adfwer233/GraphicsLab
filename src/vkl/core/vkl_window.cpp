@@ -2,13 +2,13 @@
 
 #include <stdexcept>
 
-VklWindow::VklWindow(int width, int height) : width_(width), height_(height) {
+VklWindow::VklWindow(int width, int height, std::string name) : width_(width), height_(height) {
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    this->window_ = glfwCreateWindow(width, height, "Learn Vulkan", nullptr, nullptr);
+    this->window_ = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 
     glfwSetWindowUserPointer(window_, this);
     glfwSetFramebufferSizeCallback(window_, framebufferResizeCallback);
