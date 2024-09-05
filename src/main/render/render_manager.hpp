@@ -8,15 +8,24 @@
 
 #include "controller/controller.hpp"
 
+#include "boost/di.hpp"
+
+namespace di = boost::di;
+
 using PassTypeList = META_GET_REGISTERED_TYPES(RenderGraphPassRegisterTag);
 
 class RenderPassManager {
-    SceneTree::VklSceneTree &sceneTree_;
     std::vector<RenderPassDeclarationBase *> component_ptrs;
-
 public:
-    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller) : sceneTree_(sceneTree) {
-        create_component_instances(PassTypeList {});
+    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIManager &uiManager) {
+        auto injector = di::make_injector(
+                di::bind<SceneTree::VklSceneTree>().to(sceneTree),
+                di::bind<UIManager>().to(uiManager)
+                );
+
+        create_component_instances(injector, PassTypeList {});
+
+        spdlog::info("[Controller Address] {}", (void *)&controller);
     }
 
     void descriptorStage(RenderGraphDescriptor &descriptor) {
@@ -31,7 +40,7 @@ public:
     };
 
 private:
-    template <typename... ts> void create_component_instances(MetaProgramming::TypeList<ts...>) {
-        (component_ptrs.push_back(new ts(sceneTree_)), ...);
+    template <typename InjectorType, typename... ts> void create_component_instances(InjectorType &injector, MetaProgramming::TypeList<ts...>) {
+        (component_ptrs.push_back(injector.template create<ts*>()), ...);
     }
 };

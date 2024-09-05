@@ -8,6 +8,9 @@
 
 #include "component_register.hpp"
 
+#include "boost/di.hpp"
+namespace di = boost::di;
+
 class UIComponent {
   protected:
     SceneTree::VklSceneTree &sceneTree_;

@@ -3,17 +3,19 @@
 #include "components/component.hpp"
 
 #include "components/scene_tree.hpp"
+#include "components/dummy_component.hpp"
 
 using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 
 class UIManager {
-    SceneTree::VklSceneTree &sceneTree_;
-
     std::vector<UIComponent *> component_ptrs;
-
   public:
-    explicit UIManager(SceneTree::VklSceneTree &sceneTree) : sceneTree_(sceneTree) {
-        create_component_instances(ComponentTypeList{});
+    explicit UIManager(SceneTree::VklSceneTree &sceneTree, Controller& controller) {
+        auto injector = di::make_injector(
+                di::bind<SceneTree::VklSceneTree>().to(sceneTree),
+                di::bind<Controller>().to(controller)
+            );
+        create_component_instances(injector, ComponentTypeList{});
     }
 
     void render() {
@@ -23,7 +25,7 @@ class UIManager {
     }
 
   private:
-    template <typename... ts> void create_component_instances(MetaProgramming::TypeList<ts...>) {
-        (component_ptrs.push_back(new ts(sceneTree_)), ...);
+    template <typename InjectorType, typename... ts> void create_component_instances(InjectorType &injector, MetaProgramming::TypeList<ts...>) {
+        (component_ptrs.push_back(injector.template create<ts*>()), ...);
     }
 };

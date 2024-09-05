@@ -7,9 +7,9 @@
 
 class ImguiPass: public RenderPassDeclarationBase {
     std::vector<VkDescriptorSet> render_texture_imgui;
-    UIManager uiManager;
+    UIManager &uiManager_;
 public:
-    ImguiPass(SceneTree::VklSceneTree &sceneTree): RenderPassDeclarationBase(sceneTree), uiManager(sceneTree) {}
+    ImguiPass(SceneTree::VklSceneTree &sceneTree, UIManager &uiManager): RenderPassDeclarationBase(sceneTree), uiManager_(uiManager) {}
 
     virtual void descriptorStage(RenderGraphDescriptor& descriptor) final {
         auto output_texture = descriptor.attachment<RenderGraphTextureAttachment>("output_image");
@@ -45,7 +45,7 @@ public:
             }
             ImGui::End();
 
-            uiManager.render();
+            uiManager_.render();
 
             ImGui::ShowDemoWindow();
             ImGui::Render();

@@ -2,6 +2,9 @@
 
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
+#include "boost/di.hpp"
+namespace di = boost::di;
+
 class RenderPassDeclarationBase {
 protected:
     SceneTree::VklSceneTree &sceneTree_;
