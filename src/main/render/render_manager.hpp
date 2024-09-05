@@ -6,6 +6,8 @@
 #include "passes/3d_scene_pass.hpp"
 #include "passes/imgui_pass.hpp"
 
+#include "controller/controller.hpp"
+
 using PassTypeList = META_GET_REGISTERED_TYPES(RenderGraphPassRegisterTag);
 
 class RenderPassManager {
@@ -13,7 +15,7 @@ class RenderPassManager {
     std::vector<RenderPassDeclarationBase *> component_ptrs;
 
 public:
-    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree) : sceneTree_(sceneTree) {
+    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller) : sceneTree_(sceneTree) {
         create_component_instances(PassTypeList {});
     }
 

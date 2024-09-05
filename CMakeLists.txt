@@ -48,6 +48,7 @@ include(fetch-rootfinder)
 include(fetch-svgpp)
 include(fetch-spirv_cross)
 include(fetch-spdlog)
+include(fetch-boost_di)
 
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
@@ -64,10 +65,12 @@ INCLUDE_DIRECTORIES(${random_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${imgui_fetch_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${imgui_fetch_SOURCE_DIR}/backends)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${boost_di_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${spirv_cross_SOURCE_DIRS})
 
 message(STATUS ${gtest_SOURCE_DIR})
 message(STATUS ${Boost_INCLUDE_DIRS})
+message(STATUS ${boost_di_SOURCE_DIR}/include)
 
 # set vulkan SDK
 if(NOT DEFINED ENV{VULKAN_SDK})

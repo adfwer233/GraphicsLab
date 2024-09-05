@@ -13,20 +13,41 @@
 
 #include "ui/ui_manager.hpp"
 #include "render/render_manager.hpp"
+#include "controller/controller.hpp"
+
+#include "boost/di.hpp"
+
+namespace di = boost::di;
 
 Application::~Application() {
 }
+
+struct Foo{
+    BOOST_DI_INJECT(Foo, VklDevice& device) {
+        spdlog::critical("[second] {}", (void *)&device);
+    }
+};
 
 void Application::run() {
     GLFWwindow *window = window_.getGLFWwindow();
 
     SceneTree::VklSceneTree scene_tree(device_);
+    Controller controller;
+
     scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
     scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 
+    auto env_injector = di::make_injector(
+                di::bind<SceneTree::VklSceneTree>().to(scene_tree),
+                di::bind<Controller>().to(controller),
+                di::bind<VklDevice>().to(device_)
+            );
+
+    spdlog::critical("[first ptr] {}", (void *)(&device_));
+
     RenderGraphDescriptor graphDescriptor;
-    RenderPassManager renderPassManager(scene_tree);
+    auto renderPassManager = env_injector.create<RenderPassManager>();
 
     renderPassManager.descriptorStage(graphDescriptor);
 
