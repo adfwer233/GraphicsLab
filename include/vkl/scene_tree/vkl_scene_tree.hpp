@@ -50,7 +50,7 @@ template <SupportedLightTypes LightType> consteval size_t light_type_index() {
 
 struct VklSceneTree;
 
-struct TreeNode: public Reflectable {
+struct TreeNode : public Reflectable {
     std::vector<std::unique_ptr<TreeNode>> children;
     std::string name;
 
@@ -64,9 +64,7 @@ struct TreeNode: public Reflectable {
     }
 
     virtual ReflectDataType reflect() override {
-        return {
-            {"name", TypeErasedValue(&name)}
-        };
+        return {{"name", TypeErasedValue(&name)}};
     }
     virtual NodeType type() = 0;
 };
@@ -104,7 +102,7 @@ struct CameraNode : public TreeNode {
     }
 
     void move() {
-        camera.position += glm::vec3 {0, 0, 10};
+        camera.position += glm::vec3{0, 0, 10};
     }
 
     virtual ReflectDataType reflect() override {

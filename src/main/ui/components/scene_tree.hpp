@@ -5,8 +5,8 @@
 #include "reflection/reflectors.hpp"
 
 #include "rfl.hpp"
-#include "rfl/to_view.hpp"
 #include "rfl/json.hpp"
+#include "rfl/to_view.hpp"
 
 class SceneTreeComponent : public UIComponent {
   public:
@@ -49,7 +49,6 @@ class SceneTreeComponent : public UIComponent {
             // If this is a GeometryNode, display additional details (like material info)
             if (node->type() == SceneTree::NodeType::GeometryNode) {
 
-
                 if (auto mesh3d_node = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(node)) {
                     ImGui::Text("Mesh3D: %s", mesh3d_node->name.c_str());
                 }
@@ -75,14 +74,14 @@ class SceneTreeComponent : public UIComponent {
                 }
             }
 
-            for (auto& [key, value]: node->reflect()) {
+            for (auto &[key, value] : node->reflect()) {
                 if (value.get()) {
                     if (value.type() == typeid(std::string)) {
                         auto str_ptr = reinterpret_cast<std::string *>(value.get());
                         ImGui::Text(std::format("{}: {}", key, *str_ptr).c_str());
                     }
                     if (value.type() == typeid(glm::vec3)) {
-                        auto &vec = *reinterpret_cast<glm::vec3*>(value.get());
+                        auto &vec = *reinterpret_cast<glm::vec3 *>(value.get());
                         ImGui::Text(std::format("{}: {} {} {}", key, vec.x, vec.y, vec.z).c_str());
                     }
                 } else {
