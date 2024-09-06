@@ -4,6 +4,8 @@
 #include "meta_programming/type_list.hpp"
 #include "vkl/scene/vkl_model.hpp"
 
+#include "reflection/reflectors.hpp"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -48,7 +50,7 @@ template <SupportedLightTypes LightType> consteval size_t light_type_index() {
 
 struct VklSceneTree;
 
-struct TreeNode {
+struct TreeNode: public Reflectable {
     std::vector<std::unique_ptr<TreeNode>> children;
     std::string name;
 
@@ -61,6 +63,11 @@ struct TreeNode {
         }
     }
 
+    virtual ReflectDataType reflect() override {
+        return {
+            {"name", TypeErasedValue(&name)}
+        };
+    }
     virtual NodeType type() = 0;
 };
 
@@ -78,10 +85,6 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     GeometryType data;
 
     size_t material_index;
-
-    explicit GeometryNode(GeometryType &&t_data) {
-        data = std::move(t_data);
-    }
 };
 
 template <SupportedLightTypes LightTypes> struct LightNode : public TreeNode {
@@ -98,6 +101,17 @@ struct CameraNode : public TreeNode {
     Camera camera;
 
     explicit CameraNode(Camera t_camera) : camera(t_camera) {
+    }
+
+    void move() {
+        camera.position += glm::vec3 {0, 0, 10};
+    }
+
+    virtual ReflectDataType reflect() override {
+        auto base_reflect = TreeNode::reflect();
+        base_reflect.emplace("position", TypeErasedValue(&camera.position));
+        base_reflect.emplace("move", TypeErasedValue(&CameraNode::move, this));
+        return base_reflect;
     }
 };
 
@@ -241,7 +255,8 @@ class AssimpImporter {
             mesh_converted.indices.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
         }
 
-        auto mesh_node = std::make_unique<GeometryNode<Mesh3D>>(std::move(mesh_converted));
+        auto mesh_node = std::make_unique<GeometryNode<Mesh3D>>();
+        mesh_node->data = std::move(mesh_converted);
 
         mesh_node->material_index = mesh->mMaterialIndex;
 
