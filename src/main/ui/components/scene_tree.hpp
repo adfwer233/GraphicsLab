@@ -2,6 +2,15 @@
 
 #include "component.hpp"
 
+#include "rfl.hpp"
+#include "rfl/to_view.hpp"
+#include "rfl/json.hpp"
+
+struct RflTest {
+    int x = 1;
+    double y = 3.3;
+};
+
 class SceneTreeComponent : public UIComponent {
   public:
     SceneTreeComponent(SceneTree::VklSceneTree &sceneTree) : UIComponent(sceneTree) {
@@ -38,11 +47,22 @@ class SceneTreeComponent : public UIComponent {
             break;
         }
 
+        RflTest rflTest;
+
         // Create a tree node in ImGui
         if (ImGui::TreeNode(std::format("{}: {}", label, node->name).c_str())) {
             // If this is a GeometryNode, display additional details (like material info)
             if (node->type() == SceneTree::NodeType::GeometryNode) {
+
+
                 if (auto mesh3d_node = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(node)) {
+                    const auto view = rfl::to_view(rflTest);
+
+                    view.apply([](const auto& f) {
+                        // std::cout << f.name() << ": " << rfl::json::write(*f.value()) << std::endl;
+                        ImGui::Text(std::format("{}: {}", f.name(), *f.value()).c_str());
+                    });
+
                     ImGui::Text("Mesh3D: %s", mesh3d_node->name.c_str());
                 }
             }

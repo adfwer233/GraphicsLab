@@ -18,4 +18,4 @@ endif()
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glm glfw spirv-cross-core spirv-cross-cpp nlohmann_json LAB_vkl LAB_ray_tracer LAB_geometry LAB_simulation LAB_geometry_processing igl_copyleft::core)
+target_link_libraries(${PROJECT_NAME} reflectcpp glm glfw spirv-cross-core spirv-cross-cpp nlohmann_json LAB_vkl LAB_ray_tracer LAB_geometry LAB_simulation LAB_geometry_processing igl_copyleft::core)

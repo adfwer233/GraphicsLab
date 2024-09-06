@@ -34,15 +34,10 @@ class ImguiPass : public RenderPassDeclarationBase {
     };
 
     virtual void instanceStage(RenderGraph &renderGraph) final {
-        // =============================== IMGUI DATA
-        // ======================================================================
 
         auto render_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("render_result");
         auto imgui_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("imgui_render_pass");
         render_texture_imgui = render_texture_object->getImguiTextures();
-
-        // =============================== IMGUI DATA END
-        // ==================================================================
 
         imgui_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             ImGui::Begin("Render Result");
