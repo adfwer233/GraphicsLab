@@ -5,6 +5,8 @@
 #include "render_pass_base.hpp"
 #include "render_pass_register.hpp"
 
+#include "ui/ui_manager.hpp"
+
 class ImguiPass : public RenderPassDeclarationBase {
     std::vector<VkDescriptorSet> render_texture_imgui;
     UIManager &uiManager_;
