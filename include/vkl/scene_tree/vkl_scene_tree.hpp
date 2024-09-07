@@ -63,7 +63,7 @@ struct TreeNode : public Reflectable {
         }
     }
 
-    virtual ReflectDataType reflect() override {
+    ReflectDataType reflect() override {
         return {{"name", TypeErasedValue(&name)}};
     }
     virtual NodeType type() = 0;

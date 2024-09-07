@@ -2,6 +2,9 @@
 
 #include "components/component.hpp"
 
+#include "render_resources.hpp"
+
+#include "components/scene_widgets.hpp"
 #include "components/dummy_component.hpp"
 #include "components/scene_tree.hpp"
 
@@ -11,9 +14,11 @@ class UIManager {
     std::vector<UIComponent *> component_ptrs;
 
   public:
+    RenderResources renderResources;
+
     explicit UIManager(SceneTree::VklSceneTree &sceneTree, Controller &controller) {
         auto injector =
-            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<Controller>().to(controller));
+            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<Controller>().to(controller), di::bind<RenderResources>().to(renderResources));
         create_component_instances(injector, ComponentTypeList{});
     }
 

@@ -36,20 +36,12 @@ class ImguiPass : public RenderPassDeclarationBase {
     virtual void instanceStage(RenderGraph &renderGraph) final {
 
         auto render_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("render_result");
+        uiManager_.renderResources.sceneRenderTexture = render_texture_object->getImguiTextures();
         auto imgui_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("imgui_render_pass");
-        render_texture_imgui = render_texture_object->getImguiTextures();
 
         imgui_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
-            ImGui::Begin("Render Result");
-            {
-                auto wsize = ImGui::GetContentRegionMax();
-                ImGui::Image(render_texture_imgui[frame_index], wsize);
-            }
-            ImGui::End();
-
+            ImGui::DockSpaceOverViewport();
             uiManager_.render();
-
-            ImGui::ShowDemoWindow();
             ImGui::Render();
             ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         };
