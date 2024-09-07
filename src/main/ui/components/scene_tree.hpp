@@ -4,10 +4,6 @@
 
 #include "reflection/reflectors.hpp"
 
-#include "rfl.hpp"
-#include "rfl/json.hpp"
-#include "rfl/to_view.hpp"
-
 class SceneTreeComponent : public UIComponent {
   public:
     SceneTreeComponent(SceneTree::VklSceneTree &sceneTree) : UIComponent(sceneTree) {
