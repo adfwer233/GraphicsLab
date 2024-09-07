@@ -6,11 +6,12 @@
 #include "ui/render_resources.hpp"
 
 class SceneWidgetComponent : public UIComponent {
-    UIState& uiState_;
-    RenderResources& renderResources_;
-public:
-    SceneWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, RenderResources& renderResources) : UIComponent(sceneTree), uiState_(uiState), renderResources_(renderResources) {
+    UIState &uiState_;
+    RenderResources &renderResources_;
 
+  public:
+    SceneWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, RenderResources &renderResources)
+        : UIComponent(sceneTree), uiState_(uiState), renderResources_(renderResources) {
     }
 
     void render() final {

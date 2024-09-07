@@ -5,7 +5,9 @@
 #include "ui_states.hpp"
 
 struct Controller {
-    explicit Controller(UIState &uiState, SceneTree::VklSceneTree& sceneTree): uiState_(uiState), sceneTree_(sceneTree) {}
+    explicit Controller(UIState &uiState, SceneTree::VklSceneTree &sceneTree)
+        : uiState_(uiState), sceneTree_(sceneTree) {
+    }
 
     void processInput(GLFWwindow *window, float deltaTime) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -18,15 +20,15 @@ struct Controller {
     }
 
     static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
-        auto* controller = static_cast<Controller*>(glfwGetWindowUserPointer(window));
+        auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         if (controller->sceneTree_.get().active_camera) {
             controller->sceneTree_.get().active_camera->camera.process_mouse_scroll(y_offset);
         }
     }
 
     static void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
-        auto* controller = static_cast<Controller*>(glfwGetWindowUserPointer(window));
-        auto& uiState = controller->uiState_.get();
+        auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
+        auto &uiState = controller->uiState_.get();
         if (button == GLFW_MOUSE_BUTTON_MIDDLE and state == GLFW_PRESS) {
             controller->uiState_.get().isMouseMidPressing = true;
         }
@@ -47,18 +49,19 @@ struct Controller {
     }
 
     static void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
-        auto* controller = static_cast<Controller*>(glfwGetWindowUserPointer(window));
-        auto& uiState = controller->uiState_.get();
+        auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
+        auto &uiState = controller->uiState_.get();
 
         uiState.mouseXPos = static_cast<float>(xposIn);
         uiState.mouseYPos = static_cast<float>(yposIn);
 
-        if (xposIn > uiState.scope_min.x and xposIn < uiState.scope_max.x
-            and yposIn > uiState.scope_min.y and yposIn < uiState.scope_max.y) {
+        if (xposIn > uiState.scope_min.x and xposIn < uiState.scope_max.x and yposIn > uiState.scope_min.y and
+            yposIn < uiState.scope_max.y) {
             uiState.isMouseInRegion = true;
         }
 
-        if (not(uiState.isMouseLeftPressing or uiState.isMouseMidPressing)) return;
+        if (not(uiState.isMouseLeftPressing or uiState.isMouseMidPressing))
+            return;
 
         if (uiState.mouseFlag) {
             uiState.lastMouseXPos = uiState.mouseXPos;
@@ -67,14 +70,14 @@ struct Controller {
         }
 
         float x_offset = uiState.mouseXPos - uiState.lastMouseXPos;
-        float y_offset = - (uiState.mouseYPos - uiState.lastMouseYPos);
+        float y_offset = -(uiState.mouseYPos - uiState.lastMouseYPos);
 
         uiState.lastMouseXPos = uiState.mouseXPos;
         uiState.lastMouseYPos = uiState.mouseYPos;
 
         if (uiState.isMouseLeftPressing) {
             if (controller->sceneTree_.get().active_camera) {
-                auto& camera = controller->sceneTree_.get().active_camera->camera;
+                auto &camera = controller->sceneTree_.get().active_camera->camera;
                 if (uiState.isPressingShift) {
                     camera.process_mouse_shift_movement(x_offset, y_offset);
                 } else {
@@ -84,7 +87,7 @@ struct Controller {
         }
     }
 
-private:
+  private:
     std::reference_wrapper<UIState> uiState_;
     std::reference_wrapper<SceneTree::VklSceneTree> sceneTree_;
 };

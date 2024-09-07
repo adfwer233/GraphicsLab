@@ -11,9 +11,9 @@
 #include "vkl/scene_tree/vkl_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
+#include "controller/controller.hpp"
 #include "render/render_manager.hpp"
 #include "ui/ui_manager.hpp"
-#include "controller/controller.hpp"
 
 #include "boost/di.hpp"
 
@@ -32,14 +32,11 @@ void Application::run() {
     UIState state;
 
     auto env_injector =
-        di::make_injector(
-                di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
-                di::bind<UIState>().to(state), di::bind<Controller>().in(di::singleton)
-            );
+        di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
+                          di::bind<UIState>().to(state), di::bind<Controller>().in(di::singleton));
 
-
-    auto& controller = env_injector.create<Controller&>();
-    spdlog::info("[controller] {}", (void*)&controller);
+    auto &controller = env_injector.create<Controller &>();
+    spdlog::info("[controller] {}", (void *)&controller);
 
     glfwSetWindowUserPointer(window, &controller);
     glfwSetCursorPosCallback(window, Controller::mouse_callback);

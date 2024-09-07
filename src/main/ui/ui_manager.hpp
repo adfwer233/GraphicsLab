@@ -4,9 +4,9 @@
 
 #include "render_resources.hpp"
 
-#include "components/scene_widgets.hpp"
 #include "components/dummy_component.hpp"
 #include "components/scene_tree.hpp"
+#include "components/scene_widgets.hpp"
 
 using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 
@@ -18,7 +18,8 @@ class UIManager {
 
     explicit UIManager(SceneTree::VklSceneTree &sceneTree, Controller &controller) {
         auto injector =
-            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<Controller>().to(controller), di::bind<RenderResources>().to(renderResources));
+            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<Controller>().to(controller),
+                              di::bind<RenderResources>().to(renderResources));
         create_component_instances(injector, ComponentTypeList{});
     }
 
