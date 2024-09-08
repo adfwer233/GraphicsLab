@@ -30,6 +30,8 @@ set(AUTODIFF_BUILD_PYTHON OFF)
 set(AUTODIFF_BUILD_TESTS OFF)
 
 set(SPIRV_CROSS_SHARED ON)
+set(GLM_BUILD_INSTALL ON)
+set(SPDLOG_INSTALL ON)
 
 option(GRAPHICASLAB_INSTALL ON)
 
@@ -127,9 +129,6 @@ add_dependencies(BUILD_ALL LAB_vkl LAB_demo LAB_geometry LAB_test LAB_main)
 
 add_library(GraphicsLabLib INTERFACE)
 target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)
-
-set(GLM_BUILD_INSTALL ON)
-set(SPDLOG_INSTALL ON)
 
 target_include_directories(GraphicsLabLib INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
