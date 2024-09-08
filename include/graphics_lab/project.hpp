@@ -7,5 +7,5 @@ class IGraphicsLabProject {
 public:
     virtual ~IGraphicsLabProject() = default;
 
-    virtual void tick();
+    virtual void tick() = 0;
 };

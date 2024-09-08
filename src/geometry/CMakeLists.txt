@@ -22,10 +22,5 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-target_include_directories(${PROJECT_NAME}
-        PUBLIC
-        $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
-        $<INSTALL_INTERFACE:include>
-)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

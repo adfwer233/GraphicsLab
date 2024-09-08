@@ -88,35 +88,6 @@ if (UNIX)
     set(VK_SDK_LIB ${VK_SDK_PATH}/lib/libvulkan.so.1)
 endif ()
 
-add_library(imgui
-        ${imgui_fetch_SOURCE_DIR}/imgui.cpp
-        ${imgui_fetch_SOURCE_DIR}/imgui_draw.cpp
-        ${imgui_fetch_SOURCE_DIR}/imgui_demo.cpp
-        ${imgui_fetch_SOURCE_DIR}/imgui_tables.cpp
-        ${imgui_fetch_SOURCE_DIR}/imgui_widgets.cpp
-        ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-        ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
-)
-
-target_include_directories(imgui
-        PUBLIC
-        $<BUILD_INTERFACE:${GLFW_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-target_include_directories(imgui
-        PUBLIC
-        $<BUILD_INTERFACE:${VK_SDK_INCLUDE}>
-        $<INSTALL_INTERFACE:include>
-)
-
-
-install(TARGETS imgui
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)
-
 set(SPIRV_CROSS_SHARED ON)
 
 add_subdirectory(src/vkl)
@@ -135,9 +106,9 @@ find_package(OpenMP)
 
 if(OpenCV_FOUND)
     message(STATUS "found opencv")
-    target_link_libraries(LAB_vkl glfw glm spdlog ${VK_SDK_LIB} assimp imgui spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX ${OpenCV_LIBS})
+    target_link_libraries(LAB_vkl glfw glm spdlog ${VK_SDK_LIB} assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX ${OpenCV_LIBS})
 else()
-    target_link_libraries(LAB_vkl glfw glm spdlog ${VK_SDK_LIB} assimp imgui spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX)
+    target_link_libraries(LAB_vkl glfw glm spdlog ${VK_SDK_LIB} assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX)
 endif()
 
 if(MSVC)
@@ -166,39 +137,37 @@ target_include_directories(GraphicsLabLib INTERFACE
 )
 
 # Install the library, include files, and CMake package configuration
-install(TARGETS GraphicsLabLib
+install(TARGETS GraphicsLabLib LAB_vkl LAB_geometry
         EXPORT GraphicsLabTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
 )
-#
-#install(EXPORT GraphicsLabTargets
-#        FILE GraphicsLabTargets.cmake
-#        NAMESPACE GraphicsLab::
-#        DESTINATION lib/cmake/GraphicsLab
-#)
-#
-#install(DIRECTORY include/ DESTINATION include)
-#
-##export(TARGETS GraphicsLabLib FILE "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabTargets.cmake")
-#
-## Generate a Config file for find_package()
-#include(CMakePackageConfigHelpers)
-#write_basic_package_version_file(
-#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
-#        VERSION 1.0.0
-#        COMPATIBILITY AnyNewerVersion
-#)
-#
-#configure_package_config_file(
-#        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
-#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
-#        INSTALL_DESTINATION lib/cmake/GraphicsLab
-#)
-#
-#install(FILES
-#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
-#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
-#        DESTINATION lib/cmake/GraphicsLab
-#)
+
+install(DIRECTORY include/ DESTINATION include)
+
+# Generate a Config file for find_package()
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+        VERSION 1.0.0
+        COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+        INSTALL_DESTINATION lib/cmake/GraphicsLab
+)
+
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+        DESTINATION lib/cmake/GraphicsLab
+)
+
+install(EXPORT GraphicsLabTargets
+        FILE GraphicsLabTargets.cmake
+        NAMESPACE GraphicsLab::
+        DESTINATION lib/cmake/GraphicsLab
+)

@@ -22,6 +22,13 @@ set(SRC_FILE core/vkl_window.cpp
         scene/vkl_collection.cpp
         io/vkl_image_export.cpp
         core/vkl_graphic_pipeline.cpp
+        ${imgui_fetch_SOURCE_DIR}/imgui.cpp
+        ${imgui_fetch_SOURCE_DIR}/imgui_draw.cpp
+        ${imgui_fetch_SOURCE_DIR}/imgui_demo.cpp
+        ${imgui_fetch_SOURCE_DIR}/imgui_tables.cpp
+        ${imgui_fetch_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+        ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
@@ -42,15 +49,6 @@ target_include_directories(${PROJECT_NAME}
         PUBLIC
             $<BUILD_INTERFACE:${VK_SDK_INCLUDE}>
             $<INSTALL_INTERFACE:include>
-)
-
-message(status "BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOST")
-message(status ${Boost_INCLUDE_DIRS})
-
-target_include_directories(${PROJECT_NAME}
-        PUBLIC
-        $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
-        $<INSTALL_INTERFACE:include>
 )
 
 target_link_libraries(${PROJECT_NAME} glm glfw LAB_geometry)
