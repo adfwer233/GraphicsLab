@@ -5,15 +5,15 @@
 #include <string>
 
 class ProjectManager {
-public:
+  public:
     ProjectManager() = default;
     ~ProjectManager();
 
-    bool loadProject(const std::string& projectPath);
+    bool loadProject(const std::string &projectPath);
     void unloadProject();
-    IGraphicsLabProject* getProject();
+    IGraphicsLabProject *getProject();
 
-private:
-    void* projectHandle = nullptr;
-    IGraphicsLabProject* (*createProject)() = nullptr;
+  private:
+    void *projectHandle = nullptr;
+    IGraphicsLabProject *(*createProject)() = nullptr;
 };

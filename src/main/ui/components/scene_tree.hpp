@@ -18,10 +18,11 @@ class SceneTreeComponent : public UIComponent {
 
             if (ImGui::Button("test plugin")) {
                 ProjectManager projectManager;
-                std::string path = R"(C:\Users\ba123\Desktop\GraphicsLabProject\cmake-build-debug-visual-studio\UserProject.dll)";
+                std::string path =
+                    R"(C:\Users\ba123\Desktop\GraphicsLabProject\cmake-build-debug-visual-studio\UserProject.dll)";
 
                 if (projectManager.loadProject(path)) {
-                    IGraphicsLabProject* project = projectManager.getProject();
+                    IGraphicsLabProject *project = projectManager.getProject();
                     if (project) {
                         project->tick();
                         delete project;

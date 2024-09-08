@@ -1,8 +1,8 @@
 #include "project_manager.hpp"
-#include <windows.h>
 #include <iostream>
+#include <windows.h>
 
-bool ProjectManager::loadProject(const std::string& pluginPath) {
+bool ProjectManager::loadProject(const std::string &pluginPath) {
     projectHandle = LoadLibrary(pluginPath.c_str());
     if (!projectHandle) {
         std::cerr << "Failed to load plugin: " << GetLastError() << std::endl;
@@ -10,7 +10,8 @@ bool ProjectManager::loadProject(const std::string& pluginPath) {
     }
 
     // Load the symbol (factory function)
-    createProject = reinterpret_cast<IGraphicsLabProject*(*)()>(GetProcAddress((HMODULE)projectHandle, "createProject"));
+    createProject =
+        reinterpret_cast<IGraphicsLabProject *(*)()>(GetProcAddress((HMODULE)projectHandle, "createProject"));
     if (!createProject) {
         std::cerr << "Failed to load createProject: " << GetLastError() << std::endl;
         FreeLibrary((HMODULE)projectHandle);
@@ -28,7 +29,7 @@ void ProjectManager::unloadProject() {
     }
 }
 
-IGraphicsLabProject* ProjectManager::getProject() {
+IGraphicsLabProject *ProjectManager::getProject() {
     if (createProject) {
         return createProject();
     }

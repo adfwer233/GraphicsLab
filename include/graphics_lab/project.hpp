@@ -4,7 +4,7 @@
  * Interface for Graphics Lab Application
  */
 class IGraphicsLabProject {
-public:
+  public:
     virtual ~IGraphicsLabProject() = default;
 
     virtual void tick() = 0;

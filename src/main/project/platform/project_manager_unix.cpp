@@ -2,7 +2,7 @@
 #include <dlfcn.h>
 #include <iostream>
 
-bool ProjectManager::loadProject(const std::string& pluginPath) {
+bool ProjectManager::loadProject(const std::string &pluginPath) {
     projectHandle = dlopen(pluginPath.c_str(), RTLD_LAZY);
     if (!projectHandle) {
         std::cerr << "Failed to load plugin: " << GetLastError() << std::endl;
@@ -10,7 +10,7 @@ bool ProjectManager::loadProject(const std::string& pluginPath) {
     }
 
     // Load the symbol (factory function)
-    createRenderable = reinterpret_cast<IGraphicsLabProject*(*)()>(dlsym(pluginHandle, "createProject"));
+    createRenderable = reinterpret_cast<IGraphicsLabProject *(*)()>(dlsym(pluginHandle, "createProject"));
     if (!createProject) {
         std::cerr << "Failed to load createProject: " << GetLastError() << std::endl;
         dlclose(projectHandle);
@@ -28,7 +28,7 @@ void ProjectManager::unloadProject() {
     }
 }
 
-IGraphicsLabProject* ProjectManager::getProject() {
+IGraphicsLabProject *ProjectManager::getProject() {
     if (createProject) {
         return createProject();
     }
