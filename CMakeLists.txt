@@ -160,31 +160,11 @@ target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)
 set(GLM_BUILD_INSTALL ON)
 set(SPDLOG_INSTALL ON)
 
-install(TARGETS glm
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)
-
-install(TARGETS spdlog
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)
-
-install(TARGETS glfw
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)
-
 target_include_directories(GraphicsLabLib INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
+
 # Install the library, include files, and CMake package configuration
 install(TARGETS GraphicsLabLib
         EXPORT GraphicsLabTargets
@@ -192,30 +172,33 @@ install(TARGETS GraphicsLabLib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
 )
-install(DIRECTORY include/ DESTINATION include)
-
-# Generate a Config file for find_package()
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
-        VERSION 1.0.0
-        COMPATIBILITY AnyNewerVersion
-)
-
-configure_package_config_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
-        INSTALL_DESTINATION lib/cmake/GraphicsLab
-)
-
-install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
-        DESTINATION lib/cmake/GraphicsLab
-)
-
-install(EXPORT GraphicsLabTargets
-        FILE GraphicsLabTargets.cmake
-        NAMESPACE GraphicsLab::
-        DESTINATION lib/cmake/GraphicsLab
-)
+#
+#install(EXPORT GraphicsLabTargets
+#        FILE GraphicsLabTargets.cmake
+#        NAMESPACE GraphicsLab::
+#        DESTINATION lib/cmake/GraphicsLab
+#)
+#
+#install(DIRECTORY include/ DESTINATION include)
+#
+##export(TARGETS GraphicsLabLib FILE "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabTargets.cmake")
+#
+## Generate a Config file for find_package()
+#include(CMakePackageConfigHelpers)
+#write_basic_package_version_file(
+#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+#        VERSION 1.0.0
+#        COMPATIBILITY AnyNewerVersion
+#)
+#
+#configure_package_config_file(
+#        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
+#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+#        INSTALL_DESTINATION lib/cmake/GraphicsLab
+#)
+#
+#install(FILES
+#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+#        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+#        DESTINATION lib/cmake/GraphicsLab
+#)

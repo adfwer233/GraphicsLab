@@ -15,31 +15,17 @@ set(SRC_FILE
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
 
-target_link_libraries(${PROJECT_NAME} glm autodiff eigen LAB_vkl Boost::math)
+target_link_libraries(${PROJECT_NAME} glm autodiff eigen LAB_vkl)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-#target_include_directories(${PROJECT_NAME}
-#        PUBLIC
-#        $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
-#        $<INSTALL_INTERFACE:include>
-#)
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+        $<INSTALL_INTERFACE:include>
+)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
-
-install(TARGETS LAB_geometry
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)
-
-install(TARGETS boost_math boost_assert boost_concept_check boost_config boost_core boost_integer boost_lexical_cast boost_predef boost_random boost_static_assert boost_throw_exception
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)

@@ -1,12 +1,12 @@
 include(FetchContent)
 
-set(BOOST_INCLUDE_LIBRARIES math)
+set(BOOST_INCLUDE_LIBRARIES math numeric)
 set(BOOST_ENABLE_CMAKE ON)
-set(BOOST_VERSION 1.81.0)
+set(BOOST_VERSION 1.86.0)
 
 FetchContent_Declare(
         Boost
-        URL https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}.7z
+        URL https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}-cmake.7z
         DOWNLOAD_EXTRACT_TIMESTAMP true
         USES_TERMINAL_DOWNLOAD TRUE
         GIT_PROGRESS TRUE
@@ -15,4 +15,4 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Boost)
 
-file(GLOB Boost_INCLUDE_DIRS LIST_DIRECTORIES true ${Boost_SOURCE_DIR}/libs/*/include)
+file(GLOB Boost_INCLUDE_DIRS LIST_DIRECTORIES true ${Boost_SOURCE_DIR}/libs/*/include ${Boost_SOURCE_DIR}/libs)

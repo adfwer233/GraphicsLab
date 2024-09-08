@@ -44,14 +44,16 @@ target_include_directories(${PROJECT_NAME}
             $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} glm glfw LAB_geometry)
+message(status "BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOST")
+message(status ${Boost_INCLUDE_DIRS})
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+        $<INSTALL_INTERFACE:include>
 )
+
+target_link_libraries(${PROJECT_NAME} glm glfw LAB_geometry)
 
 ############## Build SHADERS #######################
 
