@@ -14,4 +14,4 @@ add_definitions(-DPARTICLE_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader")
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glm glfw LAB_vklvkl)
+target_link_libraries(${PROJECT_NAME} glm glfw LAB_vkl)

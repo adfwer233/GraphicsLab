@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SRC_FILE main.cpp
         application.cpp
+        project/project_manager.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})

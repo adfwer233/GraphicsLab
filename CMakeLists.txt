@@ -31,6 +31,8 @@ set(AUTODIFF_BUILD_TESTS OFF)
 
 set(SPIRV_CROSS_SHARED ON)
 
+option(GRAPHICASLAB_INSTALL ON)
+
 include(fetch-glfw)
 include(fetch-glm)
 include(fetch-assimp)
@@ -95,20 +97,37 @@ add_library(imgui
         ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
         ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
 )
-target_include_directories(imgui PUBLIC ${VK_SDK_INCLUDE})
-target_include_directories(imgui PUBLIC ${GLFW_SOURCE_DIR}/include)
+
+target_include_directories(imgui
+        PUBLIC
+        $<BUILD_INTERFACE:${GLFW_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+target_include_directories(imgui
+        PUBLIC
+        $<BUILD_INTERFACE:${VK_SDK_INCLUDE}>
+        $<INSTALL_INTERFACE:include>
+)
+
+
+install(TARGETS imgui
+        EXPORT GraphicsLabTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
 
 set(SPIRV_CROSS_SHARED ON)
 
 add_subdirectory(src/vkl)
 add_subdirectory(src/ray_tracer)
 add_subdirectory(src/demo)
-add_subdirectory(src/particle)
+#add_subdirectory(src/particle)
 add_subdirectory(src/geometry_processing)
 add_subdirectory(src/bezier_curve)
 add_subdirectory(src/geometry)
 add_subdirectory(src/simulation)
-add_subdirectory(src/rendergraph_demo)
+#add_subdirectory(src/rendergraph_demo)
 add_subdirectory(src/main)
 add_subdirectory(test)
 
@@ -126,6 +145,7 @@ if(MSVC)
 endif()
 
 message(STATUS "Build documentation open")
+message(STATUS ${Boost_LIBRARIES})
 include(build-doxygen)
 build_doxygen()
 
@@ -133,3 +153,69 @@ include(clang-format)
 
 add_custom_target(BUILD_ALL)
 add_dependencies(BUILD_ALL LAB_vkl LAB_demo LAB_geometry LAB_test LAB_main)
+
+add_library(GraphicsLabLib INTERFACE)
+target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)
+
+set(GLM_BUILD_INSTALL ON)
+set(SPDLOG_INSTALL ON)
+
+install(TARGETS glm
+        EXPORT GraphicsLabTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
+
+install(TARGETS spdlog
+        EXPORT GraphicsLabTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
+
+install(TARGETS glfw
+        EXPORT GraphicsLabTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
+
+target_include_directories(GraphicsLabLib INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+# Install the library, include files, and CMake package configuration
+install(TARGETS GraphicsLabLib
+        EXPORT GraphicsLabTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
+install(DIRECTORY include/ DESTINATION include)
+
+# Generate a Config file for find_package()
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+        VERSION 1.0.0
+        COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+        INSTALL_DESTINATION lib/cmake/GraphicsLab
+)
+
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+        DESTINATION lib/cmake/GraphicsLab
+)
+
+install(EXPORT GraphicsLabTargets
+        FILE GraphicsLabTargets.cmake
+        NAMESPACE GraphicsLab::
+        DESTINATION lib/cmake/GraphicsLab
+)

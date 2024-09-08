@@ -33,10 +33,25 @@ if (OpenCV_FOUND)
     add_definitions(-DOPENCV_FOUND)
 endif ()
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+)
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+            $<BUILD_INTERFACE:${VK_SDK_INCLUDE}>
+            $<INSTALL_INTERFACE:include>
+)
 
 target_link_libraries(${PROJECT_NAME} glm glfw LAB_geometry)
+
+install(TARGETS ${PROJECT_NAME}
+        EXPORT GraphicsLabTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
 
 ############## Build SHADERS #######################
 
