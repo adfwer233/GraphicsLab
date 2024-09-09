@@ -7,6 +7,9 @@
 #include "project/project_manager.hpp"
 #include "project/file_system.hpp"
 
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
+
 class SceneTreeComponent : public UIComponent {
   public:
     SceneTreeComponent(SceneTree::VklSceneTree &sceneTree) : UIComponent(sceneTree) {
@@ -34,7 +37,17 @@ class SceneTreeComponent : public UIComponent {
             }
 
             if (ImGui::Button("Choose Path")) {
-                spdlog::info(FileSystem::chooseDirectory());
+                std::filesystem::path path = std::filesystem::path(FileSystem::chooseDirectory()) / "GraphicsLabProject.json";
+                spdlog::info(path.string());
+                std::ifstream f(path.string());
+                json data = json::parse(f);
+
+                auto project_name = data["Project"].get<std::string>();
+                spdlog::info(project_name);
+                for (const auto& build_info: data["Built"]) {
+                    spdlog::info(build_info["build_type"].get<std::string>());
+                    spdlog::info(build_info["dll_path"].get<std::string>());
+                }
             }
         }
         ImGui::End();
