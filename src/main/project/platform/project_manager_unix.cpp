@@ -1,4 +1,4 @@
-#include "project/project_manager.hpp"
+#include "project_manager.hpp"
 #include <dlfcn.h>
 #include <iostream>
 

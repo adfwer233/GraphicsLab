@@ -5,6 +5,7 @@
 #include "reflection/reflectors.hpp"
 
 #include "project/project_manager.hpp"
+#include "project/file_system.hpp"
 
 class SceneTreeComponent : public UIComponent {
   public:
@@ -30,6 +31,10 @@ class SceneTreeComponent : public UIComponent {
                         spdlog::error("load project failed");
                     }
                 }
+            }
+
+            if (ImGui::Button("Choose Path")) {
+                spdlog::info(FileSystem::chooseDirectory());
             }
         }
         ImGui::End();
