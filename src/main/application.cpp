@@ -30,14 +30,17 @@ void Application::run() {
     scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 
+    UIState state;
+    Controller controller(state, scene_tree);
     auto env_injector =
         di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
-                          di::bind<Controller>().in(di::singleton));
+                          di::bind<UIState>().to(state),
+                          di::bind<Controller>().to(controller));
 
-    auto &controller = env_injector.create<Controller &>();
     spdlog::info("[controller] {}", (void *)&controller);
 
-    glfwSetWindowUserPointer(window, &controller);
+    // glfwSetWindowUserPointer(window, &controller);
+    Controller::controller = &controller;
     glfwSetCursorPosCallback(window, Controller::mouse_callback);
     glfwSetScrollCallback(window, Controller::scroll_callback);
     glfwSetMouseButtonCallback(window, Controller::mouse_button_callback);
@@ -64,7 +67,7 @@ void Application::run() {
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
 
-        controller.processInput(window_.getGLFWwindow(), deltaTime);
+        // controller.processInput(window_.getGLFWwindow(), deltaTime);
 
         uint32_t currentFrame = renderGraph.beginFrame();
 
@@ -82,8 +85,9 @@ void Application::run() {
                 extent = window_.getExtent();
                 glfwWaitEvents();
             }
-            vkDeviceWaitIdle(device_.device());
             renderGraph.recreateSwapChain(extent);
+            glfwSetWindowUserPointer(window, &controller);
+            vkDeviceWaitIdle(device_.device());
         }
 
         renderGraph.endFrame();

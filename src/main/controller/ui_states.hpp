@@ -43,4 +43,12 @@ struct UIState {
     };
 
     ProjectStatus projectStatus;
+
+    UIState() {
+        spdlog::critical("ui state constructed");
+    }
+
+    ~UIState() {
+        spdlog::critical("ui state destructed");
+    }
 };
