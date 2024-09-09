@@ -29,11 +29,10 @@ void Application::run() {
     scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
     scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
-    UIState state;
 
     auto env_injector =
         di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
-                          di::bind<UIState>().to(state), di::bind<Controller>().in(di::singleton));
+                          di::bind<Controller>().in(di::singleton));
 
     auto &controller = env_injector.create<Controller &>();
     spdlog::info("[controller] {}", (void *)&controller);

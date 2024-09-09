@@ -1,5 +1,7 @@
 #pragma once
 
+#include "reflection/reflectors.hpp"
+
 struct UIState {
     enum class RenderMode {
         raw,
@@ -27,4 +29,18 @@ struct UIState {
 
     glm::vec2 scope_min;
     glm::vec2 scope_max;
+
+    struct ProjectStatus {
+        std::string name;
+        std::string projectPath;
+
+        struct BuildConfig {
+            std::string buildType;
+            std::string dllPath;
+        };
+
+        std::vector<BuildConfig> buildConfigs;
+    };
+
+    ProjectStatus projectStatus;
 };

@@ -19,36 +19,6 @@ class SceneTreeComponent : public UIComponent {
         ImGui::Begin("Scene Tree");
         {
             RenderTreeNode(sceneTree_.root.get());
-
-            if (ImGui::Button("test plugin")) {
-                ProjectManager projectManager;
-                std::string path =
-                    R"(C:\Users\ba123\Desktop\GraphicsLabProject\cmake-build-debug-visual-studio\UserProject.dll)";
-
-                if (projectManager.loadProject(path)) {
-                    IGraphicsLabProject *project = projectManager.getProject();
-                    if (project) {
-                        project->tick();
-                        delete project;
-                    } else {
-                        spdlog::error("load project failed");
-                    }
-                }
-            }
-
-            if (ImGui::Button("Choose Path")) {
-                std::filesystem::path path = std::filesystem::path(FileSystem::chooseDirectory()) / "GraphicsLabProject.json";
-                spdlog::info(path.string());
-                std::ifstream f(path.string());
-                json data = json::parse(f);
-
-                auto project_name = data["Project"].get<std::string>();
-                spdlog::info(project_name);
-                for (const auto& build_info: data["Built"]) {
-                    spdlog::info(build_info["build_type"].get<std::string>());
-                    spdlog::info(build_info["dll_path"].get<std::string>());
-                }
-            }
         }
         ImGui::End();
     }
