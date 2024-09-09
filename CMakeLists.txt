@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CUDA_ENABLE OFF CACHE BOOL "Whether enable cuda kernel")
+set(GRAPHICS_LAB_INSTALL OFF CACHE BOOL "Whether enable graphics lab install")
 
 message(STATUS "cmake version ${CMAKE_VERSION} ${CMAKE_GENERATOR}")
 
@@ -31,9 +32,8 @@ set(AUTODIFF_BUILD_TESTS OFF)
 
 set(SPIRV_CROSS_SHARED ON)
 set(GLM_BUILD_INSTALL ON)
+set(GLFW_INSTALL ON)
 set(SPDLOG_INSTALL ON)
-
-option(GRAPHICASLAB_INSTALL ON)
 
 include(fetch-glfw)
 include(fetch-glm)
@@ -130,43 +130,46 @@ add_dependencies(BUILD_ALL LAB_vkl LAB_demo LAB_geometry LAB_test LAB_main)
 add_library(GraphicsLabLib INTERFACE)
 target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)
 
-target_include_directories(GraphicsLabLib INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
+if (GRAPHICS_LAB_INSTALL)
+    target_include_directories(GraphicsLabLib INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
 
-# Install the library, include files, and CMake package configuration
-install(TARGETS GraphicsLabLib LAB_vkl LAB_geometry
-        EXPORT GraphicsLabTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-)
+    # Install the library, include files, and CMake package configuration
+    install(TARGETS GraphicsLabLib LAB_vkl LAB_geometry
+            EXPORT GraphicsLabTargets
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib
+            RUNTIME DESTINATION bin
+    )
 
-install(DIRECTORY include/ DESTINATION include)
+    install(DIRECTORY include/ DESTINATION include)
 
-# Generate a Config file for find_package()
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
-        VERSION 1.0.0
-        COMPATIBILITY AnyNewerVersion
-)
+    # Generate a Config file for find_package()
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+            "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+            VERSION 1.0.0
+            COMPATIBILITY AnyNewerVersion
+    )
 
-configure_package_config_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
-        INSTALL_DESTINATION lib/cmake/GraphicsLab
-)
+    configure_package_config_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GraphicsLabConfig.cmake.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+            INSTALL_DESTINATION lib/cmake/GraphicsLab
+    )
 
-install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
-        DESTINATION lib/cmake/GraphicsLab
-)
+    install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/GraphicsLabConfigVersion.cmake"
+            DESTINATION lib/cmake/GraphicsLab
+    )
 
-install(EXPORT GraphicsLabTargets
-        FILE GraphicsLabTargets.cmake
-        NAMESPACE GraphicsLab::
-        DESTINATION lib/cmake/GraphicsLab
-)
+    install(EXPORT GraphicsLabTargets
+            FILE GraphicsLabTargets.cmake
+            NAMESPACE GraphicsLab::
+            DESTINATION lib/cmake/GraphicsLab
+    )
+
+endif()
