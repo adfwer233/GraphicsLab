@@ -5,7 +5,7 @@
 #include "ui_states.hpp"
 
 struct Controller {
-    static inline Controller* controller = nullptr;
+    static inline Controller *controller = nullptr;
 
     explicit Controller(UIState &uiState, SceneTree::VklSceneTree &sceneTree)
         : uiState_(uiState), sceneTree_(sceneTree) {

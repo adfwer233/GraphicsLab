@@ -1,10 +1,10 @@
 #include "file_system.hpp"
 
-#include <windows.h>
 #include <ShlObj.h>
+#include <windows.h>
 
 std::string FileSystem::chooseDirectory() {
-    BROWSEINFO bi = { 0 };
+    BROWSEINFO bi = {0};
     bi.lpszTitle = "Select a folder";
     LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
     char path[MAX_PATH];
@@ -14,7 +14,7 @@ std::string FileSystem::chooseDirectory() {
         if (SHGetPathFromIDList(pidl, path)) {
             return std::string(path);
         }
-        CoTaskMemFree(pidl);  // Free memory allocated by the dialog
+        CoTaskMemFree(pidl); // Free memory allocated by the dialog
     }
     return std::string();
 }

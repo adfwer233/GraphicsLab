@@ -4,8 +4,8 @@
 
 #include "reflection/reflectors.hpp"
 
-#include "project/project_manager.hpp"
 #include "project/file_system.hpp"
+#include "project/project_manager.hpp"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -17,9 +17,7 @@ class SceneTreeComponent : public UIComponent {
 
     void render() final {
         ImGui::Begin("Scene Tree");
-        {
-            RenderTreeNode(sceneTree_.root.get());
-        }
+        { RenderTreeNode(sceneTree_.root.get()); }
         ImGui::End();
     }
 

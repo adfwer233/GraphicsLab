@@ -5,8 +5,9 @@
 
 std::string FileSystem::chooseDirectory() {
     char path[1024];
-    FILE* pipe = popen("zenity --file-selection --directory", "r");
-    if (!pipe) return std::string();
+    FILE *pipe = popen("zenity --file-selection --directory", "r");
+    if (!pipe)
+        return std::string();
 
     fgets(path, 1024, pipe);
     pclose(pipe);

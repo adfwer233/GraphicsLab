@@ -3,6 +3,6 @@
 #include <string>
 
 class FileSystem {
-public:
+  public:
     static std::string chooseDirectory();
 };

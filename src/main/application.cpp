@@ -34,8 +34,7 @@ void Application::run() {
     Controller controller(state, scene_tree);
     auto env_injector =
         di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
-                          di::bind<UIState>().to(state),
-                          di::bind<Controller>().to(controller));
+                          di::bind<UIState>().to(state), di::bind<Controller>().to(controller));
 
     spdlog::info("[controller] {}", (void *)&controller);
 

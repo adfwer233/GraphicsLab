@@ -10,14 +10,16 @@ class ProjectWidgetComponent : public UIComponent {
 
   public:
     ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
-    : UIComponent(sceneTree), uiState_(uiState) {}
+        : UIComponent(sceneTree), uiState_(uiState) {
+    }
 
     void render() final {
         ImGui::Begin("Project Manager");
         {
 
             if (ImGui::Button("Choose Path")) {
-                std::filesystem::path path = std::filesystem::path(FileSystem::chooseDirectory()) / "GraphicsLabProject.json";
+                std::filesystem::path path =
+                    std::filesystem::path(FileSystem::chooseDirectory()) / "GraphicsLabProject.json";
                 spdlog::info(path.string());
                 std::ifstream f(path.string());
                 json data = json::parse(f);
@@ -27,16 +29,17 @@ class ProjectWidgetComponent : public UIComponent {
                 uiState_.projectStatus.projectPath = path.string();
 
                 spdlog::info(project_name);
-                for (const auto& build_info: data["Built"]) {
+                for (const auto &build_info : data["Built"]) {
                     spdlog::info(build_info["build_type"].get<std::string>());
                     spdlog::info(build_info["dll_path"].get<std::string>());
 
-                    uiState_.projectStatus.buildConfigs.emplace_back(build_info["build_type"].get<std::string>(), build_info["dll_path"].get<std::string>());
+                    uiState_.projectStatus.buildConfigs.emplace_back(build_info["build_type"].get<std::string>(),
+                                                                     build_info["dll_path"].get<std::string>());
                 }
             }
 
             ImGui::Text("Current Project: %s", uiState_.projectStatus.name.c_str());
-            for (auto info: uiState_.projectStatus.buildConfigs) {
+            for (auto info : uiState_.projectStatus.buildConfigs) {
                 if (ImGui::TreeNode(std::format("Config {}", info.buildType).c_str())) {
                     if (ImGui::Button(std::format("Run {}", info.buildType).c_str())) {
                         ProjectManager projectManager;
