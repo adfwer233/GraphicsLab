@@ -1,65 +1,63 @@
 #pragma once
 
-#include <iostream>
+#include <format>
 #include <functional>
-#include <type_traits>
+#include <iostream>
+#include <map>
 #include <optional>
 #include <sstream>
-#include <map>
-#include <format>
+#include <type_traits>
 
 #include "meta_programming/type_list.hpp"
 #include "meta_programming/type_traits/is_function.hpp"
 
-#include "meta_programming/type_traits/is_vector.hpp"
 #include "meta_programming/type_traits/is_map.hpp"
+#include "meta_programming/type_traits/is_vector.hpp"
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 using SerializableTypes = MetaProgramming::TypeList<int, float, std::string>;
 
-template<typename T>
-using SerializableContainerTypes = MetaProgramming::TypeList<std::vector<T>>;
+template <typename T> using SerializableContainerTypes = MetaProgramming::TypeList<std::vector<T>>;
 
-template<typename T>
-struct CustomReflector {};
+template <typename T> struct CustomReflector {};
 
-template<typename T>
+template <typename T>
 concept CustomReflectImpl = requires(T t, std::string str) {
-    {T::ReflectImpl::serialize(t)} -> std::same_as<std::string>;
-    {T::ReflectImpl::deserialize(str)} -> std::same_as<T>;
+    { T::ReflectImpl::serialize(t) } -> std::same_as<std::string>;
+    { T::ReflectImpl::deserialize(str) } -> std::same_as<T>;
 };
 
-template<typename T>
+template <typename T>
 concept CustomReflectable = requires(T t, std::string str) {
     CustomReflector<T>::serializable(t);
-    {CustomReflector<T>::deserializable(str)} -> std::same_as<T>;
+    { CustomReflector<T>::deserializable(str) } -> std::same_as<T>;
 };
 
 struct Reflectable;
 
-template<typename T>
+template <typename T>
 concept ReflectableDerived = std::is_base_of_v<Reflectable, T>;
 
-template<typename T>
-concept Serializable = ReflectableDerived<T> || CustomReflectImpl<T> || MetaProgramming::TypeListFunctions::IsAnyOf<SerializableTypes, std::decay_t<T>>::value;
+template <typename T>
+concept Serializable = ReflectableDerived<T> || CustomReflectImpl<T> ||
+                       MetaProgramming::TypeListFunctions::IsAnyOf<SerializableTypes, std::decay_t<T>>::value;
 
 struct DispatchedTypeBase {
-    void* dataPtr;
+    void *dataPtr;
 
     virtual json serialize() = 0;
-    virtual void deserialize(void* target_str, const json& j) = 0;
+    virtual void deserialize(void *target_str, const json &j) = 0;
 };
 
-template<typename T>
-struct DispatchedType: public DispatchedTypeBase {
-    DispatchedType(void* ptr) {
+template <typename T> struct DispatchedType : public DispatchedTypeBase {
+    DispatchedType(void *ptr) {
         dataPtr = ptr;
     }
 
     json serialize_single() {
-        auto ptr = reinterpret_cast<T*>(dataPtr);
+        auto ptr = reinterpret_cast<T *>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
             return T::ReflectImpl::serialize(*ptr);
         } else if constexpr (ReflectableDerived<T>) {
@@ -68,7 +66,7 @@ struct DispatchedType: public DispatchedTypeBase {
             /**
              * serialization of builtin types
              */
-            auto& value = *ptr;
+            auto &value = *ptr;
             if constexpr (std::is_same_v<T, int>) {
                 return std::to_string(value);
             } else if constexpr (std::is_same_v<T, double>) {
@@ -80,7 +78,7 @@ struct DispatchedType: public DispatchedTypeBase {
                 oss << value;
                 return oss.str();
             } else if constexpr (std::is_same_v<T, std::string>) {
-                return value;  // Simple quote for JSON-like serialization
+                return value; // Simple quote for JSON-like serialization
             } else {
                 static_assert(std::is_same_v<T, void>, "Unsupported type");
                 return "";
@@ -88,8 +86,8 @@ struct DispatchedType: public DispatchedTypeBase {
         }
     }
 
-    std::optional<T> deserialize_single(const json& j) {
-        auto ptr = reinterpret_cast<T*>(dataPtr);
+    std::optional<T> deserialize_single(const json &j) {
+        auto ptr = reinterpret_cast<T *>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
             return T::ReflectImpl::deserialize(j);
         } else if constexpr (ReflectableDerived<T>) {
@@ -105,11 +103,11 @@ struct DispatchedType: public DispatchedTypeBase {
 
     json serialize_vector() {
         if constexpr (is_vector_v<T>) {
-            auto& vec = *reinterpret_cast<T*>(dataPtr);
+            auto &vec = *reinterpret_cast<T *>(dataPtr);
             using value_type = T::value_type;
             json result = json::array();
             for (size_t i = 0; i < vec.size(); ++i) {
-                result.push_back( DispatchedType<value_type>(&vec[i]).serialize());
+                result.push_back(DispatchedType<value_type>(&vec[i]).serialize());
             }
             return result;
         }
@@ -124,20 +122,21 @@ struct DispatchedType: public DispatchedTypeBase {
             using V = T::mapped_type;
 
             json result;
-            for (const auto &[key, value]: map) {
-                result[DispatchedType<K>((void*)&key).serialize().dump()] = DispatchedType<V>((void *)&value).serialize();
+            for (const auto &[key, value] : map) {
+                result[DispatchedType<K>((void *)&key).serialize().dump()] =
+                    DispatchedType<V>((void *)&value).serialize();
             }
             return result;
         }
         return "";
     }
 
-    std::optional<T> deserialize_vector(const json& j) {
+    std::optional<T> deserialize_vector(const json &j) {
         if constexpr (is_vector_v<T>) {
             using value_type = T::value_type;
 
             std::vector<value_type> vec;
-            for (const auto &item: j) {
+            for (const auto &item : j) {
                 vec.push_back(DispatchedType<value_type>(nullptr).deserialize_single(item).value());
             }
 
@@ -147,7 +146,7 @@ struct DispatchedType: public DispatchedTypeBase {
         }
     }
 
-    std::optional<T> deserialize_map(const json& j) {
+    std::optional<T> deserialize_map(const json &j) {
         if constexpr (is_map_v<T>) {
             using K = T::key_type;
             using V = T::mapped_type;
@@ -164,8 +163,8 @@ struct DispatchedType: public DispatchedTypeBase {
         }
     }
 
-public:
-   json serialize() {
+  public:
+    json serialize() {
         if constexpr (Serializable<T>) {
             // T is serializable
             return serialize_single();
@@ -192,12 +191,12 @@ public:
         }
     }
 
-    void deserialize(void* target_ptr, const json& j) {
+    void deserialize(void *target_ptr, const json &j) {
 
-        auto& target = *reinterpret_cast<T*>(target_ptr);
+        auto &target = *reinterpret_cast<T *>(target_ptr);
 
         if constexpr (Serializable<T>) {
-             target = deserialize_single(j).value();
+            target = deserialize_single(j).value();
         } else {
             // T is vector of some serializable
             if constexpr (is_vector_v<T>) {
@@ -234,7 +233,7 @@ struct TypeErasedValue {
     std::function<const std::type_info &()> type_info_func;
     std::function<void *(void)> get_ptr_func;
     std::function<void(void)> call_func; // Callable for member functions
-    DispatchedTypeBase* dispatched;
+    DispatchedTypeBase *dispatched;
     TypeErasedValue() = default;
 
     // Constructor for data members
@@ -280,13 +279,11 @@ struct Reflection {
         return TypeErasedValue(f, t);
     }
 
-    template<typename T>
-    static std::string serialize(T& t) {
+    template <typename T> static std::string serialize(T &t) {
         return DispatchedType<T>(&t).serialize();
     }
 
-    template<typename T>
-    static T deserialize(const std::string& str) {
+    template <typename T> static T deserialize(const std::string &str) {
         T t;
         DispatchedType<T>(nullptr).deserialize(&t, str);
         return t;
@@ -294,7 +291,7 @@ struct Reflection {
 };
 
 struct TypeDispatcher {
-    DispatchedTypeBase* dispath(void * ptr, type_info typeInfo) {
+    DispatchedTypeBase *dispath(void *ptr, type_info typeInfo) {
         /**
          * if the type is builtin type in SerializableTypes
          */
@@ -312,13 +309,14 @@ struct TypeDispatcher {
         }
     }
 
-private:
+  private:
     template <typename TargetType, typename... RemainingTypes>
-    DispatchedTypeBase* tryRecoverType(void* ptr, type_info& typeInfo, MetaProgramming::TypeList<TargetType, RemainingTypes...>) {
+    DispatchedTypeBase *tryRecoverType(void *ptr, type_info &typeInfo,
+                                       MetaProgramming::TypeList<TargetType, RemainingTypes...>) {
         // Attempt to compare the type_info
         if (typeInfo == typeid(TargetType)) {
             // If successful, return a new DispatchedType with the casted pointer
-            return new DispatchedType<TargetType>(static_cast<TargetType*>(ptr));
+            return new DispatchedType<TargetType>(static_cast<TargetType *>(ptr));
         } else {
             // Otherwise, recursively try the next type in the list
             return tryRecoverType(ptr, typeInfo, MetaProgramming::TypeList<RemainingTypes...>{});
@@ -326,13 +324,13 @@ private:
     }
 
     // Base case: when the type list is empty, return nullptr
-    DispatchedTypeBase* tryRecoverType(void* /*ptr*/, type_info& /*typeInfo*/, MetaProgramming::TypeList<>) {
+    DispatchedTypeBase *tryRecoverType(void * /*ptr*/, type_info & /*typeInfo*/, MetaProgramming::TypeList<>) {
         return nullptr; // No more types to check
     }
 
     // Helper function to initiate the type list traversal
     template <typename... Types>
-    DispatchedTypeBase* tryDispatch(void* ptr, type_info &typeInfo, MetaProgramming::TypeList<Types...> typeList) {
+    DispatchedTypeBase *tryDispatch(void *ptr, type_info &typeInfo, MetaProgramming::TypeList<Types...> typeList) {
         return tryRecoverType(ptr, typeInfo, typeList);
     }
 };
@@ -344,7 +342,7 @@ class Reflectable {
 
     json serialization() {
         json j;
-        for (auto& [name, info]: reflect()) {
+        for (auto &[name, info] : reflect()) {
             // spdlog::info(info.dispatched->serialize());
             j[name] = info.dispatched->serialize();
         }
@@ -352,12 +350,12 @@ class Reflectable {
     }
 
     void deserialization(json j) {
-        for (auto& [name, info]: reflect()) {
+        for (auto &[name, info] : reflect()) {
             info.dispatched->deserialize(info.get(), j[name]);
         }
     }
 
-    void deserialization(const std::string& str) {
+    void deserialization(const std::string &str) {
         json j = json::parse(str);
         deserialization(j);
     }

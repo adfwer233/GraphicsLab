@@ -32,16 +32,18 @@ struct UIState {
     glm::vec2 scope_min;
     glm::vec2 scope_max;
 
-    struct ProjectStatus: Reflectable {
+    struct ProjectStatus : Reflectable {
         std::string name;
         std::string projectPath;
 
-        struct BuildConfig: Reflectable {
+        struct BuildConfig : Reflectable {
             std::string buildType;
             std::string dllPath;
 
             BuildConfig() = default;
-            BuildConfig(std::string t_buildType, std::string t_dllPath): buildType(std::move(t_buildType)), dllPath(std::move(t_dllPath)) {}
+            BuildConfig(std::string t_buildType, std::string t_dllPath)
+                : buildType(std::move(t_buildType)), dllPath(std::move(t_dllPath)) {
+            }
 
             ReflectDataType reflect() override {
                 return {{"buildType", TypeErasedValue(&buildType)}, {"dllPath", TypeErasedValue(&dllPath)}};
@@ -67,11 +69,9 @@ struct UIState {
         std::vector<BuildConfig> buildConfigs;
 
         ReflectDataType reflect() override {
-            return {
-                    {"name", TypeErasedValue(&name)},
+            return {{"name", TypeErasedValue(&name)},
                     {"projectPath", TypeErasedValue(&projectPath)},
-                    {"buildConfigs", TypeErasedValue(&buildConfigs)}
-            };
+                    {"buildConfigs", TypeErasedValue(&buildConfigs)}};
         }
     };
 
