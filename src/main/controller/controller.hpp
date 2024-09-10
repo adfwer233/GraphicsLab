@@ -26,14 +26,14 @@ struct Controller {
     }
 
     static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
-        auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
+        // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         if (controller->sceneTree_.get().active_camera) {
             controller->sceneTree_.get().active_camera->camera.process_mouse_scroll(y_offset);
         }
     }
 
     static void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
-        auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
+        // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         auto &uiState = controller->uiState_;
         if (button == GLFW_MOUSE_BUTTON_MIDDLE and state == GLFW_PRESS) {
             controller->uiState_.isMouseMidPressing = true;

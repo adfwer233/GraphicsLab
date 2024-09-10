@@ -3,6 +3,9 @@
 #include "component.hpp"
 #include "controller/ui_states.hpp"
 
+#include "project/file_system.hpp"
+#include "project/project_manager.hpp"
+
 #include "ui/render_resources.hpp"
 
 class ProjectWidgetComponent : public UIComponent {
@@ -56,6 +59,16 @@ class ProjectWidgetComponent : public UIComponent {
                     }
                     ImGui::TreePop();
                 }
+            }
+
+            if (ImGui::Button("serialize")) {
+                spdlog::info(uiState_.projectStatus.serialization());
+            }
+
+            if (ImGui::Button("deserialize")) {
+                json j = json::parse("{\"buildConfigs\":\"[{buildType: Debug, dllPath: Debug}]\",\"name\":\"GraphicsLabProjectTempla\n"
+                                     "te\",\"projectPath\":\"C:\\\\Users\\\\Anchang\\\\Desktop\\\\GraphicsLabProjectTemplate\\\\GraphicsLabProject.json\"}");
+                uiState_.projectStatus.deserialization(j);
             }
         }
         ImGui::End();

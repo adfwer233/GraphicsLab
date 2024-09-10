@@ -30,16 +30,40 @@ struct UIState {
     glm::vec2 scope_min;
     glm::vec2 scope_max;
 
-    struct ProjectStatus {
+    struct ProjectStatus: Reflectable {
         std::string name;
         std::string projectPath;
 
         struct BuildConfig {
             std::string buildType;
             std::string dllPath;
+
+            struct ReflectImpl {
+                static std::string serialize(BuildConfig &config) {
+                    auto map = std::map<std::string, std::string> {
+                            {"buildType", config.buildType},
+                            {"dllPath", config.buildType},
+                    };
+
+                    return Reflection::serialize(map);
+                }
+
+                static BuildConfig deserialize(const std::string &str) {
+                    auto map = Reflection::deserialize<std::map<std::string, std::string>>(str);
+                    return BuildConfig (map["buildType"], map["dllPath"]);
+                }
+            };
         };
 
         std::vector<BuildConfig> buildConfigs;
+
+        ReflectDataType reflect() override {
+            return {
+                    {"name", TypeErasedValue(&name)},
+                    {"projectPath", TypeErasedValue(&projectPath)},
+                    {"buildConfigs", TypeErasedValue(&buildConfigs)}
+            };
+        }
     };
 
     ProjectStatus projectStatus;
