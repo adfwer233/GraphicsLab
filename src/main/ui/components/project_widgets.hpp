@@ -62,12 +62,18 @@ class ProjectWidgetComponent : public UIComponent {
             }
 
             if (ImGui::Button("serialize")) {
-                spdlog::info(uiState_.projectStatus.serialization());
+                auto result = uiState_.projectStatus.serialization();
+                std::ofstream ofstream("status.json");
+                ofstream << result.dump(4);
             }
 
             if (ImGui::Button("deserialize")) {
-                json j = json::parse("{\"buildConfigs\":\"[{buildType: Debug, dllPath: Debug}]\",\"name\":\"GraphicsLabProjectTempla\n"
-                                     "te\",\"projectPath\":\"C:\\\\Users\\\\Anchang\\\\Desktop\\\\GraphicsLabProjectTemplate\\\\GraphicsLabProject.json\"}");
+                std::ifstream file("status.json");
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                json j;
+                buffer >> j;
+                spdlog::critical(j.dump());
                 uiState_.projectStatus.deserialization(j);
             }
         }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "reflection/reflectors.hpp"
 
 struct UIState {
@@ -34,25 +36,32 @@ struct UIState {
         std::string name;
         std::string projectPath;
 
-        struct BuildConfig {
+        struct BuildConfig: Reflectable {
             std::string buildType;
             std::string dllPath;
 
-            struct ReflectImpl {
-                static std::string serialize(BuildConfig &config) {
-                    auto map = std::map<std::string, std::string> {
-                            {"buildType", config.buildType},
-                            {"dllPath", config.buildType},
-                    };
+            BuildConfig() = default;
+            BuildConfig(std::string t_buildType, std::string t_dllPath): buildType(std::move(t_buildType)), dllPath(std::move(t_dllPath)) {}
 
-                    return Reflection::serialize(map);
-                }
+            ReflectDataType reflect() override {
+                return {{"buildType", TypeErasedValue(&buildType)}, {"dllPath", TypeErasedValue(&dllPath)}};
+            }
 
-                static BuildConfig deserialize(const std::string &str) {
-                    auto map = Reflection::deserialize<std::map<std::string, std::string>>(str);
-                    return BuildConfig (map["buildType"], map["dllPath"]);
-                }
-            };
+            // struct ReflectImpl {
+            //     static std::string serialize(BuildConfig &config) {
+            //         auto map = std::map<std::string, std::string> {
+            //                 {"buildType", config.buildType},
+            //                 {"dllPath", config.buildType},
+            //         };
+            //
+            //         return Reflection::serialize(map);
+            //     }
+            //
+            //     static BuildConfig deserialize(const std::string &str) {
+            //         auto map = Reflection::deserialize<std::map<std::string, std::string>>(str);
+            //         return BuildConfig (map["buildType"], map["dllPath"]);
+            //     }
+            // };
         };
 
         std::vector<BuildConfig> buildConfigs;

@@ -37,14 +37,19 @@ concept CustomReflectable = requires(T t, std::string str) {
     {CustomReflector<T>::deserializable(str)} -> std::same_as<T>;
 };
 
+struct Reflectable;
+
 template<typename T>
-concept Serializable = CustomReflectImpl<T> || MetaProgramming::TypeListFunctions::IsAnyOf<SerializableTypes, std::decay_t<T>>::value;
+concept ReflectableDerived = std::is_base_of_v<Reflectable, T>;
+
+template<typename T>
+concept Serializable = ReflectableDerived<T> || CustomReflectImpl<T> || MetaProgramming::TypeListFunctions::IsAnyOf<SerializableTypes, std::decay_t<T>>::value;
 
 struct DispatchedTypeBase {
     void* dataPtr;
 
-    virtual std::string serialize() = 0;
-    virtual void deserialize(void* target_str, const std::string& str) = 0;
+    virtual json serialize() = 0;
+    virtual void deserialize(void* target_str, const json& j) = 0;
 };
 
 template<typename T>
@@ -53,10 +58,12 @@ struct DispatchedType: public DispatchedTypeBase {
         dataPtr = ptr;
     }
 
-    std::string serialize_single() {
+    json serialize_single() {
         auto ptr = reinterpret_cast<T*>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
             return T::ReflectImpl::serialize(*ptr);
+        } else if constexpr (ReflectableDerived<T>) {
+            return ptr->serialization();
         } else {
             /**
              * serialization of builtin types
@@ -81,80 +88,57 @@ struct DispatchedType: public DispatchedTypeBase {
         }
     }
 
-    std::optional<T> deserialize_single(const std::string& str) {
+    std::optional<T> deserialize_single(const json& j) {
         auto ptr = reinterpret_cast<T*>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
-            return T::ReflectImpl::deserialize(str);
+            return T::ReflectImpl::deserialize(j);
+        } else if constexpr (ReflectableDerived<T>) {
+            T t;
+            t.deserialization(j);
+            return t;
         } else {
-            if constexpr (std::is_same_v<T, int>) {
-                /**
-                 * deserialization of builtin types
-                 */
-                if constexpr (std::is_same_v<T, int>) {
-                    return std::stoi(str);
-                } else if constexpr (std::is_same_v<T, double>) {
-                    return std::stod(str);
-                } else if constexpr (std::is_same_v<T, float>) {
-                    return std::stof(str);
-                } else if constexpr (std::is_same_v<T, std::string>) {
-                    return str;
-                    throw std::runtime_error("Invalid string format");
-                } else {
-                    static_assert(std::is_same_v<T, void>, "Unsupported type");
-                    return std::nullopt;
-                }
-            }
+            return j.get<T>();
 
             return std::nullopt;
         }
     }
 
-    std::string serialize_vector() {
+    json serialize_vector() {
         if constexpr (is_vector_v<T>) {
             auto& vec = *reinterpret_cast<T*>(dataPtr);
             using value_type = T::value_type;
-            std::ostringstream oss;
-            oss << "[";
+            json result = json::array();
             for (size_t i = 0; i < vec.size(); ++i) {
-                if (i > 0) oss << ", ";
-                oss << DispatchedType<value_type>(&vec[i]).serialize();
+                result.push_back( DispatchedType<value_type>(&vec[i]).serialize());
             }
-            oss << "]";
-
-            return oss.str();
+            return result;
         }
         return "";
     }
 
-    std::string serialize_map() {
+    json serialize_map() {
         if constexpr (is_map_v<T>) {
             auto &map = *reinterpret_cast<T *>(dataPtr);
 
             using K = T::key_type;
             using V = T::mapped_type;
 
-            std::ostringstream oss;
-            oss << "{";
-            bool first = true;
+            json result;
             for (const auto &[key, value]: map) {
-                if (!first) oss << ", ";
-                oss << DispatchedType<K>((void*)&key).serialize() << ": " << DispatchedType<V>((void *)&value).serialize();
-                first = false;
+                result[DispatchedType<K>((void*)&key).serialize().dump()] = DispatchedType<V>((void *)&value).serialize();
             }
-            oss << "}";
-            return oss.str();
+            return result;
         }
         return "";
     }
 
-    std::optional<T> deserialize_vector(const std::string& str) {
+    std::optional<T> deserialize_vector(const json& j) {
         if constexpr (is_vector_v<T>) {
             using value_type = T::value_type;
 
-            json j = json::parse(str);
             std::vector<value_type> vec;
             for (const auto &item: j) {
-                vec.push_back(DispatchedType<value_type>(nullptr).deserialize_single(item.dump()).value());
+                vec.push_back(DispatchedType<value_type>(nullptr).deserialize_single(item).value());
             }
 
             return vec;
@@ -163,16 +147,15 @@ struct DispatchedType: public DispatchedTypeBase {
         }
     }
 
-    std::optional<T> deserialize_map(const std::string& str) {
+    std::optional<T> deserialize_map(const json& j) {
         if constexpr (is_map_v<T>) {
             using K = T::key_type;
             using V = T::mapped_type;
 
-            json j = json::parse(str);
             std::map<K, V> m;
             for (auto it = j.begin(); it != j.end(); ++it) {
-                K key = DispatchedType<K>(nullptr).deserialize_single(it.key().dump());
-                V value = DispatchedType<V>(nullptr).deserialize_single(it.value().dump());
+                K key = DispatchedType<K>(nullptr).deserialize_single(it.key());
+                V value = DispatchedType<V>(nullptr).deserialize_single(it.value());
                 m[key] = value;
             }
             return m;
@@ -182,7 +165,7 @@ struct DispatchedType: public DispatchedTypeBase {
     }
 
 public:
-    std::string serialize() {
+   json serialize() {
         if constexpr (Serializable<T>) {
             // T is serializable
             return serialize_single();
@@ -209,18 +192,19 @@ public:
         }
     }
 
-    void deserialize(void* target_ptr, const std::string& str) {
+    void deserialize(void* target_ptr, const json& j) {
 
         auto& target = *reinterpret_cast<T*>(target_ptr);
 
         if constexpr (Serializable<T>) {
-             target = deserialize_single(str).value();
+             target = deserialize_single(j).value();
         } else {
             // T is vector of some serializable
             if constexpr (is_vector_v<T>) {
                 if constexpr (Serializable<T::value_type>) {
                     target.clear();
-                    target = deserialize_vector(str).value();
+                    target = deserialize_vector(j).value();
+                    return;
                 } else {
                     throw std::runtime_error("value of std::vector is not serializable");
                 }
@@ -233,13 +217,14 @@ public:
                 using V = T::value_type;
                 if constexpr (Serializable<K> && Serializable<V>) {
                     target.clear();
-                    target = deserialize_map(str).value();
+                    target = deserialize_map(j).value();
+                    return;
                 } else {
                     throw std::runtime_error("value or key of std::vector is not serializable");
                 }
             }
 
-            throw std::runtime_error(std::format("{} {}", typeid(T).name(), "is not serializable"));
+            throw std::runtime_error(std::format("{} {}", typeid(T).name(), "is not deserializable"));
         }
     }
 };
@@ -357,17 +342,23 @@ class Reflectable {
   public:
     virtual ReflectDataType reflect() = 0;
 
-    std::string serialization() {
+    json serialization() {
         json j;
         for (auto& [name, info]: reflect()) {
+            // spdlog::info(info.dispatched->serialize());
             j[name] = info.dispatched->serialize();
         }
-        return j.dump();
+        return j;
     }
 
     void deserialization(json j) {
         for (auto& [name, info]: reflect()) {
-            info.dispatched->deserialize(info.get(), j[name].dump());
+            info.dispatched->deserialize(info.get(), j[name]);
         }
+    }
+
+    void deserialization(const std::string& str) {
+        json j = json::parse(str);
+        deserialization(j);
     }
 };
