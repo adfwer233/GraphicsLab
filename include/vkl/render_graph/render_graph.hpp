@@ -22,12 +22,13 @@
 struct RenderGraphRenderPass {};
 struct RenderGraphComputePass {};
 struct RenderGraphTransferPass {};
+struct RenderGraphSubgraphPass {};
 struct RenderGraphImagePresentPass {};
 struct RenderGraphFrameSyncBeginPass {};
 struct RenderGraphFrameSyncEndPass {};
 
 using RenderGraphPassTypeList =
-    MetaProgramming::TypeList<RenderGraphRenderPass, RenderGraphComputePass, RenderGraphImagePresentPass,
+    MetaProgramming::TypeList<RenderGraphRenderPass, RenderGraphComputePass, RenderGraphSubgraphPass, RenderGraphImagePresentPass,
                               RenderGraphTransferPass, RenderGraphFrameSyncBeginPass, RenderGraphFrameSyncEndPass>;
 
 struct RenderGraphTextureAttachment {};
@@ -216,6 +217,11 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
     std::unordered_map<std::string, BaseRenderSystem *> render_system_cache;
 };
 
+struct RenderGraph;
+template <> struct RenderGraphPassDerived<RenderGraphSubgraphPass>: public RenderGraphPassBase {
+
+};
+
 template <> struct RenderGraphPassDescriptor<RenderGraphRenderPass> : public RenderGraphPassDescriptorBase {
     uint32_t width, height;
     bool is_submit_pass = false;
@@ -224,6 +230,11 @@ template <> struct RenderGraphPassDescriptor<RenderGraphRenderPass> : public Ren
     std::vector<RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment> *> outTextureAttachmentDescriptors;
 
     friend class RenderGraph;
+};
+
+struct RenderGraphDescriptor;
+template <> struct RenderGraphPassDescriptor<RenderGraphSubgraphPass>: public RenderGraphPassDescriptorBase {
+    RenderGraphDescriptor* renderGraphDescriptor;
 };
 
 template <> struct RenderGraphPassDescriptor<RenderGraphImagePresentPass> : public RenderGraphPassDescriptorBase {
@@ -321,6 +332,8 @@ struct RenderGraph {
 
     uint32_t currentFrame = 0;
     uint32_t current_image_index = 0;
+
+    VkExtent2D extent_;
 
     uint32_t beginFrame() {
         auto result = swapChain_->acquireNextImage(&current_image_index);
@@ -455,11 +468,24 @@ struct RenderGraph {
         return nullptr;
     }
 
+    void expandSubgraphDescriptor(RenderGraphDescriptor* renderGraphDescriptor) {
+        constexpr uint32_t id = MetaProgramming::TypeListFunctions::IndexOf<RenderGraphPassTypeList, RenderGraphSubgraphPass>::value;
+        for (auto pass_desc : std::get<id>(renderGraphDescriptor->renderGraphPassDescriptorPtrVectors)) {
+            constructor_copy_pass_detail<RenderGraphPassTypeList::size - 1>(pass_desc->renderGraphDescriptor);
+            constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(pass_desc->renderGraphDescriptor);
+        }
+    }
+
     template <size_t id> void constructor_copy_pass_detail(RenderGraphDescriptor *renderGraphDescriptor) {
+        using T = typename MetaProgramming::TypeListFunctions::KthOf<RenderGraphPassTypeList, id>::type;
+        if constexpr (std::is_same_v<T, RenderGraphSubgraphPass>) {
+            constructor_copy_pass_detail<id - 1>(renderGraphDescriptor);
+            return;
+        }
+
         auto &obj_vector = std::get<id>(renderGraphPassObjectPtrVectors);
         for (auto pass_desc : std::get<id>(renderGraphDescriptor->renderGraphPassDescriptorPtrVectors)) {
-            auto obj_ptr = new RenderGraphPassDerived<
-                typename MetaProgramming::TypeListFunctions::KthOf<RenderGraphPassTypeList, id>::type>();
+            auto obj_ptr = new RenderGraphPassDerived<T>();
             obj_ptr->descriptor_p = pass_desc;
             obj_ptr->name = pass_desc->name;
             obj_vector.push_back(obj_ptr);
@@ -519,7 +545,7 @@ struct RenderGraph {
     }
 
     explicit RenderGraph(VklDevice &device, VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor)
-        : device_(device) {
+        : device_(device), extent_(extent) {
         renderGraphDescriptor_ = renderGraphDescriptor;
         recreateSwapChain(extent);
 
@@ -528,6 +554,7 @@ struct RenderGraph {
         /**
          * create node/edge objects
          */
+        expandSubgraphDescriptor(renderGraphDescriptor);
         constructor_copy_pass_detail<RenderGraphPassTypeList::size - 1>(renderGraphDescriptor);
         constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(renderGraphDescriptor);
 
@@ -553,19 +580,6 @@ struct RenderGraph {
             }
         }
 
-        for (auto node : passes) {
-            // for (auto input: node->descriptor_
-            //
-            // p->input_descriptors) {
-            //     RenderGraphAttachmentBase* att = getAttachment(input->name);
-            //     node->input_attachments.push_back(att);
-            // }
-            // for (auto output: node->descriptor_p->output_descriptors) {
-            //     RenderGraphAttachmentBase* att = getAttachment(output->name);
-            //     node->output_attachments.push_back(att);
-            // }
-        }
-
         createCommandBuffers();
     }
 
@@ -581,11 +595,7 @@ struct RenderGraph {
          * create render pass for each `RenderGraphRenderPass` node in render graph
          */
 
-        auto &renderPassVector = std::get<
-            MetaProgramming::TypeListFunctions::IndexOf<RenderGraphPassTypeList, RenderGraphRenderPass>::value>(
-            renderGraphPassObjectPtrVectors);
-
-        for (auto renderNode : renderPassVector) {
+        for (auto renderNode : passes_generator<RenderGraphRenderPass>()) {
             std::vector<VkAttachmentDescription> node_attachments;
             std::vector<VkAttachmentReference> input_refs;
             std::vector<VkAttachmentReference> output_refs;
@@ -745,11 +755,6 @@ struct RenderGraph {
 
             renderNode->renderPass = std::make_unique<VklRenderPass>(device_, renderPassCreateInfo);
         }
-
-        /**
-         * create render system for each `RenderGraphRenderPass` node in render graph
-         */
-
         /**
          * create compute pass for each 'RenderGraphComputePass' node in render graph
          */

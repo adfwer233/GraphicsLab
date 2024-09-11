@@ -8,6 +8,7 @@
 #include "components/project_widgets.hpp"
 #include "components/scene_tree.hpp"
 #include "components/scene_widgets.hpp"
+#include "components/project_render_widgets.hpp"
 
 using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 

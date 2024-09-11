@@ -4,4 +4,5 @@
 
 struct RenderResources {
     std::vector<VkDescriptorSet> sceneRenderTexture;
+    std::vector<VkDescriptorSet> projectRenderTexture;
 };
