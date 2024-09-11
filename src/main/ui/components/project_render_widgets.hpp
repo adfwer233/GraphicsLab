@@ -39,4 +39,4 @@ public:
     }
 };
 
-META_REGISTER_TYPE(MainComponentRegisterTag, ProjectRenderWidgetComponent)
+// META_REGISTER_TYPE(MainComponentRegisterTag, ProjectRenderWidgetComponent)

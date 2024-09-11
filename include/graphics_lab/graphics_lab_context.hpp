@@ -5,5 +5,5 @@
 
 struct GraphicsLabContext {
     VklDevice* device;
-    SceneTree::VklSceneTree* renderGraphRenderPass;
+    SceneTree::VklSceneTree* sceneTree;
 };

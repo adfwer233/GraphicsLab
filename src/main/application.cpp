@@ -26,7 +26,7 @@ void Application::run() {
 
     SceneTree::VklSceneTree scene_tree(device_);
 
-    scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
+    // scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
     scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 

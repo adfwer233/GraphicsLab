@@ -8,6 +8,7 @@
 class ScenePass : public RenderPassDeclarationBase {
   private:
     SimpleRenderSystem<> *simple_render_system;
+    SimpleRenderSystem<> *raw_render_system;
 
   public:
     ScenePass(SceneTree::VklSceneTree &sceneTree) : RenderPassDeclarationBase(sceneTree) {
@@ -48,6 +49,11 @@ class ScenePass : public RenderPassDeclarationBase {
             {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
              {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
+        raw_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
+                renderGraph.device_, "raw_render_system",
+                {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                 {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             GlobalUbo ubo{};
 
@@ -57,15 +63,21 @@ class ScenePass : public RenderPassDeclarationBase {
             ubo.pointLight = PointLight({0, 10, 0, 1.0}, {1.0, 1.0, 1.0, 0.0});
             ubo.cameraPos = sceneTree_.active_camera->camera.position;
 
-            auto key = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+            auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+            auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
             for (auto mesh3d_nodes : sceneTree_.traverse_geometry_nodes<Mesh3D>()) {
                 auto node_mesh = mesh3d_buffer->getGeometryModel(renderGraph.device_, mesh3d_nodes);
 
-                if (node_mesh->mesh->uniformBuffers.contains(key)) {
-                    node_mesh->mesh->uniformBuffers[key][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[key][frame_index]->flush();
+                if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
+                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
+                }
+
+                if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
+                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
                 }
 
                 FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
@@ -76,7 +88,11 @@ class ScenePass : public RenderPassDeclarationBase {
                     .model = *node_mesh->mesh.get(),
                 };
 
-                simple_render_system->renderObject(frameInfo);
+                if (node_mesh->mesh->textures_.size() >= simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors.size()) {
+                    simple_render_system->renderObject(frameInfo);
+                } else {
+                    raw_render_system->renderObject(frameInfo);
+                }
             }
         };
     };

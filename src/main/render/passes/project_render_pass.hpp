@@ -87,4 +87,4 @@ public:
     };
 };
 
-META_REGISTER_TYPE(RenderGraphPassRegisterTag, ProjectRenderPass)
+// META_REGISTER_TYPE(RenderGraphPassRegisterTag, ProjectRenderPass)
