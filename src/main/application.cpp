@@ -57,6 +57,10 @@ void Application::run() {
 
     renderPassManager.instanceStage(renderGraph);
 
+    scene_tree.sceneUpdateCallBack = [&]() {
+        renderPassManager.instanceStage(renderGraph);
+    };
+
     float deltaTime = 0, lastFrame = 0;
 
     while (not glfwWindowShouldClose(window)) {

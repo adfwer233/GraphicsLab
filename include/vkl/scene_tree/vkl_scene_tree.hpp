@@ -269,6 +269,14 @@ struct VklSceneTree {
 
     CameraNode *active_camera = nullptr;
 
+    std::function<void()> sceneUpdateCallBack;
+
+    void sceneUpdated() {
+        if (sceneUpdateCallBack) {
+            sceneUpdateCallBack();
+        }
+    }
+
     explicit VklSceneTree(VklDevice &device) : device_(device) {
         root = std::make_unique<SceneTree::InternalNode>();
     }
