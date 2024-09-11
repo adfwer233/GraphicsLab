@@ -8,6 +8,14 @@
 
 #include "ui/render_resources.hpp"
 
+struct mystruct: public Reflectable {
+    glm::vec3 pos;
+
+    ReflectDataType reflect() override {
+        return {{"pos", TypeErasedValue(&pos)}};
+    }
+};
+
 class ProjectWidgetComponent : public UIComponent {
     UIState &uiState_;
 
@@ -61,13 +69,13 @@ class ProjectWidgetComponent : public UIComponent {
                 }
             }
 
-            if (ImGui::Button("serialize")) {
+            if (ImGui::Button("save configuration")) {
                 auto result = uiState_.projectStatus.serialization();
                 std::ofstream ofstream("status.json");
                 ofstream << result.dump(4);
             }
 
-            if (ImGui::Button("deserialize")) {
+            if (ImGui::Button("load last configuration")) {
                 std::ifstream file("status.json");
                 std::stringstream buffer;
                 buffer << file.rdbuf();
@@ -75,6 +83,16 @@ class ProjectWidgetComponent : public UIComponent {
                 buffer >> j;
                 spdlog::critical(j.dump());
                 uiState_.projectStatus.deserialization(j);
+            }
+
+            if (ImGui::Button("test")) {
+                mystruct a;
+                json j1 = a.serialization();
+                spdlog::info(j1.dump());
+
+                mystruct b;
+                b.deserialization(j1);
+                spdlog::info(b.serialization().dump());
             }
         }
         ImGui::End();

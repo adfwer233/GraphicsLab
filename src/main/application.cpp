@@ -66,7 +66,7 @@ void Application::run() {
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
 
-        // controller.processInput(window_.getGLFWwindow(), deltaTime);
+        controller.processInput(window_.getGLFWwindow(), deltaTime);
 
         uint32_t currentFrame = renderGraph.beginFrame();
 

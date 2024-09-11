@@ -34,6 +34,7 @@ set(SPIRV_CROSS_SHARED ON)
 set(GLM_BUILD_INSTALL ON)
 set(GLFW_INSTALL ON)
 set(SPDLOG_INSTALL ON)
+set(JSON_Install ON)
 
 include(fetch-glfw)
 include(fetch-glm)
@@ -145,6 +146,7 @@ if (GRAPHICS_LAB_INSTALL)
     )
 
     install(DIRECTORY include/ DESTINATION include)
+    install(DIRECTORY ${INCLUDE} DESTINATION include)
 
     # Generate a Config file for find_package()
     include(CMakePackageConfigHelpers)
