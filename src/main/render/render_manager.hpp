@@ -4,8 +4,8 @@
 #include "passes/render_pass_register.hpp"
 
 #include "passes/3d_scene_pass.hpp"
-#include "passes/project_render_pass.hpp"
 #include "passes/imgui_pass.hpp"
+#include "passes/project_render_pass.hpp"
 
 #include "controller/controller.hpp"
 

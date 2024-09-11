@@ -6,10 +6,10 @@
 #include "render_pass_register.hpp"
 
 class ProjectRenderPass : public RenderPassDeclarationBase {
-private:
+  private:
     SimpleRenderSystem<> *simple_render_system;
 
-public:
+  public:
     ProjectRenderPass(SceneTree::VklSceneTree &sceneTree) : RenderPassDeclarationBase(sceneTree) {
     }
 
@@ -17,7 +17,8 @@ public:
         auto subgraph_pass_desc = descriptor.pass<RenderGraphSubgraphPass>("project_subgraph");
         subgraph_pass_desc->renderGraphDescriptor = new RenderGraphDescriptor;
 
-        auto render_texture = subgraph_pass_desc->renderGraphDescriptor->attachment<RenderGraphTextureAttachment>("project_render_result");
+        auto render_texture = subgraph_pass_desc->renderGraphDescriptor->attachment<RenderGraphTextureAttachment>(
+            "project_render_result");
         render_texture->clear = true;
         render_texture->isSwapChain = false;
         render_texture->input_flag = true;
@@ -25,33 +26,34 @@ public:
         render_texture->width = 1024;
         render_texture->height = 1024;
 
-        auto render_depth_texture = subgraph_pass_desc->renderGraphDescriptor->attachment<RenderGraphTextureAttachment>("project_render_depth");
+        auto render_depth_texture =
+            subgraph_pass_desc->renderGraphDescriptor->attachment<RenderGraphTextureAttachment>("project_render_depth");
         render_depth_texture->clear = true;
         render_depth_texture->type =
-                RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment;
+            RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment;
         render_depth_texture->isSwapChain = false;
         render_depth_texture->input_flag = false;
         render_depth_texture->format = sceneTree_.device_.findSupportedFormat(
-                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
-                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
         render_depth_texture->width = 1024;
         render_depth_texture->height = 1024;
 
-        auto project_render_pass = subgraph_pass_desc->renderGraphDescriptor->pass<RenderGraphRenderPass>("project_subgraph_pass");
+        auto project_render_pass =
+            subgraph_pass_desc->renderGraphDescriptor->pass<RenderGraphRenderPass>("project_subgraph_pass");
         project_render_pass->outTextureAttachmentDescriptors.push_back(render_texture);
         project_render_pass->outTextureAttachmentDescriptors.push_back(render_depth_texture);
         project_render_pass->width = 1024;
         project_render_pass->height = 1024;
-
     };
 
     virtual void instanceStage(RenderGraph &renderGraph) final {
         auto simple_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("project_subgraph_pass");
 
         simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
-                renderGraph.device_, "project_simple_render_system",
-                {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            renderGraph.device_, "project_simple_render_system",
+            {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+             {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             GlobalUbo ubo{};
@@ -74,11 +76,11 @@ public:
                 }
 
                 FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                        .frameIndex = static_cast<int>(frame_index) % 2,
-                        .frameTime = 0,
-                        .commandBuffer = commandBuffer,
-                        .camera = sceneTree_.active_camera->camera,
-                        .model = *node_mesh->mesh.get(),
+                    .frameIndex = static_cast<int>(frame_index) % 2,
+                    .frameTime = 0,
+                    .commandBuffer = commandBuffer,
+                    .camera = sceneTree_.active_camera->camera,
+                    .model = *node_mesh->mesh.get(),
                 };
 
                 simple_render_system->renderObject(frameInfo);

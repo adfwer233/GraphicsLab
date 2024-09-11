@@ -8,7 +8,7 @@
 
 #include "ui/render_resources.hpp"
 
-struct mystruct: public Reflectable {
+struct mystruct : public Reflectable {
     glm::vec3 pos;
 
     ReflectDataType reflect() override {
@@ -105,7 +105,7 @@ class ProjectWidgetComponent : public UIComponent {
             ImGui::Text("Project Functions");
 
             if (uiState_.project != nullptr) {
-                for (auto [name, erased]: uiState_.project->reflect()) {
+                for (auto [name, erased] : uiState_.project->reflect()) {
                     if (not erased.get()) {
                         if (ImGui::Button(name.c_str())) {
                             erased.call();

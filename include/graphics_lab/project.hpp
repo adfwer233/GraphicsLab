@@ -18,11 +18,9 @@ class IGraphicsLabProject : public Reflectable {
     virtual void tick() = 0;
 
     virtual ReflectDataType reflect() {
-        return {
-                {"tick", TypeErasedValue(&IGraphicsLabProject::tick, this)}
-        };
+        return {{"tick", TypeErasedValue(&IGraphicsLabProject::tick, this)}};
     }
 
-protected:
+  protected:
     GraphicsLabContext context;
 };

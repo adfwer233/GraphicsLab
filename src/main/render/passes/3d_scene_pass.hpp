@@ -50,9 +50,9 @@ class ScenePass : public RenderPassDeclarationBase {
              {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         raw_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
-                renderGraph.device_, "raw_render_system",
-                {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            renderGraph.device_, "raw_render_system",
+            {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+             {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             GlobalUbo ubo{};
@@ -88,7 +88,9 @@ class ScenePass : public RenderPassDeclarationBase {
                     .model = *node_mesh->mesh.get(),
                 };
 
-                if (node_mesh->mesh->textures_.size() >= simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors.size()) {
+                if (node_mesh->mesh->textures_.size() >=
+                    simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
+                        .size()) {
                     simple_render_system->renderObject(frameInfo);
                 } else {
                     raw_render_system->renderObject(frameInfo);

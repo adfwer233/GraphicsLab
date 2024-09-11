@@ -8,13 +8,12 @@
 using json = nlohmann::json;
 
 /**
-* Example of writing custom reflector
-*/
+ * Example of writing custom reflector
+ */
 
-template<>
-struct CustomReflector<glm::vec3> {
+template <> struct CustomReflector<glm::vec3> {
 
-    static json serialization(const glm::vec3& vec) {
+    static json serialization(const glm::vec3 &vec) {
         json j = json::array();
         j.push_back(vec.x);
         j.push_back(vec.y);
@@ -23,9 +22,8 @@ struct CustomReflector<glm::vec3> {
         return j;
     }
 
-    static glm::vec3 deserialization(const json& j) {
+    static glm::vec3 deserialization(const json &j) {
         auto tmp = j.get<std::array<float, 3>>();
         return {tmp[0], tmp[1], tmp[2]};
     }
-
 };

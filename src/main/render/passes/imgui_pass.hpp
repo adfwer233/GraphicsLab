@@ -38,7 +38,8 @@ class ImguiPass : public RenderPassDeclarationBase {
         auto render_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("render_result");
         uiManager_.renderResources.sceneRenderTexture = render_texture_object->getImguiTextures();
 
-        // auto project_texture_object = renderGraph.getAttachment<RenderGraphTextureAttachment>("project_render_result");
+        // auto project_texture_object =
+        // renderGraph.getAttachment<RenderGraphTextureAttachment>("project_render_result");
         // uiManager_.renderResources.projectRenderTexture = project_texture_object->getImguiTextures();
 
         auto imgui_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("imgui_render_pass");

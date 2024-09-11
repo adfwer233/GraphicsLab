@@ -9,9 +9,9 @@ class ProjectRenderWidgetComponent : public UIComponent {
     UIState &uiState_;
     RenderResources &renderResources_;
 
-public:
+  public:
     ProjectRenderWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, RenderResources &renderResources)
-            : UIComponent(sceneTree), uiState_(uiState), renderResources_(renderResources) {
+        : UIComponent(sceneTree), uiState_(uiState), renderResources_(renderResources) {
     }
 
     void render() final {

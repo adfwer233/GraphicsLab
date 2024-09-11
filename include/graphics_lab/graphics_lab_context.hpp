@@ -4,6 +4,6 @@
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
 struct GraphicsLabContext {
-    VklDevice* device;
-    SceneTree::VklSceneTree* sceneTree;
+    VklDevice *device;
+    SceneTree::VklSceneTree *sceneTree;
 };

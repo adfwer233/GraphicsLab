@@ -78,7 +78,7 @@ struct UIState {
 
     ProjectStatus projectStatus;
     ProjectManager projectManager;
-    IGraphicsLabProject* project = nullptr;
+    IGraphicsLabProject *project = nullptr;
 
     UIState() {
         spdlog::critical("ui state constructed");

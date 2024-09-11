@@ -28,8 +28,9 @@ struct RenderGraphFrameSyncBeginPass {};
 struct RenderGraphFrameSyncEndPass {};
 
 using RenderGraphPassTypeList =
-    MetaProgramming::TypeList<RenderGraphRenderPass, RenderGraphComputePass, RenderGraphSubgraphPass, RenderGraphImagePresentPass,
-                              RenderGraphTransferPass, RenderGraphFrameSyncBeginPass, RenderGraphFrameSyncEndPass>;
+    MetaProgramming::TypeList<RenderGraphRenderPass, RenderGraphComputePass, RenderGraphSubgraphPass,
+                              RenderGraphImagePresentPass, RenderGraphTransferPass, RenderGraphFrameSyncBeginPass,
+                              RenderGraphFrameSyncEndPass>;
 
 struct RenderGraphTextureAttachment {};
 struct RenderGraphStorageBufferAttachment {};
@@ -218,9 +219,7 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
 };
 
 struct RenderGraph;
-template <> struct RenderGraphPassDerived<RenderGraphSubgraphPass>: public RenderGraphPassBase {
-
-};
+template <> struct RenderGraphPassDerived<RenderGraphSubgraphPass> : public RenderGraphPassBase {};
 
 template <> struct RenderGraphPassDescriptor<RenderGraphRenderPass> : public RenderGraphPassDescriptorBase {
     uint32_t width, height;
@@ -233,8 +232,8 @@ template <> struct RenderGraphPassDescriptor<RenderGraphRenderPass> : public Ren
 };
 
 struct RenderGraphDescriptor;
-template <> struct RenderGraphPassDescriptor<RenderGraphSubgraphPass>: public RenderGraphPassDescriptorBase {
-    RenderGraphDescriptor* renderGraphDescriptor;
+template <> struct RenderGraphPassDescriptor<RenderGraphSubgraphPass> : public RenderGraphPassDescriptorBase {
+    RenderGraphDescriptor *renderGraphDescriptor;
 };
 
 template <> struct RenderGraphPassDescriptor<RenderGraphImagePresentPass> : public RenderGraphPassDescriptorBase {
@@ -468,11 +467,13 @@ struct RenderGraph {
         return nullptr;
     }
 
-    void expandSubgraphDescriptor(RenderGraphDescriptor* renderGraphDescriptor) {
-        constexpr uint32_t id = MetaProgramming::TypeListFunctions::IndexOf<RenderGraphPassTypeList, RenderGraphSubgraphPass>::value;
+    void expandSubgraphDescriptor(RenderGraphDescriptor *renderGraphDescriptor) {
+        constexpr uint32_t id =
+            MetaProgramming::TypeListFunctions::IndexOf<RenderGraphPassTypeList, RenderGraphSubgraphPass>::value;
         for (auto pass_desc : std::get<id>(renderGraphDescriptor->renderGraphPassDescriptorPtrVectors)) {
             constructor_copy_pass_detail<RenderGraphPassTypeList::size - 1>(pass_desc->renderGraphDescriptor);
-            constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(pass_desc->renderGraphDescriptor);
+            constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(
+                pass_desc->renderGraphDescriptor);
         }
     }
 

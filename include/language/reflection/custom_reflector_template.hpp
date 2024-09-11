@@ -1,4 +1,3 @@
 #pragma once
 
-template<typename>
-struct CustomReflector {};
+template <typename> struct CustomReflector {};
