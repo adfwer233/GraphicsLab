@@ -2,7 +2,7 @@
 
 #include <concepts>
 
-#include "meta_programming/multi_dim_array.hpp"
+#include "language/meta_programming/multi_dim_array.hpp"
 
 template <std::floating_point T, size_t... DimLengths> class Polynomial {
     MetaProgramming::MultiDimensionalArray<T, DimLengths...> data;

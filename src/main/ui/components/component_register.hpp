@@ -1,5 +1,5 @@
 #pragma once
 
-#include "meta_programming/type_register/type_register.hpp"
+#include "language/meta_programming/type_register/type_register.hpp"
 
 struct MainComponentRegisterTag {};

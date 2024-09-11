@@ -218,6 +218,6 @@ class TensorProductBezierSurface : GeometrySurface {
     void initializePeriodicBoundary();
 };
 
-#include "meta_programming/type_register/type_register.hpp"
+#include "language/meta_programming/type_register/type_register.hpp"
 using namespace MetaProgramming;
 META_REGISTER_TYPE(RenderableGeometryTag, TensorProductBezierSurface);

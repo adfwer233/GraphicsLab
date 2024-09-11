@@ -1,5 +1,5 @@
-#include "meta_programming/static_for_loop.hpp"
-#include "meta_programming/name_of.hpp"
+#include "language/meta_programming/static_for_loop.hpp"
+#include "language/meta_programming/name_of.hpp"
 
 #include "gtest/gtest.h"
 

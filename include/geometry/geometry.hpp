@@ -5,7 +5,7 @@
 #include "geometry/surface/surface.hpp"
 #include "geometry/vertex/vertex.hpp"
 
-#include "meta_programming/type_list.hpp"
+#include "language/meta_programming/type_list.hpp"
 
 using BuiltinVertexTypes = MetaProgramming::TypeList<Vertex2D, Vertex2DRaw, Vertex3D, Vertex3DRaw>;
 using BuiltinGeometryTypes =

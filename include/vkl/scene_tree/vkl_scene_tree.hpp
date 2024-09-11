@@ -1,10 +1,10 @@
 #pragma once
 
 #include "geometry/surface/surface.hpp"
-#include "meta_programming/type_list.hpp"
+#include "language/meta_programming/type_list.hpp"
 #include "vkl/scene/vkl_model.hpp"
 
-#include "reflection/reflectors.hpp"
+#include "language/reflection/reflectors.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

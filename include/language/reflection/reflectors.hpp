@@ -8,13 +8,13 @@
 #include <map>
 #include <format>
 
-#include "meta_programming/type_list.hpp"
-#include "meta_programming/type_traits/is_function.hpp"
+#include "language/meta_programming/type_list.hpp"
+#include "language/meta_programming/type_traits/is_function.hpp"
 
-#include "meta_programming/type_traits/is_vector.hpp"
-#include "meta_programming/type_traits/is_map.hpp"
+#include "language/meta_programming/type_traits/is_vector.hpp"
+#include "language/meta_programming/type_traits/is_map.hpp"
 
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 
 #include "builtin_reflectors.hpp"
 

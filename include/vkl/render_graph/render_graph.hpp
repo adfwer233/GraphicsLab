@@ -6,13 +6,13 @@
 #include <vector>
 
 #include "../core/vkl_renderer.hpp"
-#include "meta_programming/type_list.hpp"
+#include "language/meta_programming/type_list.hpp"
 
 #include "vkl/core/vkl_framebuffer.hpp"
 #include "vkl/core/vkl_render_pass.hpp"
 #include "vkl/core/vkl_texture.hpp"
 
-#include "coroutine/generator.hpp"
+#include "language/coroutine/generator.hpp"
 
 #include "vkl/core/vkl_shader_module.hpp"
 #include "vkl/system/render_system/render_system_base.hpp"

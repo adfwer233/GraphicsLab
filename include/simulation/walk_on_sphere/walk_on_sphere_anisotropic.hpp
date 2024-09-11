@@ -2,7 +2,7 @@
 
 #include "geometry/surface/tensor_product_bezier.hpp"
 
-#include "meta_programming/multi_dim_array.hpp"
+#include "language/meta_programming/multi_dim_array.hpp"
 
 class AnisotropicWalkOnSphere {
   private:
