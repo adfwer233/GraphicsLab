@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vkl/core/vkl_descriptor.hpp"
+
 class BaseRenderSystem {
   public:
     std::unique_ptr<VklDescriptorSetLayout> descriptorSetLayout;

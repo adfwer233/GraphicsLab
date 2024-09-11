@@ -52,14 +52,13 @@ class ProjectWidgetComponent : public UIComponent {
             ImGui::Text("Current Project: %s", uiState_.projectStatus.name.c_str());
             for (auto info : uiState_.projectStatus.buildConfigs) {
                 if (ImGui::TreeNode(std::format("Config {}", info.buildType).c_str())) {
-                    if (ImGui::Button(std::format("Run {}", info.buildType).c_str())) {
-                        ProjectManager projectManager;
+                    if (ImGui::Button(std::format("Load {}", info.buildType).c_str())) {
 
-                        if (projectManager.loadProject(info.dllPath)) {
-                            IGraphicsLabProject *project = projectManager.getProject();
-                            if (project) {
-                                project->tick();
-                                delete project;
+                        if (uiState_.projectManager.loadProject(info.dllPath)) {
+                            uiState_.project = uiState_.projectManager.getProject();
+                            if (uiState_.project) {
+                                uiState_.project->tick();
+                                uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_));
                             } else {
                                 spdlog::error("load project failed");
                             }
@@ -93,6 +92,18 @@ class ProjectWidgetComponent : public UIComponent {
                 mystruct b;
                 b.deserialization(j1);
                 spdlog::info(b.serialization().dump());
+            }
+
+            ImGui::Text("Project Functions");
+
+            if (uiState_.project != nullptr) {
+                for (auto [name, erased]: uiState_.project->reflect()) {
+                    if (not erased.get()) {
+                        if (ImGui::Button(name.c_str())) {
+                            erased.call();
+                        }
+                    }
+                }
             }
         }
         ImGui::End();

@@ -146,7 +146,13 @@ if (GRAPHICS_LAB_INSTALL)
     )
 
     install(DIRECTORY include/ DESTINATION include)
-    install(DIRECTORY ${INCLUDE} DESTINATION include)
+    install(FILES
+            ${imgui_fetch_SOURCE_DIR}/imgui.h
+            ${imgui_fetch_SOURCE_DIR}/imconfig.h
+            ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_vulkan.h
+            DESTINATION include)
+    install(DIRECTORY ${Boost_INCLUDE_DIRS} DESTINATION include/boost)
+    install(FILES ${stb_SOURCE_DIR}/stb_image.h DESTINATION include)
 
     # Generate a Config file for find_package()
     include(CMakePackageConfigHelpers)

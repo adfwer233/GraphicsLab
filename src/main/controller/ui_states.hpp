@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "language/reflection/reflectors.hpp"
+#include "project/project_manager.hpp"
 
 struct UIState {
     enum class RenderMode {
@@ -76,6 +77,8 @@ struct UIState {
     };
 
     ProjectStatus projectStatus;
+    ProjectManager projectManager;
+    IGraphicsLabProject* project = nullptr;
 
     UIState() {
         spdlog::critical("ui state constructed");
