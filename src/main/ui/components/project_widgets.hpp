@@ -49,6 +49,14 @@ class ProjectWidgetComponent : public UIComponent {
                 }
             }
 
+            if (uiState_.project != nullptr) {
+                ImGui::SameLine();
+                if (ImGui::Button("Unload Project")) {
+                    uiState_.project = nullptr;
+                    uiState_.projectManager.unloadProject();
+                }
+            }
+
             ImGui::Text("Current Project: %s", uiState_.projectStatus.name.c_str());
             for (auto info : uiState_.projectStatus.buildConfigs) {
                 if (ImGui::TreeNode(std::format("Config {}", info.buildType).c_str())) {
