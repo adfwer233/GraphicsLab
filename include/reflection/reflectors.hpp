@@ -15,6 +15,9 @@
 #include "meta_programming/type_traits/is_map.hpp"
 
 #include <nlohmann/json.hpp>
+
+#include "builtin_reflectors.hpp"
+
 using json = nlohmann::json;
 
 using SerializableTypes = MetaProgramming::TypeList<int, float, std::string>;
@@ -59,6 +62,8 @@ struct DispatchedType: public DispatchedTypeBase {
         auto ptr = reinterpret_cast<T*>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
             return T::ReflectImpl::serialize(*ptr);
+        } else if constexpr (CustomReflectable<T>) {
+            return CustomReflector<T>::serialization(*ptr);
         } else if constexpr (ReflectableDerived<T>) {
             return ptr->serialization();
         } else {
@@ -89,6 +94,8 @@ struct DispatchedType: public DispatchedTypeBase {
         auto ptr = reinterpret_cast<T*>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
             return T::ReflectImpl::deserialize(j);
+        } else if constexpr (CustomReflectable<T>) {
+            return CustomReflector<T>::deserialization(j);
         } else if constexpr (ReflectableDerived<T>) {
             T t;
             t.deserialization(j);
@@ -309,7 +316,7 @@ struct TypeDispatcher {
         }
     }
 
-private:
+  private:
     template <typename TargetType, typename... RemainingTypes>
     DispatchedTypeBase* tryRecoverType(void* ptr, type_info& typeInfo, MetaProgramming::TypeList<TargetType, RemainingTypes...>) {
         // Attempt to compare the type_info
