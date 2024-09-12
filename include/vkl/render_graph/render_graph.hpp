@@ -260,14 +260,12 @@ struct RenderGraphDescriptor {
     std::vector<RenderGraphPassDescriptorBase *> passDescriptors;
     std::vector<RenderGraphAttachmentDescriptorBase *> attachmentDescriptors;
 
-
     Generator<RenderGraphPassDescriptorBase *> all_pass_descriptors() {
-        return renderGraphPassDescriptorPtrVectors.traverse_as<RenderGraphPassDescriptorBase*>();
-
+        return renderGraphPassDescriptorPtrVectors.traverse_as<RenderGraphPassDescriptorBase *>();
     }
 
     Generator<RenderGraphAttachmentDescriptorBase *> all_attachment_descriptors() {
-        return renderGraphAttachmentDescriptorPtrVectors.traverse_as<RenderGraphAttachmentDescriptorBase*>();
+        return renderGraphAttachmentDescriptorPtrVectors.traverse_as<RenderGraphAttachmentDescriptorBase *>();
     }
 
     template <RenderGraphPass PassType> RenderGraphPassDescriptor<PassType> *pass(const std::string &name) {
@@ -289,7 +287,8 @@ struct RenderGraphDescriptor {
 
     template <RenderGraphAttachment AttachmentType>
     RenderGraphAttachmentDescriptor<AttachmentType> *getAttachment(const std::string &name) {
-        for (auto att :renderGraphAttachmentDescriptorPtrVectors.traverse<RenderGraphAttachmentDescriptor<AttachmentType> *>()) {
+        for (auto att :
+             renderGraphAttachmentDescriptorPtrVectors.traverse<RenderGraphAttachmentDescriptor<AttachmentType> *>()) {
             if (att->name == name)
                 return att;
         }
@@ -313,7 +312,6 @@ struct RenderGraph {
     VkExtent2D extent_;
 
     RenderGraphDescriptor *renderGraphDescriptor_;
-
 
     uint32_t beginFrame() {
         auto result = swapChain_->acquireNextImage(&current_image_index);
