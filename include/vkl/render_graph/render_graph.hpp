@@ -7,6 +7,7 @@
 
 #include "../core/vkl_renderer.hpp"
 #include "language/meta_programming/type_list.hpp"
+#include "language/meta_programming/type_list_vector.hpp"
 
 #include "vkl/core/vkl_framebuffer.hpp"
 #include "vkl/core/vkl_render_pass.hpp"
@@ -249,9 +250,9 @@ template <> struct RenderGraphPassDescriptor<RenderGraphImagePresentPass> : publ
 
 struct RenderGraphDescriptor {
     using RenderGraphPassDescriptorPtrVectorsType =
-        RenderGraphPassTypeList::monad<RenderGraphPassDescriptor>::to_ptr::monad<std::vector>::to<std::tuple>;
+        RenderGraphPassTypeList::monad<RenderGraphPassDescriptor>::to_ptr::to<MetaProgramming::TypeListVector>;
     using RenderGraphAttachmentDescriptorPtrVectorsType = RenderGraphAttachmentTypeList::monad<
-        RenderGraphAttachmentDescriptor>::to_ptr::monad<std::vector>::to<std::tuple>;
+        RenderGraphAttachmentDescriptor>::to_ptr::to<MetaProgramming::TypeListVector>;
 
     RenderGraphPassDescriptorPtrVectorsType renderGraphPassDescriptorPtrVectors;
     RenderGraphAttachmentDescriptorPtrVectorsType renderGraphAttachmentDescriptorPtrVectors;
@@ -259,40 +260,21 @@ struct RenderGraphDescriptor {
     std::vector<RenderGraphPassDescriptorBase *> passDescriptors;
     std::vector<RenderGraphAttachmentDescriptorBase *> attachmentDescriptors;
 
-    template <size_t index> Generator<RenderGraphPassDescriptorBase *> all_pass_descriptors_detail() {
-        for (auto pass_desc : std::get<index>(renderGraphPassDescriptorPtrVectors))
-            co_yield (RenderGraphPassDescriptorBase *) pass_desc;
-        if constexpr (index > 0) {
-            for (auto pass_desc : all_pass_descriptors_detail<index - 1>()) {
-                co_yield pass_desc;
-            }
-        }
-    }
-
-    template <size_t index> Generator<RenderGraphAttachmentDescriptorBase *> all_attachment_descriptors_detail() {
-        for (auto att_desc : std::get<index>(renderGraphAttachmentDescriptorPtrVectors))
-            co_yield (RenderGraphAttachmentDescriptorBase *) att_desc;
-        if constexpr (index > 0) {
-            for (auto att_desc : all_attachment_descriptors_detail<index - 1>()) {
-                co_yield att_desc;
-            }
-        }
-    }
 
     Generator<RenderGraphPassDescriptorBase *> all_pass_descriptors() {
-        return all_pass_descriptors_detail<RenderGraphPassTypeList::size - 1>();
+        return renderGraphPassDescriptorPtrVectors.traverse_as<RenderGraphPassDescriptorBase*>();
+
     }
 
     Generator<RenderGraphAttachmentDescriptorBase *> all_attachment_descriptors() {
-        return all_attachment_descriptors_detail<RenderGraphAttachmentTypeList::size - 1>();
+        return renderGraphAttachmentDescriptorPtrVectors.traverse_as<RenderGraphAttachmentDescriptorBase*>();
     }
 
     template <RenderGraphPass PassType> RenderGraphPassDescriptor<PassType> *pass(const std::string &name) {
         auto node = new RenderGraphPassDescriptor<PassType>();
         node->name = name;
-        constexpr uint32_t index =
-            MetaProgramming::TypeListFunctions::IndexOf<RenderGraphPassTypeList, PassType>::value;
-        std::get<index>(renderGraphPassDescriptorPtrVectors).push_back(node);
+        renderGraphPassDescriptorPtrVectors.push_back(node);
+
         return node;
     }
 
@@ -301,17 +283,13 @@ struct RenderGraphDescriptor {
         auto edge = new RenderGraphAttachmentDescriptor<AttachmentType>();
         edge->name = name;
 
-        constexpr uint32_t index =
-            MetaProgramming::TypeListFunctions::IndexOf<RenderGraphAttachmentTypeList, AttachmentType>::value;
-        std::get<index>(renderGraphAttachmentDescriptorPtrVectors).push_back(edge);
+        renderGraphAttachmentDescriptorPtrVectors.push_back(edge);
         return edge;
     }
 
     template <RenderGraphAttachment AttachmentType>
     RenderGraphAttachmentDescriptor<AttachmentType> *getAttachment(const std::string &name) {
-        constexpr uint32_t index =
-            MetaProgramming::TypeListFunctions::IndexOf<RenderGraphAttachmentTypeList, AttachmentType>::value;
-        for (auto att : std::get<index>(renderGraphAttachmentDescriptorPtrVectors)) {
+        for (auto att :renderGraphAttachmentDescriptorPtrVectors.traverse<RenderGraphAttachmentDescriptor<AttachmentType> *>()) {
             if (att->name == name)
                 return att;
         }
@@ -333,6 +311,9 @@ struct RenderGraph {
     uint32_t current_image_index = 0;
 
     VkExtent2D extent_;
+
+    RenderGraphDescriptor *renderGraphDescriptor_;
+
 
     uint32_t beginFrame() {
         auto result = swapChain_->acquireNextImage(&current_image_index);
@@ -405,8 +386,6 @@ struct RenderGraph {
         }
     }
 
-    RenderGraphDescriptor *renderGraphDescriptor_;
-
     static RenderGraphPassBase *pass_desc_to_obj(RenderGraphPassDescriptorBase *descriptor_p) {
         RenderGraphPassBase *res = nullptr;
 
@@ -470,7 +449,7 @@ struct RenderGraph {
     void expandSubgraphDescriptor(RenderGraphDescriptor *renderGraphDescriptor) {
         constexpr uint32_t id =
             MetaProgramming::TypeListFunctions::IndexOf<RenderGraphPassTypeList, RenderGraphSubgraphPass>::value;
-        for (auto pass_desc : std::get<id>(renderGraphDescriptor->renderGraphPassDescriptorPtrVectors)) {
+        for (auto pass_desc : renderGraphDescriptor->renderGraphPassDescriptorPtrVectors.traverse_by_index<id>()) {
             constructor_copy_pass_detail<RenderGraphPassTypeList::size - 1>(pass_desc->renderGraphDescriptor);
             constructor_copy_attachment_detail<RenderGraphAttachmentTypeList::size - 1>(
                 pass_desc->renderGraphDescriptor);
@@ -485,7 +464,7 @@ struct RenderGraph {
         }
 
         auto &obj_vector = std::get<id>(renderGraphPassObjectPtrVectors);
-        for (auto pass_desc : std::get<id>(renderGraphDescriptor->renderGraphPassDescriptorPtrVectors)) {
+        for (auto pass_desc : renderGraphDescriptor->renderGraphPassDescriptorPtrVectors.traverse_by_index<id>()) {
             auto obj_ptr = new RenderGraphPassDerived<T>();
             obj_ptr->descriptor_p = pass_desc;
             obj_ptr->name = pass_desc->name;
@@ -499,7 +478,7 @@ struct RenderGraph {
 
     template <size_t id> void constructor_copy_attachment_detail(RenderGraphDescriptor *renderGraphDescriptor) {
         auto &obj_vector = std::get<id>(renderGraphAttachmentObjectPtrVectors);
-        for (auto att_desc : std::get<id>(renderGraphDescriptor->renderGraphAttachmentDescriptorPtrVectors)) {
+        for (auto att_desc : renderGraphDescriptor->renderGraphAttachmentDescriptorPtrVectors.traverse_by_index<id>()) {
             auto obj_ptr = new RenderGraphAttachmentDerived<
                 typename MetaProgramming::TypeListFunctions::KthOf<RenderGraphAttachmentTypeList, id>::type>();
             obj_ptr->descriptor_p = att_desc;
@@ -521,7 +500,7 @@ struct RenderGraph {
             std::shared_ptr<VklSwapChain> oldSwapChain = std::move(swapChain_);
             swapChain_ = std::make_unique<VklSwapChain>(device_, extent, oldSwapChain);
 
-            if (!oldSwapChain->compareSwapFormats(*swapChain_.get())) {
+            if (!oldSwapChain->compareSwapFormats(*swapChain_)) {
                 throw std::runtime_error("Swap chain image(or depth) format has changed!");
             }
         }
@@ -545,8 +524,10 @@ struct RenderGraph {
         }
     }
 
-    explicit RenderGraph(VklDevice &device, VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor)
-        : device_(device), extent_(extent) {
+    /**
+     * Reconstruct the render graph with given descriptor
+     */
+    void reconstructRenderGraph(VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor) {
         renderGraphDescriptor_ = renderGraphDescriptor;
         recreateSwapChain(extent);
 
@@ -582,6 +563,12 @@ struct RenderGraph {
         }
 
         createCommandBuffers();
+    }
+
+    explicit RenderGraph(VklDevice &device, VkExtent2D extent, RenderGraphDescriptor *renderGraphDescriptor)
+        : device_(device), extent_(extent) {
+
+        reconstructRenderGraph(extent, renderGraphDescriptor);
     }
 
     ~RenderGraph() {
