@@ -13,6 +13,8 @@
 #include "vkl_camera.hpp"
 #include "vkl_material.hpp"
 
+#include "glm/gtc/quaternion.hpp"
+
 namespace SceneTree {
 enum class NodeType {
     InternalNode,
@@ -50,6 +52,29 @@ template <SupportedLightTypes LightType> consteval size_t light_type_index() {
 
 struct VklSceneTree;
 
+struct GraphicsTransformation: Reflectable {
+    glm::vec3 translation = glm::vec3(0.0f);
+    glm::vec3 scaling = glm::vec3(1.0f);
+    glm::quat rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);;
+
+    [[nodiscard]] glm::mat4 getTransformation() const {
+        glm::mat4 model(1.0f);
+        model = glm::translate(model, translation);
+        model = glm::rotate(model, rotation.w, glm::axis(rotation));
+        model = glm::scale(model, scaling);
+
+        return model;
+    }
+
+    ReflectDataType reflect() override {
+        return {
+                {"translation", TypeErasedValue(&translation)},
+                {"scaling", TypeErasedValue(&scaling)},
+                {"rotation", TypeErasedValue(&rotation)}
+        };
+    }
+};
+
 struct TreeNode : public Reflectable {
     std::vector<std::unique_ptr<TreeNode>> children;
     std::string name;
@@ -70,9 +95,17 @@ struct TreeNode : public Reflectable {
 };
 
 struct InternalNode : public TreeNode {
+    ReflectDataType reflect() override {
+        auto result = TreeNode::reflect();
+        result.emplace("transformation", TypeErasedValue(&transformation));
+        return result;
+    }
+
     NodeType type() override {
         return NodeType::InternalNode;
     }
+
+    GraphicsTransformation transformation;
 };
 
 template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeNode {
@@ -80,9 +113,16 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         return NodeType::GeometryNode;
     }
 
+    ReflectDataType reflect() override {
+        auto result = TreeNode::reflect();
+        result.emplace("transformation", TypeErasedValue(&transformation));
+        return result;
+    }
+
     GeometryType data;
 
     size_t material_index;
+    GraphicsTransformation transformation;
 };
 
 template <SupportedLightTypes LightTypes> struct LightNode : public TreeNode {
@@ -105,7 +145,7 @@ struct CameraNode : public TreeNode {
         camera.position += glm::vec3{0, 0, 10};
     }
 
-    virtual ReflectDataType reflect() override {
+    ReflectDataType reflect() override {
         auto base_reflect = TreeNode::reflect();
         base_reflect.emplace("position", TypeErasedValue(&camera.position));
         base_reflect.emplace("move", TypeErasedValue(&CameraNode::move, this));
@@ -310,6 +350,13 @@ struct VklSceneTree {
         }
     }
 
+    template <SupportedGeometryType GeometryType>
+    Generator<std::pair<GeometryNode<GeometryType>*, glm::mat4>> traverse_geometry_nodes_with_trans() {
+        for (auto [node, trans] : traverse_geometry_nodes_with_trans_internal<GeometryType>(root.get())) {
+            co_yield {node, trans};
+        }
+    }
+
     ~VklSceneTree() {
         for (auto &mat : materials) {
             for (auto tex : mat.textures) {
@@ -328,6 +375,25 @@ struct VklSceneTree {
         for (auto &child : node->children) {
             for (auto geometryNode : traverse_geometry_nodes_internal<GeometryType>(child.get())) {
                 co_yield geometryNode;
+            }
+        }
+    }
+
+    template <SupportedGeometryType GeometryType>
+    Generator<std::pair<GeometryNode<GeometryType>*, glm::mat4>> traverse_geometry_nodes_with_trans_internal(TreeNode *node, glm::mat4 currentTransformation) {
+        glm::mat4 trans = currentTransformation;
+
+        if (auto internal_node = dynamic_cast<InternalNode *>(node)) {
+            trans = currentTransformation * internal_node->transformation.getTransformation();
+        }
+
+        if (auto geometryNode = dynamic_cast<GeometryNode<GeometryType> *>(node)) {
+            co_yield {geometryNode, currentTransformation * geometryNode->transformation.getTransformation()};
+        }
+
+        for (auto &child : node->children) {
+            for (auto [geometryNode, nodeTransf] : traverse_geometry_nodes_internal<GeometryType>(child.get(), trans)) {
+                co_yield {geometryNode, nodeTransf};
             }
         }
     }

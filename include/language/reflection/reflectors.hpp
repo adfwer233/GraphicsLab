@@ -241,11 +241,25 @@ struct TypeErasedValue {
     DispatchedTypeBase *dispatched;
     TypeErasedValue() = default;
 
+    bool isReflectable = false;
+
+    template<typename T>
+    bool isObjectReflectable() {
+        bool test = std::is_base_of<Reflectable, T>::value;
+        if (test) {
+            int x = 0;
+        }
+        return std::is_base_of<Reflectable, T>::value;
+    }
+
     // Constructor for data members
     template <typename T> TypeErasedValue(T *value) {
         type_info_func = [value]() -> const std::type_info & { return typeid(T); };
         get_ptr_func = [value]() -> void * { return static_cast<void *>(value); };
         dispatched = new DispatchedType<T>(value);
+
+        isReflectable = isObjectReflectable<T>();
+
         call_func = nullptr; // Not a function
     }
 

@@ -22,6 +22,30 @@ class SceneTreeComponent : public UIComponent {
     }
 
   private:
+    void showReflectable(Reflectable* reflectableObject) {
+        auto rfl = reflectableObject->reflect();
+        for (auto &[key, value] : reflectableObject->reflect()) {
+            if (value.get()) {
+                if (value.type() == typeid(std::string)) {
+                    auto str_ptr = reinterpret_cast<std::string *>(value.get());
+                    ImGui::Text(std::format("{}: {}", key, *str_ptr).c_str());
+                }
+                if (value.type() == typeid(glm::vec3)) {
+                    auto &vec = *reinterpret_cast<glm::vec3 *>(value.get());
+                    ImGui::Text(std::format("{}: {} {} {}", key, vec.x, vec.y, vec.z).c_str());
+                }
+
+                if (value.isReflectable) {
+                    showReflectable(static_cast<Reflectable*>(value.get()));
+                }
+            } else {
+                if (ImGui::Button(std::format("{}", key).c_str())) {
+                    value.call();
+                }
+            }
+        }
+    }
+
     void RenderTreeNode(SceneTree::TreeNode *node) {
         if (!node)
             return;
@@ -76,22 +100,8 @@ class SceneTreeComponent : public UIComponent {
                 }
             }
 
-            for (auto &[key, value] : node->reflect()) {
-                if (value.get()) {
-                    if (value.type() == typeid(std::string)) {
-                        auto str_ptr = reinterpret_cast<std::string *>(value.get());
-                        ImGui::Text(std::format("{}: {}", key, *str_ptr).c_str());
-                    }
-                    if (value.type() == typeid(glm::vec3)) {
-                        auto &vec = *reinterpret_cast<glm::vec3 *>(value.get());
-                        ImGui::Text(std::format("{}: {} {} {}", key, vec.x, vec.y, vec.z).c_str());
-                    }
-                } else {
-                    if (ImGui::Button(std::format("{}: {}", node->name, key).c_str())) {
-                        value.call();
-                    }
-                }
-            }
+            if (auto internal_node = dynamic_cast<SceneTree::InternalNode *>(node))
+                showReflectable(internal_node);
 
             // Recursively render child nodes
             for (const auto &child : node->children) {
