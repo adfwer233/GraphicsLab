@@ -12,7 +12,7 @@ class ScenePass : public RenderPassDeclarationBase {
   private:
     SimpleRenderSystem<> *simple_render_system;
     SimpleRenderSystem<> *raw_render_system;
-    LineRenderSystem<>* line_render_system;
+    LineRenderSystem<> *line_render_system;
 
     SceneTree::GeometryNode<Wire3D> boxNode;
 
@@ -62,10 +62,9 @@ class ScenePass : public RenderPassDeclarationBase {
              {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = simple_render_pass_obj->getRenderSystem<LineRenderSystem<>>(
-                renderGraph.device_, "line_render_system",
-                {{std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
-
+            renderGraph.device_, "line_render_system",
+            {{std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+             {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             GlobalUbo ubo{};
@@ -124,11 +123,11 @@ class ScenePass : public RenderPassDeclarationBase {
                 }
 
                 FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
-                        .frameIndex = static_cast<int>(frame_index) % 2,
-                        .frameTime = 0,
-                        .commandBuffer = commandBuffer,
-                        .camera = sceneTree_.active_camera->camera,
-                        .model = *wire_mesh->mesh.get(),
+                    .frameIndex = static_cast<int>(frame_index) % 2,
+                    .frameTime = 0,
+                    .commandBuffer = commandBuffer,
+                    .camera = sceneTree_.active_camera->camera,
+                    .model = *wire_mesh->mesh.get(),
                 };
 
                 line_render_system->renderObject(frameInfo);

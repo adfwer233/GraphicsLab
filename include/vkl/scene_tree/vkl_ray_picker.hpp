@@ -1,18 +1,20 @@
 #pragma once
 
-#include "vkl_scene_tree.hpp"
 #include "glm/glm.hpp"
+#include "vkl_scene_tree.hpp"
 
 namespace SceneTree {
 
 class Ray {
-public:
+  public:
     glm::vec3 base;
     glm::vec3 dir;
 
-    Ray() {}
+    Ray() {
+    }
 
-    Ray(const glm::vec3 &t_base, const glm::vec3 &t_dir) : base(t_base), dir(t_dir) {}
+    Ray(const glm::vec3 &t_base, const glm::vec3 &t_dir) : base(t_base), dir(t_dir) {
+    }
 
     glm::vec3 at(float t) const {
         return base + t * dir;
@@ -25,7 +27,7 @@ public:
 
     auto ray_triangle_intersection(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2) const {
 
-        ray_triangle_intersection_result result {false, 0, 0, 0, 0};
+        ray_triangle_intersection_result result{false, 0, 0, 0, 0};
 
         using T = decltype(result);
 
@@ -78,13 +80,13 @@ public:
     }
 };
 
-
 class RayPicker {
-public:
-    RayPicker (VklSceneTree& sceneTree, Ray &ray): sceneTree_(sceneTree), ray_(ray) {}
+  public:
+    RayPicker(VklSceneTree &sceneTree, Ray &ray) : sceneTree_(sceneTree), ray_(ray) {
+    }
 
     struct RayPickingResult {
-        TreeNode* hitGeometryNode;
+        TreeNode *hitGeometryNode;
         float param;
         float u, v, w;
     };
@@ -93,23 +95,20 @@ public:
 
         std::map<float, RayPickingResult> param_result_map;
 
-        for (auto [node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>() ) {
+        for (auto [node, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
             int x = 0;
-            for (auto face: node->data.indices) {
-                auto int_res = ray_.ray_triangle_intersection(
-                        trans * glm::vec4(node->data.vertices[face.i].position, 1.0f),
-                        trans * glm::vec4(node->data.vertices[face.j].position, 1.0f),
-                        trans * glm::vec4(node->data.vertices[face.k].position, 1.0f)
-                    );
+            for (auto face : node->data.indices) {
+                auto int_res =
+                    ray_.ray_triangle_intersection(trans * glm::vec4(node->data.vertices[face.i].position, 1.0f),
+                                                   trans * glm::vec4(node->data.vertices[face.j].position, 1.0f),
+                                                   trans * glm::vec4(node->data.vertices[face.k].position, 1.0f));
 
                 if (int_res.hit) {
-                    param_result_map[int_res.param] = {
-                            .hitGeometryNode = node,
-                            .param = int_res.param,
-                            .u = int_res.u,
-                            .v = int_res.v,
-                            .w = int_res.w
-                    };
+                    param_result_map[int_res.param] = {.hitGeometryNode = node,
+                                                       .param = int_res.param,
+                                                       .u = int_res.u,
+                                                       .v = int_res.v,
+                                                       .w = int_res.w};
                 }
             }
         }
@@ -124,9 +123,9 @@ public:
         return result;
     }
 
-private:
+  private:
     VklSceneTree &sceneTree_;
     Ray ray_;
 };
 
-}
+} // namespace SceneTree

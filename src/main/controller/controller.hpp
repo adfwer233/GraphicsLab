@@ -47,9 +47,9 @@ struct Controller {
         }
 
         if (button == GLFW_MOUSE_BUTTON_LEFT and state == GLFW_PRESS) {
-            controller->rayPicking(
-                    uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
-                    uiState.scope_max.x - uiState.scope_min.x, uiState.scope_max.y - uiState.scope_min.y);
+            controller->rayPicking(uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
+                                   uiState.scope_max.x - uiState.scope_min.x,
+                                   uiState.scope_max.y - uiState.scope_min.y);
 
             uiState.isMouseLeftPressing = true;
         }
@@ -104,7 +104,7 @@ struct Controller {
         if (sceneTree_.get().active_camera == nullptr)
             return;
 
-        auto& camera = sceneTree_.get().active_camera->camera;
+        auto &camera = sceneTree_.get().active_camera->camera;
 
         auto up = camera.camera_up_axis;
         auto right = camera.camera_right_axis * camera.ratio;

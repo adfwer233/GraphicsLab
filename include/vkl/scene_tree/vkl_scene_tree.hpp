@@ -52,10 +52,11 @@ template <SupportedLightTypes LightType> consteval size_t light_type_index() {
 
 struct VklSceneTree;
 
-struct GraphicsTransformation: Reflectable {
+struct GraphicsTransformation : Reflectable {
     glm::vec3 translation = glm::vec3(0.0f);
     glm::vec3 scaling = glm::vec3(1.0f);
-    glm::quat rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);;
+    glm::quat rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
+    ;
 
     [[nodiscard]] glm::mat4 getTransformation() const {
         glm::mat4 model(1.0f);
@@ -67,11 +68,9 @@ struct GraphicsTransformation: Reflectable {
     }
 
     ReflectDataType reflect() override {
-        return {
-                {"translation", TypeErasedValue(&translation)},
+        return {{"translation", TypeErasedValue(&translation)},
                 {"scaling", TypeErasedValue(&scaling)},
-                {"rotation", TypeErasedValue(&rotation)}
-        };
+                {"rotation", TypeErasedValue(&rotation)}};
     }
 };
 
@@ -353,8 +352,9 @@ struct VklSceneTree {
     }
 
     template <SupportedGeometryType GeometryType>
-    Generator<std::pair<GeometryNode<GeometryType>*, glm::mat4>> traverse_geometry_nodes_with_trans() {
-        for (auto [node, trans] : traverse_geometry_nodes_with_trans_internal<GeometryType>(root.get(), glm::mat4(1.0f))) {
+    Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans() {
+        for (auto [node, trans] :
+             traverse_geometry_nodes_with_trans_internal<GeometryType>(root.get(), glm::mat4(1.0f))) {
             co_yield {node, trans};
         }
     }
@@ -382,7 +382,8 @@ struct VklSceneTree {
     }
 
     template <SupportedGeometryType GeometryType>
-    Generator<std::pair<GeometryNode<GeometryType>*, glm::mat4>> traverse_geometry_nodes_with_trans_internal(TreeNode *node, glm::mat4 currentTransformation) {
+    Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans_internal(
+        TreeNode *node, glm::mat4 currentTransformation) {
         glm::mat4 trans = currentTransformation;
 
         if (auto internal_node = dynamic_cast<InternalNode *>(node)) {
@@ -394,7 +395,8 @@ struct VklSceneTree {
         }
 
         for (auto &child : node->children) {
-            for (auto [geometryNode, nodeTransf] : traverse_geometry_nodes_with_trans_internal<GeometryType>(child.get(), trans)) {
+            for (auto [geometryNode, nodeTransf] :
+                 traverse_geometry_nodes_with_trans_internal<GeometryType>(child.get(), trans)) {
                 co_yield {geometryNode, nodeTransf};
             }
         }

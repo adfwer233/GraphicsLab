@@ -243,8 +243,7 @@ struct TypeErasedValue {
 
     bool isReflectable = false;
 
-    template<typename T>
-    bool isObjectReflectable() {
+    template <typename T> bool isObjectReflectable() {
         bool test = std::is_base_of<Reflectable, T>::value;
         if (test) {
             int x = 0;

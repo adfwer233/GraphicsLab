@@ -22,7 +22,7 @@ class SceneTreeComponent : public UIComponent {
     }
 
   private:
-    void showReflectable(Reflectable* reflectableObject) {
+    void showReflectable(Reflectable *reflectableObject) {
         auto rfl = reflectableObject->reflect();
         for (auto &[key, value] : reflectableObject->reflect()) {
             if (value.get()) {
@@ -36,7 +36,7 @@ class SceneTreeComponent : public UIComponent {
                 }
 
                 if (value.isReflectable) {
-                    showReflectable(static_cast<Reflectable*>(value.get()));
+                    showReflectable(static_cast<Reflectable *>(value.get()));
                 }
             } else {
                 if (ImGui::Button(std::format("{}", key).c_str())) {
