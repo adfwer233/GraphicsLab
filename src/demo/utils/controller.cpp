@@ -1,11 +1,8 @@
 #include "demo/utils/controller.hpp"
 
-#include "ray_tracer/ray_picker.hpp"
-
 #include "vkl/scene/vkl_geometry_model.hpp"
 #include "vkl/scene/vkl_scene.hpp"
 
-#include <format>
 #include <iostream>
 
 KeyboardCameraController *KeyboardCameraController::instance_ = nullptr;
@@ -106,8 +103,6 @@ void KeyboardCameraController::mouse_button_callback(GLFWwindow *window, int but
                 controller->mouse_x_pos - controller->scope_min.x, controller->mouse_y_pos - controller->scope_min.y,
                 controller->scope_max.x - controller->scope_min.x, controller->scope_max.y - controller->scope_min.y);
         } else if (controller->currentWidgets == DemoWidgets::BezierEditing) {
-            std::cout << "current " << controller->mouse_x_pos - controller->scope_min.x << " "
-                      << controller->mouse_y_pos - controller->scope_min.y << std::endl;
             float width = controller->scope_max.x - controller->scope_min.x;
             float height = controller->scope_max.y - controller->scope_min.y;
             float u = (controller->mouse_x_pos - controller->scope_min.x) / width;

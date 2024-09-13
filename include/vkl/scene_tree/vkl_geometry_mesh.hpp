@@ -240,9 +240,10 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<Me
         builder.vertices = node_->data.vertices;
         builder.indices = node_->data.indices;
 
-        auto material = node_->scene->materials[node_->material_index];
-
-        std::ranges::copy(material.textures, std::back_inserter(builder.textures));
+        if (node_->material_index.has_value()) {
+            auto material = node_->scene->materials[node_->material_index.value()];
+            std::ranges::copy(material.textures, std::back_inserter(builder.textures));
+        }
 
         mesh = std::make_unique<render_type>(device_, builder);
     }

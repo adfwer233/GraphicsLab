@@ -120,12 +120,7 @@ struct Controller {
         auto picking_result = rayTracer.trace();
 
         if (picking_result.has_value()) {
-            spdlog::info(picking_result->param);
-        } else {
-            spdlog::info(Reflection::serialize(base_on_viewport).dump());
-            spdlog::info(Reflection::serialize(ray.dir).dump());
-            spdlog::info(Reflection::serialize(ray.base).dump());
-            spdlog::info("pick missed");
+            sceneTree_.get().activeNode = picking_result->hitGeometryNode;
         }
     }
 

@@ -29,5 +29,6 @@ template <typename VertexType, typename IndicesType> class MeshGeometry {
 
 using Mesh2D = MeshGeometry<Vertex2D, LineIndex>;
 using Mesh3D = MeshGeometry<Vertex3D, TriangleIndex>;
+using Wire3D = MeshGeometry<Vertex3DRaw, LineIndex>;
 using PointCloud3D = MeshGeometry<Vertex3D, NullIndex>;
 using PointCloud2D = MeshGeometry<Vertex2D, NullIndex>;

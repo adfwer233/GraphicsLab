@@ -26,7 +26,7 @@ enum class NodeType {
 struct PointLightSource {};
 struct AreaLightSource {};
 
-using GeometryTypes = MetaProgramming::TypeList<Mesh3D, TensorProductBezierSurface>;
+using GeometryTypes = MetaProgramming::TypeList<Mesh3D, Wire3D, TensorProductBezierSurface>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>
@@ -121,7 +121,7 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
 
     GeometryType data;
 
-    size_t material_index;
+    std::optional<size_t> material_index = std::nullopt;
     GraphicsTransformation transformation;
 };
 
@@ -308,6 +308,7 @@ struct VklSceneTree {
     std::vector<Material> materials;
 
     CameraNode *active_camera = nullptr;
+    TreeNode *activeNode = nullptr;
 
     std::function<void()> sceneUpdateCallBack;
 
