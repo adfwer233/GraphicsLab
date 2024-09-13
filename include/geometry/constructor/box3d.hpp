@@ -24,15 +24,15 @@ struct Box3DConstructor {
         mesh.indices.push_back({3 , 2});
         mesh.indices.push_back({2 , 0});
 
-        // mesh.indices.push_back({4 , 5});
-        // mesh.indices.push_back({5 , 6});
-        // mesh.indices.push_back({6 , 7});
-        // mesh.indices.push_back({7 , 4});
-        //
-        // mesh.indices.push_back({0 , 4});
-        // mesh.indices.push_back({1 , 5});
-        // mesh.indices.push_back({2 , 6});
-        // mesh.indices.push_back({3 , 7});
+        mesh.indices.push_back({4 , 5});
+        mesh.indices.push_back({5 , 7});
+        mesh.indices.push_back({7 , 6});
+        mesh.indices.push_back({6 , 4});
+
+        mesh.indices.push_back({0 , 4});
+        mesh.indices.push_back({1 , 5});
+        mesh.indices.push_back({2 , 6});
+        mesh.indices.push_back({3 , 7});
 
         return mesh;
     }

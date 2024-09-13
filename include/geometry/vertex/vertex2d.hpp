@@ -14,6 +14,6 @@ struct Vertex2DRaw {
 };
 
 struct LineIndex {
-    uint32_t i, j, k;
-    static constexpr size_t vertexCount = 3;
+    uint32_t i, j;
+    static constexpr size_t vertexCount = 2;
 };
