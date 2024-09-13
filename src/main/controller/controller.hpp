@@ -2,6 +2,8 @@
 
 #include "vkl/core/vkl_device.hpp"
 
+#include "vkl/scene_tree/vkl_ray_picker.hpp"
+
 #include "ui_states.hpp"
 
 struct Controller {
@@ -45,6 +47,10 @@ struct Controller {
         }
 
         if (button == GLFW_MOUSE_BUTTON_LEFT and state == GLFW_PRESS) {
+            controller->rayPicking(
+                    uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
+                    uiState.scope_max.x - uiState.scope_min.x, uiState.scope_max.y - uiState.scope_min.y);
+
             uiState.isMouseLeftPressing = true;
         }
 
@@ -90,6 +96,36 @@ struct Controller {
                     camera.process_mouse_movement(x_offset, y_offset);
                 }
             }
+        }
+    }
+
+    void rayPicking(float mouse_x_pos, float mouse_y_pos, float width, float height) {
+
+        if (sceneTree_.get().active_camera == nullptr)
+            return;
+
+        auto& camera = sceneTree_.get().active_camera->camera;
+
+        auto up = camera.camera_up_axis;
+        auto right = camera.camera_right_axis * camera.ratio;
+
+        auto base_on_viewport = camera.position + camera.camera_front * 0.1f - up * 0.0414f - right * 0.0414f;
+        up = up * 0.0414f / float(height / 2);
+        right = right * 0.0414f / float(width / 2);
+        base_on_viewport = base_on_viewport + up * float(mouse_y_pos) + right * float(mouse_x_pos);
+
+        SceneTree::Ray ray(camera.position, base_on_viewport - camera.position);
+
+        SceneTree::RayPicker rayTracer(sceneTree_.get(), ray);
+        auto picking_result = rayTracer.trace();
+
+        if (picking_result.has_value()) {
+            spdlog::info(picking_result->param);
+        } else {
+            spdlog::info(Reflection::serialize(base_on_viewport).dump());
+            spdlog::info(Reflection::serialize(ray.dir).dump());
+            spdlog::info(Reflection::serialize(ray.base).dump());
+            spdlog::info("pick missed");
         }
     }
 

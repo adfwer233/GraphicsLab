@@ -298,7 +298,7 @@ struct Reflection {
         return TypeErasedValue(f, t);
     }
 
-    template <typename T> static std::string serialize(T &t) {
+    template <typename T> static json serialize(T &t) {
         return DispatchedType<T>(&t).serialize();
     }
 

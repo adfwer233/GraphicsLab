@@ -342,6 +342,7 @@ struct VklSceneTree {
         root = assimpImporter.importScene();
         materials = assimpImporter.importMaterial();
         set_scene_to_nodes(root.get());
+        active_camera = nullptr;
     }
 
     template <SupportedGeometryType GeometryType> Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes() {
@@ -352,7 +353,7 @@ struct VklSceneTree {
 
     template <SupportedGeometryType GeometryType>
     Generator<std::pair<GeometryNode<GeometryType>*, glm::mat4>> traverse_geometry_nodes_with_trans() {
-        for (auto [node, trans] : traverse_geometry_nodes_with_trans_internal<GeometryType>(root.get())) {
+        for (auto [node, trans] : traverse_geometry_nodes_with_trans_internal<GeometryType>(root.get(), glm::mat4(1.0f))) {
             co_yield {node, trans};
         }
     }
@@ -392,7 +393,7 @@ struct VklSceneTree {
         }
 
         for (auto &child : node->children) {
-            for (auto [geometryNode, nodeTransf] : traverse_geometry_nodes_internal<GeometryType>(child.get(), trans)) {
+            for (auto [geometryNode, nodeTransf] : traverse_geometry_nodes_with_trans_internal<GeometryType>(child.get(), trans)) {
                 co_yield {geometryNode, nodeTransf};
             }
         }

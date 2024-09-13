@@ -18,12 +18,14 @@ public:
         return base + t * dir;
     };
 
+    struct ray_triangle_intersection_result {
+        bool hit;
+        float param, u, v, w;
+    };
+
     auto ray_triangle_intersection(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2) const {
 
-        struct {
-            bool hit = false;
-            float param = 0, u = 0, v = 0, w = 0;
-        } result;
+        ray_triangle_intersection_result result {false, 0, 0, 0, 0};
 
         using T = decltype(result);
 
@@ -52,8 +54,6 @@ public:
 
         auto p = this->at(t);
 
-        float u, v, w;
-
         auto get_param = [&](const glm::vec3 &r, const glm::vec3 &s) -> float {
             auto edge = r - s;
             auto tmp = p - s;
@@ -70,9 +70,10 @@ public:
         result.v = get_param(v0, v2);
         result.param = t;
 
-        if (u < 0 or v < 0 or w < 0)
+        if (result.u < 0 or result.v < 0 or result.w < 0)
             return result;
 
+        result.hit = true;
         return result;
     }
 };
@@ -80,7 +81,7 @@ public:
 
 class RayPicker {
 public:
-    RayPicker (VklSceneTree& sceneTree, Ray &ray): sceneTree_(sceneTree) {}
+    RayPicker (VklSceneTree& sceneTree, Ray &ray): sceneTree_(sceneTree), ray_(ray) {}
 
     struct RayPickingResult {
         TreeNode* hitGeometryNode;
@@ -91,34 +92,28 @@ public:
     std::optional<RayPickingResult> trace() {
 
         std::map<float, RayPickingResult> param_result_map;
-        
-        for (auto [node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>() ) {
 
+        for (auto [node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>() ) {
+            int x = 0;
+            for (auto face: node->data.indices) {
+                auto int_res = ray_.ray_triangle_intersection(
+                        trans * glm::vec4(node->data.vertices[face.i].position, 1.0f),
+                        trans * glm::vec4(node->data.vertices[face.j].position, 1.0f),
+                        trans * glm::vec4(node->data.vertices[face.k].position, 1.0f)
+                    );
+
+                if (int_res.hit) {
+                    param_result_map[int_res.param] = {
+                            .hitGeometryNode = node,
+                            .param = int_res.param,
+                            .u = int_res.u,
+                            .v = int_res.v,
+                            .w = int_res.w
+                    };
+                }
+            }
         }
 
-        // for (size_t object_index = 0; object_index < scene_.objects.size(); object_index++) {
-        //     auto &object = scene_.objects[object_index];
-        //
-        //     Ray object_ray = ray_;
-        //     glm::mat4 model_transformation = object->getModelTransformation();
-        //
-        //     for (size_t model_index = 0; model_index < object->models.size(); model_index++) {
-        //         auto model = object->models[model_index];
-        //
-        //         for (size_t face_index = 0; face_index < model->geometry->indices.size(); face_index++) {
-        //             auto &face = model->geometry->indices[face_index];
-        //
-        //             auto [flag, t, u, v, w] = object_ray.ray_triangle_intersection(
-        //                     model_transformation * glm::vec4(model->geometry->vertices[face.i].position, 1.0f),
-        //                     model_transformation * glm::vec4(model->geometry->vertices[face.j].position, 1.0f),
-        //                     model_transformation * glm::vec4(model->geometry->vertices[face.k].position, 1.0f));
-        //
-        //             if (flag) {
-        //                 param_result_map[t] = {object_index, model_index, face_index, 0, t, u, v, w};
-        //             }
-        //         }
-        //     }
-        // }
         std::optional<RayPickingResult> result = std::nullopt;
 
         if (not param_result_map.empty()) {
