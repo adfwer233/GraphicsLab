@@ -15,9 +15,12 @@ class ScenePass : public RenderPassDeclarationBase {
     LineRenderSystem<> *line_render_system;
 
     SceneTree::GeometryNode<Wire3D> boxNode;
+    UIState& uiState_;
+
+    bool flag = false;
 
   public:
-    ScenePass(SceneTree::VklSceneTree &sceneTree) : RenderPassDeclarationBase(sceneTree) {
+    ScenePass(SceneTree::VklSceneTree &sceneTree, UIState &uiState) : RenderPassDeclarationBase(sceneTree), uiState_(uiState) {
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
 
@@ -97,7 +100,7 @@ class ScenePass : public RenderPassDeclarationBase {
                     .frameTime = 0,
                     .commandBuffer = commandBuffer,
                     .camera = sceneTree_.active_camera->camera,
-                    .model = *node_mesh->mesh.get(),
+                    .model = *node_mesh->mesh,
                 };
 
                 if (node_mesh->mesh->textures_.size() >=
@@ -117,6 +120,12 @@ class ScenePass : public RenderPassDeclarationBase {
 
                 auto wire_mesh = wire3d_buffer->getGeometryModel(renderGraph.device_, &boxNode);
 
+                if (not uiState_.boxMeshRecreated) {
+                    boxNode.data = Box3DConstructor::create(uiState_.box.min_pos, uiState_.box.max_pos);
+                    wire_mesh->recreateMeshes();
+                    uiState_.boxMeshRecreated = true;
+                }
+
                 if (wire_mesh->mesh->uniformBuffers.contains(line_render_system_key)) {
                     wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->writeToBuffer(&ubo);
                     wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->flush();
@@ -127,7 +136,7 @@ class ScenePass : public RenderPassDeclarationBase {
                     .frameTime = 0,
                     .commandBuffer = commandBuffer,
                     .camera = sceneTree_.active_camera->camera,
-                    .model = *wire_mesh->mesh.get(),
+                    .model = *wire_mesh->mesh,
                 };
 
                 line_render_system->renderObject(frameInfo);

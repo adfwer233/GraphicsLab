@@ -80,6 +80,13 @@ struct UIState {
     ProjectManager projectManager;
     IGraphicsLabProject *project = nullptr;
 
+    /**
+     * picked bounding box data
+     */
+
+    AABB3D box;
+    bool boxMeshRecreated = false;
+
     UIState() {
         spdlog::critical("ui state constructed");
     }

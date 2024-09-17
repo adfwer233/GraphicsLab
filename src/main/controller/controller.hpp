@@ -121,6 +121,12 @@ struct Controller {
 
         if (picking_result.has_value()) {
             sceneTree_.get().activeNode = picking_result->hitGeometryNode;
+
+            if (auto meshNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(picking_result->hitGeometryNode)) {
+                uiState_.box = meshNode->data.getMeshBox();
+                // spdlog::info("box updated {} {}", Reflection::serialize(uiState_.box.min_pos).dump(), Reflection::serialize(uiState_.box.max_pos).dump());
+                uiState_.boxMeshRecreated = false;
+            }
         }
     }
 

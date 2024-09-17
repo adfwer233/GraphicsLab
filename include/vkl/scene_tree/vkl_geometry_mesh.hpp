@@ -252,6 +252,10 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<Me
     using render_type = VklMesh<VertexType, IndexType>;
     std::unique_ptr<render_type> mesh;
 
+    void recreateMeshes() {
+        createMesh();
+    }
+
     VklNodeMesh(VklDevice &device, decltype(node_) node) : device_(device), node_(node) {
         createMesh();
     }

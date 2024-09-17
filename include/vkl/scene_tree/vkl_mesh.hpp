@@ -39,6 +39,7 @@ class VklMesh {
   public:
     using vertex_type = VertexType;
     using index_type = IndexType;
+    using box_type = BoxType;
 
     std::vector<VklTexture *> textures_;
     std::vector<VkDescriptorSet> descriptorSets_;
@@ -49,6 +50,7 @@ class VklMesh {
         std::vector<VklTexture *> textures{};
     };
 
+    box_type meshBox_;
   private:
     VklDevice &device_;
 
@@ -63,6 +65,7 @@ class VklMesh {
     void createIndexBuffers(const std::vector<IndexType> &indices);
     void createTextureImage(const std::string &texturePath);
 
+    void createMeshBox(const std::vector<VertexType>& vertices);
   public:
     VklMesh(VklDevice &device, Builder builder);
 
@@ -78,12 +81,51 @@ class VklMesh {
     std::map<VklDescriptorSetLayoutKey, std::vector<VkDescriptorSet>> descriptorSetsMap;
     void allocDescriptorSets(VklDescriptorSetLayout &setLayout, VklDescriptorPool &pool);
 
+    box_type getMeshBox() {
+        return meshBox_;
+    }
+
     int materialIndex = 0;
 
     VkBuffer getVertexBuffer(size_t index) {
         return vertexBuffer_[index]->getBuffer();
     };
 };
+
+template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
+void VklMesh<VertexType, IndexType, BoxType>::createMeshBox(const std::vector<VertexType> &vertices) {
+    if constexpr (std::is_same_v<BoxType, VklBox3D>) {
+        auto min_pos = glm::vec3(999999.0);
+        auto max_pos = glm::vec3(-999999.0);
+
+        for (size_t i = 0; i < vertices.size(); i++) {
+            min_pos.x = std::min(min_pos.x, vertices[i].position.x);
+            min_pos.y = std::min(min_pos.y, vertices[i].position.y);
+            min_pos.z = std::min(min_pos.z, vertices[i].position.z);
+
+            max_pos.x = std::max(max_pos.x, vertices[i].position.x);
+            max_pos.y = std::max(max_pos.y, vertices[i].position.y);
+            max_pos.z = std::max(max_pos.z, vertices[i].position.z);
+        }
+
+        meshBox_.min_position = min_pos;
+        meshBox_.max_position = max_pos;
+    } else {
+        auto min_pos = glm::vec2(999999.0);
+        auto max_pos = glm::vec2(-999999.0);
+
+        for (size_t i = 0; i < vertices.size(); i++) {
+            min_pos.x = std::min(min_pos.x, vertices[i].position.x);
+            min_pos.y = std::min(min_pos.y, vertices[i].position.y);
+
+            max_pos.x = std::max(max_pos.x, vertices[i].position.x);
+            max_pos.y = std::max(max_pos.y, vertices[i].position.y);
+        }
+
+        meshBox_.min_position = min_pos;
+        meshBox_.max_position = max_pos;
+    }
+}
 
 template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
 void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorSetLayout &setLayout,
@@ -239,7 +281,7 @@ template <VklVertexType VertexType, VklIndexType IndexType, VklBoxType BoxType>
 VklMesh<VertexType, IndexType, BoxType>::VklMesh(VklDevice &device, VklMesh::Builder builder) : device_(device) {
     createVertexBuffers(builder.vertices);
     createIndexBuffers(builder.indices);
-
+    createMeshBox(builder.vertices);
     std::ranges::copy(builder.textures, std::back_inserter(textures_));
 }
 
