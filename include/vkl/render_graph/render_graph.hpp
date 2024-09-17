@@ -218,7 +218,7 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
 
     std::vector<VklDescriptorSetLayoutKey> getRenderSystemKeys() {
         std::vector<VklDescriptorSetLayoutKey> result;
-        for (auto& [name, sys]: render_system_cache) {
+        for (auto &[name, sys] : render_system_cache) {
             spdlog::critical(name);
             result.push_back(sys->descriptorSetLayout->descriptorSetLayoutKey);
         }
@@ -723,14 +723,12 @@ struct RenderGraph {
                 }
             }
 
-            VkSubpassDescription subpassDescription{
-                .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-                .inputAttachmentCount = static_cast<uint32_t>(input_refs.size()),
-                .pInputAttachments = input_refs.data(),
-                .colorAttachmentCount = static_cast<uint32_t>(output_refs.size()),
-                .pColorAttachments = output_refs.data(),
-                .pResolveAttachments = resolve_refs.data()
-            };
+            VkSubpassDescription subpassDescription{.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                                    .inputAttachmentCount = static_cast<uint32_t>(input_refs.size()),
+                                                    .pInputAttachments = input_refs.data(),
+                                                    .colorAttachmentCount = static_cast<uint32_t>(output_refs.size()),
+                                                    .pColorAttachments = output_refs.data(),
+                                                    .pResolveAttachments = resolve_refs.data()};
 
             std::vector<VkAttachmentReference> depth_refs;
             if (has_depth_write) {
@@ -832,13 +830,13 @@ struct RenderGraph {
 
                 VkFormat format = edge->descriptor_p->format;
 
-                edge->instances[i]->texture = std::move(std::make_unique<VklTexture>(
-                    device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, imageUsage, layout, format, device_.getMaxUsableSampleCount()));
+                edge->instances[i]->texture = std::move(
+                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4,
+                                                 imageUsage, layout, format, device_.getMaxUsableSampleCount()));
 
                 edge->instances[i]->resolveTexture = std::move(
                     std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4,
                                                  imageUsage, layout, format, VK_SAMPLE_COUNT_1_BIT));
-
             }
 
             /**
@@ -930,21 +928,23 @@ struct RenderGraph {
 
             std::vector<VkClearValue> clearValues{};
 
-            for (auto att: render_pass->descriptor_p->inTextureAttachmentDescriptors) {
-                if (att->type == RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
-                    clearValues.push_back(VkClearValue{ .depthStencil = {1.0f, 0} });
+            for (auto att : render_pass->descriptor_p->inTextureAttachmentDescriptors) {
+                if (att->type ==
+                    RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
+                    clearValues.push_back(VkClearValue{.depthStencil = {1.0f, 0}});
                 } else {
-                    clearValues.push_back(VkClearValue{ .color = {0.01f, 0.01f, 0.01f, 1.0f} });
+                    clearValues.push_back(VkClearValue{.color = {0.01f, 0.01f, 0.01f, 1.0f}});
                 }
             }
 
-            for (auto att: render_pass->descriptor_p->outTextureAttachmentDescriptors) {
-                if (att->type == RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
-                    clearValues.push_back(VkClearValue{ .depthStencil = {1.0f, 0} });
-                    clearValues.push_back(VkClearValue{ .depthStencil = {1.0f, 0} });
+            for (auto att : render_pass->descriptor_p->outTextureAttachmentDescriptors) {
+                if (att->type ==
+                    RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
+                    clearValues.push_back(VkClearValue{.depthStencil = {1.0f, 0}});
+                    clearValues.push_back(VkClearValue{.depthStencil = {1.0f, 0}});
                 } else {
-                    clearValues.push_back(VkClearValue{ .color = {0.01f, 0.01f, 0.01f, 1.0f} });
-                    clearValues.push_back(VkClearValue{ .color = {0.01f, 0.01f, 0.01f, 1.0f} });
+                    clearValues.push_back(VkClearValue{.color = {0.01f, 0.01f, 0.01f, 1.0f}});
+                    clearValues.push_back(VkClearValue{.color = {0.01f, 0.01f, 0.01f, 1.0f}});
                 }
             }
 

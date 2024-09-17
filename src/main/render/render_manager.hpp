@@ -19,9 +19,10 @@ class RenderPassManager {
     std::vector<RenderPassDeclarationBase *> component_ptrs;
 
   public:
-    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIState &state, UIManager &uiManager) {
-        auto injector =
-            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<UIManager>().to(uiManager), di::bind<UIState>().to(state));
+    explicit RenderPassManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIState &state,
+                               UIManager &uiManager) {
+        auto injector = di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree),
+                                          di::bind<UIManager>().to(uiManager), di::bind<UIState>().to(state));
 
         create_component_instances(injector, PassTypeList{});
 

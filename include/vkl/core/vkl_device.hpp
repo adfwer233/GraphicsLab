@@ -171,7 +171,8 @@ class VklDevice {
                       VkDeviceMemory &bufferMemory);
 
     void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-                     VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory, VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT);
+                     VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory,
+                     VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT);
 
     void createSampler(VkSampler &sampler);
 

@@ -15,13 +15,13 @@ struct AABB2D {
     glm::vec2 min_pos, max_pos;
 };
 
-template<size_t dim> struct AABBType;
+template <size_t dim> struct AABBType;
 
-template<> struct AABBType<2> {
+template <> struct AABBType<2> {
     using type = AABB2D;
 };
 
-template<> struct AABBType<3> {
+template <> struct AABBType<3> {
     using type = AABB3D;
 };
 
@@ -34,8 +34,6 @@ template <typename VertexType, typename IndicesType> class MeshModelTemplate {
 
     std::vector<vertex_type> vertices;
     std::vector<IndicesType> indices;
-
-
 };
 
 template <typename VertexType, typename IndicesType, size_t Dimension = 3> class MeshGeometry {

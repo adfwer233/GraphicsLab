@@ -4,7 +4,7 @@
 
 struct Box3DConstructor {
     static Wire3D create(glm::vec3 min_pos, glm::vec3 max_pos) {
-        spdlog::info("recreate {} {} {}" ,min_pos.x, min_pos.y, min_pos.z);
+        spdlog::info("recreate {} {} {}", min_pos.x, min_pos.y, min_pos.z);
         Wire3D mesh;
 
         glm::vec3 dir_x = {max_pos.x - min_pos.x, 0, 0};

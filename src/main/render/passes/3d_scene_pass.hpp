@@ -18,12 +18,13 @@ class ScenePass : public RenderPassDeclarationBase {
     SimpleWireFrameRenderSystem<> *wireframe_render_system;
 
     SceneTree::GeometryNode<Wire3D> boxNode;
-    UIState& uiState_;
+    UIState &uiState_;
 
     bool flag = false;
 
   public:
-    ScenePass(SceneTree::VklSceneTree &sceneTree, UIState &uiState) : RenderPassDeclarationBase(sceneTree), uiState_(uiState) {
+    ScenePass(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
+        : RenderPassDeclarationBase(sceneTree), uiState_(uiState) {
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
 
@@ -88,7 +89,8 @@ class ScenePass : public RenderPassDeclarationBase {
             ubo.view = sceneTree_.active_camera->camera.get_view_transformation();
             ubo.proj = sceneTree_.active_camera->camera.get_proj_transformation();
             ubo.model = glm::mat4(1.0f);
-            ubo.pointLight = PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 0.0});
+            ubo.pointLight =
+                PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 0.0});
             ubo.cameraPos = sceneTree_.active_camera->camera.position;
 
             auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
@@ -128,8 +130,8 @@ class ScenePass : public RenderPassDeclarationBase {
                     wireframe_render_system->renderObject(frameInfo);
                 } else if (uiState_.renderMode == UIState::RenderMode::material) {
                     if (node_mesh->mesh->textures_.size() >=
-                        simple_render_system->descriptorSetLayout->descriptorSetLayoutKey
-                            .sampledImageBufferDescriptors.size()) {
+                        simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
+                            .size()) {
                         simple_render_system->renderObject(frameInfo);
                     } else {
                         color_render_system->renderObject(frameInfo);

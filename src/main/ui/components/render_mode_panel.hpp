@@ -7,7 +7,8 @@ class RenderModelPanel : public UIComponent {
     UIState &uiState_;
 
   public:
-    RenderModelPanel(SceneTree::VklSceneTree &sceneTree, UIState &uiState) : UIComponent(sceneTree), uiState_(uiState) {}
+    RenderModelPanel(SceneTree::VklSceneTree &sceneTree, UIState &uiState) : UIComponent(sceneTree), uiState_(uiState) {
+    }
 
     void render() final {
         ImGui::Begin("Render Options");
@@ -18,9 +19,11 @@ class RenderModelPanel : public UIComponent {
 
         ImGui::RadioButton("Raw", (RenderModelType *)&uiState_.renderMode, RenderModelType(UIState::RenderMode::raw));
         ImGui::SameLine();
-        ImGui::RadioButton("Wire Frame", (RenderModelType *)&uiState_.renderMode, RenderModelType(UIState::RenderMode::wireframe));
+        ImGui::RadioButton("Wire Frame", (RenderModelType *)&uiState_.renderMode,
+                           RenderModelType(UIState::RenderMode::wireframe));
         ImGui::SameLine();
-        ImGui::RadioButton("With Texture", (RenderModelType *)&uiState_.renderMode, RenderModelType(UIState::RenderMode::material));
+        ImGui::RadioButton("With Texture", (RenderModelType *)&uiState_.renderMode,
+                           RenderModelType(UIState::RenderMode::material));
 
         // ImGui::SameLine();
         // ImGui::RadioButton("Path Tracing", (int *)&uiManager_.renderMode, RenderMode::PathTracing);
@@ -29,10 +32,11 @@ class RenderModelPanel : public UIComponent {
 
         using ShadeModelType = std::underlying_type_t<UIState::LightingMode>;
 
-
-        ImGui::RadioButton("Color Shading", (int *)&uiState_.lightingMode, ShadeModelType(UIState::LightingMode::simple));
+        ImGui::RadioButton("Color Shading", (int *)&uiState_.lightingMode,
+                           ShadeModelType(UIState::LightingMode::simple));
         ImGui::SameLine();
-        ImGui::RadioButton("Solid Shading", (int *)&uiState_.lightingMode,ShadeModelType(UIState::LightingMode::solid));
+        ImGui::RadioButton("Solid Shading", (int *)&uiState_.lightingMode,
+                           ShadeModelType(UIState::LightingMode::solid));
 
         ImGui::End();
     }

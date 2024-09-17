@@ -51,6 +51,7 @@ class VklMesh {
     };
 
     box_type meshBox_;
+
   private:
     VklDevice &device_;
 
@@ -65,7 +66,8 @@ class VklMesh {
     void createIndexBuffers(const std::vector<IndexType> &indices);
     void createTextureImage(const std::string &texturePath);
 
-    void createMeshBox(const std::vector<VertexType>& vertices);
+    void createMeshBox(const std::vector<VertexType> &vertices);
+
   public:
     VklMesh(VklDevice &device, Builder builder);
 
