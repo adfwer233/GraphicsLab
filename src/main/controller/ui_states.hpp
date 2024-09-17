@@ -18,8 +18,8 @@ struct UIState {
         simple
     };
 
-    RenderMode renderMode;
-    LightingMode lightingMode;
+    RenderMode renderMode = RenderMode::raw;
+    LightingMode lightingMode = LightingMode::simple;
 
     bool isMouseLeftPressing{false};
     bool isMouseMidPressing{false};

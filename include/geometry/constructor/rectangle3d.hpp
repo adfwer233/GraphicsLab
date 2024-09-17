@@ -9,11 +9,14 @@ struct RectangleConstructor {
         dir1 /= n;
         dir2 /= m;
 
+        auto norm = glm::normalize(glm::cross(dir1, dir2));
+
         for (int i = 0; i <= n; i++) {
             for (int j = 0; j <= m; j++) {
                 Mesh3D::vertex_type vertex;
                 vertex.position = pos + dir1 * float(i) + dir2 * float(j);
                 vertex.color = {0, 1, 0};
+                vertex.normal = norm;
                 mesh.vertices.push_back(vertex);
             }
         }

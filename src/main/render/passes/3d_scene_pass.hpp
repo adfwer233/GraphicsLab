@@ -2,6 +2,7 @@
 
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
+#include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 
 #include "geometry/constructor/box3d.hpp"
 
@@ -11,8 +12,10 @@
 class ScenePass : public RenderPassDeclarationBase {
   private:
     SimpleRenderSystem<> *simple_render_system;
+    SimpleRenderSystem<> *color_render_system;
     SimpleRenderSystem<> *raw_render_system;
     LineRenderSystem<> *line_render_system;
+    SimpleWireFrameRenderSystem<> *wireframe_render_system;
 
     SceneTree::GeometryNode<Wire3D> boxNode;
     UIState& uiState_;
@@ -62,6 +65,11 @@ class ScenePass : public RenderPassDeclarationBase {
         raw_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
             renderGraph.device_, "raw_render_system",
             {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+             {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
+        color_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
+            renderGraph.device_, "color_render_system",
+            {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
              {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = simple_render_pass_obj->getRenderSystem<LineRenderSystem<>>(
@@ -69,16 +77,22 @@ class ScenePass : public RenderPassDeclarationBase {
             {{std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
              {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
+        wireframe_render_system = simple_render_pass_obj->getRenderSystem<SimpleWireFrameRenderSystem<>>(
+            renderGraph.device_, "wireframe_render_system",
+            {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+             {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             GlobalUbo ubo{};
 
             ubo.view = sceneTree_.active_camera->camera.get_view_transformation();
             ubo.proj = sceneTree_.active_camera->camera.get_proj_transformation();
             ubo.model = glm::mat4(1.0f);
-            ubo.pointLight = PointLight({0, 10, 0, 1.0}, {1.0, 1.0, 1.0, 0.0});
+            ubo.pointLight = PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 0.0});
             ubo.cameraPos = sceneTree_.active_camera->camera.position;
 
             auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+            auto colorKey = color_render_system->descriptorSetLayout->descriptorSetLayoutKey;
             auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
@@ -88,6 +102,11 @@ class ScenePass : public RenderPassDeclarationBase {
                 if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
                     node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
                     node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
+                }
+
+                if (node_mesh->mesh->uniformBuffers.contains(colorKey)) {
+                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->flush();
                 }
 
                 if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
@@ -103,12 +122,18 @@ class ScenePass : public RenderPassDeclarationBase {
                     .model = *node_mesh->mesh,
                 };
 
-                if (node_mesh->mesh->textures_.size() >=
-                    simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
-                        .size()) {
-                    simple_render_system->renderObject(frameInfo);
-                } else {
+                if (uiState_.renderMode == UIState::RenderMode::raw) {
                     raw_render_system->renderObject(frameInfo);
+                } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
+                    wireframe_render_system->renderObject(frameInfo);
+                } else if (uiState_.renderMode == UIState::RenderMode::material) {
+                    if (node_mesh->mesh->textures_.size() >=
+                        simple_render_system->descriptorSetLayout->descriptorSetLayoutKey
+                            .sampledImageBufferDescriptors.size()) {
+                        simple_render_system->renderObject(frameInfo);
+                    } else {
+                        color_render_system->renderObject(frameInfo);
+                    }
                 }
             }
 

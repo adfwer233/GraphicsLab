@@ -216,8 +216,17 @@ template <> struct RenderGraphPassDerived<RenderGraphRenderPass> : public Render
         }
     }
 
+    std::vector<VklDescriptorSetLayoutKey> getRenderSystemKeys() {
+        std::vector<VklDescriptorSetLayoutKey> result;
+        for (auto& [name, sys]: render_system_cache) {
+            spdlog::critical(name);
+            result.push_back(sys->descriptorSetLayout->descriptorSetLayoutKey);
+        }
+        return result;
+    }
+
   private:
-    std::unordered_map<std::string, BaseRenderSystem *> render_system_cache;
+    std::map<std::string, BaseRenderSystem *> render_system_cache;
 };
 
 struct RenderGraph;
@@ -843,6 +852,7 @@ struct RenderGraph {
              */
 
             for (auto node : passes_generator<RenderGraphRenderPass>()) {
+
                 std::vector<VkImageView> attachmentImageViews;
 
                 for (auto edge : node->get_input_attachment_vector<RenderGraphTextureAttachment>()) {
