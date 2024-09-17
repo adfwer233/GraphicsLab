@@ -3,14 +3,14 @@
 #include "vkl/core/vkl_texture.hpp"
 
 VklTexture::VklTexture(VklDevice &device, int texWidth, int texHeight, int texChannels, VkImageUsageFlags usage,
-                       VkImageLayout layout, VkFormat format)
+                       VkImageLayout layout, VkFormat format, VkSampleCountFlagBits samples)
     : texWidth_(texWidth), texHeight_(texHeight), texChannels_(texChannels), device_(device), layout_(layout) {
     if (texChannels == 3) {
         throw std::runtime_error("unsupported texture type \n");
     } else if (texChannels == 4) {
         usage_ = usage;
         device_.createImage(texWidth, texHeight, format, VK_IMAGE_TILING_OPTIMAL, usage,
-                            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, this->image_, this->memory_);
+                            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, this->image_, this->memory_, samples);
         device_.createSampler(this->textureSampler_);
 
         if (layout != VK_IMAGE_LAYOUT_UNDEFINED)

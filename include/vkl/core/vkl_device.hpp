@@ -171,7 +171,7 @@ class VklDevice {
                       VkDeviceMemory &bufferMemory);
 
     void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-                     VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
+                     VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory, VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT);
 
     void createSampler(VkSampler &sampler);
 
@@ -192,6 +192,8 @@ class VklDevice {
 
     VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
                                  VkFormatFeatureFlags features);
+
+    VkSampleCountFlagBits getMaxUsableSampleCount();
 
     void fillImGuiInitInfo(ImGui_ImplVulkan_InitInfo &initInfo) {
         initInfo.Instance = instance_;

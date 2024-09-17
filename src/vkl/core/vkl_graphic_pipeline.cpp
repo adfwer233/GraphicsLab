@@ -74,7 +74,7 @@ void VklGraphicsPipeline::createGraphicsPipeline(const PipelineConfigInfo &confi
     }
 }
 
-void VklGraphicsPipeline::defaultPipelineConfigInfo(PipelineConfigInfo &configInfo) {
+void VklGraphicsPipeline::defaultPipelineConfigInfo(VklDevice& device, PipelineConfigInfo &configInfo) {
     configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -99,7 +99,7 @@ void VklGraphicsPipeline::defaultPipelineConfigInfo(PipelineConfigInfo &configIn
 
     configInfo.multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     configInfo.multisampleInfo.sampleShadingEnable = VK_FALSE;
-    configInfo.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    configInfo.multisampleInfo.rasterizationSamples = device.getMaxUsableSampleCount();
     configInfo.multisampleInfo.minSampleShading = 1.0f;          // Optional
     configInfo.multisampleInfo.pSampleMask = nullptr;            // Optional
     configInfo.multisampleInfo.alphaToCoverageEnable = VK_FALSE; // Optional

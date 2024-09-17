@@ -102,6 +102,7 @@ template <RenderGraphAttachment T> struct RenderGraphAttachmentDerived : public 
 
 template <> struct RenderGraphAttachmentInstance<RenderGraphTextureAttachment> {
     std::unique_ptr<VklTexture> texture;
+    std::unique_ptr<VklTexture> resolveTexture;
 };
 
 template <> struct RenderGraphAttachmentDerived<RenderGraphTextureAttachment> : public RenderGraphAttachmentBase {
@@ -116,9 +117,9 @@ template <> struct RenderGraphAttachmentDerived<RenderGraphTextureAttachment> : 
     auto getImguiTextures() {
         std::vector<VkDescriptorSet> result;
         for (auto instance : instances) {
-            auto tex = ImGui_ImplVulkan_AddTexture(instance->texture->getTextureSampler(),
-                                                   instance->texture->getTextureImageView(),
-                                                   instance->texture->getImageLayout());
+            auto tex = ImGui_ImplVulkan_AddTexture(instance->resolveTexture->getTextureSampler(),
+                                                   instance->resolveTexture->getTextureImageView(),
+                                                   instance->resolveTexture->getImageLayout());
             result.push_back(tex);
         }
         return result;
@@ -586,7 +587,10 @@ struct RenderGraph {
             std::vector<VkAttachmentReference> input_refs;
             std::vector<VkAttachmentReference> output_refs;
 
+            std::vector<VkAttachmentReference> resolve_refs;
+
             VkAttachmentReference depth_attachment_ref;
+            VkAttachmentReference depth_resolve_ref;
 
             uint32_t attachment_index = 0;
 
@@ -621,7 +625,7 @@ struct RenderGraph {
             for (auto output_desc : renderNode->descriptor_p->outTextureAttachmentDescriptors) {
                 VkAttachmentDescription attachmentDescription{
                     .format = output_desc->format,
-                    .samples = VK_SAMPLE_COUNT_1_BIT,
+                    .samples = device_.getMaxUsableSampleCount(),
                     .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
                     .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
                     .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -667,12 +671,46 @@ struct RenderGraph {
                         .attachment = attachment_index++,
                         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
                     };
+
+                    VkAttachmentDescription resolveAttachment = {};
+                    resolveAttachment.format = attachmentDescription.format; // Format of your resolve image
+                    resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;       // No MSAA for resolve image
+                    resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                    resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                    resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                    resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                    resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                    resolveAttachment.finalLayout = attachmentDescription.finalLayout;
+
+                    node_attachments.push_back(resolveAttachment);
+                    depth_resolve_ref = {
+                        .attachment = attachment_index++,
+                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    };
                 } else {
                     node_attachments.push_back(attachmentDescription);
                     output_refs.push_back({
                         .attachment = attachment_index++,
                         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                     });
+
+                    if (not output_desc->isSwapChain) {
+                        VkAttachmentDescription resolveAttachment = {};
+                        resolveAttachment.format = attachmentDescription.format; // Format of your resolve image
+                        resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;       // No MSAA for resolve image
+                        resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                        resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                        resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                        resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                        resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                        resolveAttachment.finalLayout = attachmentDescription.finalLayout;
+
+                        node_attachments.push_back(resolveAttachment);
+                        resolve_refs.push_back({
+                            .attachment = attachment_index++,
+                            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        });
+                    }
                 }
             }
 
@@ -682,10 +720,14 @@ struct RenderGraph {
                 .pInputAttachments = input_refs.data(),
                 .colorAttachmentCount = static_cast<uint32_t>(output_refs.size()),
                 .pColorAttachments = output_refs.data(),
+                .pResolveAttachments = resolve_refs.data()
             };
 
-            if (has_depth_write)
-                subpassDescription.pDepthStencilAttachment = &depth_attachment_ref;
+            std::vector<VkAttachmentReference> depth_refs;
+            if (has_depth_write) {
+                depth_refs = {depth_attachment_ref, depth_resolve_ref};
+                subpassDescription.pDepthStencilAttachment = depth_refs.data();
+            }
 
             std::vector<VkSubpassDependency> dependencies;
             dependencies.resize(2);
@@ -782,7 +824,12 @@ struct RenderGraph {
                 VkFormat format = edge->descriptor_p->format;
 
                 edge->instances[i]->texture = std::move(std::make_unique<VklTexture>(
-                    device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, imageUsage, layout, format));
+                    device_, edge->descriptor_p->width, edge->descriptor_p->height, 4, imageUsage, layout, format, device_.getMaxUsableSampleCount()));
+
+                edge->instances[i]->resolveTexture = std::move(
+                    std::make_unique<VklTexture>(device_, edge->descriptor_p->width, edge->descriptor_p->height, 4,
+                                                 imageUsage, layout, format, VK_SAMPLE_COUNT_1_BIT));
+
             }
 
             /**
@@ -807,6 +854,10 @@ struct RenderGraph {
                         attachmentImageViews.push_back(swapChain_->getImageView(i));
                     } else {
                         attachmentImageViews.push_back(edge->instances[i]->texture->getTextureImageView());
+
+                        if (edge->instances[i]->resolveTexture) {
+                            attachmentImageViews.push_back(edge->instances[i]->resolveTexture->getTextureImageView());
+                        }
                     }
                 }
 
@@ -867,9 +918,26 @@ struct RenderGraph {
                 renderPassInfo.framebuffer = swapChain_->getFrameBuffer(frame_index);
             }
 
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-            clearValues[1].depthStencil = {1.0f, 0};
+            std::vector<VkClearValue> clearValues{};
+
+            for (auto att: render_pass->descriptor_p->inTextureAttachmentDescriptors) {
+                if (att->type == RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
+                    clearValues.push_back(VkClearValue{ .depthStencil = {1.0f, 0} });
+                } else {
+                    clearValues.push_back(VkClearValue{ .color = {0.01f, 0.01f, 0.01f, 1.0f} });
+                }
+            }
+
+            for (auto att: render_pass->descriptor_p->outTextureAttachmentDescriptors) {
+                if (att->type == RenderGraphAttachmentDescriptor<RenderGraphTextureAttachment>::AttachmentType::DepthAttachment) {
+                    clearValues.push_back(VkClearValue{ .depthStencil = {1.0f, 0} });
+                    clearValues.push_back(VkClearValue{ .depthStencil = {1.0f, 0} });
+                } else {
+                    clearValues.push_back(VkClearValue{ .color = {0.01f, 0.01f, 0.01f, 1.0f} });
+                    clearValues.push_back(VkClearValue{ .color = {0.01f, 0.01f, 0.01f, 1.0f} });
+                }
+            }
+
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
 

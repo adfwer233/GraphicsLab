@@ -24,5 +24,5 @@ class VklGraphicsPipeline : public VklPipeline {
     VklGraphicsPipeline(const VklGraphicsPipeline &) = delete;
     VklGraphicsPipeline &operator=(const VklGraphicsPipeline &) = delete;
 
-    static void defaultPipelineConfigInfo(PipelineConfigInfo &configInfo);
+    static void defaultPipelineConfigInfo(VklDevice& device, PipelineConfigInfo &configInfo);
 };

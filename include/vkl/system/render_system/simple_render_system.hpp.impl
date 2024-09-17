@@ -188,7 +188,7 @@ void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::cr
     VkRenderPass renderPass, std::vector<VklShaderModuleInfo> shaderInfos) {
     PipelineConfigInfo pipelineConfigInfo{};
 
-    VklGraphicsPipeline::defaultPipelineConfigInfo(pipelineConfigInfo);
+    VklGraphicsPipeline::defaultPipelineConfigInfo(device_, pipelineConfigInfo);
 
     PipelineModifierType::modifyPipeline(pipelineConfigInfo);
 
