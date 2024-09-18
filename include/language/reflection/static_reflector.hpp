@@ -26,3 +26,14 @@ struct Property {
     static constexpr auto staticReflect() {               \
         return std::make_tuple(__VA_ARGS__);              \
     }
+
+struct StaticReflect {
+    // Function to set a property value
+    template<typename T, typename ValueType>
+    static void set_property(T& obj, std::string_view prop_name, const ValueType& value) {
+        constexpr auto properties = T::staticReflect();
+        std::apply([&](auto&&... props) {
+            ((props.name == prop_name ? props.set(obj, value) : void()), ...);
+        }, properties);
+    }
+};

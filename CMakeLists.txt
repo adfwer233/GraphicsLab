@@ -35,6 +35,7 @@ set(GLM_BUILD_INSTALL ON)
 set(GLFW_INSTALL ON)
 set(SPDLOG_INSTALL ON)
 set(JSON_Install ON)
+set(LIBIGL_INSTALL ON)
 
 include(fetch-glfw)
 include(fetch-glm)
