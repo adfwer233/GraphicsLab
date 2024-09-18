@@ -115,11 +115,12 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     ReflectDataType reflect() override {
         auto result = TreeNode::reflect();
         result.emplace("transformation", TypeErasedValue(&transformation));
+        result.emplace("visible", TypeErasedValue(&visible));
         return result;
     }
 
     GeometryType data;
-
+    bool visible = true;
     std::optional<size_t> material_index = std::nullopt;
     GraphicsTransformation transformation;
 };

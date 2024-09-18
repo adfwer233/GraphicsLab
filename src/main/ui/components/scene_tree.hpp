@@ -34,7 +34,10 @@ class SceneTreeComponent : public UIComponent {
                     auto &vec = *reinterpret_cast<glm::vec3 *>(value.get());
                     ImGui::Text(std::format("{}: {} {} {}", key, vec.x, vec.y, vec.z).c_str());
                 }
-
+                if (value.type() == typeid(bool)) {
+                    auto &boolval = *reinterpret_cast<bool *>(value.get());
+                    ImGui::Checkbox(key.c_str(), &boolval);
+                }
                 if (value.isReflectable) {
                     showReflectable(static_cast<Reflectable *>(value.get()));
                 }
@@ -100,8 +103,7 @@ class SceneTreeComponent : public UIComponent {
                 }
             }
 
-            if (auto internal_node = dynamic_cast<SceneTree::InternalNode *>(node))
-                showReflectable(internal_node);
+            showReflectable(node);
 
             // Recursively render child nodes
             for (const auto &child : node->children) {
