@@ -1,24 +1,23 @@
 #pragma once
 
-#include <string>
 #include "Eigen/Eigen"
 #include "geometry/geometry.hpp"
-#include "language/reflection/static_reflector.hpp"
 #include "igl/per_vertex_normals.h"
+#include "language/reflection/static_reflector.hpp"
+#include <string>
 
-template<typename T, typename MeshType>
-concept GeoFlowPerVertexExecutor = requires(MeshType* mesh) {
-    {T::run(mesh)} -> std::same_as<Eigen::MatrixXd>;
+template <typename T, typename MeshType>
+concept GeoFlowPerVertexExecutor = requires(MeshType *mesh) {
+    { T::run(mesh) } -> std::same_as<Eigen::MatrixXd>;
 };
 
-template<typename T>
-concept GeoFlowMeshType = requires (T t) {
+template <typename T>
+concept GeoFlowMeshType = requires(T t) {
     typename T::vertex_type;
-    {t.vertices} -> std::same_as<std::vector<typename T::vertex_type>&>;
+    { t.vertices } -> std::same_as<std::vector<typename T::vertex_type> &>;
 } and MeshVertexConcept<typename T::vertex_type>;
 
-template<GeoFlowMeshType MeshType, GeoFlowPerVertexExecutor<MeshType> Executor>
-struct GeoFlowPerVertexMap {
+template <GeoFlowMeshType MeshType, GeoFlowPerVertexExecutor<MeshType> Executor> struct GeoFlowPerVertexMap {
     MeshType *mesh;
     std::string targetFieldName;
 
@@ -29,12 +28,11 @@ struct GeoFlowPerVertexMap {
         using vertex_type = MeshType::vertex_type;
 
         for (int i = 0; i < n; i++) {
-            glm::vec3 vec {result(i, 0), result(i, 1), result(i, 2)};
+            glm::vec3 vec{result(i, 0), result(i, 1), result(i, 2)};
             StaticReflect::set_property(mesh->vertices[i], targetFieldName, vec);
         }
     }
 };
-
 
 struct NormalVector {
     static Eigen::MatrixXd run(Mesh3D *mesh) {

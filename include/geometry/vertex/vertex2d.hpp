@@ -9,20 +9,14 @@ struct Vertex2D {
     glm::vec3 normal{};
     glm::vec2 uv{};
 
-    REFLECT(
-            Property{"position", &Vertex2D::position},
-            Property{"color", &Vertex2D::color},
-            Property{"normal", &Vertex2D::normal},
-            Property{"uv", &Vertex2D::uv}
-            )
+    REFLECT(Property{"position", &Vertex2D::position}, Property{"color", &Vertex2D::color},
+            Property{"normal", &Vertex2D::normal}, Property{"uv", &Vertex2D::uv})
 };
 
 struct Vertex2DRaw {
     glm::vec2 position{};
 
-    REFLECT(
-            Property{"position", &Vertex2DRaw::position}
-            )
+    REFLECT(Property{"position", &Vertex2DRaw::position})
 };
 
 struct LineIndex {

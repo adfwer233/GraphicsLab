@@ -346,8 +346,8 @@ struct VklSceneTree {
         active_camera = nullptr;
     }
 
-    template <SupportedGeometryType GeometryType> GeometryNode<GeometryType> * get_geometry_node(std::string_view name) {
-        for (auto node: traverse_geometry_nodes<GeometryType>()) {
+    template <SupportedGeometryType GeometryType> GeometryNode<GeometryType> *get_geometry_node(std::string_view name) {
+        for (auto node : traverse_geometry_nodes<GeometryType>()) {
             if (node->name == name) {
                 return node;
             }

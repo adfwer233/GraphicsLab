@@ -8,12 +8,8 @@ struct Vertex3D {
     glm::vec3 normal{};
     glm::vec2 uv{};
 
-    REFLECT(
-            Property{"position", &Vertex3D::position},
-            Property{"color", &Vertex3D::color},
-            Property{"normal", &Vertex3D::normal},
-            Property{"uv", &Vertex3D::uv}
-    )
+    REFLECT(Property{"position", &Vertex3D::position}, Property{"color", &Vertex3D::color},
+            Property{"normal", &Vertex3D::normal}, Property{"uv", &Vertex3D::uv})
 };
 
 struct Vertex3DRaw {

@@ -37,9 +37,7 @@ template <typename VertexType, typename IndicesType> class MeshModelTemplate {
 };
 
 template <typename T>
-concept MeshVertexConcept = requires {
-    typename T::IsStaticReflected;
-};
+concept MeshVertexConcept = requires { typename T::IsStaticReflected; };
 
 template <typename VertexType, typename IndicesType, size_t Dimension = 3> class MeshGeometry {
   public:
