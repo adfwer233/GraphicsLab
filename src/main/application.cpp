@@ -17,6 +17,9 @@
 
 #include "boost/di.hpp"
 
+#include "language/reflection/static_reflector.hpp"
+
+
 namespace di = boost::di;
 
 Application::~Application() = default;

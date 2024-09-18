@@ -36,6 +36,11 @@ template <typename VertexType, typename IndicesType> class MeshModelTemplate {
     std::vector<IndicesType> indices;
 };
 
+template <typename T>
+concept MeshVertexConcept = requires {
+    typename T::IsStaticReflected;
+};
+
 template <typename VertexType, typename IndicesType, size_t Dimension = 3> class MeshGeometry {
   public:
     using vertex_type = VertexType;
