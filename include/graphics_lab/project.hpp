@@ -16,6 +16,7 @@ class IGraphicsLabProject : public Reflectable {
     }
 
     virtual void tick() = 0;
+    virtual void afterLoad() = 0;
 
     virtual ReflectDataType reflect() {
         return {{"tick", TypeErasedValue(&IGraphicsLabProject::tick, this)}};

@@ -65,8 +65,8 @@ class ProjectWidgetComponent : public UIComponent {
                         if (uiState_.projectManager.loadProject(info.dllPath)) {
                             uiState_.project = uiState_.projectManager.getProject();
                             if (uiState_.project) {
-                                uiState_.project->tick();
                                 uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_));
+                                uiState_.project->afterLoad();
                             } else {
                                 spdlog::error("load project failed");
                             }
