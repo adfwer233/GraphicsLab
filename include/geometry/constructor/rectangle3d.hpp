@@ -23,8 +23,13 @@ struct RectangleConstructor {
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                mesh.indices.push_back({i * n + j, i * n + j + 1, (i + 1) * n + j + 1});
-                mesh.indices.push_back({i * n + j, (i + 1) * n + j + 1, (i + 1) * n + j});
+                auto idx1 = i * (n + 1) + j;
+                auto idx2 = i * (n + 1) + j + 1;
+                auto idx3 = (i + 1) * (n + 1) + j;
+                auto idx4 = (i + 1) * (n + 1) + j + 1;
+
+                mesh.indices.push_back({idx1, idx2, idx4});
+                mesh.indices.push_back({idx1, idx4, idx3});
             }
         }
 
