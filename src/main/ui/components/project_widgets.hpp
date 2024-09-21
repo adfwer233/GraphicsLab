@@ -1,5 +1,7 @@
 #pragma once
 
+#include <future>
+
 #include "component.hpp"
 #include "controller/ui_states.hpp"
 
@@ -18,6 +20,8 @@ struct mystruct : public Reflectable {
 
 class ProjectWidgetComponent : public UIComponent {
     UIState &uiState_;
+
+    std::future<void> projectFunctionResult;
 
   public:
     ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
@@ -67,8 +71,16 @@ class ProjectWidgetComponent : public UIComponent {
                         if (uiState_.projectManager.loadProject(info.dllPath)) {
                             uiState_.project = uiState_.projectManager.getProject();
                             if (uiState_.project) {
-                                uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_));
-                                uiState_.project->afterLoad();
+
+                                auto loadProject = [&]() {
+                                    uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_));
+                                    uiState_.project->afterLoad();
+                                };
+
+                                if (!projectFunctionResult.valid()) {
+                                    projectFunctionResult = std::async(std::launch::async, loadProject);
+                                }
+
                             } else {
                                 spdlog::error("load project failed");
                             }
@@ -96,11 +108,20 @@ class ProjectWidgetComponent : public UIComponent {
 
             ImGui::Text("Project Functions");
 
-            if (uiState_.project != nullptr) {
-                for (auto [name, erased] : uiState_.project->reflect()) {
-                    if (not erased.get()) {
-                        if (ImGui::Button(name.c_str())) {
-                            erased.call();
+            // spdlog::info("stat {}", int(projectFunctionResult.wait_for(std::chrono::milliseconds(500))));
+
+            if (projectFunctionResult.valid() and projectFunctionResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+
+                // projectFunctionResult.get();
+                // projectFunctionResult = std::future<void>();
+
+                if (uiState_.project != nullptr) {
+                    for (auto [name, erased] : uiState_.project->reflect()) {
+                        if (not erased.get()) {
+                            if (ImGui::Button(name.c_str())) {
+                                // erased.call();
+                                projectFunctionResult = std::async(std::launch::async, [erased](){erased.call();});
+                            }
                         }
                     }
                 }

@@ -57,6 +57,7 @@ class ScenePass : public RenderPassDeclarationBase {
     };
 
     virtual void instanceStage(RenderGraph &renderGraph) final {
+
         auto simple_render_pass_obj = renderGraph.getPass<RenderGraphRenderPass>("simple_render_pass");
         simple_render_system = simple_render_pass_obj->getRenderSystem<SimpleRenderSystem<>>(
             renderGraph.device_, "simple_render_system",
@@ -84,6 +85,8 @@ class ScenePass : public RenderPassDeclarationBase {
              {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
+            std::scoped_lock sceneTreeLock(sceneTree_.sceneTreeMutex);
+
             GlobalUbo ubo{};
 
             if (sceneTree_.active_camera == nullptr) {

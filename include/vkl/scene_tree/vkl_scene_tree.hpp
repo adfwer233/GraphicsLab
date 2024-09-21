@@ -312,6 +312,8 @@ struct VklSceneTree {
 
     std::function<void()> sceneUpdateCallBack;
 
+    std::mutex sceneTreeMutex;
+
     void sceneUpdated() {
         if (sceneUpdateCallBack) {
             sceneUpdateCallBack();
