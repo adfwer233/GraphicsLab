@@ -52,6 +52,8 @@ class ProjectWidgetComponent : public UIComponent {
             if (uiState_.project != nullptr) {
                 ImGui::SameLine();
                 if (ImGui::Button("Unload Project")) {
+                    sceneTree_.cleanSceneTree();
+
                     uiState_.project = nullptr;
                     uiState_.projectManager.unloadProject();
                 }
@@ -90,16 +92,6 @@ class ProjectWidgetComponent : public UIComponent {
                 buffer >> j;
                 spdlog::critical(j.dump());
                 uiState_.projectStatus.deserialization(j);
-            }
-
-            if (ImGui::Button("test")) {
-                mystruct a;
-                json j1 = a.serialization();
-                spdlog::info(j1.dump());
-
-                mystruct b;
-                b.deserialization(j1);
-                spdlog::info(b.serialization().dump());
             }
 
             ImGui::Text("Project Functions");

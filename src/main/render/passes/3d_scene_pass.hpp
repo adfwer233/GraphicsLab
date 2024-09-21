@@ -86,6 +86,10 @@ class ScenePass : public RenderPassDeclarationBase {
         simple_render_pass_obj->recordFunction = [&](VkCommandBuffer commandBuffer, uint32_t frame_index) {
             GlobalUbo ubo{};
 
+            if (sceneTree_.active_camera == nullptr) {
+                return;
+            }
+
             ubo.view = sceneTree_.active_camera->camera.get_view_transformation();
             ubo.proj = sceneTree_.active_camera->camera.get_proj_transformation();
             ubo.model = glm::mat4(1.0f);
