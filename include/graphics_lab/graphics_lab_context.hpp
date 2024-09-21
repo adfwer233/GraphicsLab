@@ -8,5 +8,5 @@
 struct GraphicsLabContext {
     VklDevice *device;
     SceneTree::VklSceneTree *sceneTree;
-    LogManager* logManager;
+    LogManager *logManager;
 };

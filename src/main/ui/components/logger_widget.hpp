@@ -7,12 +7,11 @@
 class LoggerWidgetComponent : public UIComponent {
   public:
     LoggerWidgetComponent(SceneTree::VklSceneTree &sceneTree) : UIComponent(sceneTree) {
-
     }
 
     void render() final {
         // Get the singleton instance of LogManager
-        auto& logManager = LogManager::getInstance();
+        auto &logManager = LogManager::getInstance();
 
         // Begin ImGui window
         ImGui::Begin("Log Window");
@@ -24,8 +23,8 @@ class LoggerWidgetComponent : public UIComponent {
         ImGui::BeginChild("Scrolling", available_size, true, ImGuiWindowFlags_HorizontalScrollbar);
 
         // Retrieve and display logs
-        const auto& logs = logManager.get_logs();
-        for (const auto& log : logs) {
+        const auto &logs = logManager.get_logs();
+        for (const auto &log : logs) {
             ImGui::TextWrapped("%s", log.c_str());
         }
 

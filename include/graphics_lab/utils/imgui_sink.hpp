@@ -9,16 +9,15 @@
 #include <vector>
 
 // Custom ImGui sink
-template<typename Mutex>
-class ImGuiSink : public spdlog::sinks::base_sink<Mutex> {
+template <typename Mutex> class ImGuiSink : public spdlog::sinks::base_sink<Mutex> {
   public:
     // Function to retrieve the logs
-    const std::vector<std::string>& get_logs() const {
+    const std::vector<std::string> &get_logs() const {
         return log_buffer;
     }
 
   protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override {
+    void sink_it_(const spdlog::details::log_msg &msg) override {
         spdlog::memory_buf_t formatted;
         this->formatter_->format(msg, formatted);
 
@@ -30,11 +29,12 @@ class ImGuiSink : public spdlog::sinks::base_sink<Mutex> {
         }
     }
 
-    void flush_() override {}
+    void flush_() override {
+    }
 
   private:
-    std::vector<std::string> log_buffer;  // Buffer for log messages
-    size_t max_logs = 1000;  // Max number of logs to keep in buffer
+    std::vector<std::string> log_buffer; // Buffer for log messages
+    size_t max_logs = 1000;              // Max number of logs to keep in buffer
 };
 
 // Type alias for convenience
@@ -44,19 +44,18 @@ using ImGuiLogSink = ImGuiSink<std::mutex>;
 class LogManager {
   public:
     // Get the singleton instance of the LogManager
-    static LogManager& getInstance() {
+    static LogManager &getInstance() {
         static LogManager instance;
         return instance;
     }
 
     // Get the logs to render in ImGui
-    const std::vector<std::string>& get_logs() const {
+    const std::vector<std::string> &get_logs() const {
         return imgui_sink_->get_logs();
     }
 
     // Logs through spdlog
-    template<typename... Args>
-    void log_info(const char* fmt, const Args&... args) {
+    template <typename... Args> void log_info(const char *fmt, const Args &...args) {
         spdlog::info(fmt, args...);
     }
 
@@ -64,10 +63,11 @@ class LogManager {
 
     void setLogger(std::string name) {
         // Create the logger with both console and ImGui sinks
-        auto logger = std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list{
-                                                                     std::make_shared<spdlog::sinks::stdout_color_sink_mt>(),  // Console sink
-                                                                     imgui_sink_  // ImGui custom sink
-                                                                 });
+        auto logger = std::make_shared<spdlog::logger>(
+            name, spdlog::sinks_init_list{
+                      std::make_shared<spdlog::sinks::stdout_color_sink_mt>(), // Console sink
+                      imgui_sink_                                              // ImGui custom sink
+                  });
 
         // Set the logger as the default one
         spdlog::set_default_logger(logger);
@@ -80,19 +80,20 @@ class LogManager {
         imgui_sink_ = std::make_shared<ImGuiLogSink>();
 
         // Create the logger with both console and ImGui sinks
-        auto logger = std::make_shared<spdlog::logger>("Graphics Lab", spdlog::sinks_init_list{
-                                                                     std::make_shared<spdlog::sinks::stdout_color_sink_mt>(),  // Console sink
-                                                                     imgui_sink_  // ImGui custom sink
-                                                                 });
+        auto logger = std::make_shared<spdlog::logger>(
+            "Graphics Lab", spdlog::sinks_init_list{
+                                std::make_shared<spdlog::sinks::stdout_color_sink_mt>(), // Console sink
+                                imgui_sink_                                              // ImGui custom sink
+                            });
 
         // Set the logger as the default one
         spdlog::set_default_logger(logger);
-        spdlog::set_level(spdlog::level::info);  // Optional: Set the log level
+        spdlog::set_level(spdlog::level::info); // Optional: Set the log level
     }
 
     // Prevent copying and assignment
-    LogManager(const LogManager&) = delete;
-    LogManager& operator=(const LogManager&) = delete;
+    LogManager(const LogManager &) = delete;
+    LogManager &operator=(const LogManager &) = delete;
 
     std::shared_ptr<ImGuiLogSink> imgui_sink_;
 };

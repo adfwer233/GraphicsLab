@@ -73,7 +73,8 @@ class ProjectWidgetComponent : public UIComponent {
                             if (uiState_.project) {
 
                                 auto loadProject = [&]() {
-                                    uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_, &LogManager::getInstance()));
+                                    uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_,
+                                                                                       &LogManager::getInstance()));
                                     uiState_.project->afterLoad();
                                 };
 
@@ -110,7 +111,8 @@ class ProjectWidgetComponent : public UIComponent {
 
             // spdlog::info("stat {}", int(projectFunctionResult.wait_for(std::chrono::milliseconds(500))));
 
-            if (projectFunctionResult.valid() and projectFunctionResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+            if (projectFunctionResult.valid() and
+                projectFunctionResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
 
                 // projectFunctionResult.get();
                 // projectFunctionResult = std::future<void>();
@@ -120,7 +122,7 @@ class ProjectWidgetComponent : public UIComponent {
                         if (not erased.get()) {
                             if (ImGui::Button(name.c_str())) {
                                 // erased.call();
-                                projectFunctionResult = std::async(std::launch::async, [erased](){erased.call();});
+                                projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call(); });
                             }
                         }
                     }

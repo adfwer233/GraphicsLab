@@ -26,7 +26,7 @@ Application::~Application() = default;
 void Application::run() {
 
     // customize the log manager
-    auto& logManager = LogManager::getInstance();
+    auto &logManager = LogManager::getInstance();
 
     GLFWwindow *window = window_.getGLFWwindow();
 
