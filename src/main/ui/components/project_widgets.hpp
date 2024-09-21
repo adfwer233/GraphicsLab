@@ -73,7 +73,7 @@ class ProjectWidgetComponent : public UIComponent {
                             if (uiState_.project) {
 
                                 auto loadProject = [&]() {
-                                    uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_));
+                                    uiState_.project->updateContext(GraphicsLabContext(&sceneTree_.device_, &sceneTree_, &LogManager::getInstance()));
                                     uiState_.project->afterLoad();
                                 };
 

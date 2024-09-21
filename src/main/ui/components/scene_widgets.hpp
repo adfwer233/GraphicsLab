@@ -18,7 +18,7 @@ class SceneWidgetComponent : public UIComponent {
 
         ImGui::Begin("Render Result");
         {
-            auto wsize = ImGui::GetContentRegionMax();
+            auto wsize = ImGui::GetContentRegionAvail();
             if (sceneTree_.active_camera) {
                 sceneTree_.active_camera->camera.ratio = wsize.x / wsize.y;
             }
