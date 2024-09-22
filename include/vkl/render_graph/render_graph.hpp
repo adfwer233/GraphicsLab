@@ -699,8 +699,8 @@ struct RenderGraph {
 
                         node_attachments.push_back(resolveAttachment);
                         depth_resolve_ref = {
-                                .attachment = attachment_index++,
-                                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                            .attachment = attachment_index++,
+                            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         };
                     }
                 } else {
