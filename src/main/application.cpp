@@ -104,4 +104,5 @@ void Application::run() {
 
     imguiContext.reset();
     SceneTree::VklNodeMeshBuffer<Mesh3D>::free_instance();
+    SceneTree::VklNodeMeshBuffer<Wire3D>::free_instance();
 }

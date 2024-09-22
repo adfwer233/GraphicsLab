@@ -670,6 +670,11 @@ struct RenderGraph {
                     attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 }
 
+                // swap chain target image
+                if (output_desc->isSwapChain) {
+                    attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+                }
+
                 if (output_desc->type == std::decay_t<decltype(*output_desc)>::AttachmentType::DepthAttachment) {
                     if (has_depth_write) {
                         throw std::runtime_error("Cannot write to multiple depth attachments!");
@@ -681,21 +686,23 @@ struct RenderGraph {
                         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
                     };
 
-                    VkAttachmentDescription resolveAttachment = {};
-                    resolveAttachment.format = attachmentDescription.format; // Format of your resolve image
-                    resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;       // No MSAA for resolve image
-                    resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                    resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-                    resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                    resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                    resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                    resolveAttachment.finalLayout = attachmentDescription.finalLayout;
+                    if (not output_desc->isSwapChain) {
+                        VkAttachmentDescription resolveAttachment = {};
+                        resolveAttachment.format = attachmentDescription.format; // Format of your resolve image
+                        resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;       // No MSAA for resolve image
+                        resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                        resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                        resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                        resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                        resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                        resolveAttachment.finalLayout = attachmentDescription.finalLayout;
 
-                    node_attachments.push_back(resolveAttachment);
-                    depth_resolve_ref = {
-                        .attachment = attachment_index++,
-                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    };
+                        node_attachments.push_back(resolveAttachment);
+                        depth_resolve_ref = {
+                                .attachment = attachment_index++,
+                                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        };
+                    }
                 } else {
                     node_attachments.push_back(attachmentDescription);
                     output_refs.push_back({
@@ -717,7 +724,7 @@ struct RenderGraph {
                         node_attachments.push_back(resolveAttachment);
                         resolve_refs.push_back({
                             .attachment = attachment_index++,
-                            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                            .layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                         });
                     }
                 }
@@ -854,7 +861,10 @@ struct RenderGraph {
                 std::vector<VkImageView> attachmentImageViews;
 
                 for (auto edge : node->get_input_attachment_vector<RenderGraphTextureAttachment>()) {
-                    attachmentImageViews.push_back(edge->instances[i]->texture->getTextureImageView());
+                    if (edge->instances[i]->resolveTexture)
+                        attachmentImageViews.push_back(edge->instances[i]->resolveTexture->getTextureImageView());
+                    else
+                        attachmentImageViews.push_back(edge->instances[i]->texture->getTextureImageView());
                 }
 
                 for (auto edge : node->get_output_attachment_vector<RenderGraphTextureAttachment>()) {
