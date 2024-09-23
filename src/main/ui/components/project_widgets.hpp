@@ -60,6 +60,8 @@ class ProjectWidgetComponent : public UIComponent {
 
                     uiState_.project = nullptr;
                     uiState_.projectManager.unloadProject();
+
+                    projectFunctionResult = std::future<void>();
                 }
             }
 

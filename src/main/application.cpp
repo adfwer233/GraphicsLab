@@ -57,7 +57,8 @@ void Application::run() {
     renderGraph.createInstances();
 
     auto imguiContext = std::make_unique<ImguiContext>(device_, window, renderGraph.swapChain_->getRenderPass());
-    ImGui::GetIO().FontGlobalScale = 1.5;
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
 
     renderPassManager.instanceStage(renderGraph);
 

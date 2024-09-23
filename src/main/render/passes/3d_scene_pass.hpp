@@ -34,8 +34,8 @@ class ScenePass : public RenderPassDeclarationBase {
         render_texture->isSwapChain = false;
         render_texture->input_flag = true;
         render_texture->format = VK_FORMAT_R8G8B8A8_SRGB;
-        render_texture->width = 1024;
-        render_texture->height = 1024;
+        render_texture->width = 2048;
+        render_texture->height = 2048;
 
         auto render_depth_texture = descriptor.attachment<RenderGraphTextureAttachment>("render_depth");
         render_depth_texture->clear = true;
@@ -46,14 +46,14 @@ class ScenePass : public RenderPassDeclarationBase {
         render_depth_texture->format = sceneTree_.device_.findSupportedFormat(
             {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-        render_depth_texture->width = 1024;
-        render_depth_texture->height = 1024;
+        render_depth_texture->width = 2048;
+        render_depth_texture->height = 2048;
 
         auto simple_render_pass = descriptor.pass<RenderGraphRenderPass>("simple_render_pass");
         simple_render_pass->outTextureAttachmentDescriptors.push_back(render_texture);
         simple_render_pass->outTextureAttachmentDescriptors.push_back(render_depth_texture);
-        simple_render_pass->width = 1024;
-        simple_render_pass->height = 1024;
+        simple_render_pass->width = 2048;
+        simple_render_pass->height = 2048;
     };
 
     virtual void instanceStage(RenderGraph &renderGraph) final {
