@@ -42,9 +42,6 @@ void Application::run() {
         di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
                           di::bind<UIState>().to(state), di::bind<Controller>().to(controller));
 
-    spdlog::info("[controller] {}", (void *)&controller);
-
-    // glfwSetWindowUserPointer(window, &controller);
     Controller::controller = &controller;
     glfwSetCursorPosCallback(window, Controller::mouse_callback);
     glfwSetScrollCallback(window, Controller::scroll_callback);
@@ -60,6 +57,7 @@ void Application::run() {
     renderGraph.createInstances();
 
     auto imguiContext = std::make_unique<ImguiContext>(device_, window, renderGraph.swapChain_->getRenderPass());
+    ImGui::GetIO().FontGlobalScale = 2.0;
 
     renderPassManager.instanceStage(renderGraph);
 
@@ -93,7 +91,6 @@ void Application::run() {
                 glfwWaitEvents();
             }
             renderGraph.recreateSwapChain(extent);
-            glfwSetWindowUserPointer(window, &controller);
             vkDeviceWaitIdle(device_.device());
         }
 
