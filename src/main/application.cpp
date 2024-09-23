@@ -57,7 +57,7 @@ void Application::run() {
     renderGraph.createInstances();
 
     auto imguiContext = std::make_unique<ImguiContext>(device_, window, renderGraph.swapChain_->getRenderPass());
-    ImGui::GetIO().FontGlobalScale = 2.0;
+    ImGui::GetIO().FontGlobalScale = 1.5;
 
     renderPassManager.instanceStage(renderGraph);
 

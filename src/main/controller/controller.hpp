@@ -28,6 +28,9 @@ struct Controller {
     }
 
     static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
+        if (not controller->uiState_.isMouseInRegion)
+            return;
+
         // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         if (controller->sceneTree_.get().active_camera) {
             controller->sceneTree_.get().active_camera->camera.process_mouse_scroll(y_offset);
@@ -35,6 +38,10 @@ struct Controller {
     }
 
     static void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
+        if (not controller->uiState_.isMouseInRegion) {
+            return;
+        }
+
         // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         auto &uiState = controller->uiState_;
         if (button == GLFW_MOUSE_BUTTON_MIDDLE and state == GLFW_PRESS) {
@@ -70,6 +77,8 @@ struct Controller {
         if (xposIn > uiState.scope_min.x and xposIn < uiState.scope_max.x and yposIn > uiState.scope_min.y and
             yposIn < uiState.scope_max.y) {
             uiState.isMouseInRegion = true;
+        } else {
+            uiState.isMouseInRegion = false;
         }
 
         if (not(uiState.isMouseLeftPressing or uiState.isMouseMidPressing))
