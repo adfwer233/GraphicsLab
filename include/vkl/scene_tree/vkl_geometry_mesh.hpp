@@ -37,7 +37,8 @@ template <typename T> class VklNodeMeshBuffer {
     }
 
     static void free_instance() {
-        if (instance_ == nullptr) return;
+        if (instance_ == nullptr)
+            return;
         for (auto [geometry, mesh] : instance_->map_) {
             delete mesh;
         }

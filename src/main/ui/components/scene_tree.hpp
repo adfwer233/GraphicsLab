@@ -17,7 +17,9 @@ class SceneTreeComponent : public UIComponent {
 
     void render() final {
         ImGui::Begin("Scene Tree");
-        { RenderTreeNode(sceneTree_.root.get()); }
+        {
+            RenderTreeNode(sceneTree_.root.get());
+        }
         ImGui::End();
     }
 
