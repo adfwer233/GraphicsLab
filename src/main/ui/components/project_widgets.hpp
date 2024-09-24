@@ -23,6 +23,10 @@ class ProjectWidgetComponent : public UIComponent {
 
     std::future<void> projectFunctionResult;
 
+    bool showFunctionCallDialog = false;
+    GraphicsLabReflection::GraphicsLabFunction functionWithParamPack;
+    std::vector<std::any> functionCallParameters;
+
   public:
     ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
         : UIComponent(sceneTree), uiState_(uiState) {
@@ -121,16 +125,92 @@ class ProjectWidgetComponent : public UIComponent {
 
                 if (uiState_.project != nullptr) {
                     for (auto [name, erased] : uiState_.project->reflect()) {
-                        if (not erased.get()) {
+                        if (not erased.get() and erased.call_func != nullptr) {
                             if (ImGui::Button(name.c_str())) {
                                 // erased.call();
                                 projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call(); });
                             }
                         }
+
+                        if (erased.function_with_pack.has_value()) {
+                            if (ImGui::Button(name.c_str())) {
+                                functionCallParameters.clear();
+                                for (auto &arg: erased.function_with_pack.value().meta.arguments) {
+                                    functionCallParameters.push_back(arg.default_value);
+                                    spdlog::info(arg.name);
+                                }
+
+                                for (int i = 0; i < functionCallParameters.size(); i++) {
+                                    if (functionCallParameters[i].type() == typeid(int)) {
+                                        spdlog::info("has type");
+                                    }
+                                }
+
+                                showFunctionCallDialog = true;
+
+                                functionWithParamPack = erased.function_with_pack.value();
+                                // erased.call();
+                                // projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call(); });
+                            }
+                        }
                     }
+                }
+
+                if (showFunctionCallDialog) {
+                    functionCallDialogRender();
                 }
             }
         }
+        ImGui::End();
+    }
+
+    void functionCallDialogRender() {
+        // Center the window
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        ImGui::Begin("Input Dialog", &showFunctionCallDialog, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+
+        ImGui::Text("Enter your arguments:");
+
+        GraphicsLabReflection::GraphicsLabFunctionParameterPack parameterPack;
+        for (int i = 0; auto &arg: functionWithParamPack.meta.arguments) {
+            GraphicsLabReflection::Parameter parameter;
+
+            if (arg.type_info_func() == typeid(float)) {
+                float& val = std::any_cast<float&>(functionCallParameters[i]);
+                ImGui::InputFloat(std::format("Param: {} (Float)", arg.name).c_str(), &val);
+                parameter.param = val;
+            }
+
+            if (arg.type_info_func() == typeid(int)) {
+                int& val = std::any_cast<int&>(functionCallParameters[i]);
+                ImGui::InputInt(std::format("Param: {} (Int)", arg.name).c_str(), &val);
+                parameter.param = val;
+            }
+
+            parameterPack.parameters.push_back(parameter);
+            i++;
+        }
+
+        if (ImGui::Button("OK"))
+        {
+            showFunctionCallDialog = false;
+
+            projectFunctionResult = std::async(std::launch::async, [&]() { functionWithParamPack.function_with_parameter(parameterPack); });
+
+
+            spdlog::info("called");
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel"))
+        {
+            // Close the dialog
+            showFunctionCallDialog = false;
+        }
+
         ImGui::End();
     }
 };
