@@ -135,7 +135,7 @@ class ProjectWidgetComponent : public UIComponent {
                         if (erased.function_with_pack.has_value()) {
                             if (ImGui::Button(name.c_str())) {
                                 functionCallParameters.clear();
-                                for (auto &arg: erased.function_with_pack.value().meta.arguments) {
+                                for (auto &arg : erased.function_with_pack.value().meta.arguments) {
                                     functionCallParameters.push_back(arg.default_value);
                                     spdlog::info(arg.name);
                                 }
@@ -150,7 +150,8 @@ class ProjectWidgetComponent : public UIComponent {
 
                                 functionWithParamPack = erased.function_with_pack.value();
                                 // erased.call();
-                                // projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call(); });
+                                // projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call();
+                                // });
                             }
                         }
                     }
@@ -169,22 +170,23 @@ class ProjectWidgetComponent : public UIComponent {
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-        ImGui::Begin("Input Dialog", &showFunctionCallDialog, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Input Dialog", &showFunctionCallDialog,
+                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
 
         ImGui::Text("Enter your arguments:");
 
         GraphicsLabReflection::GraphicsLabFunctionParameterPack parameterPack;
-        for (int i = 0; auto &arg: functionWithParamPack.meta.arguments) {
+        for (int i = 0; auto &arg : functionWithParamPack.meta.arguments) {
             GraphicsLabReflection::Parameter parameter;
 
             if (arg.type_info_func() == typeid(float)) {
-                float& val = std::any_cast<float&>(functionCallParameters[i]);
+                float &val = std::any_cast<float &>(functionCallParameters[i]);
                 ImGui::InputFloat(std::format("Param: {} (Float)", arg.name).c_str(), &val);
                 parameter.param = val;
             }
 
             if (arg.type_info_func() == typeid(int)) {
-                int& val = std::any_cast<int&>(functionCallParameters[i]);
+                int &val = std::any_cast<int &>(functionCallParameters[i]);
                 ImGui::InputInt(std::format("Param: {} (Int)", arg.name).c_str(), &val);
                 parameter.param = val;
             }
@@ -193,20 +195,18 @@ class ProjectWidgetComponent : public UIComponent {
             i++;
         }
 
-        if (ImGui::Button("OK"))
-        {
+        if (ImGui::Button("OK")) {
             showFunctionCallDialog = false;
 
-            projectFunctionResult = std::async(std::launch::async, [&]() { functionWithParamPack.function_with_parameter(parameterPack); });
-
+            projectFunctionResult =
+                std::async(std::launch::async, [&]() { functionWithParamPack.function_with_parameter(parameterPack); });
 
             spdlog::info("called");
         }
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Cancel"))
-        {
+        if (ImGui::Button("Cancel")) {
             // Close the dialog
             showFunctionCallDialog = false;
         }

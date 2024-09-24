@@ -271,14 +271,19 @@ struct TypeErasedValue {
         call_func = [func, obj]() { (obj->*func)(); };
     }
 
-    template <typename R, typename C, typename... args> TypeErasedValue(R (C::*func)(GraphicsLabReflection::GraphicsLabFunctionParameterPack), C *obj, std::tuple<args...> default_values, std::vector<std::string> names) {
+    template <typename R, typename C, typename... args>
+    TypeErasedValue(R (C::*func)(GraphicsLabReflection::GraphicsLabFunctionParameterPack), C *obj,
+                    std::tuple<args...> default_values, std::vector<std::string> names) {
         type_info_func = [func]() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = nullptr;
 
         function_with_pack = GraphicsLabReflection::GraphicsLabFunction{};
-        function_with_pack.value().meta = GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<C, R, args...>(func, obj, default_values, names);
-        function_with_pack->function_with_parameter = [func, obj](GraphicsLabReflection::GraphicsLabFunctionParameterPack pack) { (obj->*func)(pack); };
+        function_with_pack.value().meta =
+            GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<C, R, args...>(
+                func, obj, default_values, names);
+        function_with_pack->function_with_parameter =
+            [func, obj](GraphicsLabReflection::GraphicsLabFunctionParameterPack pack) { (obj->*func)(pack); };
     }
 
     const std::type_info &type() const {
