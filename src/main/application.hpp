@@ -12,7 +12,7 @@
 class Application {
   private:
     static constexpr int WIDTH = 1024 + 768;
-    static constexpr int HEIGHT = 1024;
+    static constexpr int HEIGHT = 1280;
 
     VklWindow window_{WIDTH, HEIGHT};
     VklDevice device_;

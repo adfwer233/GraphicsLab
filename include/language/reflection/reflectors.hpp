@@ -17,6 +17,7 @@
 #include "nlohmann/json.hpp"
 
 #include "builtin_reflectors.hpp"
+#include "function_meta.hpp"
 
 using json = nlohmann::json;
 
@@ -238,6 +239,7 @@ struct TypeErasedValue {
     std::function<const std::type_info &()> type_info_func;
     std::function<void *(void)> get_ptr_func;
     std::function<void(void)> call_func; // Callable for member functions
+    std::optional<GraphicsLabReflection::GraphicsLabFunction> function_with_pack;
     DispatchedTypeBase *dispatched;
     TypeErasedValue() = default;
 
@@ -267,6 +269,14 @@ struct TypeErasedValue {
         type_info_func = [func]() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = [func, obj]() { (obj->*func)(); };
+    }
+
+    template <typename C, typename... args> TypeErasedValue(void (C::*func)(GraphicsLabReflection::GraphicsLabFunctionParameterPack), C *obj, std::vector<std::string>& names) {
+        type_info_func = [func]() -> const std::type_info & { return typeid(func); };
+        get_ptr_func = nullptr; // Not a data member
+        call_func = nullptr;
+
+        function_with_pack = GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<void, C, args...>(func, obj, names);
     }
 
     const std::type_info &type() const {
