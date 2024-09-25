@@ -19,13 +19,12 @@ enum CameraMovement {
  * @brief Camera class for opengl
  */
 class Camera {
-  private:
+  public:
     /**
      * @brief calculates the front vector from the Camera's (updated) Euler Angles
      */
     void update_camera_vectors();
 
-  public:
     /**
      * @brief position of camera in world coordinate
      */

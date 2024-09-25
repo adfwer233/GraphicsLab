@@ -35,6 +35,47 @@ struct Controller {
             uiState_.isPressingG = true;
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
             uiState_.isPressingG = false;
+
+        if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) {
+            if (sceneTree_.get().active_camera != nullptr) {
+                auto& camera = sceneTree_.get().active_camera->camera;
+
+                camera.position = glm::vec3{0, 0, 10};
+                camera.camera_up_axis = glm::vec3{0 ,1, 0};
+                camera.theta = 90.0f;
+                camera.phi = 0.0f;
+                camera.camera_target = glm::vec3(0.0f);
+                camera.zoom = 45;
+                camera.update_camera_vectors();
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) {
+            if (sceneTree_.get().active_camera != nullptr) {
+                auto& camera = sceneTree_.get().active_camera->camera;
+                camera.position = glm::vec3{10, 0, 0};
+                camera.camera_up_axis = glm::vec3{0 ,1, 0};
+                camera.theta = 90.0f;
+                camera.phi = 90.0f;
+                camera.camera_target = glm::vec3(0.0f);
+                camera.zoom = 45;
+                camera.update_camera_vectors();
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) {
+            if (sceneTree_.get().active_camera != nullptr) {
+                auto& camera = sceneTree_.get().active_camera->camera;
+
+                camera.position = glm::vec3{0, -10, 0};
+                camera.camera_up_axis = glm::vec3{0 ,1, 0.003};
+                camera.theta = 0.001f;
+                camera.phi = 0.0f;
+                camera.camera_target = glm::vec3(0.0f);
+                camera.zoom = 45;
+                camera.update_camera_vectors();
+            }
+        }
     }
 
     static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
@@ -168,7 +209,6 @@ struct Controller {
 
             if (auto meshNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(picking_result->hitGeometryNode)) {
                 uiState_.box = meshNode->data.getMeshBox();
-                spdlog::info("get mesh box data ptr {}", (void *)&meshNode->data);
                 // spdlog::info("box updated {} {}", Reflection::serialize(uiState_.box.min_pos).dump(),
                 // Reflection::serialize(uiState_.box.max_pos).dump());
                 uiState_.boxMeshRecreated = false;
