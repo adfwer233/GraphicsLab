@@ -58,7 +58,6 @@ struct UIState {
             ReflectDataType reflect() override {
                 return {{"buildType", TypeErasedValue(&buildType)}, {"dllPath", TypeErasedValue(&dllPath)}};
             }
-
         };
 
         std::vector<BuildConfig> buildConfigs;

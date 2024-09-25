@@ -134,9 +134,9 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
 
             auto trans = transformation.getTransformation();
 
-            auto &mesh = static_cast<Mesh3D&>(data);
+            auto &mesh = static_cast<Mesh3D &>(data);
 
-            for (auto& vert: mesh.vertices) {
+            for (auto &vert : mesh.vertices) {
                 vert.position = trans * glm::vec4(vert.position, 1.0f);
             }
             transformation.translation = glm::vec3(0.0f);

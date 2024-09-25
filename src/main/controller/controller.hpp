@@ -38,10 +38,10 @@ struct Controller {
 
         if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) {
             if (sceneTree_.get().active_camera != nullptr) {
-                auto& camera = sceneTree_.get().active_camera->camera;
+                auto &camera = sceneTree_.get().active_camera->camera;
 
                 camera.position = glm::vec3{0, 0, 10};
-                camera.camera_up_axis = glm::vec3{0 ,1, 0};
+                camera.camera_up_axis = glm::vec3{0, 1, 0};
                 camera.theta = 90.0f;
                 camera.phi = 0.0f;
                 camera.camera_target = glm::vec3(0.0f);
@@ -52,9 +52,9 @@ struct Controller {
 
         if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) {
             if (sceneTree_.get().active_camera != nullptr) {
-                auto& camera = sceneTree_.get().active_camera->camera;
+                auto &camera = sceneTree_.get().active_camera->camera;
                 camera.position = glm::vec3{10, 0, 0};
-                camera.camera_up_axis = glm::vec3{0 ,1, 0};
+                camera.camera_up_axis = glm::vec3{0, 1, 0};
                 camera.theta = 90.0f;
                 camera.phi = 90.0f;
                 camera.camera_target = glm::vec3(0.0f);
@@ -65,10 +65,10 @@ struct Controller {
 
         if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) {
             if (sceneTree_.get().active_camera != nullptr) {
-                auto& camera = sceneTree_.get().active_camera->camera;
+                auto &camera = sceneTree_.get().active_camera->camera;
 
                 camera.position = glm::vec3{0, -10, 0};
-                camera.camera_up_axis = glm::vec3{0 ,1, 0.003};
+                camera.camera_up_axis = glm::vec3{0, 1, 0.003};
                 camera.theta = 0.001f;
                 camera.phi = 0.0f;
                 camera.camera_target = glm::vec3(0.0f);
@@ -159,7 +159,8 @@ struct Controller {
                         auto r = camera.camera_right_axis;
                         auto up = camera.camera_up_axis;
                         if (controller->sceneTree_.get().activeNode) {
-                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D>*>(controller->sceneTree_.get().activeNode);
+                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(
+                                controller->sceneTree_.get().activeNode);
 
                             geoNode->transformation.translation += r * x_offset * 0.1f - up * y_offset * 0.1f;
                         }
@@ -170,7 +171,8 @@ struct Controller {
                         float scaling_factor = 1.0f + 0.1f * y_offset;
 
                         if (controller->sceneTree_.get().activeNode) {
-                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D>*>(controller->sceneTree_.get().activeNode);
+                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(
+                                controller->sceneTree_.get().activeNode);
 
                             geoNode->transformation.scaling *= glm::vec3(1.0f) * scaling_factor;
                         }
