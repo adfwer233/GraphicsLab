@@ -112,6 +112,11 @@ class ScenePass : public RenderPassDeclarationBase {
 
                 auto node_mesh = mesh3d_buffer->getGeometryModel(renderGraph.device_, mesh3d_nodes);
 
+                if (mesh3d_nodes->updated) {
+                    node_mesh->recreateMeshes();
+                    mesh3d_nodes->updated = false;
+                }
+
                 if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
                     node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
                     node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();

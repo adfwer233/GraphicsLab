@@ -123,6 +123,9 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     bool visible = true;
     std::optional<size_t> material_index = std::nullopt;
     GraphicsTransformation transformation;
+
+    // sync objects
+    bool updated = false;
 };
 
 template <SupportedLightTypes LightTypes> struct LightNode : public TreeNode {
