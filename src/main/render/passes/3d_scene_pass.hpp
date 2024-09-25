@@ -105,10 +105,12 @@ class ScenePass : public RenderPassDeclarationBase {
             auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
-            for (auto mesh3d_nodes : sceneTree_.traverse_geometry_nodes<Mesh3D>()) {
+            for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
 
                 if (not mesh3d_nodes->visible)
                     continue;
+
+                ubo.model = trans;
 
                 auto node_mesh = mesh3d_buffer->getGeometryModel(renderGraph.device_, mesh3d_nodes);
 

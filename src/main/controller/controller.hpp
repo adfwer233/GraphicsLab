@@ -25,6 +25,16 @@ struct Controller {
             uiState_.isPressingShift = true;
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
             uiState_.isPressingShift = false;
+
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            uiState_.isPressingS = true;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
+            uiState_.isPressingS = false;
+
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+            uiState_.isPressingG = true;
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+            uiState_.isPressingG = false;
     }
 
     static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
@@ -99,7 +109,32 @@ struct Controller {
         if (uiState.isMouseLeftPressing) {
             if (controller->sceneTree_.get().active_camera) {
                 auto &camera = controller->sceneTree_.get().active_camera->camera;
-                if (uiState.isPressingShift) {
+
+                // translation
+                if (uiState.isPressingG) {
+                    if (controller->sceneTree_.get().active_camera) {
+                        auto camera = controller->sceneTree_.get().active_camera->camera;
+
+                        auto r = camera.camera_right_axis;
+                        auto up = camera.camera_up_axis;
+                        if (controller->sceneTree_.get().activeNode) {
+                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D>*>(controller->sceneTree_.get().activeNode);
+
+                            geoNode->transformation.translation += r * x_offset * 0.1f - up * y_offset * 0.1f;
+                        }
+                    }
+                } else if (uiState.isPressingS) {
+                    if (controller->sceneTree_.get().active_camera) {
+                        auto &camera = controller->sceneTree_.get().active_camera->camera;
+                        float scaling_factor = 1.0f + 0.1f * y_offset;
+
+                        if (controller->sceneTree_.get().activeNode) {
+                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D>*>(controller->sceneTree_.get().activeNode);
+
+                            geoNode->transformation.scaling *= glm::vec3(1.0f) * scaling_factor;
+                        }
+                    }
+                } else if (uiState.isPressingShift) {
                     camera.process_mouse_shift_movement(x_offset, y_offset);
                 } else {
                     camera.process_mouse_movement(x_offset, y_offset);
@@ -133,6 +168,7 @@ struct Controller {
 
             if (auto meshNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(picking_result->hitGeometryNode)) {
                 uiState_.box = meshNode->data.getMeshBox();
+                spdlog::info("get mesh box data ptr {}", (void *)&meshNode->data);
                 // spdlog::info("box updated {} {}", Reflection::serialize(uiState_.box.min_pos).dump(),
                 // Reflection::serialize(uiState_.box.max_pos).dump());
                 uiState_.boxMeshRecreated = false;

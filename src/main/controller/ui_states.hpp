@@ -27,6 +27,15 @@ struct UIState {
     bool isMouseInRegion{false};
     bool isPressingShift{false};
 
+    // for scaling
+    bool isPressingS{false};
+
+    // for rotation
+    bool isPressingR{false};
+
+    // for translation
+    bool isPressingG{false};
+
     float mouseXPos{}, lastMouseXPos{};
     float mouseYPos{}, lastMouseYPos{};
 
@@ -50,21 +59,6 @@ struct UIState {
                 return {{"buildType", TypeErasedValue(&buildType)}, {"dllPath", TypeErasedValue(&dllPath)}};
             }
 
-            // struct ReflectImpl {
-            //     static std::string serialize(BuildConfig &config) {
-            //         auto map = std::map<std::string, std::string> {
-            //                 {"buildType", config.buildType},
-            //                 {"dllPath", config.buildType},
-            //         };
-            //
-            //         return Reflection::serialize(map);
-            //     }
-            //
-            //     static BuildConfig deserialize(const std::string &str) {
-            //         auto map = Reflection::deserialize<std::map<std::string, std::string>>(str);
-            //         return BuildConfig (map["buildType"], map["dllPath"]);
-            //     }
-            // };
         };
 
         std::vector<BuildConfig> buildConfigs;

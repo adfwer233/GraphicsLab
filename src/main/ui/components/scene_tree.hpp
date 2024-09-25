@@ -41,7 +41,10 @@ class SceneTreeComponent : public UIComponent {
                     ImGui::Checkbox(key.c_str(), &boolval);
                 }
                 if (value.isReflectable) {
-                    showReflectable(static_cast<Reflectable *>(value.get()));
+                    if (ImGui::TreeNode(key.c_str())) {
+                        showReflectable(static_cast<Reflectable *>(value.get()));
+                        ImGui::TreePop();
+                    }
                 }
             } else {
                 if (ImGui::Button(std::format("{}", key).c_str())) {

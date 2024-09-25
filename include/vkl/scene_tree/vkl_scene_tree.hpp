@@ -56,7 +56,6 @@ struct GraphicsTransformation : Reflectable {
     glm::vec3 translation = glm::vec3(0.0f);
     glm::vec3 scaling = glm::vec3(1.0f);
     glm::quat rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
-    ;
 
     [[nodiscard]] glm::mat4 getTransformation() const {
         glm::mat4 model(1.0f);
@@ -116,6 +115,7 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         auto result = TreeNode::reflect();
         result.emplace("transformation", TypeErasedValue(&transformation));
         result.emplace("visible", TypeErasedValue(&visible));
+        result.emplace("Apply Transformation", TypeErasedValue(&GeometryNode::applyTransformation, this));
         return result;
     }
 
@@ -126,6 +126,29 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
 
     // sync objects
     bool updated = false;
+    bool boxUpdated = false;
+
+    void applyTransformation() {
+        if constexpr (std::is_same_v<GeometryType, Mesh3D>) {
+            spdlog::info("apply transformation to mesh 3d");
+
+            auto trans = transformation.getTransformation();
+
+            auto &mesh = static_cast<Mesh3D&>(data);
+
+            for (auto& vert: mesh.vertices) {
+                vert.position = trans * glm::vec4(vert.position, 1.0f);
+            }
+            transformation.translation = glm::vec3(0.0f);
+            transformation.scaling = glm::vec3(1.0f);
+            transformation.rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
+
+            updated = true;
+            boxUpdated = true;
+
+            mesh.box.reset();
+        }
+    }
 };
 
 template <SupportedLightTypes LightTypes> struct LightNode : public TreeNode {
