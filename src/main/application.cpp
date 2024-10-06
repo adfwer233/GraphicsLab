@@ -64,7 +64,9 @@ void Application::run() {
 
     float deltaTime = 0, lastFrame = 0;
 
+#ifdef RENDERDOC_DIR
     GraphicsLab::RenderDocApi::initialize_render_doc();
+#endif
 
     while (not glfwWindowShouldClose(window)) {
         glfwPollEvents();
