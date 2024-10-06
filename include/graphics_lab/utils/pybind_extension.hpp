@@ -6,7 +6,6 @@
 
 #include "pybind/bind_glm.hpp"
 
-
 PYBIND11_EMBEDDED_MODULE(graphics_lab, m) {
     BindGLM::bind_glm(m);
 

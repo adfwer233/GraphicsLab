@@ -84,7 +84,7 @@ struct Controller {
 #ifdef RENDERDOC_DIR
         if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) {
             GraphicsLab::RenderDocApi::renderdoc_api->TriggerCapture();
-            if(!GraphicsLab::RenderDocApi::renderdoc_api->IsTargetControlConnected())
+            if (!GraphicsLab::RenderDocApi::renderdoc_api->IsTargetControlConnected())
                 GraphicsLab::RenderDocApi::renderdoc_api->LaunchReplayUI(1, nullptr);
         }
 #endif

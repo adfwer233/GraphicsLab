@@ -11,29 +11,31 @@
  *
  * Design Goals:
  *
- * 1. Separate render graph with the rendering backend, i.e. no vulkan-related logic appears in the render graph implementation
+ * 1. Separate render graph with the rendering backend, i.e. no vulkan-related logic appears in the render graph
+ * implementation
  *
  * Design:
  *
- * We got idea from the entity component systems, pass instances and resource instances are stored in a vector `RenderGraph`
-*/
+ * We got idea from the entity component systems, pass instances and resource instances are stored in a vector
+ * `RenderGraph`
+ */
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace GraphicsLab {
 
 namespace RenderGraph {
 
 struct RenderResource {};
-struct RenderResourceInstance{};
+struct RenderResourceInstance {};
 
 struct RenderTexture {};
 struct RenderBuffer {};
 
-struct TextureInstance: public RenderResourceInstance{};
-struct BufferInstance: public RenderResourceInstance{};
+struct TextureInstance : public RenderResourceInstance {};
+struct BufferInstance : public RenderResourceInstance {};
 
 struct Pass {
     enum class Type {
@@ -45,19 +47,19 @@ struct Pass {
     std::string name;
     size_t index;
     size_t instance_index;
-  private:
 
+  private:
 };
 
-struct ComputePass: Pass {};
-struct RenderPass: Pass {};
-struct SwapChainPass: Pass {};
+struct ComputePass : Pass {};
+struct RenderPass : Pass {};
+struct SwapChainPass : Pass {};
 
 struct PassInstance {};
 
-struct ComputePassInstance: public PassInstance {};
-struct RenderPassInstance: public PassInstance {};
-struct SwapChainPassInstance: public PassInstance{};
+struct ComputePassInstance : public PassInstance {};
+struct RenderPassInstance : public PassInstance {};
+struct SwapChainPassInstance : public PassInstance {};
 
 struct RenderGraph {
 
@@ -76,10 +78,10 @@ struct RenderGraph {
 };
 
 struct HyperRenderGraph {
-    std::vector<RenderGraph*> graphs;
+    std::vector<RenderGraph *> graphs;
 
     void render();
 };
 
-}
-}
+} // namespace RenderGraph
+} // namespace GraphicsLab

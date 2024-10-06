@@ -3,7 +3,7 @@
 #include <windows.h>
 
 bool ProjectManager::loadProject(const std::string &pluginPath) {
-    projectHandle = LoadLibraryEx(pluginPath.c_str(),  NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    projectHandle = LoadLibraryEx(pluginPath.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     if (!projectHandle) {
         std::cerr << "Failed to load plugin: " << GetLastError() << std::endl;
         return false;

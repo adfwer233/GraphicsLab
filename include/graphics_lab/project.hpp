@@ -20,7 +20,8 @@ class IGraphicsLabProject : public Reflectable {
     virtual void tick() = 0;
     virtual std::string name() = 0;
     virtual void afterLoad() = 0;
-    virtual void bindPython(pybind11::module &m) {}
+    virtual void bindPython(pybind11::module &m) {
+    }
 
     virtual ReflectDataType reflect() {
         return {{"tick", TypeErasedValue(&IGraphicsLabProject::tick, this)}};

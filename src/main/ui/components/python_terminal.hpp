@@ -10,27 +10,27 @@ using namespace py::literals;
 
 class PythonTerminalComponent : public UIComponent {
     // Constants
-    const static int INPUT_BUFFER_SIZE = 256;  // Maximum input buffer size
+    const static int INPUT_BUFFER_SIZE = 256; // Maximum input buffer size
 
     struct PythonTerminal {
-        char input_buffer[INPUT_BUFFER_SIZE];  // Character array for input
-        std::vector<std::string> output_log;   // Stores output logs
+        char input_buffer[INPUT_BUFFER_SIZE]; // Character array for input
+        std::vector<std::string> output_log;  // Stores output logs
 
         PythonTerminal() {
-            clear_input();  // Initialize input buffer with empty string
+            clear_input(); // Initialize input buffer with empty string
         }
 
         void clear_input() {
-            memset(input_buffer, 0, sizeof(input_buffer));  // Clear the buffer
+            memset(input_buffer, 0, sizeof(input_buffer)); // Clear the buffer
         }
 
-        void add_output(const std::string& output) {
+        void add_output(const std::string &output) {
             output_log.push_back(output);
         }
 
         void render_log() {
-            for (const auto& line : output_log) {
-                ImGui::TextWrapped("%s", line.c_str());  // Render each line of log
+            for (const auto &line : output_log) {
+                ImGui::TextWrapped("%s", line.c_str()); // Render each line of log
             }
         }
     };
@@ -68,7 +68,7 @@ class PythonTerminalComponent : public UIComponent {
         }
     };
 
-    void run_python_command(PythonTerminal& terminal, PythonOutputRedirector& output_redirector) {
+    void run_python_command(PythonTerminal &terminal, PythonOutputRedirector &output_redirector) {
         try {
             // Convert the C-style string (input_buffer) to a std::string
             std::string command(terminal.input_buffer);
@@ -85,17 +85,17 @@ class PythonTerminalComponent : public UIComponent {
             // If there's output, add it to the terminal and C++ console
             if (!output.empty()) {
                 terminal.add_output(output);
-                std::cout << output;  // Also print to C++ console
+                std::cout << output; // Also print to C++ console
             }
 
             // Clear Python's output buffer after each command
             output_redirector.clear_output();
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             // Log any errors
             terminal.add_output("Error: " + std::string(e.what()));
         }
 
-        terminal.clear_input();  // Clear input after execution
+        terminal.clear_input(); // Clear input after execution
     }
 
     // Set up the custom output redirector
@@ -106,13 +106,11 @@ class PythonTerminalComponent : public UIComponent {
 
   public:
     PythonTerminalComponent(SceneTree::VklSceneTree &sceneTree, Controller &controller) : UIComponent(sceneTree) {
-
     }
 
     void render() final {
         // Python terminal UI
         ImGui::Begin("Python Terminal");
-
 
         // Display output log
         ImGui::Separator();
@@ -122,18 +120,18 @@ class PythonTerminalComponent : public UIComponent {
         ImGui::EndChild();
 
         // Input text field for Python commands
-        if (ImGui::InputText("Command", terminal.input_buffer, INPUT_BUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue)) {
+        if (ImGui::InputText("Command", terminal.input_buffer, INPUT_BUFFER_SIZE,
+                             ImGuiInputTextFlags_EnterReturnsTrue)) {
             // If 'Enter' is pressed, execute the Python command
             if (strlen(terminal.input_buffer) > 0) {
                 run_python_command(terminal, output_redirector);
             }
 
             // Set focus back to the input field after command execution
-            ImGui::SetKeyboardFocusHere(-1);  // Focus on the next item (InputText field)
+            ImGui::SetKeyboardFocusHere(-1); // Focus on the next item (InputText field)
         }
 
         ImGui::End();
-
     }
 };
 

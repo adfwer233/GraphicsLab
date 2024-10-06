@@ -27,6 +27,7 @@ class ProjectWidgetComponent : public UIComponent {
     GraphicsLabReflection::GraphicsLabFunction functionWithParamPack;
     std::vector<std::any> functionCallParameters;
     std::set<std::string> bindClassNames;
+
   public:
     ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
         : UIComponent(sceneTree), uiState_(uiState) {
@@ -114,8 +115,6 @@ class ProjectWidgetComponent : public UIComponent {
             }
 
             ImGui::Text("Project Functions");
-
-
 
             // spdlog::info("stat {}", int(projectFunctionResult.wait_for(std::chrono::milliseconds(500))));
 
