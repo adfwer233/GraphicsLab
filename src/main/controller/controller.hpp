@@ -6,6 +6,10 @@
 
 #include "ui_states.hpp"
 
+#ifdef RENDERDOC_DIR
+#include "graphics_lab/utils/render_doc.hpp"
+#endif
+
 struct Controller {
     static inline Controller *controller = nullptr;
 
@@ -76,6 +80,14 @@ struct Controller {
                 camera.update_camera_vectors();
             }
         }
+
+#ifdef RENDERDOC_DIR
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+            GraphicsLab::RenderDocApi::renderdoc_api->TriggerCapture();
+            if(!GraphicsLab::RenderDocApi::renderdoc_api->IsTargetControlConnected())
+                GraphicsLab::RenderDocApi::renderdoc_api->LaunchReplayUI(1, nullptr);
+        }
+#endif
     }
 
     static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {

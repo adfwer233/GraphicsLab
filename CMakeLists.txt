@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CUDA_ENABLE OFF CACHE BOOL "Whether enable cuda kernel")
+set(RENDERDOC_ENABLE OFF CACHE BOOL "Whether enable render doc")
 set(GRAPHICS_LAB_INSTALL OFF CACHE BOOL "Whether enable graphics lab install")
+set(RENDERDOC_INSTALL_PATH "" CACHE STRING "RenderDoc Install Path")
 
 message(STATUS "cmake version ${CMAKE_VERSION} ${CMAKE_GENERATOR}")
 
@@ -73,6 +75,7 @@ INCLUDE_DIRECTORIES(${imgui_fetch_SOURCE_DIR}/backends)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${boost_di_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${spirv_cross_SOURCE_DIRS})
+INCLUDE_DIRECTORIES(${RENDERDOC_INSTALL_PATH})
 
 message(STATUS ${gtest_SOURCE_DIR})
 message(STATUS ${Boost_INCLUDE_DIRS})

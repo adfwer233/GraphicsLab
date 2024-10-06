@@ -17,8 +17,6 @@
 
 #include "boost/di.hpp"
 
-#include "language/reflection/static_reflector.hpp"
-
 namespace di = boost::di;
 
 Application::~Application() = default;
@@ -65,6 +63,8 @@ void Application::run() {
     scene_tree.sceneUpdateCallBack = [&]() { renderPassManager.instanceStage(renderGraph); };
 
     float deltaTime = 0, lastFrame = 0;
+
+    GraphicsLab::RenderDocApi::initialize_render_doc();
 
     while (not glfwWindowShouldClose(window)) {
         glfwPollEvents();
