@@ -57,6 +57,7 @@ include(fetch-svgpp)
 include(fetch-spirv_cross)
 include(fetch-spdlog)
 include(fetch-boost_di)
+include(fetch-pybind11)
 
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
