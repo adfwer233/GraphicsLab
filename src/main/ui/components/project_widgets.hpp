@@ -26,7 +26,7 @@ class ProjectWidgetComponent : public UIComponent {
     bool showFunctionCallDialog = false;
     GraphicsLabReflection::GraphicsLabFunction functionWithParamPack;
     std::vector<std::any> functionCallParameters;
-
+    std::set<std::string> bindClassNames;
   public:
     ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
         : UIComponent(sceneTree), uiState_(uiState) {
@@ -115,6 +115,8 @@ class ProjectWidgetComponent : public UIComponent {
 
             ImGui::Text("Project Functions");
 
+
+
             // spdlog::info("stat {}", int(projectFunctionResult.wait_for(std::chrono::milliseconds(500))));
 
             if (projectFunctionResult.valid() and
@@ -124,6 +126,17 @@ class ProjectWidgetComponent : public UIComponent {
                 // projectFunctionResult = std::future<void>();
 
                 if (uiState_.project != nullptr) {
+
+                    if (ImGui::Button("export to python")) {
+                        pybind11::module m;
+                        if (not bindClassNames.contains(uiState_.project->name())) {
+                            uiState_.project->bindPython(m);
+                            bindClassNames.insert(uiState_.project->name());
+                        }
+
+                        pybind11::globals()["proj"] = uiState_.project;
+                    }
+
                     for (auto [name, erased] : uiState_.project->reflect()) {
                         if (not erased.get() and erased.call_func != nullptr) {
                             if (ImGui::Button(name.c_str())) {

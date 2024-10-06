@@ -4,6 +4,7 @@
 
 #include "language/reflection/reflectors.hpp"
 #include "project/project_manager.hpp"
+#include "pybind11/embed.h"
 
 struct UIState {
     enum class RenderMode {
@@ -79,6 +80,13 @@ struct UIState {
 
     AABB3D box;
     bool boxMeshRecreated = false;
+
+    /**
+     * Python scripts supporting
+     */
+
+    // Initialize the Python interpreter
+    pybind11::scoped_interpreter python;
 
     UIState() {
         spdlog::critical("ui state constructed");

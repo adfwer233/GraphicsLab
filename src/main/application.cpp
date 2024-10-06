@@ -17,6 +17,8 @@
 
 #include "boost/di.hpp"
 
+#include "graphics_lab/utils/pybind_extension.hpp"
+
 namespace di = boost::di;
 
 Application::~Application() = default;

@@ -98,9 +98,6 @@ class PythonTerminalComponent : public UIComponent {
         terminal.clear_input();  // Clear input after execution
     }
 
-    // Initialize the Python interpreter
-    py::scoped_interpreter python;
-
     // Set up the custom output redirector
     PythonOutputRedirector output_redirector;
 

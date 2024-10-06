@@ -4,6 +4,8 @@
 
 #include "graphics_lab_context.hpp"
 
+#include "pybind11/pybind11.h"
+
 /**
  * Interface for Graphics Lab Application
  */
@@ -16,7 +18,9 @@ class IGraphicsLabProject : public Reflectable {
     }
 
     virtual void tick() = 0;
+    virtual std::string name() = 0;
     virtual void afterLoad() = 0;
+    virtual void bindPython(pybind11::module &m) {}
 
     virtual ReflectDataType reflect() {
         return {{"tick", TypeErasedValue(&IGraphicsLabProject::tick, this)}};
