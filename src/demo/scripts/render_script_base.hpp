@@ -18,7 +18,7 @@ class RenderScriptsBase {
     void renderResult() {
         using VklModel2D = VklModelTemplate<Vertex2D, TriangleIndex, VklBox2D>;
 
-        SimpleRenderSystem2D renderSystem(
+        SimpleRenderSystem2D<> renderSystem(
             device_, renderer_.getSwapChainRenderPass(),
             {{std::format("{}/simple_shader_2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
              {std::format("{}/simple_shader_2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});

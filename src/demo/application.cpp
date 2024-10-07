@@ -66,38 +66,38 @@ void Application::run() {
         {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-    SimpleWireFrameRenderSystem wireFrameRenderSystem(
+    SimpleWireFrameRenderSystem<> wireFrameRenderSystem(
         device_, offscreenRenderer_.getSwapChainRenderPass(),
         {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-    LineRenderSystem lineRenderSystem(
+    LineRenderSystem<> lineRenderSystem(
         device_, offscreenRenderer_.getSwapChainRenderPass(),
         {{std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-    LineRenderSystem curveMeshRenderSystem(
+    LineRenderSystem<> curveMeshRenderSystem(
         device_, offscreenRenderer_.getSwapChainRenderPass(),
         {{std::format("{}/curve_mesh_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-    ParamLineRenderSystem paramCurveRenderSystem(
+    ParamLineRenderSystem<> paramCurveRenderSystem(
         device_, uvRender_.getSwapChainRenderPass(),
         {{std::format("{}/param_curve_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/param_curve_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-    SimpleRenderSystem colorRenderSystem(
+    SimpleRenderSystem<> colorRenderSystem(
         device_, offscreenRenderer_.getSwapChainRenderPass(),
         {{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-    NormalRenderSystem normalRenderSystem(
+    NormalRenderSystem<> normalRenderSystem(
         device_, offscreenRenderer_.getSwapChainRenderPass(),
         {{std::format("{}/normal_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
          {std::format("{}/normal_generation.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
-    PointCloud2DRenderSystem pointCloud2DRenderSystem(
+    PointCloud2DRenderSystem<> pointCloud2DRenderSystem(
         device_, offscreenRenderer_.getSwapChainRenderPass(),
         {{std::format("{}/point_cloud_2d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
          {std::format("{}/point_cloud_2d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});

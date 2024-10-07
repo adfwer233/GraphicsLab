@@ -1,5 +1,6 @@
 #include "geometry_processing/map/normal_vector.hpp"
 
+#define NOMINMAX // windows header min max conflicts with std::min / max
 #include "igl/per_vertex_normals.h"
 
 NormalVector::NormalVector(VklModel &model) {

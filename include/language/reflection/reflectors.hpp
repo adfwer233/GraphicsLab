@@ -177,7 +177,7 @@ template <typename T> struct DispatchedType : public DispatchedTypeBase {
         } else {
             // T is vector of some serializable
             if constexpr (is_vector_v<T>) {
-                if constexpr (Serializable<T::value_type>) {
+                if constexpr (Serializable<typename T::value_type>) {
                     return serialize_vector();
                 } else {
                     throw std::runtime_error("value of std::vector is not serializable");
@@ -206,7 +206,7 @@ template <typename T> struct DispatchedType : public DispatchedTypeBase {
         } else {
             // T is vector of some serializable
             if constexpr (is_vector_v<T>) {
-                if constexpr (Serializable<T::value_type>) {
+                if constexpr (Serializable<typename T::value_type>) {
                     target.clear();
                     target = deserialize_vector(j).value();
                     return;

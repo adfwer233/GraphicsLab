@@ -21,7 +21,7 @@ template <typename... Ts> struct TypeList {
 
     template <template <typename...> typename T> using to = T<Ts...>;
 
-    template <template <typename> typename T> using monad = TypeList<T<Ts>...>;
+    template <template <typename...> typename T> using monad = TypeList<T<Ts>...>;
 };
 
 namespace TypeListFunctions {
