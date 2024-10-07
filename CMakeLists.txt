@@ -11,8 +11,6 @@ set(RENDERDOC_ENABLE OFF CACHE BOOL "Whether enable render doc")
 set(GRAPHICS_LAB_INSTALL OFF CACHE BOOL "Whether enable graphics lab install")
 set(RENDERDOC_INSTALL_PATH "" CACHE STRING "RenderDoc Install Path")
 
-set(PYTHON_EXECUTABLE C:/Users/ba123/miniconda3/envs/graphics/python.exe)
-
 message(STATUS "cmake version ${CMAKE_VERSION} ${CMAKE_GENERATOR}")
 
 if (CUDA_ENABLE)
