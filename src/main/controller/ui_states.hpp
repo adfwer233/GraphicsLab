@@ -1,13 +1,13 @@
 #pragma once
 
-#include <utility>
 #include <cstdlib>
+#include <utility>
 
 #include "language/reflection/reflectors.hpp"
 #include "project/project_manager.hpp"
 #include "pybind11/embed.h"
 
-struct UIState: Reflectable {
+struct UIState : Reflectable {
     enum class RenderMode {
         raw,
         wireframe,

@@ -1,19 +1,19 @@
 #pragma once
 
-#include <filesystem>
 #include "component.hpp"
 #include "controller/controller.hpp"
+#include <filesystem>
 
 class PythonScriptsExplorer : public UIComponent {
     UIState &uiState_;
 
     // Function to get the file list from a directory
-    std::vector<std::string> getFileList(const std::string& directoryPath) {
+    std::vector<std::string> getFileList(const std::string &directoryPath) {
         std::vector<std::string> fileList;
 
         // Iterate over directory and collect filenames
-        for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
-            if (entry.is_regular_file()) { // Ensure it's a file, not a directory
+        for (const auto &entry : std::filesystem::directory_iterator(directoryPath)) {
+            if (entry.is_regular_file()) {                            // Ensure it's a file, not a directory
                 fileList.push_back(entry.path().filename().string()); // Get only the file name
             }
         }
@@ -22,9 +22,10 @@ class PythonScriptsExplorer : public UIComponent {
 
     std::vector<std::string> filenames;
     std::filesystem::path script_dir_path;
-  public:
-    PythonScriptsExplorer(SceneTree::VklSceneTree &sceneTree, UIState &uiState) : UIComponent(sceneTree), uiState_(uiState) {
 
+  public:
+    PythonScriptsExplorer(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
+        : UIComponent(sceneTree), uiState_(uiState) {
     }
 
     void render() final {
@@ -46,7 +47,7 @@ class PythonScriptsExplorer : public UIComponent {
         }
 
         if (ImGui::BeginListBox("##fileList", ImVec2(-FLT_MIN, 10 * ImGui::GetTextLineHeightWithSpacing()))) {
-            for (const auto& file : filenames) {
+            for (const auto &file : filenames) {
                 auto file_path = script_dir_path / file;
 
                 ImGui::PushID(file.c_str()); // Ensure unique IDs for each item
@@ -71,7 +72,6 @@ class PythonScriptsExplorer : public UIComponent {
                     } catch (std::exception &e) {
                         spdlog::error(e.what());
                     }
-
                 }
 
                 ImGui::EndGroup();
