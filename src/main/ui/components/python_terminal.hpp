@@ -35,6 +35,9 @@ class PythonTerminalComponent : public UIComponent {
         }
     };
 
+    /**
+     * @todo: make this to a global context
+     */
     // Custom Python Output Redirector
     class PythonOutputRedirector {
       public:
@@ -50,7 +53,7 @@ class PythonTerminalComponent : public UIComponent {
                 def flush(self):
                     pass
                 def get_output(self):
-                    return ''.join(self.output)
+                    return '\n'.join(self.output)
                 def clear_output(self):
                     self.output.clear()
 

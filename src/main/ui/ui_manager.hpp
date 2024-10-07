@@ -12,6 +12,7 @@
 #include "components/render_mode_panel.hpp"
 #include "components/scene_tree.hpp"
 #include "components/scene_widgets.hpp"
+#include "components/python_scripts_explorer.hpp"
 
 using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 
