@@ -13,7 +13,7 @@ template <typename Mutex> class ImGuiSink : public spdlog::sinks::base_sink<Mute
     // Function to retrieve the logs
     std::vector<std::string> get_logs() const {
         std::lock_guard<Mutex> lock(this->mutex_);
-        return log_buffer;  // Return a copy of the log buffer
+        return log_buffer; // Return a copy of the log buffer
     }
 
   protected:
@@ -32,10 +32,11 @@ template <typename Mutex> class ImGuiSink : public spdlog::sinks::base_sink<Mute
         }
     }
 
-    void flush_() override {}
+    void flush_() override {
+    }
 
   private:
-    mutable Mutex mutex_;               // Mutex to protect log_buffer
+    mutable Mutex mutex_;                // Mutex to protect log_buffer
     std::vector<std::string> log_buffer; // Buffer for log messages
     size_t max_logs = 1000;              // Max number of logs to keep in buffer
 };
