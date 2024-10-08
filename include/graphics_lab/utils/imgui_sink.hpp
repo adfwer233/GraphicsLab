@@ -8,12 +8,12 @@
 #include <string>
 #include <vector>
 
-// Custom ImGui sink
 template <typename Mutex> class ImGuiSink : public spdlog::sinks::base_sink<Mutex> {
   public:
     // Function to retrieve the logs
-    const std::vector<std::string> &get_logs() const {
-        return log_buffer;
+    std::vector<std::string> get_logs() const {
+        std::lock_guard<Mutex> lock(this->mutex_);
+        return log_buffer;  // Return a copy of the log buffer
     }
 
   protected:
@@ -21,18 +21,21 @@ template <typename Mutex> class ImGuiSink : public spdlog::sinks::base_sink<Mute
         spdlog::memory_buf_t formatted;
         this->formatter_->format(msg, formatted);
 
-        log_buffer.push_back(fmt::to_string(formatted));
+        {
+            std::lock_guard<Mutex> lock(this->mutex_);
+            log_buffer.push_back(fmt::to_string(formatted));
 
-        // Optionally limit buffer size
-        if (log_buffer.size() > max_logs) {
-            log_buffer.erase(log_buffer.begin());
+            // Optionally limit buffer size
+            if (log_buffer.size() > max_logs) {
+                log_buffer.erase(log_buffer.begin());
+            }
         }
     }
 
-    void flush_() override {
-    }
+    void flush_() override {}
 
   private:
+    mutable Mutex mutex_;               // Mutex to protect log_buffer
     std::vector<std::string> log_buffer; // Buffer for log messages
     size_t max_logs = 1000;              // Max number of logs to keep in buffer
 };
@@ -50,7 +53,7 @@ class LogManager {
     }
 
     // Get the logs to render in ImGui
-    const std::vector<std::string> &get_logs() const {
+    [[nodiscard]] std::vector<std::string> get_logs() const {
         return imgui_sink_->get_logs();
     }
 

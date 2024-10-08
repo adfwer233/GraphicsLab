@@ -30,6 +30,8 @@ class PythonScriptsExplorer : public UIComponent {
 
     void render() final {
 
+        namespace py = pybind11;
+
         ImGui::Begin("Project Scripts List");
 
         // Custom styling to make the widget look more attractive

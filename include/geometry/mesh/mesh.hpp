@@ -69,6 +69,8 @@ template <typename VertexType, typename IndicesType, size_t Dimension = 3> class
                 }
 
                 box = {min_pos, max_pos};
+
+                return box.value();
             } else {
                 auto min_pos = glm::vec2(999999.0);
                 auto max_pos = glm::vec2(-999999.0);
@@ -82,6 +84,8 @@ template <typename VertexType, typename IndicesType, size_t Dimension = 3> class
                 }
 
                 box = {min_pos, max_pos};
+
+                return box.value();
             }
         }
     }
