@@ -140,9 +140,9 @@ class ProjectWidgetComponent : public UIComponent {
                         if (not erased.get() and erased.call_func != nullptr) {
                             if (ImGui::Button(name.c_str())) {
                                 // erased.call();
-                                auto temp = erased.type_info_func; // Capturing a structured binding is not yet
+                                auto temp = erased.call_func;      // Capturing a structured binding is not yet
                                                                    // supported in OpenMP
-                                projectFunctionResult = std::async(std::launch::async, [&]() { temp(); });
+                                projectFunctionResult = std::async(std::launch::async, [temp]() { temp(); });
                             }
                         }
 
