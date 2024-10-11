@@ -44,6 +44,9 @@ set(JSON_Install ON)
 set(LIBIGL_INSTALL ON)
 set(PYBIND11_INSTALL ON)
 
+set(XTL_CMAKECONFIG_INSTALL_DIR ${GRAPHICS_LAB_INSTALL})
+set(XTENSOR_CMAKECONFIG_INSTALL_DIR ${GRAPHICS_LAB_INSTALL})
+
 include(fetch-glfw)
 include(fetch-glm)
 include(fetch-assimp)
@@ -63,6 +66,7 @@ include(fetch-spirv_cross)
 include(fetch-spdlog)
 include(fetch-boost_di)
 include(fetch-pybind11)
+include(fetch-xtensor)
 
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
