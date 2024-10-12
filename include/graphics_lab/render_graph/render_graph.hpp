@@ -11,14 +11,16 @@
  *
  * @section Goals
  *
- * 1. Separate the render graph from the rendering backend, meaning no Vulkan-related logic appears in the render graph implementation.
+ * 1. Separate the render graph from the rendering backend, meaning no Vulkan-related logic appears in the render graph
+ * implementation.
  * 2. Support creating the render graph with scripts.
  *
  * @section Design
  *
  * - **RenderPass**: Descriptor of a render pass.
  *     - The `RenderPass` should maintain a set of rendering systems and the record function.
- *     - The `RenderPass` should be customizable and Reflectable, i.e., able to reflect input and output render resources.
+ *     - The `RenderPass` should be customizable and Reflectable, i.e., able to reflect input and output render
+ * resources.
  *
  * - **RenderResources**: Descriptor of rendering resources.
  *     - Buffers and textures are sufficient.
