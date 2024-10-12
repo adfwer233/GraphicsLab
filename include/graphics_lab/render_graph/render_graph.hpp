@@ -1,23 +1,35 @@
 #pragma once
 
 /**
- * New render graph for the graphics lab.
+ * @brief New render graph for the graphics lab.
  *
- * Functionality Goals:
+ * @section Functionality Goals
  *
- * 1. Support define or use default render graph in the imported project
- * 2. Support computational pass for applications such as path tracing related projects
- * 3. Support "hyper render graph", that is the composition of render graphs
+ * 1. Support defining or using a default render graph in the imported project.
+ * 2. Support computational passes for applications such as path tracing-related projects.
+ * 3. Support "hyper render graph", which refers to the composition of render graphs.
  *
- * Design Goals:
+ * @section Goals
  *
- * 1. Separate render graph with the rendering backend, i.e. no vulkan-related logic appears in the render graph
- * implementation
+ * 1. Separate the render graph from the rendering backend, meaning no Vulkan-related logic appears in the render graph implementation.
+ * 2. Support creating the render graph with scripts.
  *
- * Design:
+ * @section Design
  *
- * We got idea from the entity component systems, pass instances and resource instances are stored in a vector
- * `RenderGraph`
+ * - **RenderPass**: Descriptor of a render pass.
+ *     - The `RenderPass` should maintain a set of rendering systems and the record function.
+ *     - The `RenderPass` should be customizable and Reflectable, i.e., able to reflect input and output render resources.
+ *
+ * - **RenderResources**: Descriptor of rendering resources.
+ *     - Buffers and textures are sufficient.
+ *
+ * - **RenderGraph**: Describes the render passes and resources.
+ *
+ * - **RenderGraphCompiler**: Computes the `RenderGraph` into a `RenderGraphInstance`.
+ *
+ * - **RenderGraphInstance**: The executable render graph in the application.
+ *     - The `RenderGraphInstance` should maintain a Scene Object, which, in the current framework, is a `SceneTree`.
+ *     - Render resource instances are managed by the `RenderGraphInstance`.
  */
 
 #include <memory>
