@@ -3,9 +3,7 @@
 #include <vector>
 
 struct DynamicFields {
-    struct Field {
-
-    };
+    struct Field {};
 
     std::vector<Field> fields;
 };

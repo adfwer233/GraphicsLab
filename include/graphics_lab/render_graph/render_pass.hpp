@@ -1,7 +1,7 @@
 #pragma once
 
-#include <functional>
 #include "vkl/core/vkl_render_pass.hpp"
+#include <functional>
 
 #include "render_context.hpp"
 
@@ -34,13 +34,14 @@ struct RenderPass {
         return name_;
     }
 
-    virtual void compile(RenderContext* render_context, const CompileData& compile_data) = 0;
-    virtual void execute(RenderContext* render_context, const RenderPassExecuteData& execute_data) = 0;
+    virtual void compile(RenderContext *render_context, const CompileData &compile_data) = 0;
+    virtual void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) = 0;
 
-protected:
-    RenderPass(VklDevice& device): device_(device) {}
+  protected:
+    RenderPass(VklDevice &device) : device_(device) {
+    }
 
-    VklDevice& device_;
+    VklDevice &device_;
     std::string name_;
 
     std::function<void(void)> record_function_;
@@ -48,5 +49,5 @@ protected:
     friend class RenderGraph;
 };
 
-}
-}
+} // namespace RenderGraph
+} // namespace GraphicsLab

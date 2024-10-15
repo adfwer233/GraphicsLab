@@ -1,5 +1,3 @@
 #pragma once
 
-struct RenderContext {
-
-};
+struct RenderContext {};
