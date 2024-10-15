@@ -26,6 +26,7 @@
  *     - Buffers and textures are sufficient.
  *
  * - **RenderGraph**: Describes the render passes and resources.
+ *      - `RenderGraph` should maintain a context (use dynamic reflection) and passes can communicate via this context.
  *
  * - **RenderGraphCompiler**: Computes the `RenderGraph` into a `RenderGraphInstance`.
  *
@@ -34,6 +35,7 @@
  *     - Render resource instances are managed by the `RenderGraphInstance`.
  */
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -84,6 +86,9 @@ struct RenderGraph {
     void render();
 
   private:
+    std::string name;
+    std::map<std::string, size_t> pass_name_to_index;
+
     std::vector<std::unique_ptr<Pass>> passes;
     std::vector<std::unique_ptr<RenderResource>> resources;
 
