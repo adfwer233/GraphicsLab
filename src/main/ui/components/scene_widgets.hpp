@@ -23,7 +23,7 @@ class SceneWidgetComponent : public UIComponent {
                 sceneTree_.active_camera->camera.ratio = wsize.x / wsize.y;
             }
             // todo: set frame index
-            ImGui::Image(renderResources_.sceneRenderTexture[0], wsize);
+            ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.sceneRenderTexture[0]), wsize);
         }
 
         if (ImGui::IsItemVisible()) {
