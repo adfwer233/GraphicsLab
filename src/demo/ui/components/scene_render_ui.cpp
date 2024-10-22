@@ -35,9 +35,9 @@ void SceneRenderUI::renderImgui() {
                     uiManager_.renderResultTexture->getTextureSampler(),
                     uiManager_.renderResultTexture->getTextureImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
             }
-            ImGui::Image(uiManager_.pathTracingResTex, wsize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<ImTextureID>(uiManager_.pathTracingResTex), wsize, ImVec2(0, 1), ImVec2(1, 0));
         } else {
-            ImGui::Image(resTex[uiManager_.frameIndex], wsize);
+            ImGui::Image(reinterpret_cast<ImTextureID>(resTex[uiManager_.frameIndex]), wsize);
         }
 
         if (ImGui::IsItemVisible()) {

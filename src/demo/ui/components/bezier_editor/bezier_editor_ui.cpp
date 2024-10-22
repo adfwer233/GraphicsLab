@@ -25,7 +25,7 @@ void BezierEditorUI::renderImgui() {
         }
 
         if (uiManager_.renderMode != RenderMode::PathTracing) {
-            ImGui::Image(resTex[uiManager_.frameIndex], wsize);
+            ImGui::Image(reinterpret_cast<ImTextureID>(resTex[uiManager_.frameIndex]), wsize);
         }
 
         if (ImGui::IsItemVisible()) {

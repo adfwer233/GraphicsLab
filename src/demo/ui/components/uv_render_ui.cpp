@@ -22,7 +22,7 @@ void UVRenderUI::renderImgui() {
                                                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         }
         if (uiManager_.renderMode != RenderMode::PathTracing) {
-            ImGui::Image(resTex[uiManager_.frameIndex], wsize);
+            ImGui::Image(reinterpret_cast<ImTextureID>(resTex[uiManager_.frameIndex]), wsize);
         }
 
         ImGui::EndChild();
