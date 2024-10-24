@@ -5,6 +5,8 @@
 
 #include "render_context.hpp"
 
+#include "render_pass_reflection.hpp"
+
 namespace GraphicsLab {
 namespace RenderGraph {
 
@@ -37,6 +39,7 @@ struct RenderPass {
     virtual void compile(RenderContext *render_context, const CompileData &compile_data) = 0;
     virtual void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) = 0;
 
+    virtual RenderPassReflection render_pass_reflect() = 0;
   protected:
     RenderPass(VklDevice &device) : device_(device) {
     }
