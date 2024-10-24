@@ -2,6 +2,10 @@
 
 #include <vector>
 #include <string>
+#include <map>
+
+#include "spdlog/spdlog.h"
+#include "vkl/core/vkl_device.hpp"
 
 #include "graphics_lab/core/macros.hpp"
 
@@ -47,6 +51,26 @@ struct RenderPassReflection {
         uint32_t get_height() const { return height_; }
         uint32_t get_sample_count() const { return sample_count_; }
 
+        VkSampleCountFlagBits get_vk_sample_count_flag_bits() const {
+            std::map<uint32_t, VkSampleCountFlagBits> transfer_map {
+                    {1, VK_SAMPLE_COUNT_1_BIT},
+                    {4, VK_SAMPLE_COUNT_4_BIT},
+                    {8, VK_SAMPLE_COUNT_8_BIT},
+                    {16, VK_SAMPLE_COUNT_16_BIT},
+            };
+
+            if (not transfer_map.contains(sample_count_)) {
+                spdlog::warn("invalid sample count {}", sample_count_);
+                return VK_SAMPLE_COUNT_1_BIT;
+            }
+
+            return transfer_map[sample_count_];
+        };
+
+        Visibility get_visibility() const { return visibility_; }
+        VkFormat get_format() const { return format_; }
+        bool need_to_resolve() const { return sample_count_ == 1; }
+
       private:
         std::string name_;
         std::string description_;
@@ -54,6 +78,8 @@ struct RenderPassReflection {
 
         uint32_t width_, height_;
         uint32_t sample_count_;
+
+        VkFormat format_;
 
         Visibility visibility_ = Visibility::Undefined;
     };
@@ -97,6 +123,15 @@ struct RenderPassReflection {
         return nullptr;
     }
 
+    /**
+     * iterators
+     */
+
+    auto begin() { return fields_.begin(); }
+    auto end() { return fields_.end(); }
+
+    auto begin() const {return fields_.begin(); }
+    auto end() const { return fields_.end(); }
   private:
     std::vector<Field> fields_;
 };
