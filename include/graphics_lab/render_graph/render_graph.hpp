@@ -45,6 +45,8 @@
 #include "render_pass.hpp"
 #include "graph/graph.hpp"
 
+#include "language/coroutine/generator.hpp"
+
 namespace GraphicsLab {
 
 namespace RenderGraph {
@@ -105,6 +107,12 @@ struct RenderGraph {
         return graph_.nodes[pass_name_to_index[pass_name]].data.render_pass;
     }
 
+    Generator<RenderPass*> get_all_passes_generator() {
+        for (auto& node: graph_.nodes) {
+            co_yield node.data.render_pass;
+        }
+    }
+
   private:
     std::string name_;
     std::map<std::string, size_t> pass_name_to_index;
@@ -116,6 +124,8 @@ struct RenderGraph {
     struct EdgeAttachment {};
 
     DirectedGraph<NodeAttachment, EdgeAttachment> graph_;
+
+    friend RenderGraphCompiler;
 };
 
 struct HyperRenderGraph {

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <stack>
+#include <functional>
+#include <stdexcept>
 
 namespace GraphicsLab {
 
@@ -15,7 +18,6 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
     };
 
     std::vector<Node> nodes;
-
     std::vector<std::vector<Edge>> G;
 
     explicit DirectedGraph(size_t max_node) {
@@ -33,6 +35,53 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
     void add_bidirectional_edge(size_t from, size_t to, EdgeAttachmentType data) {
         add_directed_edge(from, to, data);
         add_directed_edge(to, from, data);
+    }
+
+    // Topological sort function
+    std::vector<size_t> topological_sort() {
+        size_t n = nodes.size();
+        std::vector<int> visited(n, 0); // 0 = unvisited, 1 = visiting, 2 = visited
+        std::stack<size_t> result;      // stores the topological ordering
+        bool has_cycle = false;
+
+        // Helper function to perform DFS
+        std::function<void(size_t)> dfs = [&](size_t node) {
+            if (visited[node] == 1) {
+                has_cycle = true; // Found a back edge, so it's not a DAG
+                return;
+            }
+            if (visited[node] == 2) return; // already visited
+
+            visited[node] = 1; // mark as visiting
+
+            for (const auto& edge : G[node]) {
+                dfs(edge.to); // visit neighbors
+            }
+
+            visited[node] = 2;    // mark as fully visited
+            result.push(node);    // push node to result in post-order
+        };
+
+        // Perform DFS from all unvisited nodes
+        for (size_t i = 0; i < n; ++i) {
+            if (visited[i] == 0) {
+                dfs(i);
+            }
+        }
+
+        // If a cycle is detected, throw an exception
+        if (has_cycle) {
+            throw std::runtime_error("Graph contains a cycle, topological sort is not possible.");
+        }
+
+        // Extract the topological order from the stack
+        std::vector<size_t> topo_order;
+        while (!result.empty()) {
+            topo_order.push_back(result.top());
+            result.pop();
+        }
+
+        return topo_order;
     }
 };
 
