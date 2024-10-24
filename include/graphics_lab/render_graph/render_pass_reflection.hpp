@@ -20,6 +20,7 @@ struct RenderPassReflection {
 
         enum class Type {
             Texture2D,
+            TextureDepth,
             RawBuffer
         };
 
