@@ -14,20 +14,21 @@ namespace RenderGraph {
 struct RenderGraphInstance {
     struct Pass {
         std::string name;
-        RenderPass* pass;
+        RenderPass *pass;
     };
 
     void execute(RenderContext *context) {
-        for (auto pass: executionSequence_) {
+        for (auto pass : executionSequence_) {
             RenderPassExecuteData render_data;
             pass.pass->execute(context, render_data);
         }
     }
-private:
+
+  private:
     std::vector<Pass> executionSequence_;
 
     friend class RenderGraphCompiler;
 };
 
-}
-}
+} // namespace RenderGraph
+} // namespace GraphicsLab

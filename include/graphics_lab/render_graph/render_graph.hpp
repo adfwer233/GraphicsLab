@@ -42,8 +42,8 @@
 
 #include "spdlog/spdlog.h"
 
-#include "render_pass.hpp"
 #include "graph/graph.hpp"
+#include "render_pass.hpp"
 
 #include "language/coroutine/generator.hpp"
 
@@ -91,13 +91,13 @@ struct RenderGraph {
     void compile();
     void render();
 
-    void add_pass(RenderPass* render_pass, const std::string& pass_name) {
+    void add_pass(RenderPass *render_pass, const std::string &pass_name) {
         // add the pass ptr to graph
         auto idx = graph_.add_node({render_pass});
         pass_name_to_index[pass_name] = idx;
     }
 
-    RenderPass* get_pass(const std::string& pass_name) {
+    RenderPass *get_pass(const std::string &pass_name) {
         // return the pass from graph
         if (not pass_name_to_index.contains(pass_name)) {
             spdlog::warn("No pass named {}", pass_name);
@@ -107,8 +107,8 @@ struct RenderGraph {
         return graph_.nodes[pass_name_to_index[pass_name]].data.render_pass;
     }
 
-    Generator<RenderPass*> get_all_passes_generator() {
-        for (auto& node: graph_.nodes) {
+    Generator<RenderPass *> get_all_passes_generator() {
+        for (auto &node : graph_.nodes) {
             co_yield node.data.render_pass;
         }
     }
@@ -118,7 +118,7 @@ struct RenderGraph {
     std::map<std::string, size_t> pass_name_to_index;
 
     struct NodeAttachment {
-        RenderPass* render_pass;
+        RenderPass *render_pass;
     };
 
     struct EdgeAttachment {};

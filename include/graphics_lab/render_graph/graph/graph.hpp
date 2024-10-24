@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
-#include <stack>
 #include <functional>
+#include <stack>
 #include <stdexcept>
+#include <vector>
 
 namespace GraphicsLab {
 
@@ -50,16 +50,17 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                 has_cycle = true; // Found a back edge, so it's not a DAG
                 return;
             }
-            if (visited[node] == 2) return; // already visited
+            if (visited[node] == 2)
+                return; // already visited
 
             visited[node] = 1; // mark as visiting
 
-            for (const auto& edge : G[node]) {
+            for (const auto &edge : G[node]) {
                 dfs(edge.to); // visit neighbors
             }
 
-            visited[node] = 2;    // mark as fully visited
-            result.push(node);    // push node to result in post-order
+            visited[node] = 2; // mark as fully visited
+            result.push(node); // push node to result in post-order
         };
 
         // Perform DFS from all unvisited nodes
@@ -85,4 +86,4 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
     }
 };
 
-}
+} // namespace GraphicsLab
