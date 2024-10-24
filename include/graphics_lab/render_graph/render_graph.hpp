@@ -40,6 +40,11 @@
 #include <string>
 #include <vector>
 
+#include "spdlog/spdlog.h"
+
+#include "render_pass.hpp"
+#include "graph/graph.hpp"
+
 namespace GraphicsLab {
 
 namespace RenderGraph {
@@ -68,7 +73,6 @@ struct Pass {
 };
 
 struct ComputePass : Pass {};
-struct RenderPass : Pass {};
 struct SwapChainPass : Pass {};
 
 struct PassInstance {};
@@ -85,15 +89,33 @@ struct RenderGraph {
     void compile();
     void render();
 
+    void add_pass(RenderPass* render_pass, const std::string& pass_name) {
+        // add the pass ptr to graph
+        auto idx = graph_.add_node({render_pass});
+        pass_name_to_index[pass_name] = idx;
+    }
+
+    RenderPass* get_pass(const std::string& pass_name) {
+        // return the pass from graph
+        if (not pass_name_to_index.contains(pass_name)) {
+            spdlog::warn("No pass named {}", pass_name);
+            return nullptr;
+        }
+
+        return graph_.nodes[pass_name_to_index[pass_name]].data.render_pass;
+    }
+
   private:
-    std::string name;
+    std::string name_;
     std::map<std::string, size_t> pass_name_to_index;
 
-    std::vector<std::unique_ptr<Pass>> passes;
-    std::vector<std::unique_ptr<RenderResource>> resources;
+    struct NodeAttachment {
+        RenderPass* render_pass;
+    };
 
-    std::vector<std::unique_ptr<RenderResourceInstance>> resource_instances;
-    std::vector<std::unique_ptr<PassInstance>> pass_instances;
+    struct EdgeAttachment {};
+
+    DirectedGraph<NodeAttachment, EdgeAttachment> graph_;
 };
 
 struct HyperRenderGraph {
