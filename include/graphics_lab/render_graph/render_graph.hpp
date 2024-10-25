@@ -47,22 +47,15 @@
 
 #include "language/coroutine/generator.hpp"
 
-namespace GraphicsLab {
-
-namespace RenderGraph {
+namespace GraphicsLab::RenderGraph {
 
 struct RenderGraph {
-
-    void create_pass_instances();
-    void create_resource_instances();
-
-    void compile();
-    void render();
 
     RenderGraph(): graph_(10) {}
 
     void add_pass(RenderPass *render_pass, const std::string &pass_name) {
         // add the pass ptr to graph
+        render_pass->name_ = pass_name;
         auto idx = graph_.add_node({render_pass});
         pass_name_to_index[pass_name] = idx;
     }
@@ -75,6 +68,15 @@ struct RenderGraph {
         }
 
         return graph_.nodes[pass_name_to_index[pass_name]].data.render_pass;
+    }
+
+    size_t get_pass_idx(const std::string &pass_name) {
+        if (not pass_name_to_index.contains(pass_name)) {
+            spdlog::warn("No pass named {}", pass_name);
+            return 0;
+        }
+
+        return pass_name_to_index[pass_name];
     }
 
     Generator<RenderPass *> get_all_passes_generator() {
@@ -104,5 +106,4 @@ struct HyperRenderGraph {
     void render();
 };
 
-} // namespace RenderGraph
-} // namespace GraphicsLab
+} // namespace GraphicsLab::RenderGraph

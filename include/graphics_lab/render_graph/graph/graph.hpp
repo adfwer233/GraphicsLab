@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <ranges>
 #include <functional>
 #include <stack>
 #include <stdexcept>
@@ -82,6 +84,8 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             topo_order.push_back(result.top());
             result.pop();
         }
+
+        std::reverse(topo_order.begin(), topo_order.end());
 
         return topo_order;
     }

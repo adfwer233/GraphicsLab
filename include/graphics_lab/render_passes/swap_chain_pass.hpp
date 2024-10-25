@@ -22,19 +22,24 @@ struct SwapChainPass: public RenderPass {
         return reflection;
     }
 
-    virtual void post_compile(RenderContext *render_context) override {
+    void post_compile(RenderContext *render_context) override {
         auto resource = render_context->resource_manager.get_resource(output_name_);
-        auto color_texture = static_cast<ColorTextureResource*>(resource);
+        auto color_texture = reinterpret_cast<ColorTextureResource*>(resource);
         output_texture_ = color_texture->getTexture();
 
         if (color_texture->get_resolved_texture()) {
             output_texture_ = color_texture->get_resolved_texture();
         }
+
+        for (int i = 0; i < render_context->swap_chain_->imageCount(); i++) {
+            device_.transitionImageLayout(render_context->swap_chain_->getImage(i),
+                                          render_context->swap_chain_->getSwapChainImageFormat() , VK_IMAGE_LAYOUT_UNDEFINED,
+                                          VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        }
     }
 
-    virtual void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
+    void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
         auto commandBuffer = render_context->get_current_command_buffer();
-        begin_swap_chain_render_pass(commandBuffer, render_context);
 
         VkImageBlit imageBlit = {};
         imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -51,6 +56,14 @@ struct SwapChainPass: public RenderPass {
          * @todo: transition image layout
          */
 
+        device_.transitionImageLayout(output_texture_->image_,
+                                      VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                                      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, commandBuffer);
+
+        device_.transitionImageLayout(render_context->swap_chain_->getImage(render_context->current_image_index_),
+                                      render_context->swap_chain_->getSwapChainImageFormat() , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer);
+
         vkCmdBlitImage(
                 commandBuffer,
                 output_texture_->image_, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -59,7 +72,13 @@ struct SwapChainPass: public RenderPass {
                 VK_FILTER_LINEAR // or VK_FILTER_NEAREST
         );
 
-        end_render_pass(commandBuffer);
+        device_.transitionImageLayout(output_texture_->image_,
+                                      VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, commandBuffer);
+
+        device_.transitionImageLayout(render_context->swap_chain_->getImage(render_context->current_image_index_),
+                                      render_context->swap_chain_->getSwapChainImageFormat() , VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                      VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, commandBuffer);
     }
 
 private:

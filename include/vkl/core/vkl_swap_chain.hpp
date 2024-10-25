@@ -144,6 +144,8 @@ class VklSwapChain {
         return swapChainImages_.size();
     }
 
+    [[nodiscard]] VkFormat getSwapChainImageFormat() const { return swapChainImageFormat_; }
+
     VkResult acquireNextImage(uint32_t *imageIndex);
     VkResult submitCommandBuffers(std::vector<VkCommandBuffer> &buffers, uint32_t *imageIndex,
                                   std::vector<VkSemaphore> toWait = std::vector<VkSemaphore>());

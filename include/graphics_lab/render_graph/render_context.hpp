@@ -86,13 +86,14 @@ struct RenderContext {
     }
 
     void end_frame() {
+        vkDeviceWaitIdle(device_.device());
         assert(is_frame_started_ && "Can't call endFrame while frame is not in progress");
         auto commandBuffer = get_current_command_buffer();
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to record command buffer!");
         }
 
-        std::vector<VkCommandBuffer> command_buffer_to_submit;
+        std::vector<VkCommandBuffer> command_buffer_to_submit{commandBuffer};
         auto result = swap_chain_->submitCommandBuffers(command_buffer_to_submit, &current_image_index_);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
             recreate_swap_chain();
@@ -101,7 +102,7 @@ struct RenderContext {
         }
 
         is_frame_started_ = false;
-        current_frame_index_ = (current_image_index_ + 1) % VklSwapChain::MAX_FRAMES_IN_FLIGHT;
+        current_frame_index_ = (current_frame_index_ + 1) % VklSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
   private:
     void create_command_buffers() {

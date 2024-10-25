@@ -1,5 +1,7 @@
 #include "application.hpp"
 
+#include <thread>
+
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_passes/simple_pass.hpp"
@@ -10,6 +12,7 @@ Application::~Application() {
 
 void Application::run() {
     using namespace GraphicsLab::RenderGraph;
+    using namespace std::chrono_literals;
 
     GLFWwindow *window = window_.getGLFWwindow();
 
@@ -17,6 +20,7 @@ void Application::run() {
 
     SimpleRenderPass simpleRenderPass(device_);
     SwapChainPass swapChainPass(device_, "simple_output");
+
     render_graph.add_pass(&simpleRenderPass, "simple_pass");
     render_graph.add_pass(&swapChainPass, "swap_chain_pass");
 
@@ -29,5 +33,6 @@ void Application::run() {
         context.begin_frame();
         render_graph_instance->execute(&context);
         context.end_frame();
+
     }
 }

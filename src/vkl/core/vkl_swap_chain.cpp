@@ -87,11 +87,8 @@ void VklSwapChain::createSwapChain() {
 
     /*
      * specifies what kind of operations we’ll use the images in the swap chain for.
-     *
-     * In this case, we are rendering the image. In some other cases such as post-processing, we can use
-     * `VK_IMAGE_USAGE_TRANSFER_DST_BIT`.
      */
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
     QueueFamilyIndices indices = device_.findPhysicalQueueFamilies();
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};

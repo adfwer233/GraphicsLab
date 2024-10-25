@@ -51,6 +51,10 @@ class SimpleRenderSystem : public BaseRenderSystem {
     template <VklRenderable ModelType> void renderObject(FrameInfo<ModelType> &frameInfo);
     template <VklRenderable ModelType>
     void renderObject(FrameInfo<ModelType> &frameInfo, PushConstantInfoList pushData);
+
+    void bindPipeline(VkCommandBuffer commandBuffer) {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->graphicsPipeline_);
+    }
 };
 
 #include "simple_render_system.hpp.impl"

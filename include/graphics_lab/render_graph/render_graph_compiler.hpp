@@ -22,6 +22,9 @@ struct RenderGraphCompiler {
         // compile render passes
         compile_passes(context);
 
+        // generate the dependency order
+        generate_edges();
+
         // generate execution sequence
         auto execution_order_index = render_graph_.graph_.topological_sort();
 
@@ -49,6 +52,30 @@ struct RenderGraphCompiler {
             for (auto &f : pass->render_pass_reflect()) {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
                     auto resource = context->resource_manager.add_resource(f);
+                }
+            }
+        }
+    }
+
+    void generate_edges() {
+        // texture_name -> producer_idx
+        std::map<std::string, size_t> producer_map;
+
+        for (auto pass : render_graph_.get_all_passes_generator()) {
+            for (auto &f : pass->render_pass_reflect()) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
+                    producer_map[f.get_name()] = render_graph_.get_pass_idx(std::string(pass->get_name()));
+                }
+            }
+        }
+
+        for (auto pass : render_graph_.get_all_passes_generator()) {
+            auto consumer_idx = render_graph_.get_pass_idx(std::string(pass->get_name()));
+            for (auto &f : pass->render_pass_reflect()) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
+                    if (producer_map.contains(f.get_name())) {
+                        render_graph_.graph_.add_directed_edge(consumer_idx, producer_map[f.get_name()], {});
+                    }
                 }
             }
         }

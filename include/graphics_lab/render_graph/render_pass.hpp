@@ -66,7 +66,7 @@ struct RenderPass {
             if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
                 VkAttachmentDescription attachmentDescription{
                     .format = f.get_format(),
-                    .samples = f.get_vk_sample_count_flag_bits(),
+                    .samples = VK_SAMPLE_COUNT_1_BIT,
                     .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
                     .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
                     .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -138,7 +138,7 @@ struct RenderPass {
                         attachments.push_back(resolveAttachment);
                         resolve_refs.push_back({
                             .attachment = static_cast<uint32_t>(attachments.size() - 1),
-                            .layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         });
                     }
                 }
@@ -222,11 +222,22 @@ struct RenderPass {
 
             Resource *resource = render_context->resource_manager.get_resource(f.get_name());
 
-            if (resource->get_type() == Resource::Type::ColorTexture) {
-                auto color_texture = static_cast<ColorTextureResource *>(resource);
-                attachmentImageViews.push_back(color_texture->getTexture()->getTextureImageView());
-                if (color_texture->get_resolved_texture()) {
-                    attachmentImageViews.push_back(color_texture->get_resolved_texture()->getTextureImageView());
+            if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
+                if (resource->get_type() == Resource::Type::ColorTexture) {
+                    auto color_texture = reinterpret_cast<ColorTextureResource *>(resource);
+                    attachmentImageViews.push_back(color_texture->getTexture()->getTextureImageView());
+                    if (color_texture->get_resolved_texture()) {
+                        attachmentImageViews.push_back(color_texture->get_resolved_texture()->getTextureImageView());
+                    }
+                }
+            } else {
+                if (resource->get_type() == Resource::Type::ColorTexture) {
+                    auto color_texture = reinterpret_cast<ColorTextureResource *>(resource);
+                    if (color_texture->get_resolved_texture()) {
+                        attachmentImageViews.push_back(color_texture->get_resolved_texture()->getTextureImageView());
+                    } else {
+                        attachmentImageViews.push_back(color_texture->getTexture()->getTextureImageView());
+                    }
                 }
             }
         }
