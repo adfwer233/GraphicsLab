@@ -2,61 +2,67 @@
 
 #include "vkl/system/render_system/simple_render_system.hpp"
 
+#include "../../controller/ui_states.hpp"
+#include "geometry/constructor/box3d.hpp"
 #include "graphics_lab/render_graph/render_pass.hpp"
+#include "vkl/scene_tree/vkl_geometry_mesh.hpp"
+#include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
-#include "vkl/scene_tree/vkl_scene_tree.hpp"
-#include "../../controller/ui_states.hpp"
-#include "vkl/scene_tree/vkl_geometry_mesh.hpp"
-#include "geometry/constructor/box3d.hpp"
 
 namespace GraphicsLab::RenderGraph {
-struct InternalSceneRenderPass: public RenderPass {
-    explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState) : RenderPass(device), sceneTree_(sceneTree), uiState_(uiState) {
+struct InternalSceneRenderPass : public RenderPass {
+    explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState)
+        : RenderPass(device), sceneTree_(sceneTree), uiState_(uiState) {
     }
 
     RenderPassReflection render_pass_reflect() override {
         RenderPassReflection reflection;
         reflection.add_output("scene_render_result", "Built in 3d scene rendering")
-                .type(RenderPassReflection::Field::Type::Texture2D)
-                .sample_count(8)
-                .format(VK_FORMAT_R8G8B8A8_SRGB)
-                .extent(2048, 2048)
-                .set_annotation("imgui_show", true);
+            .type(RenderPassReflection::Field::Type::Texture2D)
+            .sample_count(8)
+            .format(VK_FORMAT_R8G8B8A8_SRGB)
+            .extent(2048, 2048)
+            .set_annotation("imgui_show", true);
 
         reflection.add_output("scene_render_depth", "depth texture of built in 3d scene rendering")
-                .type(RenderPassReflection::Field::Type::TextureDepth)
-                .sample_count(8)
-                .extent(2048, 2048);
+            .type(RenderPassReflection::Field::Type::TextureDepth)
+            .sample_count(8)
+            .extent(2048, 2048);
 
         return reflection;
     }
 
     void post_compile(RenderContext *render_context) override {
         simple_render_system = std::make_unique<SimpleRenderSystem<>>(
-                device_, vkl_render_pass->renderPass,
-                std::vector<VklShaderModuleInfo>{{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         raw_render_system = std::make_unique<SimpleRenderSystem<>>(
-                device_, vkl_render_pass->renderPass,
-                std::vector<VklShaderModuleInfo>{{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         color_render_system = std::make_unique<SimpleRenderSystem<>>(
-                device_, vkl_render_pass->renderPass,
-                std::vector<VklShaderModuleInfo>{{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = std::make_unique<LineRenderSystem<>>(
-                device_, vkl_render_pass->renderPass,
-                std::vector<VklShaderModuleInfo>{{std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         wireframe_render_system = std::make_unique<SimpleWireFrameRenderSystem<>>(
-                device_, vkl_render_pass->renderPass,
-                std::vector<VklShaderModuleInfo>{{std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                 {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
@@ -76,8 +82,7 @@ struct InternalSceneRenderPass: public RenderPass {
         ubo.view = sceneTree_.active_camera->camera.get_view_transformation();
         ubo.proj = sceneTree_.active_camera->camera.get_proj_transformation();
         ubo.model = glm::mat4(1.0f);
-        ubo.pointLight =
-                PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 0.0});
+        ubo.pointLight = PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 0.0});
         ubo.cameraPos = sceneTree_.active_camera->camera.position;
 
         auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
@@ -115,11 +120,11 @@ struct InternalSceneRenderPass: public RenderPass {
             }
 
             FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                    .frameIndex = static_cast<int>(frame_index) % 2,
-                    .frameTime = 0,
-                    .commandBuffer = commandBuffer,
-                    .camera = sceneTree_.active_camera->camera,
-                    .model = *node_mesh->mesh,
+                .frameIndex = static_cast<int>(frame_index) % 2,
+                .frameTime = 0,
+                .commandBuffer = commandBuffer,
+                .camera = sceneTree_.active_camera->camera,
+                .model = *node_mesh->mesh,
             };
 
             if (uiState_.renderMode == UIState::RenderMode::raw) {
@@ -129,7 +134,7 @@ struct InternalSceneRenderPass: public RenderPass {
             } else if (uiState_.renderMode == UIState::RenderMode::material) {
                 if (node_mesh->mesh->textures_.size() >=
                     simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
-                            .size()) {
+                        .size()) {
                     simple_render_system->renderObject(frameInfo);
                 } else {
                     color_render_system->renderObject(frameInfo);
@@ -157,11 +162,11 @@ struct InternalSceneRenderPass: public RenderPass {
             }
 
             FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
-                    .frameIndex = static_cast<int>(frame_index) % 2,
-                    .frameTime = 0,
-                    .commandBuffer = commandBuffer,
-                    .camera = sceneTree_.active_camera->camera,
-                    .model = *wire_mesh->mesh,
+                .frameIndex = static_cast<int>(frame_index) % 2,
+                .frameTime = 0,
+                .commandBuffer = commandBuffer,
+                .camera = sceneTree_.active_camera->camera,
+                .model = *wire_mesh->mesh,
             };
 
             line_render_system->renderObject(frameInfo);
@@ -170,7 +175,7 @@ struct InternalSceneRenderPass: public RenderPass {
         end_render_pass(commandBuffer);
     }
 
-private:
+  private:
     SceneTree::VklSceneTree &sceneTree_;
     UIState &uiState_;
     SceneTree::GeometryNode<Wire3D> boxNode;
@@ -181,4 +186,4 @@ private:
     std::unique_ptr<LineRenderSystem<>> line_render_system = nullptr;
     std::unique_ptr<SimpleWireFrameRenderSystem<>> wireframe_render_system = nullptr;
 };
-}
+} // namespace GraphicsLab::RenderGraph

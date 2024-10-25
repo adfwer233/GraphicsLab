@@ -13,24 +13,25 @@ struct ResourceManager {
     }
 
     ~ResourceManager() {
-        for (auto& r: resources_)
+        for (auto &r : resources_)
             r.reset();
     }
 
-    Resource *add_resource(const RenderPassReflection::Field& field) {
+    Resource *add_resource(const RenderPassReflection::Field &field) {
         VkSampleCountFlagBits sampleBits = VK_SAMPLE_COUNT_1_BIT;
 
         if (auto cur = get_resource(field.get_name()))
             return cur;
 
-
         if (field.get_sample_count() == 8)
             sampleBits = VK_SAMPLE_COUNT_8_BIT;
         if (field.get_type() == RenderPassReflection::Field::Type::Texture2D) {
             auto color_texture = std::make_unique<ColorTextureResource>(field.get_name());
-            color_texture->create_instance(device_, field.get_width(), field.get_height(), 4,
-                                           VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT  | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                           VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, sampleBits);
+            color_texture->create_instance(
+                device_, field.get_width(), field.get_height(), 4,
+                VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, sampleBits);
             color_texture->copy_annotation(field);
             resources_.push_back(std::move(color_texture));
 
@@ -38,10 +39,10 @@ struct ResourceManager {
         } else if (field.get_type() == RenderPassReflection::Field::Type::TextureDepth) {
             auto depth_texture = std::make_unique<DepthTextureResource>(field.get_name());
             VkFormat format = device_.findSupportedFormat(
-                    {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
-                    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-            depth_texture->create_instance(device_, field.get_width(), field.get_height(), 4, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                                           format, sampleBits);
+                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            depth_texture->create_instance(device_, field.get_width(), field.get_height(), 4,
+                                           VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, format, sampleBits);
             resources_.push_back(std::move(depth_texture));
             return resources_.back().get();
         }
@@ -67,14 +68,15 @@ struct ResourceManager {
         return nullptr;
     }
 
-    Generator<Resource*> get_resource_with_annotation(const std::string annotation) {
-        for (auto& r: resources_) {
+    Generator<Resource *> get_resource_with_annotation(const std::string annotation) {
+        for (auto &r : resources_) {
             if (r->has_annotation(annotation)) {
                 co_yield r.get();
             }
         }
     }
-private:
+
+  private:
     VklDevice &device_;
 
     std::vector<std::unique_ptr<Resource>> resources_;

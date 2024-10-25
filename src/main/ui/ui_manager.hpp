@@ -22,10 +22,12 @@ class UIManager {
   public:
     RenderResources renderResources;
 
-    explicit UIManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIState &uiState, GraphicsLab::GraphicsLabInternalContext &appContext) {
+    explicit UIManager(SceneTree::VklSceneTree &sceneTree, Controller &controller, UIState &uiState,
+                       GraphicsLab::GraphicsLabInternalContext &appContext) {
         auto injector =
             di::make_injector(di::bind<SceneTree::VklSceneTree>().to(sceneTree), di::bind<Controller>().to(controller),
-                              di::bind<RenderResources>().to(renderResources), di::bind<UIState>().to(uiState), di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
+                              di::bind<RenderResources>().to(renderResources), di::bind<UIState>().to(uiState),
+                              di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
         create_component_instances(injector, ComponentTypeList{});
     }
 

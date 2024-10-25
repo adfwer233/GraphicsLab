@@ -1,8 +1,8 @@
 #pragma once
 
+#include <array>
 #include <functional>
 #include <memory>
-#include <array>
 
 #include "vkl/core/vkl_framebuffer.hpp"
 #include "vkl/core/vkl_render_pass.hpp"
@@ -69,16 +69,14 @@ struct RenderPass {
 
             // input attachments
             if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
-                VkAttachmentDescription attachmentDescription{
-                    .format = f.get_format(),
-                    .samples = VK_SAMPLE_COUNT_1_BIT,
-                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                    .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                    .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                    .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                    .initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                    .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                };
+                VkAttachmentDescription attachmentDescription{.format = f.get_format(),
+                                                              .samples = VK_SAMPLE_COUNT_1_BIT,
+                                                              .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                                                              .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                                                              .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                                              .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                                                              .initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                              .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
 
                 attachments.push_back(attachmentDescription);
 
@@ -95,9 +93,7 @@ struct RenderPass {
                                                               .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
                                                               .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
                                                               .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                                                              .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                };
-
+                                                              .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
 
                 if (f.get_type() == RenderPassReflection::Field::Type::TextureDepth) {
                     attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -105,14 +101,14 @@ struct RenderPass {
                     attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                     attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                     attachmentDescription.format = device_.findSupportedFormat(
-                            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
-                            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+                        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                        VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
                     attachments.push_back(attachmentDescription);
 
                     has_depth_write = true;
 
                     depth_attachment_ref = {.attachment = static_cast<uint32_t>(attachments.size() - 1),
-                                         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+                                            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
                 } else {
                     attachments.push_back(attachmentDescription);
                     output_refs.push_back({.attachment = static_cast<uint32_t>(attachments.size() - 1),
@@ -254,9 +250,9 @@ struct RenderPass {
             }
         }
 
-        vkl_frame_buffer = std::make_unique<VklFramebuffer>(
-            device_, vkl_render_pass->renderPass, static_cast<uint32_t>(attachmentImageViews.size()),
-            attachmentImageViews.data(), width_, height_);
+        vkl_frame_buffer = std::make_unique<VklFramebuffer>(device_, vkl_render_pass->renderPass,
+                                                            static_cast<uint32_t>(attachmentImageViews.size()),
+                                                            attachmentImageViews.data(), width_, height_);
     }
 
     virtual void post_compile(RenderContext *render_context) = 0;
@@ -265,7 +261,7 @@ struct RenderPass {
 
     virtual RenderPassReflection render_pass_reflect() = 0;
 
-    void set_name(const std::string& name) {
+    void set_name(const std::string &name) {
         name_ = name;
     }
 

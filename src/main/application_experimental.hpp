@@ -4,13 +4,13 @@
 #include "graphics_lab/render_graph/render_context.hpp"
 
 struct ApplicationExperimental {
-private:
+  private:
     static constexpr int WIDTH = 1024 + 768;
     static constexpr int HEIGHT = 1280;
 
     GraphicsLab::GraphicsLabInternalContext appContext;
 
-public:
+  public:
     ApplicationExperimental() : appContext(WIDTH, HEIGHT) {};
     ~ApplicationExperimental();
 

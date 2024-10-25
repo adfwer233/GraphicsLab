@@ -33,6 +33,5 @@ void Application::run() {
         context.begin_frame();
         render_graph_instance->execute(&context);
         context.end_frame();
-
     }
 }

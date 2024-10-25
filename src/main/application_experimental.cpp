@@ -32,9 +32,10 @@ void ApplicationExperimental::run() {
 
     UIState state;
     Controller controller(state, scene_tree);
-    auto env_injector =
-            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(appContext.device_),
-                              di::bind<UIState>().to(state), di::bind<Controller>().to(controller), di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
+    auto env_injector = di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree),
+                                          di::bind<VklDevice>().to(appContext.device_), di::bind<UIState>().to(state),
+                                          di::bind<Controller>().to(controller),
+                                          di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
 
     Controller::controller = &controller;
     glfwSetCursorPosCallback(window, Controller::mouse_callback);

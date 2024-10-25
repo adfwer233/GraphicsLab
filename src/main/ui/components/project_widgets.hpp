@@ -31,7 +31,8 @@ class ProjectWidgetComponent : public UIComponent {
     std::set<std::string> bindClassNames;
 
   public:
-    ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, GraphicsLab::GraphicsLabInternalContext &appContext)
+    ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState,
+                           GraphicsLab::GraphicsLabInternalContext &appContext)
         : UIComponent(sceneTree), uiState_(uiState), appContext_(appContext) {
     }
 

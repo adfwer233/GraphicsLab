@@ -1,8 +1,8 @@
 #pragma once
 
 #include <algorithm>
-#include <ranges>
 #include <functional>
+#include <ranges>
 #include <stack>
 #include <stdexcept>
 #include <vector>

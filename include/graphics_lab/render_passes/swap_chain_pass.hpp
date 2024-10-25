@@ -9,9 +9,12 @@ namespace GraphicsLab::RenderGraph {
  *
  * `SpecialChainPass` blit a image to the swap chain rendering context
  */
-struct SwapChainPass: public RenderPass {
-    explicit SwapChainPass(VklDevice &device, const std::string& output_name) : RenderPass(device), output_name_(output_name) {}
-    explicit SwapChainPass(VklDevice &device) : RenderPass(device) {}
+struct SwapChainPass : public RenderPass {
+    explicit SwapChainPass(VklDevice &device, const std::string &output_name)
+        : RenderPass(device), output_name_(output_name) {
+    }
+    explicit SwapChainPass(VklDevice &device) : RenderPass(device) {
+    }
 
     RenderPassReflection render_pass_reflect() override {
         RenderPassReflection reflection;
@@ -23,7 +26,7 @@ struct SwapChainPass: public RenderPass {
 
     void post_compile(RenderContext *render_context) override {
         auto resource = render_context->resource_manager.get_resource(output_name_);
-        auto color_texture = reinterpret_cast<ColorTextureResource*>(resource);
+        auto color_texture = reinterpret_cast<ColorTextureResource *>(resource);
         output_texture_ = color_texture->getTexture();
 
         if (color_texture->get_resolved_texture()) {
@@ -32,8 +35,8 @@ struct SwapChainPass: public RenderPass {
 
         for (int i = 0; i < render_context->swap_chain_->imageCount(); i++) {
             device_.transitionImageLayout(render_context->swap_chain_->getImage(i),
-                                          render_context->swap_chain_->getSwapChainImageFormat() , VK_IMAGE_LAYOUT_UNDEFINED,
-                                          VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+                                          render_context->swap_chain_->getSwapChainImageFormat(),
+                                          VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         }
     }
 
@@ -43,49 +46,51 @@ struct SwapChainPass: public RenderPass {
         VkImageBlit imageBlit = {};
         imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         imageBlit.srcSubresource.layerCount = 1;
-        imageBlit.srcOffsets[1] = { 1024, 1024, 1 };
+        imageBlit.srcOffsets[1] = {1024, 1024, 1};
 
         imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         imageBlit.dstSubresource.layerCount = 1;
-        imageBlit.dstOffsets[1] = { static_cast<int32_t>(render_context->get_width()), static_cast<int32_t>(render_context->get_height()), 1 };
+        imageBlit.dstOffsets[1] = {static_cast<int32_t>(render_context->get_width()),
+                                   static_cast<int32_t>(render_context->get_height()), 1};
 
-        // device_.transitionImageLayout(commandBuffer, output_texture_->getTextureImageView(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        // device_.transitionImageLayout(commandBuffer, output_texture_->getTextureImageView(),
+        // VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
         /**
          * @todo: transition image layout
          */
 
-        device_.transitionImageLayout(output_texture_->image_,
-                                      VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                                      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, commandBuffer);
+        device_.transitionImageLayout(output_texture_->image_, VK_FORMAT_R8G8B8A8_SRGB,
+                                      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                      commandBuffer);
 
         device_.transitionImageLayout(render_context->swap_chain_->getImage(render_context->current_image_index_),
-                                      render_context->swap_chain_->getSwapChainImageFormat() , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer);
+                                      render_context->swap_chain_->getSwapChainImageFormat(),
+                                      VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                      commandBuffer);
 
-        vkCmdBlitImage(
-                commandBuffer,
-                output_texture_->image_, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                render_context->swap_chain_->getImage(render_context->current_image_index_), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1, &imageBlit,
-                VK_FILTER_LINEAR // or VK_FILTER_NEAREST
+        vkCmdBlitImage(commandBuffer, output_texture_->image_, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                       render_context->swap_chain_->getImage(render_context->current_image_index_),
+                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit,
+                       VK_FILTER_LINEAR // or VK_FILTER_NEAREST
         );
 
-        device_.transitionImageLayout(output_texture_->image_,
-                                      VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, commandBuffer);
+        device_.transitionImageLayout(output_texture_->image_, VK_FORMAT_R8G8B8A8_SRGB,
+                                      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                                      commandBuffer);
 
         device_.transitionImageLayout(render_context->swap_chain_->getImage(render_context->current_image_index_),
-                                      render_context->swap_chain_->getSwapChainImageFormat() , VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                      VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, commandBuffer);
+                                      render_context->swap_chain_->getSwapChainImageFormat(),
+                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                                      commandBuffer);
     }
 
-protected:
-    VklSwapChain* get_current_swap_chain(RenderContext* context) {
+  protected:
+    VklSwapChain *get_current_swap_chain(RenderContext *context) {
         return context->swap_chain_.get();
     }
 
-    void begin_swap_chain_render_pass(VkCommandBuffer commandBuffer, RenderContext* context) {
+    void begin_swap_chain_render_pass(VkCommandBuffer commandBuffer, RenderContext *context) {
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = context->swap_chain_->getRenderPass();
@@ -114,8 +119,8 @@ protected:
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    VklTexture* output_texture_ = nullptr;
+    VklTexture *output_texture_ = nullptr;
     std::string output_name_;
 };
 
-}
+} // namespace GraphicsLab::RenderGraph

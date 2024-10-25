@@ -91,8 +91,8 @@ struct RenderGraphCompiler {
         // collect all output data
         std::vector<RenderPassReflection::Field> fields;
 
-        for (auto pass: render_graph_.get_all_passes_generator()) {
-            for (auto& f: pass->render_pass_reflect()) {
+        for (auto pass : render_graph_.get_all_passes_generator()) {
+            for (auto &f : pass->render_pass_reflect()) {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
                     fields.push_back(f);
                 }
@@ -101,12 +101,12 @@ struct RenderGraphCompiler {
 
         for (auto pass : render_graph_.get_all_passes_generator()) {
             RenderPassReflection connected_resources;
-            for (auto& f: pass->render_pass_reflect()) {
+            for (auto &f : pass->render_pass_reflect()) {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
                     connected_resources.add_field(f);
                 }
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
-                    for (auto f_iter: fields) {
+                    for (auto f_iter : fields) {
                         if (f_iter.get_name() == f.get_name()) {
                             RenderPassReflection::Field tmp_field = f_iter;
                             tmp_field.visibility(f.get_visibility());

@@ -20,8 +20,8 @@ struct RenderContext {
         return height_;
     }
 
-    explicit RenderContext(VklDevice& device, VklWindow& window, VkExtent2D extent): resource_manager(device), device_(device),
-                                                                                      window_(window) {
+    explicit RenderContext(VklDevice &device, VklWindow &window, VkExtent2D extent)
+        : resource_manager(device), device_(device), window_(window) {
         width_ = window.getExtent().width;
         height_ = window.getExtent().height;
 
@@ -44,7 +44,9 @@ struct RenderContext {
         return swap_chain_->getRenderPass();
     }
 
-    [[nodiscard]] GLFWwindow* get_glfw_window() { return window_.getGLFWwindow(); }
+    [[nodiscard]] GLFWwindow *get_glfw_window() {
+        return window_.getGLFWwindow();
+    }
 
     void recreate_swap_chain() {
         auto extent = window_.getExtent();
@@ -113,7 +115,9 @@ struct RenderContext {
         return result;
     }
 
-    [[nodiscard]] uint32_t get_current_frame_index() const { return current_frame_index_; }
+    [[nodiscard]] uint32_t get_current_frame_index() const {
+        return current_frame_index_;
+    }
 
     ~RenderContext() {
         vkDeviceWaitIdle(device_.device());
@@ -129,18 +133,16 @@ struct RenderContext {
         allocInfo.commandPool = device_.getCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(command_buffers_.size());
 
-        if (vkAllocateCommandBuffers(device_.device(), &allocInfo, command_buffers_.data()) !=
-            VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(device_.device(), &allocInfo, command_buffers_.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
 
-
     uint32_t width_, height_;
-    VklDevice& device_;
+    VklDevice &device_;
 
     std::unique_ptr<VklSwapChain> swap_chain_ = nullptr;
-    VklWindow& window_;
+    VklWindow &window_;
 
     std::vector<VkCommandBuffer> command_buffers_;
 

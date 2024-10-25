@@ -7,14 +7,14 @@
 #include "spdlog/spdlog.h"
 #include "vkl/core/vkl_device.hpp"
 
-#include "graphics_lab/core/macros.hpp"
 #include "graphics_lab/core/annotation.hpp"
+#include "graphics_lab/core/macros.hpp"
 
 namespace GraphicsLab {
 namespace RenderGraph {
 
 struct RenderPassReflection {
-    struct Field: public AnnotatedClass {
+    struct Field : public AnnotatedClass {
         enum class Visibility {
             Undefined = 0x0,
             Input = 0x1,
@@ -30,7 +30,8 @@ struct RenderPassReflection {
         };
 
         Field() = default;
-        Field(const std::string &name, const std::string &description, Visibility v): name_(name), description_(description), visibility_(v) {};
+        Field(const std::string &name, const std::string &description, Visibility v)
+            : name_(name), description_(description), visibility_(v) {};
 
         Field &name(const std::string &name) {
             name_ = name;

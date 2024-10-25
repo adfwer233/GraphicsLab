@@ -19,7 +19,7 @@ class SceneWidgetComponent : public UIComponent {
         ImGui::Begin("Render Result");
         {
             if (ImGui::BeginTabBar("RenderTabs")) { // Start a tab bar
-                for (auto& [name, img] : renderResources_.imguiImages) {
+                for (auto &[name, img] : renderResources_.imguiImages) {
                     if (ImGui::BeginTabItem(name.c_str())) { // Create a tab for each image
                         auto wsize = ImGui::GetContentRegionAvail();
                         if (sceneTree_.active_camera) {

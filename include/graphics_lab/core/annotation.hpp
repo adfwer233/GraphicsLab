@@ -7,22 +7,20 @@
 namespace GraphicsLab {
 struct AnnotatedClass {
   public:
-    template<typename T>
-    void set_annotation(const std::string& name, T data) {
+    template <typename T> void set_annotation(const std::string &name, T data) {
         annotations_[name] = data;
     }
 
-    template<typename T>
-    T get_annotation(const std::string& name) {
+    template <typename T> T get_annotation(const std::string &name) {
         return any_cast<T>(&annotations_[name]);
     }
 
-    bool has_annotation(const std::string& name) const {
+    bool has_annotation(const std::string &name) const {
         return annotations_.contains(name);
     }
 
-    void copy_annotation(const AnnotatedClass& source) {
-        for(const auto& [name, data]: source.annotations_) {
+    void copy_annotation(const AnnotatedClass &source) {
+        for (const auto &[name, data] : source.annotations_) {
             annotations_[name] = data;
         }
     }
@@ -30,4 +28,4 @@ struct AnnotatedClass {
   private:
     std::map<std::string, std::any> annotations_;
 };
-}
+} // namespace GraphicsLab

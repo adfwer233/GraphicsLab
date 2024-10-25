@@ -74,15 +74,15 @@ class ImguiContext {
     ImguiContext &operator=(const ImguiContext &) = delete;
 
     // Singleton instance retrieval method
-    static ImguiContext* getInstance(VklDevice &device, GLFWwindow *window, VkRenderPass renderPass) {
+    static ImguiContext *getInstance(VklDevice &device, GLFWwindow *window, VkRenderPass renderPass) {
         if (instance_ == nullptr)
             instance_ = new ImguiContext(device, window, renderPass);
         return instance_;
     }
 
-    static ImguiContext* getInstance() {
+    static ImguiContext *getInstance() {
         return instance_;
     }
 
-    static inline ImguiContext* instance_ = nullptr;
+    static inline ImguiContext *instance_ = nullptr;
 };

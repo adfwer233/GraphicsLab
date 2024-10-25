@@ -5,13 +5,12 @@
 namespace GraphicsLab {
 
 struct ImguiUtils {
-    static auto getImguiTextureFromVklTexture(VklTexture* texture) {
+    static auto getImguiTextureFromVklTexture(VklTexture *texture) {
         std::vector<VkDescriptorSet> result;
-        auto tex = ImGui_ImplVulkan_AddTexture(texture->getTextureSampler(),
-                                               texture->getTextureImageView(),
+        auto tex = ImGui_ImplVulkan_AddTexture(texture->getTextureSampler(), texture->getTextureImageView(),
                                                texture->getImageLayout());
         result.push_back(tex);
         return result;
     }
 };
-}
+} // namespace GraphicsLab

@@ -15,13 +15,11 @@ struct GraphicsLabContext {
     LogManager *logManager;
 };
 
-
 namespace GraphicsLab {
 struct GraphicsLabInternalContext {
     VklWindow window_;
     VklDevice device_;
     GraphicsLab::RenderGraph::RenderContext renderContext;
-
 
     std::unique_ptr<RenderGraph::RenderGraph> renderGraph;
     std::unique_ptr<RenderGraph::RenderGraphInstance> renderGraphInstance;
@@ -37,7 +35,8 @@ struct GraphicsLabInternalContext {
      */
     std::mutex renderGraphInstanceMutex;
 
-    GraphicsLabInternalContext(uint32_t width, uint32_t height): window_(width, height), device_(window_), renderContext(device_, window_, {width, height}) {
+    GraphicsLabInternalContext(uint32_t width, uint32_t height)
+        : window_(width, height), device_(window_), renderContext(device_, window_, {width, height}) {
         renderGraph = std::make_unique<RenderGraph::RenderGraph>();
     }
 
@@ -47,4 +46,4 @@ struct GraphicsLabInternalContext {
         newRenderGraphInstance = compiler.compile(&renderContext);
     }
 };
-}
+} // namespace GraphicsLab

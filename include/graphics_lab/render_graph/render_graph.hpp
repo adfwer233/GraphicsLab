@@ -51,7 +51,8 @@ namespace GraphicsLab::RenderGraph {
 
 struct RenderGraph {
 
-    RenderGraph(): graph_(10) {}
+    RenderGraph() : graph_(10) {
+    }
 
     void add_pass(RenderPass *render_pass, const std::string &pass_name) {
         // add the pass ptr to graph
@@ -60,11 +61,11 @@ struct RenderGraph {
         pass_name_to_index[pass_name] = idx;
     }
 
-    void add_edge(const std::string& from, const std::string& to) {
+    void add_edge(const std::string &from, const std::string &to) {
         if (pass_name_to_index.contains(from) and pass_name_to_index.contains(to)) {
             graph_.add_directed_edge(pass_name_to_index[from], pass_name_to_index[to], {});
         } else {
-            spdlog::warn("Render Graph add_edge failed since {} or {} is not the pass name added to graph", from ,to);
+            spdlog::warn("Render Graph add_edge failed since {} or {} is not the pass name added to graph", from, to);
             return;
         }
     }
