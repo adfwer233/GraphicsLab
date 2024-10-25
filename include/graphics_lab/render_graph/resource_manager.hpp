@@ -1,5 +1,7 @@
 #pragma once
 
+#include "language/coroutine/generator.hpp"
+
 #include "render_pass_reflection.hpp"
 #include "resources.hpp"
 
@@ -8,6 +10,11 @@ namespace RenderGraph {
 
 struct ResourceManager {
     explicit ResourceManager(VklDevice &device) : device_(device) {
+    }
+
+    ~ResourceManager() {
+        for (auto& r: resources_)
+            r.reset();
     }
 
     Resource *add_resource(const RenderPassReflection::Field& field) {
@@ -20,6 +27,7 @@ struct ResourceManager {
             color_texture->create_instance(device_, field.get_width(), field.get_height(), 4,
                                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT  | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
                                            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, sampleBits);
+            color_texture->copy_annotation(field);
             resources_.push_back(std::move(color_texture));
 
             return resources_.back().get();
@@ -55,7 +63,14 @@ struct ResourceManager {
         return nullptr;
     }
 
-  private:
+    Generator<Resource*> get_resource_with_annotation(const std::string annotation) {
+        for (auto& r: resources_) {
+            if (r->has_annotation(annotation)) {
+                co_yield r.get();
+            }
+        }
+    }
+private:
     VklDevice &device_;
 
     std::vector<std::unique_ptr<Resource>> resources_;

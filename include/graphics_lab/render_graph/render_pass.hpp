@@ -265,6 +265,10 @@ struct RenderPass {
 
     virtual RenderPassReflection render_pass_reflect() = 0;
 
+    void set_name(const std::string& name) {
+        name_ = name;
+    }
+
   protected:
     void begin_render_pass(VkCommandBuffer commandBuffer) {
         VkRenderPassBeginInfo renderPassInfo{};
@@ -315,7 +319,7 @@ struct RenderPass {
     std::unique_ptr<VklFramebuffer> vkl_frame_buffer;
 
     uint32_t width_ = 2048, height_ = 2048;
-    friend class RenderGraph;
+
     friend class RenderGraphCompiler;
 };
 

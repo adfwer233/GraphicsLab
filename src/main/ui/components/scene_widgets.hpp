@@ -18,12 +18,20 @@ class SceneWidgetComponent : public UIComponent {
 
         ImGui::Begin("Render Result");
         {
-            auto wsize = ImGui::GetContentRegionAvail();
-            if (sceneTree_.active_camera) {
-                sceneTree_.active_camera->camera.ratio = wsize.x / wsize.y;
+            if (ImGui::BeginTabBar("RenderTabs")) { // Start a tab bar
+                for (auto& [name, img] : renderResources_.imguiImages) {
+                    if (ImGui::BeginTabItem(name.c_str())) { // Create a tab for each image
+                        auto wsize = ImGui::GetContentRegionAvail();
+                        if (sceneTree_.active_camera) {
+                            sceneTree_.active_camera->camera.ratio = wsize.x / wsize.y;
+                        }
+                        // todo: set frame index
+                        ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), wsize);
+                        ImGui::EndTabItem(); // End the tab for the current image
+                    }
+                }
+                ImGui::EndTabBar(); // End the tab bar
             }
-            // todo: set frame index
-            ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.sceneRenderTexture[0]), wsize);
         }
 
         if (ImGui::IsItemVisible()) {

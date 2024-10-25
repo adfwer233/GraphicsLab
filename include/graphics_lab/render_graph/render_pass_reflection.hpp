@@ -8,12 +8,13 @@
 #include "vkl/core/vkl_device.hpp"
 
 #include "graphics_lab/core/macros.hpp"
+#include "graphics_lab/core/annotation.hpp"
 
 namespace GraphicsLab {
 namespace RenderGraph {
 
 struct RenderPassReflection {
-    struct Field {
+    struct Field: public AnnotatedClass {
         enum class Visibility {
             Undefined = 0x0,
             Input = 0x1,

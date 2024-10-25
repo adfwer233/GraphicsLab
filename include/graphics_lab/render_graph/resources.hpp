@@ -1,12 +1,14 @@
 #pragma once
 
-#include "vkl/core/vkl_texture.hpp"
 #include <memory>
+
+#include "graphics_lab/core/annotation.hpp"
+#include "vkl/core/vkl_texture.hpp"
 
 namespace GraphicsLab {
 namespace RenderGraph {
 
-struct Resource {
+struct Resource: public AnnotatedClass {
     enum class Type {
         Undefined,
         ColorTexture,
@@ -18,9 +20,11 @@ struct Resource {
         return name_;
     }
 
-    Type get_type() const {
+    [[nodiscard]] Type get_type() const {
         return type_;
     }
+
+    virtual ~Resource() = default;
 
   protected:
     std::string name_;
@@ -37,6 +41,8 @@ struct ColorTextureResource : public Resource {
         return texture_.get();
     }
     VklTexture *get_resolved_texture() {
+        if (resolved_texture_ == nullptr)
+            return texture_.get();
         return resolved_texture_.get();
     }
 

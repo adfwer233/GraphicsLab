@@ -15,23 +15,19 @@ namespace GraphicsLab::RenderGraph {
 
         RenderPassReflection render_pass_reflect() override {
             RenderPassReflection reflection;
-            reflection.add_output("simple_output", "The output texture of simple pass, which will be a triangle")
-                    .type(RenderPassReflection::Field::Type::Texture2D)
-                    .sample_count(8)
-                    .format(VK_FORMAT_R8G8B8A8_SRGB)
-                    .extent(1024, 1024);
             return reflection;
         }
 
         void post_compile(RenderContext *render_context) override {
-            auto resource = render_context->resource_manager.get_resource("scene_render_result");
-            auto color_resource = reinterpret_cast<ColorTextureResource*>(resource);
-
             imguiContext = std::make_unique<ImguiContext>(device_, render_context->get_glfw_window(), render_context->get_swap_chain_render_pass());
             ImGuiIO &io = ImGui::GetIO();
             io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
 
-            uiManager_.renderResources.sceneRenderTexture = ImguiUtils::getImguiTextureFromVklTexture(color_resource->get_resolved_texture());
+            for (auto r: render_context->resource_manager.get_resource_with_annotation("imgui_show")) {
+                if (auto colorTexture = dynamic_cast<ColorTextureResource*>(r)) {
+                    uiManager_.renderResources.imguiImages[colorTexture->get_name()] = ImguiUtils::getImguiTextureFromVklTexture(colorTexture->get_resolved_texture());
+                }
+            }
 
             auto swapChain = get_current_swap_chain(render_context);
             for (int i = 0; i < swapChain->imageCount(); i++) {

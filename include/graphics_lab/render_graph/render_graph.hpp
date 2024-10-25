@@ -55,7 +55,7 @@ struct RenderGraph {
 
     void add_pass(RenderPass *render_pass, const std::string &pass_name) {
         // add the pass ptr to graph
-        render_pass->name_ = pass_name;
+        render_pass->set_name(pass_name);
         auto idx = graph_.add_node({render_pass});
         pass_name_to_index[pass_name] = idx;
     }
