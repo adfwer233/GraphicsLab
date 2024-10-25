@@ -19,9 +19,9 @@ namespace GraphicsLab::RenderGraph {
         }
 
         void post_compile(RenderContext *render_context) override {
-            imguiContext = std::make_unique<ImguiContext>(device_, render_context->get_glfw_window(), render_context->get_swap_chain_render_pass());
-            ImGuiIO &io = ImGui::GetIO();
-            io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
+
+
+            imguiContext = ImguiContext::getInstance(device_, render_context->get_glfw_window(), render_context->get_swap_chain_render_pass());
 
             for (auto r: render_context->resource_manager.get_resource_with_annotation("imgui_show")) {
                 if (auto colorTexture = dynamic_cast<ColorTextureResource*>(r)) {
@@ -50,7 +50,7 @@ namespace GraphicsLab::RenderGraph {
 
     private:
         UIManager &uiManager_;
-        std::unique_ptr<ImguiContext> imguiContext = nullptr;
+        ImguiContext* imguiContext = nullptr;
 
     };
 }

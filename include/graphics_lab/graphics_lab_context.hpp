@@ -20,11 +20,12 @@ namespace GraphicsLab {
 struct GraphicsLabInternalContext {
     VklWindow window_;
     VklDevice device_;
-    GraphicsLab::RenderGraph::RenderContext context;
+    GraphicsLab::RenderGraph::RenderContext renderContext;
 
 
     std::unique_ptr<RenderGraph::RenderGraph> renderGraph;
     std::unique_ptr<RenderGraph::RenderGraphInstance> renderGraphInstance;
+    std::unique_ptr<RenderGraph::RenderGraphInstance> newRenderGraphInstance;
 
     /**
      * @brief mutex lock protecting render graph (i.e. the descriptor)
@@ -36,12 +37,14 @@ struct GraphicsLabInternalContext {
      */
     std::mutex renderGraphInstanceMutex;
 
-    GraphicsLabInternalContext(uint32_t width, uint32_t height): window_(width, height), device_(window_), context(device_, window_, {width, height}) {}
+    GraphicsLabInternalContext(uint32_t width, uint32_t height): window_(width, height), device_(window_), renderContext(device_, window_, {width, height}) {
+        renderGraph = std::make_unique<RenderGraph::RenderGraph>();
+    }
 
     void compileRenderGraph() {
         std::scoped_lock instanceLock(renderGraphInstanceMutex);
         RenderGraph::RenderGraphCompiler compiler(*renderGraph, device_);
-        renderGraphInstance = compiler.compile(&context);
+        newRenderGraphInstance = compiler.compile(&renderContext);
     }
 };
 }

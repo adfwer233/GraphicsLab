@@ -20,6 +20,10 @@ struct ResourceManager {
     Resource *add_resource(const RenderPassReflection::Field& field) {
         VkSampleCountFlagBits sampleBits = VK_SAMPLE_COUNT_1_BIT;
 
+        if (auto cur = get_resource(field.get_name()))
+            return cur;
+
+
         if (field.get_sample_count() == 8)
             sampleBits = VK_SAMPLE_COUNT_8_BIT;
         if (field.get_type() == RenderPassReflection::Field::Type::Texture2D) {

@@ -10,7 +10,7 @@ class ImguiContext {
     VklDevice &device_;
     VkDescriptorPool imguiPool;
 
-  public:
+    // Private constructor for singleton pattern
     ImguiContext(VklDevice &device, GLFWwindow *window, VkRenderPass renderPass) : device_(device) {
         VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
                                              {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
@@ -28,7 +28,7 @@ class ImguiContext {
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         pool_info.maxSets = 1000;
-        pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+        pool_info.poolSizeCount = static_cast<uint32_t>(std::size(pool_sizes));
         pool_info.pPoolSizes = pool_sizes;
 
         vkCreateDescriptorPool(device_.device(), &pool_info, nullptr, &imguiPool);
@@ -37,7 +37,6 @@ class ImguiContext {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
-        (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
@@ -58,14 +57,32 @@ class ImguiContext {
         init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
         ImGui_ImplVulkan_Init(&init_info);
+
+        io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
     }
 
-    ~ImguiContext() {
+  public:
+    void cleanContext() {
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-
-        /** destroy imgui descriptor pool*/
         vkDestroyDescriptorPool(device_.device(), imguiPool, nullptr);
     }
+
+    // Delete copy constructor and assignment operator to prevent multiple instances
+    ImguiContext(const ImguiContext &) = delete;
+    ImguiContext &operator=(const ImguiContext &) = delete;
+
+    // Singleton instance retrieval method
+    static ImguiContext* getInstance(VklDevice &device, GLFWwindow *window, VkRenderPass renderPass) {
+        if (instance_ == nullptr)
+            instance_ = new ImguiContext(device, window, renderPass);
+        return instance_;
+    }
+
+    static ImguiContext* getInstance() {
+        return instance_;
+    }
+
+    static inline ImguiContext* instance_ = nullptr;
 };

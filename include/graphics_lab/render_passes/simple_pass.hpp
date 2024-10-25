@@ -16,7 +16,8 @@ struct SimpleRenderPass: public RenderPass {
                   .type(RenderPassReflection::Field::Type::Texture2D)
                   .sample_count(8)
                   .format(VK_FORMAT_R8G8B8A8_SRGB)
-                  .extent(1024, 1024);
+                  .extent(2048, 2048)
+                  .set_annotation("imgui_show", true);
         return reflection;
     }
 
@@ -31,8 +32,8 @@ struct SimpleRenderPass: public RenderPass {
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
         auto commandBuffer = render_context->get_current_command_buffer();
 
-        simple_render_system->bindPipeline(commandBuffer);
         begin_render_pass(commandBuffer);
+        simple_render_system->bindPipeline(commandBuffer);
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
         end_render_pass(commandBuffer);
     }

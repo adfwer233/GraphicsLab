@@ -22,9 +22,9 @@ void ApplicationExperimental::run() {
     // customize the log manager
     auto &logManager = LogManager::getInstance();
 
-    GLFWwindow *window = window_.getGLFWwindow();
+    GLFWwindow *window = appContext.window_.getGLFWwindow();
 
-    SceneTree::VklSceneTree scene_tree(device_);
+    SceneTree::VklSceneTree scene_tree(appContext.device_);
 
     // scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
     scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
@@ -33,30 +33,27 @@ void ApplicationExperimental::run() {
     UIState state;
     Controller controller(state, scene_tree);
     auto env_injector =
-            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(device_),
-                              di::bind<UIState>().to(state), di::bind<Controller>().to(controller));
+            di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree), di::bind<VklDevice>().to(appContext.device_),
+                              di::bind<UIState>().to(state), di::bind<Controller>().to(controller), di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
 
     Controller::controller = &controller;
     glfwSetCursorPosCallback(window, Controller::mouse_callback);
     glfwSetScrollCallback(window, Controller::scroll_callback);
     glfwSetMouseButtonCallback(window, Controller::mouse_button_callback);
 
-    UIManager uiManager(scene_tree, controller, state);
+    UIManager uiManager(scene_tree, controller, state, appContext);
 
-    GraphicsLab::RenderGraph::RenderGraph render_graph;
-
-    InternalSceneRenderPass internalSceneRenderPass(device_, scene_tree, state);
-    InternalImguiPass internalImguiPass(device_, uiManager);
+    InternalSceneRenderPass internalSceneRenderPass(appContext.device_, scene_tree, state);
+    InternalImguiPass internalImguiPass(appContext.device_, uiManager);
 
     internalSceneRenderPass.set_extent(2048, 2048);
     internalImguiPass.set_extent(WIDTH, HEIGHT);
 
-    render_graph.add_pass(&internalSceneRenderPass, "internal_scene_render_pass");
-    render_graph.add_pass(&internalImguiPass, "internal_imgui_pass");
-    render_graph.add_edge("internal_scene_render_pass", "internal_imgui_pass");
+    appContext.renderGraph->add_pass(&internalSceneRenderPass, "internal_scene_render_pass");
+    appContext.renderGraph->add_pass(&internalImguiPass, "internal_imgui_pass");
+    appContext.renderGraph->add_edge("internal_scene_render_pass", "internal_imgui_pass");
 
-    RenderGraphCompiler compiler(render_graph, device_);
-    auto render_graph_instance = compiler.compile(&context);
+    appContext.compileRenderGraph();
 
     float deltaTime = 0, lastFrame = 0;
 
@@ -65,30 +62,36 @@ void ApplicationExperimental::run() {
 #endif
 
     while (not glfwWindowShouldClose(window)) {
+        if (appContext.newRenderGraphInstance != nullptr) {
+            appContext.renderGraphInstance = std::move(appContext.newRenderGraphInstance);
+        }
+
         glfwPollEvents();
 
         float currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
 
-        controller.processInput(window_.getGLFWwindow(), deltaTime);
+        controller.processInput(appContext.window_.getGLFWwindow(), deltaTime);
 
         ImGui_ImplGlfw_NewFrame();
         ImGui_ImplVulkan_NewFrame();
         ImGui::NewFrame();
 
-        context.begin_frame();
-        render_graph_instance->execute(&context);
-        auto render_result = context.end_frame();
+        appContext.renderContext.begin_frame();
+        appContext.renderGraphInstance->execute(&appContext.renderContext);
+        auto render_result = appContext.renderContext.end_frame();
 
         if (render_result == VK_ERROR_OUT_OF_DATE_KHR || render_result == VK_SUBOPTIMAL_KHR ||
-            window_.wasWindowResized()) {
-            window_.resetWindowResizedFlag();
-            context.recreate_swap_chain();
+            appContext.window_.wasWindowResized()) {
+            appContext.window_.resetWindowResizedFlag();
+            appContext.renderContext.recreate_swap_chain();
         }
     }
 
-    vkDeviceWaitIdle(device_.device());
+    vkDeviceWaitIdle(appContext.device_.device());
+
+    ImguiContext::getInstance()->cleanContext();
     SceneTree::VklNodeMeshBuffer<Mesh3D>::free_instance();
     SceneTree::VklNodeMeshBuffer<Wire3D>::free_instance();
 }

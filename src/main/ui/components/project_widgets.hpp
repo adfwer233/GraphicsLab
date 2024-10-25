@@ -10,6 +10,8 @@
 
 #include "ui/render_resources.hpp"
 
+#include "graphics_lab/render_passes/simple_pass.hpp"
+
 struct mystruct : public Reflectable {
     glm::vec3 pos;
 
@@ -20,7 +22,7 @@ struct mystruct : public Reflectable {
 
 class ProjectWidgetComponent : public UIComponent {
     UIState &uiState_;
-
+    GraphicsLab::GraphicsLabInternalContext &appContext_;
     std::future<void> projectFunctionResult;
 
     bool showFunctionCallDialog = false;
@@ -29,13 +31,20 @@ class ProjectWidgetComponent : public UIComponent {
     std::set<std::string> bindClassNames;
 
   public:
-    ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
-        : UIComponent(sceneTree), uiState_(uiState) {
+    ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, GraphicsLab::GraphicsLabInternalContext &appContext)
+        : UIComponent(sceneTree), uiState_(uiState), appContext_(appContext) {
     }
 
     void render() final {
         ImGui::Begin("Project Manager");
         {
+            if (ImGui::Button("add render pass")) {
+                auto simple_pass = new GraphicsLab::RenderGraph::SimpleRenderPass(appContext_.device_);
+                simple_pass->set_extent(2048, 2048);
+                appContext_.renderGraph->add_pass(simple_pass, "New simple pass");
+
+                appContext_.compileRenderGraph();
+            }
 
             if (ImGui::Button("Choose Path")) {
                 std::filesystem::path path =

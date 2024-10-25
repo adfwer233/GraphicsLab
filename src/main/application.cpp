@@ -56,7 +56,7 @@ void Application::run() {
     renderGraph.createLayouts();
     renderGraph.createInstances();
 
-    auto imguiContext = std::make_unique<ImguiContext>(device_, window, renderGraph.swapChain_->getRenderPass());
+    auto imguiContext = ImguiContext::getInstance(device_, window, renderGraph.swapChain_->getRenderPass());
     ImGuiIO &io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
 
@@ -104,7 +104,7 @@ void Application::run() {
 
     vkDeviceWaitIdle(device_.device());
 
-    imguiContext.reset();
+    // imguiContext.reset();
     SceneTree::VklNodeMeshBuffer<Mesh3D>::free_instance();
     SceneTree::VklNodeMeshBuffer<Wire3D>::free_instance();
 }
