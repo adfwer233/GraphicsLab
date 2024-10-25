@@ -104,6 +104,11 @@ struct RenderContext {
         is_frame_started_ = false;
         current_frame_index_ = (current_frame_index_ + 1) % VklSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
+
+    ~RenderContext() {
+        vkDeviceWaitIdle(device_.device());
+    }
+
   private:
     void create_command_buffers() {
         command_buffers_.resize(VklSwapChain::MAX_FRAMES_IN_FLIGHT);
