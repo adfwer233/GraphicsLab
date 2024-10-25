@@ -74,7 +74,7 @@ struct RenderGraphCompiler {
             for (auto &f : pass->render_pass_reflect()) {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
                     if (producer_map.contains(f.get_name())) {
-                        render_graph_.graph_.add_directed_edge(consumer_idx, producer_map[f.get_name()], {});
+                        render_graph_.graph_.add_directed_edge(producer_map[f.get_name()], consumer_idx, {});
                     }
                 }
             }

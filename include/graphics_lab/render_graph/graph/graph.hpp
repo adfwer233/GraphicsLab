@@ -85,8 +85,6 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             result.pop();
         }
 
-        std::reverse(topo_order.begin(), topo_order.end());
-
         return topo_order;
     }
 };

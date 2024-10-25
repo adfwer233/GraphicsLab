@@ -40,6 +40,12 @@ struct RenderContext {
         return command_buffers_[current_frame_index_];
     }
 
+    VkRenderPass get_swap_chain_render_pass() {
+        return swap_chain_->getRenderPass();
+    }
+
+    [[nodiscard]] GLFWwindow* get_glfw_window() { return window_.getGLFWwindow(); }
+
     void recreate_swap_chain() {
         auto extent = window_.getExtent();
         while (extent.width == 0 || extent.height == 0) {
@@ -85,7 +91,7 @@ struct RenderContext {
         return commandBuffer;
     }
 
-    void end_frame() {
+    VkResult end_frame() {
         vkDeviceWaitIdle(device_.device());
         assert(is_frame_started_ && "Can't call endFrame while frame is not in progress");
         auto commandBuffer = get_current_command_buffer();
@@ -103,7 +109,11 @@ struct RenderContext {
 
         is_frame_started_ = false;
         current_frame_index_ = (current_frame_index_ + 1) % VklSwapChain::MAX_FRAMES_IN_FLIGHT;
+
+        return result;
     }
+
+    [[nodiscard]] uint32_t get_current_frame_index() const { return current_frame_index_; }
 
     ~RenderContext() {
         vkDeviceWaitIdle(device_.device());

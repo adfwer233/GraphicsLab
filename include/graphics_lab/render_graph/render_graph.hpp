@@ -60,6 +60,15 @@ struct RenderGraph {
         pass_name_to_index[pass_name] = idx;
     }
 
+    void add_edge(const std::string& from, const std::string& to) {
+        if (pass_name_to_index.contains(from) and pass_name_to_index.contains(to)) {
+            graph_.add_directed_edge(pass_name_to_index[from], pass_name_to_index[to], {});
+        } else {
+            spdlog::warn("Render Graph add_edge failed since {} or {} is not the pass name added to graph", from ,to);
+            return;
+        }
+    }
+
     RenderPass *get_pass(const std::string &pass_name) {
         // return the pass from graph
         if (not pass_name_to_index.contains(pass_name)) {

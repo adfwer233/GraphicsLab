@@ -10,9 +10,8 @@ namespace GraphicsLab::RenderGraph {
  * `SpecialChainPass` blit a image to the swap chain rendering context
  */
 struct SwapChainPass: public RenderPass {
-    explicit SwapChainPass(VklDevice &device, const std::string& output_name) : RenderPass(device), output_name_(output_name) {
-
-    }
+    explicit SwapChainPass(VklDevice &device, const std::string& output_name) : RenderPass(device), output_name_(output_name) {}
+    explicit SwapChainPass(VklDevice &device) : RenderPass(device) {}
 
     RenderPassReflection render_pass_reflect() override {
         RenderPassReflection reflection;
@@ -81,12 +80,16 @@ struct SwapChainPass: public RenderPass {
                                       VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, commandBuffer);
     }
 
-private:
+protected:
+    VklSwapChain* get_current_swap_chain(RenderContext* context) {
+        return context->swap_chain_.get();
+    }
+
     void begin_swap_chain_render_pass(VkCommandBuffer commandBuffer, RenderContext* context) {
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = context->swap_chain_->getRenderPass();
-        renderPassInfo.framebuffer = context->swap_chain_->getFrameBuffer(context->current_frame_index_);
+        renderPassInfo.framebuffer = context->swap_chain_->getFrameBuffer(context->current_image_index_);
 
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = context->swap_chain_->getSwapChainExtent();
