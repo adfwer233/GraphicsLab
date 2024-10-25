@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <array>
 
 #include "vkl/core/vkl_framebuffer.hpp"
 #include "vkl/core/vkl_render_pass.hpp"
@@ -70,6 +71,8 @@ struct RenderPass {
                     .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
                     .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                    .initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                    .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
                 };
 
                 attachments.push_back(attachmentDescription);
@@ -79,7 +82,7 @@ struct RenderPass {
             }
 
             // output attachments
-            if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
+            if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
                 VkAttachmentDescription attachmentDescription{.format = f.get_format(),
                                                               .samples = f.get_vk_sample_count_flag_bits(),
                                                               .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
@@ -233,12 +236,47 @@ struct RenderPass {
             attachmentImageViews.data(), render_context->get_width(), render_context->get_height());
     }
 
+    virtual void post_compile(RenderContext *render_context) = 0;
+
     virtual void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) = 0;
 
     virtual RenderPassReflection render_pass_reflect() = 0;
 
   protected:
-    RenderPass(VklDevice &device) : device_(device) {
+    void begin_render_pass(VkCommandBuffer commandBuffer) {
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = vkl_render_pass->renderPass;
+        renderPassInfo.framebuffer = vkl_frame_buffer->framebuffer;
+
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = {1024, 1024};
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
+        clearValues[1].depthStencil = {1.0f, 0};
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(1024);
+        viewport.height = static_cast<float>(1024);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        VkRect2D scissor{{0, 0}, {1024, 1024}};
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    }
+
+    void end_render_pass(VkCommandBuffer commandBuffer) {
+        vkCmdEndRenderPass(commandBuffer);
+    }
+
+    explicit RenderPass(VklDevice &device) : device_(device) {
     }
 
     VklDevice &device_;

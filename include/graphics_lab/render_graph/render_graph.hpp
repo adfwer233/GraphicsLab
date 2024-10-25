@@ -51,38 +51,6 @@ namespace GraphicsLab {
 
 namespace RenderGraph {
 
-struct RenderResource {};
-struct RenderResourceInstance {};
-
-struct RenderTexture {};
-struct RenderBuffer {};
-
-struct TextureInstance : public RenderResourceInstance {};
-struct BufferInstance : public RenderResourceInstance {};
-
-struct Pass {
-    enum class Type {
-        RenderPass,
-        ComputePass
-    };
-
-    Type type;
-    std::string name;
-    size_t index;
-    size_t instance_index;
-
-  private:
-};
-
-struct ComputePass : Pass {};
-struct SwapChainPass : Pass {};
-
-struct PassInstance {};
-
-struct ComputePassInstance : public PassInstance {};
-struct RenderPassInstance : public PassInstance {};
-struct SwapChainPassInstance : public PassInstance {};
-
 struct RenderGraph {
 
     void create_pass_instances();
@@ -90,6 +58,8 @@ struct RenderGraph {
 
     void compile();
     void render();
+
+    RenderGraph(): graph_(10) {}
 
     void add_pass(RenderPass *render_pass, const std::string &pass_name) {
         // add the pass ptr to graph

@@ -46,7 +46,7 @@ struct ColorTextureResource : public Resource {
      * If the sample count is not 1, a resolved texture will be generated
      */
     void create_instance(VklDevice &device_, int texWidth, int texHeight, int texChannels,
-                         VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                         VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
                          VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED, VkFormat format = VK_FORMAT_R8G8B8A8_SRGB,
                          VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT) {
         texture_ =

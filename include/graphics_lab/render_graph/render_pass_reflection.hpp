@@ -29,7 +29,7 @@ struct RenderPassReflection {
         };
 
         Field() = default;
-        Field(const std::string &name, const std::string &description, Visibility v);
+        Field(const std::string &name, const std::string &description, Visibility v): name_(name), description_(description), visibility_(v) {};
 
         Field &name(const std::string &name) {
             name_ = name;
@@ -43,27 +43,44 @@ struct RenderPassReflection {
             visibility_ = v;
             return *this;
         }
+        Field &type(Type t) {
+            type_ = t;
+            return *this;
+        }
+        Field &extent(uint32_t width, uint32_t height) {
+            width_ = width;
+            height_ = height;
+            return *this;
+        }
+        Field &sample_count(uint32_t sample_count) {
+            sample_count_ = sample_count;
+            return *this;
+        }
+        Field &format(VkFormat format) {
+            format_ = format;
+            return *this;
+        }
 
-        const std::string get_name() const {
+        [[nodiscard]] std::string get_name() const {
             return name_;
         }
-        const std::string get_description() const {
+        [[nodiscard]] std::string get_description() const {
             return description_;
         }
-        Type get_type() const {
+        [[nodiscard]] Type get_type() const {
             return type_;
         }
-        uint32_t get_width() const {
+        [[nodiscard]] uint32_t get_width() const {
             return width_;
         }
-        uint32_t get_height() const {
+        [[nodiscard]] uint32_t get_height() const {
             return height_;
         }
-        uint32_t get_sample_count() const {
+        [[nodiscard]] uint32_t get_sample_count() const {
             return sample_count_;
         }
 
-        VkSampleCountFlagBits get_vk_sample_count_flag_bits() const {
+        [[nodiscard]] VkSampleCountFlagBits get_vk_sample_count_flag_bits() const {
             std::map<uint32_t, VkSampleCountFlagBits> transfer_map{
                 {1, VK_SAMPLE_COUNT_1_BIT},
                 {4, VK_SAMPLE_COUNT_4_BIT},
@@ -79,14 +96,14 @@ struct RenderPassReflection {
             return transfer_map[sample_count_];
         };
 
-        Visibility get_visibility() const {
+        [[nodiscard]] Visibility get_visibility() const {
             return visibility_;
         }
-        VkFormat get_format() const {
+        [[nodiscard]] VkFormat get_format() const {
             return format_;
         }
-        bool need_to_resolve() const {
-            return sample_count_ == 1;
+        [[nodiscard]] bool need_to_resolve() const {
+            return sample_count_ != 1;
         }
 
       private:

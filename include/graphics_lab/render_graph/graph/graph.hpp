@@ -26,6 +26,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
 
     size_t add_node(NodeAttachmentType node_data) {
         nodes.emplace_back(node_data);
+        return nodes.size() - 1;
     }
 
     void add_directed_edge(size_t from, size_t to, EdgeAttachmentType data) {

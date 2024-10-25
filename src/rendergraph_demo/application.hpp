@@ -1,9 +1,6 @@
 #pragma once
 
-#include "vkl/core/vkl_device.hpp"
-#include "vkl/core/vkl_offscreen_renderer.hpp"
-#include "vkl/core/vkl_renderer.hpp"
-#include "vkl/core/vkl_window.hpp"
+#include "graphics_lab/render_graph/render_context.hpp"
 
 #ifndef DATA_DIR
 #define DATA_DIR "./shader/"
@@ -16,11 +13,10 @@ class Application {
 
     VklWindow window_{WIDTH, HEIGHT};
     VklDevice device_;
-
-    VklSwapChain swapChain_;
+    GraphicsLab::RenderGraph::RenderContext context;
 
   public:
-    Application() : device_(window_), swapChain_(device_, {WIDTH, HEIGHT}) {};
+    Application() : device_(window_), context(device_, window_, {WIDTH, HEIGHT}) {};
     ~Application();
 
     Application(const Application &) = delete;

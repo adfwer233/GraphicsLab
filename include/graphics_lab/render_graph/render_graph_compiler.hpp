@@ -47,7 +47,9 @@ struct RenderGraphCompiler {
     void create_resources(RenderContext *context) {
         for (auto pass : render_graph_.get_all_passes_generator()) {
             for (auto &f : pass->render_pass_reflect()) {
-                auto resource = context->resource_manager.add_resource(f);
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
+                    auto resource = context->resource_manager.add_resource(f);
+                }
             }
         }
     }
@@ -59,9 +61,38 @@ struct RenderGraphCompiler {
     }
 
     void compile_passes(RenderContext *context) {
-        for (auto pass : render_graph_.get_all_passes_generator()) {
-            pass->compile(context, {pass->render_pass_reflect()}); // only add the reflected data
+        // collect all output data
+        std::vector<RenderPassReflection::Field> fields;
+
+        for (auto pass: render_graph_.get_all_passes_generator()) {
+            for (auto& f: pass->render_pass_reflect()) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
+                    fields.push_back(f);
+                }
+            }
         }
+
+        for (auto pass : render_graph_.get_all_passes_generator()) {
+            RenderPassReflection connected_resources;
+            for (auto& f: pass->render_pass_reflect()) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
+                    connected_resources.add_field(f);
+                }
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
+                    for (auto f_iter: fields) {
+                        if (f_iter.get_name() == f.get_name()) {
+                            RenderPassReflection::Field tmp_field = f_iter;
+                            tmp_field.visibility(f.get_visibility());
+                            connected_resources.add_field(tmp_field);
+                        }
+                    }
+                }
+            }
+            pass->compile(context, {connected_resources}); // only add the reflected data
+        }
+
+        for (auto pass : render_graph_.get_all_passes_generator())
+            pass->post_compile(context);
     }
 };
 

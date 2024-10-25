@@ -128,6 +128,10 @@ class VklSwapChain {
         return swapChainImageViews_[index];
     }
 
+    VkImage getImage(int index) {
+        return swapChainImages_[index];
+    }
+
     float extentAspectRatio() {
         return static_cast<float>(swapChainExtent_.width) / static_cast<float>(swapChainExtent_.height);
     }
