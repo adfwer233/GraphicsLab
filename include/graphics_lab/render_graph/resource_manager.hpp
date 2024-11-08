@@ -13,8 +13,16 @@ struct ResourceManager {
     }
 
     ~ResourceManager() {
-        for (auto &r : resources_)
-            r.reset();
+        for (auto &r : resources_) {
+            try {
+                if (not r->has_annotation("do_not_release"))
+                    r.reset();
+                else
+                    r.release();
+            } catch (std::exception& e) {
+                spdlog::warn(e.what());
+            }
+        }
     }
 
     Resource *add_resource(const RenderPassReflection::Field &field) {

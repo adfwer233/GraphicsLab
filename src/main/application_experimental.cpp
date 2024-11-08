@@ -63,6 +63,8 @@ void ApplicationExperimental::run() {
 #endif
 
     while (not glfwWindowShouldClose(window)) {
+        std::scoped_lock instanceLock(appContext.renderGraphInstanceMutex);
+
         if (appContext.newRenderGraphInstance != nullptr) {
             appContext.renderGraphInstance = std::move(appContext.newRenderGraphInstance);
         }

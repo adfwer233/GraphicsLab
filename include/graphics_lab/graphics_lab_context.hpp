@@ -9,12 +9,6 @@
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_graph/render_graph_instance.hpp"
 
-struct GraphicsLabContext {
-    VklDevice *device;
-    SceneTree::VklSceneTree *sceneTree;
-    LogManager *logManager;
-};
-
 namespace GraphicsLab {
 struct GraphicsLabInternalContext {
     VklWindow window_;
@@ -47,3 +41,11 @@ struct GraphicsLabInternalContext {
     }
 };
 } // namespace GraphicsLab
+
+struct GraphicsLabContext {
+    VklDevice *device;
+    SceneTree::VklSceneTree *sceneTree;
+    LogManager *logManager;
+
+    GraphicsLab::GraphicsLabInternalContext *applicationContext;
+};

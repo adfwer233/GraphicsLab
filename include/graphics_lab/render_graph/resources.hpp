@@ -46,6 +46,10 @@ struct ColorTextureResource : public Resource {
         return resolved_texture_.get();
     }
 
+    ~ColorTextureResource() {
+        spdlog::info("destructed {}", name_);
+    }
+
     /**
      * @brief generate the instance of images
      *
