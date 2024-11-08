@@ -19,7 +19,7 @@ struct ResourceManager {
                     r.reset();
                 else
                     r.release();
-            } catch (std::exception& e) {
+            } catch (std::exception &e) {
                 spdlog::warn(e.what());
             }
         }

@@ -7,7 +7,7 @@
 namespace GraphicsLab {
 struct AnnotatedClass {
   public:
-    template <typename T> AnnotatedClass& set_annotation(const std::string &name, T data) {
+    template <typename T> AnnotatedClass &set_annotation(const std::string &name, T data) {
         annotations_[name] = data;
         return *this;
     }

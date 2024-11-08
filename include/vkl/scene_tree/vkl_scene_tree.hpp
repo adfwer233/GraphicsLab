@@ -119,8 +119,11 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         return result;
     }
 
-    GeometryNode() requires std::default_initializable<GeometryType> = default;
-    explicit GeometryNode(GeometryType&& geometry_data): data(std::move(geometry_data)) {}
+    GeometryNode()
+        requires std::default_initializable<GeometryType>
+    = default;
+    explicit GeometryNode(GeometryType &&geometry_data) : data(std::move(geometry_data)) {
+    }
 
     GeometryType data;
     bool visible = true;
