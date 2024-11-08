@@ -69,7 +69,7 @@ void ApplicationExperimental::run() {
 
         glfwPollEvents();
 
-        float currentTime = static_cast<float>(glfwGetTime());
+        auto currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
 

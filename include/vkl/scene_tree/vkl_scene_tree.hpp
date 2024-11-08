@@ -26,7 +26,7 @@ enum class NodeType {
 struct PointLightSource {};
 struct AreaLightSource {};
 
-using GeometryTypes = MetaProgramming::TypeList<Mesh3D, Wire3D, TensorProductBezierSurface>;
+using GeometryTypes = MetaProgramming::TypeList<Mesh3D, Wire3D, BezierCurve2D, TensorProductBezierSurface>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>
@@ -118,6 +118,9 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         result.emplace("Apply Transformation", TypeErasedValue(&GeometryNode::applyTransformation, this));
         return result;
     }
+
+    GeometryNode() requires std::default_initializable<GeometryType> = default;
+    explicit GeometryNode(GeometryType&& geometry_data): data(std::move(geometry_data)) {}
 
     GeometryType data;
     bool visible = true;
@@ -351,7 +354,7 @@ struct VklSceneTree {
     }
 
     template <SupportedGeometryType GeometryType> void addGeometryNode(GeometryType &&Geometry) {
-        auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(Geometry);
+        auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(std::forward<GeometryType>(Geometry));
         root->children.push_back(std::move(geometry_node));
     }
 
