@@ -90,8 +90,8 @@ class ProjectWidgetComponent : public UIComponent {
                             if (uiState_.project) {
 
                                 auto loadProject = [&]() {
-                                    spdlog::info((void*)sceneTree_.root.get());
-                                    spdlog::info((void*)&sceneTree_.sceneTreeMutex);
+                                    spdlog::info((void *)sceneTree_.root.get());
+                                    spdlog::info((void *)&sceneTree_.sceneTreeMutex);
                                     spdlog::info(sceneTree_.root->name);
                                     uiState_.project->updateContext(GraphicsLabContext(
                                         &sceneTree_.device_, &sceneTree_, &LogManager::getInstance(), &appContext_));

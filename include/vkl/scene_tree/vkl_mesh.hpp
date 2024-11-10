@@ -147,9 +147,9 @@ void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorS
         std::vector<VkDescriptorBufferInfo> bufferInfos;
         if (not key.uniformDescriptors.empty()) {
             for (int i = 0; i < uniformBuffers[key].size(); i++) {
-                uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(device_, key.uniformDescriptors.front().size, 1,
-                                                                               VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT));
+                uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(
+                    device_, key.uniformDescriptors.front().size, 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT));
                 uniformBuffers[key][i]->map();
                 bufferInfos.push_back(uniformBuffers[key][i]->descriptorInfo());
                 writer[i].writeBuffer(key.uniformDescriptors.front().binding, &bufferInfos.back());
