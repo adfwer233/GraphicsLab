@@ -143,14 +143,16 @@ void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorS
         for (int i = 0; i < VklSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
             writer.emplace_back(setLayout, pool);
         }
-        for (auto &uniformBufferDescriptor : key.uniformDescriptors) {
+
+        std::vector<VkDescriptorBufferInfo> bufferInfos;
+        if (not key.uniformDescriptors.empty()) {
             for (int i = 0; i < uniformBuffers[key].size(); i++) {
-                uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(device_, uniformBufferDescriptor.size, 1,
+                uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(device_, key.uniformDescriptors.front().size, 1,
                                                                                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                                                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT));
                 uniformBuffers[key][i]->map();
-                auto bufferInfo = uniformBuffers[key][i]->descriptorInfo();
-                writer[i].writeBuffer(uniformBufferDescriptor.binding, &bufferInfo);
+                bufferInfos.push_back(uniformBuffers[key][i]->descriptorInfo());
+                writer[i].writeBuffer(key.uniformDescriptors.front().binding, &bufferInfos.back());
             }
         }
 
@@ -161,7 +163,6 @@ void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorS
             }
             i++;
         }
-
         for (int i = 0; i < VklSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
             writer[i].build(descriptorSetsMap[key][i]);
         }

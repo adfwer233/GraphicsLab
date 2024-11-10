@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+#include "spdlog/spdlog.h"
+
 VkDeviceSize VklBuffer::getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) {
     if (minOffsetAlignment > 0) {
         return (instanceSize + minOffsetAlignment - 1) & ~(minOffsetAlignment - 1);

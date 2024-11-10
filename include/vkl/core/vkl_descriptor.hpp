@@ -134,7 +134,7 @@ class VklDescriptorPool {
 };
 
 class VklDescriptorWriter {
-  private:
+  public:
     VklDescriptorSetLayout &setLayout_;
     VklDescriptorPool &pool_;
     std::vector<VkWriteDescriptorSet> writes_;

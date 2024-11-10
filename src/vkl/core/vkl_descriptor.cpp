@@ -1,4 +1,5 @@
 #include "vkl/core/vkl_descriptor.hpp"
+#include "spdlog/spdlog.h"
 #include <stdexcept>
 
 VklDescriptorSetLayout::Builder &VklDescriptorSetLayout::Builder::addBinding(uint32_t binding,
@@ -132,6 +133,7 @@ void VklDescriptorPool::resetPool() {
 
 VklDescriptorWriter::VklDescriptorWriter(VklDescriptorSetLayout &setLayout, VklDescriptorPool &pool)
     : setLayout_(setLayout), pool_(pool) {
+    writes_.reserve(5);
 }
 
 VklDescriptorWriter &VklDescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo *bufferInfo) {

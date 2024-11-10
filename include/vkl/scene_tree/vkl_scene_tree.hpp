@@ -354,6 +354,7 @@ struct VklSceneTree {
 
     explicit VklSceneTree(VklDevice &device) : device_(device) {
         root = std::make_unique<SceneTree::InternalNode>();
+        spdlog::info("Scene Tree Created");
     }
 
     template <SupportedGeometryType GeometryType> void addGeometryNode(GeometryType &&Geometry) {
@@ -411,6 +412,8 @@ struct VklSceneTree {
     }
 
     ~VklSceneTree() {
+        spdlog::info("Scene Tree Destructed");
+
         for (auto &mat : materials) {
             for (auto tex : mat.textures) {
                 delete tex;

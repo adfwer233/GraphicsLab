@@ -29,10 +29,10 @@ set(SRC_FILE core/vkl_window.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui_widgets.cpp
         ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
         ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
-        ${imgui_node_editor_SOURCE_DIR}/crude_json.cpp
-        ${imgui_node_editor_SOURCE_DIR}/imgui_canvas.cpp
-        ${imgui_node_editor_SOURCE_DIR}/imgui_node_editor.cpp
-        ${imgui_node_editor_SOURCE_DIR}/imgui_node_editor_api.cpp
+#        ${imgui_node_editor_SOURCE_DIR}/crude_json.cpp
+#        ${imgui_node_editor_SOURCE_DIR}/imgui_canvas.cpp
+#        ${imgui_node_editor_SOURCE_DIR}/imgui_node_editor.cpp
+#        ${imgui_node_editor_SOURCE_DIR}/imgui_node_editor_api.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
