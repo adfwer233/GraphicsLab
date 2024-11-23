@@ -155,12 +155,14 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
 
     int poolSizeValue = 2000;
 
-    if constexpr (HasPoolSize<PipelineModifierType>) poolSizeValue = PipelineModifierType::poolSize;
+    if constexpr (HasPoolSize<PipelineModifierType>)
+        poolSizeValue = PipelineModifierType::poolSize;
 
-    descriptorPool = VklDescriptorPool::Builder(device_)
-                         .setMaxSets(VklSwapChain::MAX_FRAMES_IN_FLIGHT * poolSizeValue)
-                         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VklSwapChain::MAX_FRAMES_IN_FLIGHT * poolSizeValue)
-                         .build();
+    descriptorPool =
+        VklDescriptorPool::Builder(device_)
+            .setMaxSets(VklSwapChain::MAX_FRAMES_IN_FLIGHT * poolSizeValue)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VklSwapChain::MAX_FRAMES_IN_FLIGHT * poolSizeValue)
+            .build();
 
     createPipelineLayout();
     createPipeline(renderPass, shaderInfos);
