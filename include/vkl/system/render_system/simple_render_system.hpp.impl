@@ -7,6 +7,11 @@
 #include "spirv_cross.hpp"
 #include "spirv_glsl.hpp"
 
+template <typename T>
+concept HasPoolSize = requires {
+    { T::poolSize } -> std::convertible_to<int>;
+};
+
 template <uint32_t Subpass, VklPushConstantInfoListConcept PushConstantInfoList,
           VklPipelineModifierType PipelineModifierType>
 SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleRenderSystem(
@@ -148,9 +153,13 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
 
     descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
+    int poolSizeValue = 2000;
+
+    if constexpr (HasPoolSize<PipelineModifierType>) poolSizeValue = PipelineModifierType::poolSize;
+
     descriptorPool = VklDescriptorPool::Builder(device_)
-                         .setMaxSets(VklSwapChain::MAX_FRAMES_IN_FLIGHT * 2000)
-                         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VklSwapChain::MAX_FRAMES_IN_FLIGHT * 2000)
+                         .setMaxSets(VklSwapChain::MAX_FRAMES_IN_FLIGHT * poolSizeValue)
+                         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VklSwapChain::MAX_FRAMES_IN_FLIGHT * poolSizeValue)
                          .build();
 
     createPipelineLayout();
