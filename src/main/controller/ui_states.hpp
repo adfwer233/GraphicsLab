@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <utility>
 
-#include "language/reflection/reflectors.hpp"
 #include "../project/project_manager.hpp"
+#include "language/reflection/reflectors.hpp"
 #include "pybind11/embed.h"
 
 struct UIState : Reflectable {

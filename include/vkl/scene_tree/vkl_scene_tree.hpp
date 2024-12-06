@@ -30,9 +30,8 @@ using GeometryTypes = MetaProgramming::TypeList<Mesh3D, Wire3D, BezierCurve2D, T
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>
-concept SupportedGeometryType = MetaProgramming::TypeListFunctions::IsAnyOf<GeometryTypes, T>::value || requires {
-    typename T::SceneTreeGeometryTypeTrait;
-};
+concept SupportedGeometryType = MetaProgramming::TypeListFunctions::IsAnyOf<GeometryTypes, T>::value ||
+                                requires { typename T::SceneTreeGeometryTypeTrait; };
 
 template <typename T>
 concept SupportedLightTypes = MetaProgramming::TypeListFunctions::IsAnyOf<LightTypes, T>::value;
