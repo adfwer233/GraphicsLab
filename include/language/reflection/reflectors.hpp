@@ -7,6 +7,7 @@
 #include <optional>
 #include <sstream>
 #include <type_traits>
+#include <typeinfo>
 
 #include "language/meta_programming/type_list.hpp"
 #include "language/meta_programming/type_traits/is_function.hpp"
@@ -186,7 +187,7 @@ template <typename T> struct DispatchedType : public DispatchedTypeBase {
 
             // T is map of two serializable
             if constexpr (is_map_v<T>) {
-                if constexpr (Serializable<T::key_type> && Serializable<T::mapped_type>) {
+                if constexpr (Serializable<typename T::key_type> && Serializable<typename T::mapped_type>) {
                     return serialize_map();
                 } else {
                     throw std::runtime_error("value or key of std::map is not serializable");
@@ -326,7 +327,7 @@ struct Reflection {
 };
 
 struct TypeDispatcher {
-    DispatchedTypeBase *dispath(void *ptr, type_info typeInfo) {
+    DispatchedTypeBase *dispath(void *ptr, std::type_info typeInfo) {
         /**
          * if the type is builtin type in SerializableTypes
          */
@@ -346,7 +347,7 @@ struct TypeDispatcher {
 
   private:
     template <typename TargetType, typename... RemainingTypes>
-    DispatchedTypeBase *tryRecoverType(void *ptr, type_info &typeInfo,
+    DispatchedTypeBase *tryRecoverType(void *ptr, std::type_info &typeInfo,
                                        MetaProgramming::TypeList<TargetType, RemainingTypes...>) {
         // Attempt to compare the type_info
         if (typeInfo == typeid(TargetType)) {
@@ -359,13 +360,13 @@ struct TypeDispatcher {
     }
 
     // Base case: when the type list is empty, return nullptr
-    DispatchedTypeBase *tryRecoverType(void * /*ptr*/, type_info & /*typeInfo*/, MetaProgramming::TypeList<>) {
+    DispatchedTypeBase *tryRecoverType(void * /*ptr*/, std::type_info & /*typeInfo*/, MetaProgramming::TypeList<>) {
         return nullptr; // No more types to check
     }
 
     // Helper function to initiate the type list traversal
     template <typename... Types>
-    DispatchedTypeBase *tryDispatch(void *ptr, type_info &typeInfo, MetaProgramming::TypeList<Types...> typeList) {
+    DispatchedTypeBase *tryDispatch(void *ptr, std::type_info &typeInfo, MetaProgramming::TypeList<Types...> typeList) {
         return tryRecoverType(ptr, typeInfo, typeList);
     }
 };

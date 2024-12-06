@@ -5,6 +5,17 @@ Its goal is offering a range of features and tools to explore and create with gr
 
 ### Build and Install
 
+#### Dependency
+
+To use GraphicsLab on ubuntu, you should install these dependencies required by the GLFW.
+```bash
+sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
+```
+Other dependencies are managed by the cmake Fetch-Content.
+
+The rendering backend is based on vulkan, hence you should also install the vulkan SDK and set `VK_SDK_PATH` correctly.
+
+#### Build
 GraphicsLab use cmake as build system and the preferred toolchain is `clang`+`ninja`.
 You can build GraphicsLab and install it with following commands
 

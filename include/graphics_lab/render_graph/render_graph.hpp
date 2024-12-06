@@ -107,7 +107,7 @@ struct RenderGraph {
 
     DirectedGraph<NodeAttachment, EdgeAttachment> graph_;
 
-    friend RenderGraphCompiler;
+    friend class RenderGraphCompiler;
 };
 
 struct HyperRenderGraph {

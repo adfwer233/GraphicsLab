@@ -43,9 +43,11 @@ set(SPDLOG_INSTALL ON)
 set(JSON_Install ON)
 set(LIBIGL_INSTALL ON)
 set(PYBIND11_INSTALL ON)
+set(GLM_BUILD_INSTALL ON)
+set(Random_BuildTests OFF)
 
-set(XTL_CMAKECONFIG_INSTALL_DIR ${GRAPHICS_LAB_INSTALL})
-set(XTENSOR_CMAKECONFIG_INSTALL_DIR ${GRAPHICS_LAB_INSTALL})
+set(XTL_CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+set(XTENSOR_CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 
 include(fetch-glfw)
 include(fetch-glm)
@@ -93,19 +95,7 @@ message(STATUS ${gtest_SOURCE_DIR})
 message(STATUS ${Boost_INCLUDE_DIRS})
 message(STATUS ${boost_di_SOURCE_DIR}/include)
 
-# set vulkan SDK
-if(NOT DEFINED ENV{VULKAN_SDK})
-    message(FATAL_ERROR "VK_SDK_PATH not defined!")
-endif()
-
-set(VK_SDK_PATH $ENV{VULKAN_SDK})
-set(VK_SDK_INCLUDE ${VK_SDK_PATH}/Include)
-set(VK_SDK_LIB ${VK_SDK_PATH}/Lib/vulkan-1.lib)
-
-if (UNIX)
-    message(STATUS "Set Linux Vulkan SDK Path")
-    set(VK_SDK_LIB ${VK_SDK_PATH}/lib/libvulkan.so.1)
-endif ()
+find_package(Vulkan REQUIRED)
 
 set(SPIRV_CROSS_SHARED ON)
 
@@ -125,9 +115,9 @@ find_package(OpenMP)
 
 if(OpenCV_FOUND)
     message(STATUS "found opencv")
-    target_link_libraries(LAB_vkl glfw glm spdlog ${VK_SDK_LIB} assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX ${OpenCV_LIBS})
+    target_link_libraries(LAB_vkl glfw glm spdlog Vulkan::Vulkan assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX ${OpenCV_LIBS})
 else()
-    target_link_libraries(LAB_vkl glfw glm spdlog ${VK_SDK_LIB} assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX)
+    target_link_libraries(LAB_vkl glfw glm spdlog Vulkan::Vulkan assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX)
 endif()
 
 if(MSVC)
@@ -148,6 +138,8 @@ add_library(GraphicsLabLib INTERFACE)
 target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)
 
 if (GRAPHICS_LAB_INSTALL)
+    set(GLM_BUILD_INSTALL ON)
+
     target_include_directories(GraphicsLabLib INTERFACE
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>

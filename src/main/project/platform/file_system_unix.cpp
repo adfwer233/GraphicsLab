@@ -1,4 +1,4 @@
-#include "file_system.hpp"
+#include "project/file_system.hpp"
 
 #include <cstdlib>
 #include <string>
@@ -14,7 +14,6 @@ std::string FileSystem::chooseDirectory() {
 
     // Remove newline character from the path
     std::string dir = path;
-    dir.erase(std::remove(dir.begin(), dir.end(), '\n'), dir.end());
 
     return dir;
 }
