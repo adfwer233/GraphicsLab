@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <string>
 
+#include "spdlog/spdlog.h"
+
 std::string FileSystem::chooseDirectory() {
     char path[1024];
     FILE *pipe = popen("zenity --file-selection --directory", "r");
@@ -14,6 +16,7 @@ std::string FileSystem::chooseDirectory() {
 
     // Remove newline character from the path
     std::string dir = path;
+    std::erase(dir, '\n');
 
     return dir;
 }

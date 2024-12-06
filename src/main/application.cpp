@@ -7,7 +7,8 @@
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_passes/simple_pass.hpp"
-#include "graphics_lab/render_passes/swap_chain_pass.hpp"
+
+#include "vkl/core/vkl_window.hpp"
 
 #include "render/internal_render_pass/3d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/internal_imgui_pass.hpp"
@@ -78,6 +79,7 @@ void ApplicationExperimental::run() {
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
 
+        glfwSetWindowTitle(window, std::format("Graphics Lab {:.2f} FPS", 1 / deltaTime).c_str());
         controller.processInput(appContext.window_.getGLFWwindow(), deltaTime);
 
         ImGui_ImplGlfw_NewFrame();

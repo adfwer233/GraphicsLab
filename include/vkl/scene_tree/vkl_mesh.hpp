@@ -143,9 +143,11 @@ void VklMesh<VertexType, IndexType, BoxType>::allocDescriptorSets(VklDescriptorS
         for (int i = 0; i < VklSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
             writer.emplace_back(setLayout, pool);
         }
+        std::vector<VkDescriptorBufferInfo> bufferInfos{};
 
-        std::vector<VkDescriptorBufferInfo> bufferInfos;
         if (not key.uniformDescriptors.empty()) {
+            bufferInfos.reserve(uniformBuffers[key].size() * 5);
+
             for (int i = 0; i < uniformBuffers[key].size(); i++) {
                 uniformBuffers[key][i] = std::move(std::make_unique<VklBuffer>(
                     device_, key.uniformDescriptors.front().size, 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
