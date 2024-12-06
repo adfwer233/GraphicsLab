@@ -14,8 +14,9 @@ set(SRC_FILE
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
+set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(${PROJECT_NAME} glm autodiff eigen LAB_vkl)
+target_link_libraries(${PROJECT_NAME} glm autodiff eigen)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC

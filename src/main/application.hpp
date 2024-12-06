@@ -1,28 +1,21 @@
 #pragma once
 
-#include "vkl/core/vkl_device.hpp"
-#include "vkl/core/vkl_offscreen_renderer.hpp"
-#include "vkl/core/vkl_renderer.hpp"
-#include "vkl/core/vkl_window.hpp"
+#include "graphics_lab/graphics_lab_context.hpp"
+#include "graphics_lab/render_graph/render_context.hpp"
 
-#ifndef DATA_DIR
-#define DATA_DIR "./shader/"
-#endif
-
-class Application {
+struct ApplicationExperimental {
   private:
     static constexpr int WIDTH = 1024 + 768;
     static constexpr int HEIGHT = 1280;
 
-    VklWindow window_{WIDTH, HEIGHT};
-    VklDevice device_;
+    GraphicsLab::GraphicsLabInternalContext appContext;
 
   public:
-    Application() : device_(window_) {};
-    ~Application();
+    ApplicationExperimental() : appContext(WIDTH, HEIGHT) {};
+    ~ApplicationExperimental();
 
-    Application(const Application &) = delete;
-    Application &operator=(const Application &) = delete;
+    ApplicationExperimental(const ApplicationExperimental &) = delete;
+    ApplicationExperimental &operator=(const ApplicationExperimental &) = delete;
 
     void run();
 };

@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SRC_FILE main.cpp
         application.cpp
-        application_experimental.cpp
         project/project_manager.cpp
         project/file_system.cpp
 )

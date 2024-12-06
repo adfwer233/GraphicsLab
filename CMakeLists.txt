@@ -113,6 +113,8 @@ add_subdirectory(test)
 
 find_package(OpenMP)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(OpenCV_FOUND)
     message(STATUS "found opencv")
     target_link_libraries(LAB_vkl glfw glm spdlog Vulkan::Vulkan assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX ${OpenCV_LIBS})

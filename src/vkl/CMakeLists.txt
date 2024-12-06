@@ -37,6 +37,8 @@ set(SRC_FILE core/vkl_window.cpp
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 add_definitions(-DSHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader")
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
 
