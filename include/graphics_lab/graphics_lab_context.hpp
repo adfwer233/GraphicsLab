@@ -22,12 +22,12 @@ struct GraphicsLabInternalContext {
     /**
      * @brief mutex lock protecting render graph (i.e. the descriptor)
      */
-    std::mutex renderGraphMutex;
+    std::recursive_mutex renderGraphMutex;
 
     /**
      * @brief: mutex lock protecting render graph instance;
      */
-    std::mutex renderGraphInstanceMutex;
+    std::recursive_mutex renderGraphInstanceMutex;
 
     GraphicsLabInternalContext(uint32_t width, uint32_t height)
         : window_(width, height), device_(window_), renderContext(device_, window_, {width, height}) {

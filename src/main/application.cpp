@@ -67,8 +67,6 @@ void ApplicationExperimental::run() {
 #endif
 
     while (not glfwWindowShouldClose(window)) {
-        std::scoped_lock instanceLock(appContext.renderGraphInstanceMutex);
-
         if (appContext.newRenderGraphInstance != nullptr) {
             appContext.renderGraphInstance = std::move(appContext.newRenderGraphInstance);
         }
@@ -87,7 +85,10 @@ void ApplicationExperimental::run() {
         ImGui::NewFrame();
 
         appContext.renderContext.begin_frame();
-        appContext.renderGraphInstance->execute(&appContext.renderContext);
+        {
+            std::scoped_lock instanceLock(appContext.renderGraphInstanceMutex);
+            appContext.renderGraphInstance->execute(&appContext.renderContext);
+        }
         auto render_result = appContext.renderContext.end_frame();
 
         if (render_result == VK_ERROR_OUT_OF_DATE_KHR || render_result == VK_SUBOPTIMAL_KHR ||
