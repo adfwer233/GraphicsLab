@@ -17,6 +17,6 @@ enable_testing()
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
-target_link_libraries(${PROJECT_NAME} glm glfw autodiff LAB_vkl LAB_geometry GTest::gtest_main)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw autodiff LAB_vkl LAB_geometry GTest::gtest_main)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

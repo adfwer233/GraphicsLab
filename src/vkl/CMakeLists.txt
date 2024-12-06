@@ -59,10 +59,11 @@ target_include_directories(${PROJECT_NAME}
 
 if(OpenCV_FOUND)
     message(STATUS "found opencv")
-    target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog Vulkan::Vulkan assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry ${OpenCV_LIBS})
+    target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry ${OpenCV_LIBS})
 else()
-    target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog Vulkan::Vulkan assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry)
+    target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry)
 endif()
+target_link_libraries(LAB_vkl PUBLIC Vulkan::Vulkan)
 
 ############## Build SHADERS #######################
 

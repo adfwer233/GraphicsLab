@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "spirv_cross/spirv_cross.hpp"
+#include "spirv_cross.hpp"
 #include "vkl_device.hpp"
 
 /**
