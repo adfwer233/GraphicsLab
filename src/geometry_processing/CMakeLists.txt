@@ -12,4 +12,4 @@ add_library(${PROJECT_NAME} ${SRC_FILE})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glm glfw LAB_vkl igl_copyleft::core eigen)
+target_link_libraries(${PROJECT_NAME} glm glfw assimp LAB_vkl igl_copyleft::core eigen)

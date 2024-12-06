@@ -35,7 +35,7 @@ set(SRC_FILE core/vkl_window.cpp
 #        ${imgui_node_editor_SOURCE_DIR}/imgui_node_editor_api.cpp
 )
 
-add_library(${PROJECT_NAME} ${SRC_FILE})
+add_library(${PROJECT_NAME} SHARED ${SRC_FILE})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -57,7 +57,12 @@ target_include_directories(${PROJECT_NAME}
             $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} glm glfw LAB_geometry)
+if(OpenCV_FOUND)
+    message(STATUS "found opencv")
+    target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog Vulkan::Vulkan assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry ${OpenCV_LIBS})
+else()
+    target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog Vulkan::Vulkan assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry)
+endif()
 
 ############## Build SHADERS #######################
 

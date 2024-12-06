@@ -46,6 +46,14 @@ set(PYBIND11_INSTALL ON)
 set(GLM_BUILD_INSTALL ON)
 set(Random_BuildTests OFF)
 
+set(SPDLOG_BUILD_SHARED ON)
+set(SPIRV_CROSS_FORCE_PIC ON)
+set(ASSIMP_BUILD_ZLIB ON)
+
+## assimp importer, we only use obj format
+#set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+#set(ASSIMP_BUILD_OBJ_IMPORTER ON)
+
 set(XTL_CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(XTENSOR_CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 
@@ -96,31 +104,24 @@ message(STATUS ${Boost_INCLUDE_DIRS})
 message(STATUS ${boost_di_SOURCE_DIR}/include)
 
 find_package(Vulkan REQUIRED)
+find_package(OpenMP REQUIRED)
 
 set(SPIRV_CROSS_SHARED ON)
 
 add_subdirectory(src/vkl)
-add_subdirectory(src/ray_tracer)
-add_subdirectory(src/demo)
+#add_subdirectory(src/ray_tracer)
+#add_subdirectory(src/demo)
 #add_subdirectory(src/particle)
 add_subdirectory(src/geometry_processing)
-add_subdirectory(src/bezier_curve)
+#add_subdirectory(src/bezier_curve)
 add_subdirectory(src/geometry)
 add_subdirectory(src/simulation)
-add_subdirectory(src/rendergraph_demo)
+#add_subdirectory(src/rendergraph_demo)
+
 add_subdirectory(src/main)
 add_subdirectory(test)
 
-find_package(OpenMP)
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if(OpenCV_FOUND)
-    message(STATUS "found opencv")
-    target_link_libraries(LAB_vkl glfw glm spdlog Vulkan::Vulkan assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX ${OpenCV_LIBS})
-else()
-    target_link_libraries(LAB_vkl glfw glm spdlog Vulkan::Vulkan assimp  spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX)
-endif()
 
 if(MSVC)
     add_compile_options("/source-charset:utf-8")
