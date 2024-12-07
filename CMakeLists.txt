@@ -124,6 +124,7 @@ add_subdirectory(test)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
     add_compile_options("/source-charset:utf-8")
 endif()
 
