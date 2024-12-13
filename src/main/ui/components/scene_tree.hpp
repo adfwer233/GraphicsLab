@@ -3,7 +3,7 @@
 #include "component.hpp"
 
 #include "language/reflection/reflectors.hpp"
-
+#include "../../project/file_system.hpp"
 #include "project/file_system.hpp"
 #include "project/project_manager.hpp"
 
@@ -18,6 +18,17 @@ class SceneTreeComponent : public UIComponent {
     void render() final {
         ImGui::Begin("Scene Tree");
         {
+            if (ImGui::Button("Load Obj File")) {
+                std::string file = FileSystem::chooseFile();
+                spdlog::info("Choose Obj File: {}", file);
+                auto result = std::async(std::launch::async, [&]() {
+                    std::scoped_lock scoped_lock(sceneTree_.sceneTreeMutex);
+                    sceneTree_.importFromPath(file);
+                    sceneTree_.addCameraNode("Camera 1", Camera({0, 0, 10}, {0, 1, 0}));
+                    spdlog::info("Load Obj File: {}", file);
+                });
+                vkDeviceWaitIdle(sceneTree_.device_.device());
+            }
             RenderTreeNode(sceneTree_.root.get());
         }
         ImGui::End();

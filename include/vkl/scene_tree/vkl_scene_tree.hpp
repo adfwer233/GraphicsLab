@@ -205,7 +205,7 @@ class AssimpImporter {
     std::unique_ptr<TreeNode> importScene() {
         Assimp::Importer importer;
         auto scene =
-            importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+            importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_GenNormals);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
@@ -320,6 +320,8 @@ class AssimpImporter {
                 vertex.uv = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
             mesh_converted.vertices.push_back(vertex);
         }
+
+        spdlog::info("normal {}", mesh->HasNormals());
 
         for (auto i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];

@@ -76,6 +76,7 @@ struct InternalSceneRenderPass : public RenderPass {
         GlobalUbo ubo{};
 
         if (sceneTree_.active_camera == nullptr) {
+            spdlog::error("Scene camera is null");
             return;
         }
 
@@ -89,89 +90,92 @@ struct InternalSceneRenderPass : public RenderPass {
         auto colorKey = color_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
-        auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
-        for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
+        try {
+            auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
+            for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
 
-            if (not mesh3d_nodes->visible)
-                continue;
+                if (not mesh3d_nodes->visible)
+                    continue;
 
-            ubo.model = trans;
+                ubo.model = trans;
 
-            auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
+                auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
 
-            if (mesh3d_nodes->updated) {
-                node_mesh->recreateMeshes();
-                mesh3d_nodes->updated = false;
-            }
+                if (mesh3d_nodes->updated) {
+                    node_mesh->recreateMeshes();
+                    mesh3d_nodes->updated = false;
+                }
 
-            if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
-                node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
-                node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
-            }
+                if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
+                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
+                }
 
-            if (node_mesh->mesh->uniformBuffers.contains(colorKey)) {
-                node_mesh->mesh->uniformBuffers[colorKey][frame_index]->writeToBuffer(&ubo);
-                node_mesh->mesh->uniformBuffers[colorKey][frame_index]->flush();
-            }
+                if (node_mesh->mesh->uniformBuffers.contains(colorKey)) {
+                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->flush();
+                }
 
-            if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
-                node_mesh->mesh->uniformBuffers[rawKey][frame_index]->writeToBuffer(&ubo);
-                node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
-            }
+                if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
+                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
+                }
 
-            FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                .frameIndex = static_cast<int>(frame_index) % 2,
-                .frameTime = 0,
-                .commandBuffer = commandBuffer,
-                .camera = sceneTree_.active_camera->camera,
-                .model = *node_mesh->mesh,
-            };
+                FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                    .frameIndex = static_cast<int>(frame_index) % 2,
+                    .frameTime = 0,
+                    .commandBuffer = commandBuffer,
+                    .camera = sceneTree_.active_camera->camera,
+                    .model = *node_mesh->mesh,
+                };
 
-            if (uiState_.renderMode == UIState::RenderMode::raw) {
-                raw_render_system->renderObject(frameInfo);
-            } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
-                wireframe_render_system->renderObject(frameInfo);
-            } else if (uiState_.renderMode == UIState::RenderMode::material) {
-                if (node_mesh->mesh->textures_.size() >=
-                    simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
-                        .size()) {
-                    simple_render_system->renderObject(frameInfo);
-                } else {
-                    color_render_system->renderObject(frameInfo);
+                if (uiState_.renderMode == UIState::RenderMode::raw) {
+                    raw_render_system->renderObject(frameInfo);
+                } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
+                    wireframe_render_system->renderObject(frameInfo);
+                } else if (uiState_.renderMode == UIState::RenderMode::material) {
+                    if (node_mesh->mesh->textures_.size() >=
+                        simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
+                            .size()) {
+                        simple_render_system->renderObject(frameInfo);
+                            } else {
+                                color_render_system->renderObject(frameInfo);
+                            }
                 }
             }
-        }
 
-        // draw box for the picked object
+            // draw box for the picked object
 
-        if (sceneTree_.activeNode != nullptr) {
-            auto line_render_system_key = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
-            auto wire3d_buffer = SceneTree::VklNodeMeshBuffer<Wire3D>::instance();
+            if (sceneTree_.activeNode != nullptr) {
+                auto line_render_system_key = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+                auto wire3d_buffer = SceneTree::VklNodeMeshBuffer<Wire3D>::instance();
 
-            auto wire_mesh = wire3d_buffer->getGeometryModel(device_, &boxNode);
+                auto wire_mesh = wire3d_buffer->getGeometryModel(device_, &boxNode);
 
-            if (not uiState_.boxMeshRecreated) {
-                boxNode.data = Box3DConstructor::create(uiState_.box.min_pos, uiState_.box.max_pos);
-                wire_mesh->recreateMeshes();
-                uiState_.boxMeshRecreated = true;
+                if (not uiState_.boxMeshRecreated) {
+                    boxNode.data = Box3DConstructor::create(uiState_.box.min_pos, uiState_.box.max_pos);
+                    wire_mesh->recreateMeshes();
+                    uiState_.boxMeshRecreated = true;
+                }
+
+                if (wire_mesh->mesh->uniformBuffers.contains(line_render_system_key)) {
+                    wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->writeToBuffer(&ubo);
+                    wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->flush();
+                }
+
+                FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
+                    .frameIndex = static_cast<int>(frame_index) % 2,
+                    .frameTime = 0,
+                    .commandBuffer = commandBuffer,
+                    .camera = sceneTree_.active_camera->camera,
+                    .model = *wire_mesh->mesh,
+                };
+
+                line_render_system->renderObject(frameInfo);
             }
-
-            if (wire_mesh->mesh->uniformBuffers.contains(line_render_system_key)) {
-                wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->writeToBuffer(&ubo);
-                wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->flush();
-            }
-
-            FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
-                .frameIndex = static_cast<int>(frame_index) % 2,
-                .frameTime = 0,
-                .commandBuffer = commandBuffer,
-                .camera = sceneTree_.active_camera->camera,
-                .model = *wire_mesh->mesh,
-            };
-
-            line_render_system->renderObject(frameInfo);
+        } catch (std::exception &e) {
+            spdlog::error("{}", e.what());
         }
-
         end_render_pass(commandBuffer);
     }
 

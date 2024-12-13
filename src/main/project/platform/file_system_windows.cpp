@@ -1,4 +1,4 @@
-#include "file_system.hpp"
+#include "project/file_system.hpp"
 
 #include <ShlObj.h>
 #include <windows.h>
@@ -17,4 +17,8 @@ std::string FileSystem::chooseDirectory() {
         CoTaskMemFree(pidl); // Free memory allocated by the dialog
     }
     return std::string();
+}
+
+std::string FileSystem::chooseFile() {
+    return "";
 }
