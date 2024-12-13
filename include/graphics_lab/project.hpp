@@ -3,6 +3,7 @@
 #include "language/reflection/reflectors.hpp"
 
 #include "graphics_lab_context.hpp"
+#include "graphics_lab_controller.hpp"
 
 #include "pybind11/pybind11.h"
 
@@ -21,6 +22,10 @@ class IGraphicsLabProject : public Reflectable {
     virtual std::string name() = 0;
     virtual void afterLoad() = 0;
     virtual void bindPython(pybind11::module &m) {
+    }
+
+    virtual GraphicsLab::IGraphicsLabProjectController* getController() {
+        return new GraphicsLab::EmptyGraphicsLabController();
     }
 
     virtual ReflectDataType reflect() {

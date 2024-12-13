@@ -96,6 +96,7 @@ class ProjectWidgetComponent : public UIComponent {
                                     uiState_.project->updateContext(GraphicsLabContext(
                                         &sceneTree_.device_, &sceneTree_, &LogManager::getInstance(), &appContext_));
                                     uiState_.project->afterLoad();
+                                    ControllerCallbackHandler::project_controller = uiState_.project->getController();
                                 };
 
                                 if (!projectFunctionResult.valid()) {

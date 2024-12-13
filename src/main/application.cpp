@@ -41,10 +41,13 @@ void ApplicationExperimental::run() {
                                           di::bind<Controller>().to(controller),
                                           di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
 
-    Controller::controller = &controller;
-    glfwSetCursorPosCallback(window, Controller::mouse_callback);
-    glfwSetScrollCallback(window, Controller::scroll_callback);
-    glfwSetMouseButtonCallback(window, Controller::mouse_button_callback);
+    ControllerCallbackHandler::internal_controller = &controller;
+
+    glfwSetWindowUserPointer(window, &controller);
+
+    glfwSetCursorPosCallback(window, ControllerCallbackHandler::mouse_callback);
+    glfwSetScrollCallback(window, ControllerCallbackHandler::scroll_callback);
+    glfwSetMouseButtonCallback(window, ControllerCallbackHandler::mouse_button_callback);
 
     UIManager uiManager(scene_tree, controller, state, appContext);
 
@@ -78,7 +81,7 @@ void ApplicationExperimental::run() {
         lastFrame = currentTime;
 
         glfwSetWindowTitle(window, std::format("Graphics Lab {:.2f} FPS", 1 / deltaTime).c_str());
-        controller.processInput(appContext.window_.getGLFWwindow(), deltaTime);
+        controller.process_keyboard_input(appContext.window_.getGLFWwindow(), deltaTime);
 
         ImGui_ImplGlfw_NewFrame();
         ImGui_ImplVulkan_NewFrame();
@@ -95,6 +98,8 @@ void ApplicationExperimental::run() {
             appContext.window_.wasWindowResized()) {
             appContext.window_.resetWindowResizedFlag();
             appContext.renderContext.recreate_swap_chain();
+            vkDeviceWaitIdle(appContext.device_.device());
+            glfwSetWindowUserPointer(window, &controller);
         }
     }
 

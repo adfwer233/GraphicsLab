@@ -10,8 +10,40 @@
 #include "graphics_lab/utils/render_doc.hpp"
 #endif
 
-struct Controller {
-    static inline Controller *controller = nullptr;
+struct ControllerCallbackHandler {
+    static inline GraphicsLab::IGraphicsLabProjectController *internal_controller = nullptr;
+    static inline GraphicsLab::IGraphicsLabProjectController *project_controller = nullptr;
+
+    static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
+        if (internal_controller != nullptr) {
+            internal_controller->scroll_callback(window, x_offset, y_offset);
+        }
+
+        if (project_controller != nullptr) {
+            project_controller->scroll_callback(window, x_offset, y_offset);
+        }
+    }
+
+    static void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
+        if (internal_controller != nullptr) {
+            internal_controller->mouse_button_callback(window, button, state, mod);
+        }
+        if (project_controller != nullptr) {
+            project_controller->mouse_button_callback(window, button, state, mod);
+        }
+    }
+
+    static void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+        if (internal_controller != nullptr) {
+            internal_controller->mouse_callback(window, xposIn, yposIn);
+        }
+        if (project_controller != nullptr) {
+            project_controller->mouse_callback(window, xposIn, yposIn);
+        }
+    }
+};
+
+struct Controller: GraphicsLab::IGraphicsLabProjectController {
 
     explicit Controller(UIState &uiState, SceneTree::VklSceneTree &sceneTree)
         : uiState_(uiState), sceneTree_(sceneTree) {
@@ -21,7 +53,7 @@ struct Controller {
         spdlog::critical("controller destructed");
     }
 
-    void processInput(GLFWwindow *window, float deltaTime) {
+    void process_keyboard_input(GLFWwindow *window, float deltaTime) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
@@ -90,25 +122,25 @@ struct Controller {
 #endif
     }
 
-    static void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
-        if (not controller->uiState_.isMouseInRegion)
+    void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) override {
+        if (not uiState_.isMouseInRegion)
             return;
 
         // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
-        if (controller->sceneTree_.get().active_camera) {
-            controller->sceneTree_.get().active_camera->camera.process_mouse_scroll(y_offset);
+        if (sceneTree_.get().active_camera) {
+            sceneTree_.get().active_camera->camera.process_mouse_scroll(y_offset);
         }
     }
 
-    static void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
-        if (not controller->uiState_.isMouseInRegion) {
+    void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
+        if (not uiState_.isMouseInRegion) {
             return;
         }
 
         // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
-        auto &uiState = controller->uiState_;
+        auto &uiState = uiState_;
         if (button == GLFW_MOUSE_BUTTON_MIDDLE and state == GLFW_PRESS) {
-            controller->uiState_.isMouseMidPressing = true;
+            uiState_.isMouseMidPressing = true;
         }
 
         if (button == GLFW_MOUSE_BUTTON_MIDDLE and state == GLFW_RELEASE) {
@@ -117,7 +149,7 @@ struct Controller {
         }
 
         if (button == GLFW_MOUSE_BUTTON_LEFT and state == GLFW_PRESS) {
-            controller->rayPicking(uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
+            rayPicking(uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
                                    uiState.scope_max.x - uiState.scope_min.x,
                                    uiState.scope_max.y - uiState.scope_min.y);
 
@@ -130,9 +162,9 @@ struct Controller {
         }
     }
 
-    static void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+    void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
         // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
-        auto &uiState = controller->uiState_;
+        auto &uiState = uiState_;
 
         uiState.mouseXPos = static_cast<float>(xposIn);
         uiState.mouseYPos = static_cast<float>(yposIn);
@@ -160,31 +192,30 @@ struct Controller {
         uiState.lastMouseYPos = uiState.mouseYPos;
 
         if (uiState.isMouseLeftPressing) {
-            if (controller->sceneTree_.get().active_camera) {
-                auto &camera = controller->sceneTree_.get().active_camera->camera;
+            if (sceneTree_.get().active_camera) {
+                auto &camera = sceneTree_.get().active_camera->camera;
 
                 // translation
                 if (uiState.isPressingG) {
-                    if (controller->sceneTree_.get().active_camera) {
-                        auto camera = controller->sceneTree_.get().active_camera->camera;
+                    if (sceneTree_.get().active_camera) {
+                        auto camera = sceneTree_.get().active_camera->camera;
 
                         auto r = camera.camera_right_axis;
                         auto up = camera.camera_up_axis;
-                        if (controller->sceneTree_.get().activeNode) {
+                        if (sceneTree_.get().activeNode) {
                             auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(
-                                controller->sceneTree_.get().activeNode);
+                                sceneTree_.get().activeNode);
 
                             geoNode->transformation.translation += r * x_offset * 0.1f - up * y_offset * 0.1f;
                         }
                     }
                 } else if (uiState.isPressingS) {
-                    if (controller->sceneTree_.get().active_camera) {
-                        auto &camera = controller->sceneTree_.get().active_camera->camera;
+                    if (sceneTree_.get().active_camera) {
+                        auto &camera = sceneTree_.get().active_camera->camera;
                         float scaling_factor = 1.0f + 0.1f * y_offset;
 
-                        if (controller->sceneTree_.get().activeNode) {
-                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(
-                                controller->sceneTree_.get().activeNode);
+                        if (sceneTree_.get().activeNode) {
+                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(sceneTree_.get().activeNode);
 
                             geoNode->transformation.scaling *= glm::vec3(1.0f) * scaling_factor;
                         }
