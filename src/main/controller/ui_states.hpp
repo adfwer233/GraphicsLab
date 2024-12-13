@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <utility>
 
-#include "graphics_lab/graphics_lab_controller.hpp"
 #include "../project/project_manager.hpp"
+#include "graphics_lab/graphics_lab_controller.hpp"
 #include "language/reflection/reflectors.hpp"
 #include "pybind11/embed.h"
 

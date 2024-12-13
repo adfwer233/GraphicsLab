@@ -204,8 +204,8 @@ class AssimpImporter {
 
     std::unique_ptr<TreeNode> importScene() {
         Assimp::Importer importer;
-        auto scene =
-            importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_GenNormals);
+        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
+                                                 aiProcess_JoinIdenticalVertices | aiProcess_GenNormals);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));

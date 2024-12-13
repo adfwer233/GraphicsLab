@@ -43,7 +43,7 @@ struct ControllerCallbackHandler {
     }
 };
 
-struct Controller: GraphicsLab::IGraphicsLabProjectController {
+struct Controller : GraphicsLab::IGraphicsLabProjectController {
 
     explicit Controller(UIState &uiState, SceneTree::VklSceneTree &sceneTree)
         : uiState_(uiState), sceneTree_(sceneTree) {
@@ -150,8 +150,7 @@ struct Controller: GraphicsLab::IGraphicsLabProjectController {
 
         if (button == GLFW_MOUSE_BUTTON_LEFT and state == GLFW_PRESS) {
             rayPicking(uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
-                                   uiState.scope_max.x - uiState.scope_min.x,
-                                   uiState.scope_max.y - uiState.scope_min.y);
+                       uiState.scope_max.x - uiState.scope_min.x, uiState.scope_max.y - uiState.scope_min.y);
 
             uiState.isMouseLeftPressing = true;
         }
@@ -203,8 +202,7 @@ struct Controller: GraphicsLab::IGraphicsLabProjectController {
                         auto r = camera.camera_right_axis;
                         auto up = camera.camera_up_axis;
                         if (sceneTree_.get().activeNode) {
-                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(
-                                sceneTree_.get().activeNode);
+                            auto geoNode = dynamic_cast<SceneTree::GeometryNode<Mesh3D> *>(sceneTree_.get().activeNode);
 
                             geoNode->transformation.translation += r * x_offset * 0.1f - up * y_offset * 0.1f;
                         }

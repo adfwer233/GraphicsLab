@@ -138,9 +138,9 @@ struct InternalSceneRenderPass : public RenderPass {
                         simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
                             .size()) {
                         simple_render_system->renderObject(frameInfo);
-                            } else {
-                                color_render_system->renderObject(frameInfo);
-                            }
+                    } else {
+                        color_render_system->renderObject(frameInfo);
+                    }
                 }
             }
 

@@ -24,7 +24,7 @@ class IGraphicsLabProject : public Reflectable {
     virtual void bindPython(pybind11::module &m) {
     }
 
-    virtual GraphicsLab::IGraphicsLabProjectController* getController() {
+    virtual GraphicsLab::IGraphicsLabProjectController *getController() {
         return new GraphicsLab::EmptyGraphicsLabController();
     }
 
