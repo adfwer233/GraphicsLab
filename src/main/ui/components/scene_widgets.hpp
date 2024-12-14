@@ -10,7 +10,8 @@ class SceneWidgetComponent : public UIComponent {
     RenderResources &renderResources_;
 
   public:
-    SceneWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState, RenderResources &renderResources)
+    SceneWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState,
+                         RenderResources &renderResources)
         : UIComponent(context), uiState_(uiState), renderResources_(renderResources) {
     }
 
@@ -28,7 +29,6 @@ class SceneWidgetComponent : public UIComponent {
                         // todo: set frame index
                         ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), wsize);
 
-
                         auto min_pos = ImGui::GetItemRectMin();
                         auto max_pos = ImGui::GetItemRectMax();
                         // spdlog::info("{} {} {}", name, min_pos.x, max_pos.x);
@@ -37,10 +37,8 @@ class SceneWidgetComponent : public UIComponent {
                         uiState_.scope_max[name] = {max_pos.x, max_pos.y};
 
                         ImGui::EndTabItem(); // End the tab for the current image
-
                     }
                     if (ImGui::IsItemVisible()) {
-
                     }
                 }
             }

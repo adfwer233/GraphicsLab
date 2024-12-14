@@ -10,7 +10,8 @@ class ProjectRenderWidgetComponent : public UIComponent {
     RenderResources &renderResources_;
 
   public:
-    ProjectRenderWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState, RenderResources &renderResources)
+    ProjectRenderWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState,
+                                 RenderResources &renderResources)
         : UIComponent(context), uiState_(uiState), renderResources_(renderResources) {
     }
 

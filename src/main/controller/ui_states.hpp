@@ -93,11 +93,9 @@ struct UIState : Reflectable {
     std::string python_interpreter_path;
 
     ReflectDataType reflect() override {
-        return {
-            {"python_interpreter_path", TypeErasedValue(&python_interpreter_path)},
-            {"scope_min", TypeErasedValue(&scope_min)},
-            {"scope_max", TypeErasedValue(&scope_max)}
-        };
+        return {{"python_interpreter_path", TypeErasedValue(&python_interpreter_path)},
+                {"scope_min", TypeErasedValue(&scope_min)},
+                {"scope_max", TypeErasedValue(&scope_max)}};
     }
 
     UIState() = default;

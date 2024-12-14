@@ -7,13 +7,13 @@
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
 #include "component_register.hpp"
-#include "graphics_lab/graphics_lab_imgui_component.hpp"
 #include "graphics_lab/graphics_lab_context.hpp"
+#include "graphics_lab/graphics_lab_imgui_component.hpp"
 
 #include "boost/di.hpp"
 namespace di = boost::di;
 
-class UIComponent: public GraphicsLab::IGraphicsLabImguiComponent {
+class UIComponent : public GraphicsLab::IGraphicsLabImguiComponent {
   protected:
     GraphicsLab::GraphicsLabInternalContext &context_;
 
