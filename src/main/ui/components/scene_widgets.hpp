@@ -27,20 +27,24 @@ class SceneWidgetComponent : public UIComponent {
                         }
                         // todo: set frame index
                         ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), wsize);
+
+
+                        auto min_pos = ImGui::GetItemRectMin();
+                        auto max_pos = ImGui::GetItemRectMax();
+                        // spdlog::info("{} {} {}", name, min_pos.x, max_pos.x);
+
+                        uiState_.scope_min[name] = {min_pos.x, min_pos.y};
+                        uiState_.scope_max[name] = {max_pos.x, max_pos.y};
+
                         ImGui::EndTabItem(); // End the tab for the current image
+
+                    }
+                    if (ImGui::IsItemVisible()) {
+
                     }
                 }
-                ImGui::EndTabBar(); // End the tab bar
             }
-        }
-
-        if (ImGui::IsItemVisible()) {
-
-            auto min_pos = ImGui::GetItemRectMin();
-            auto max_pos = ImGui::GetItemRectMax();
-
-            uiState_.scope_min = {min_pos.x, min_pos.y};
-            uiState_.scope_max = {max_pos.x, max_pos.y};
+            ImGui::EndTabBar(); // End the tab bar
         }
 
         ImGui::End();

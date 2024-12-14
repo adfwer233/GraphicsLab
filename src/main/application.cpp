@@ -40,8 +40,6 @@ void ApplicationExperimental::run() {
     Controller controller(state, *appContext.sceneTree);
     ControllerCallbackHandler::internal_controller = &controller;
 
-    glfwSetWindowUserPointer(window, &controller);
-
     glfwSetCursorPosCallback(window, ControllerCallbackHandler::mouse_callback);
     glfwSetScrollCallback(window, ControllerCallbackHandler::scroll_callback);
     glfwSetMouseButtonCallback(window, ControllerCallbackHandler::mouse_button_callback);
@@ -96,7 +94,6 @@ void ApplicationExperimental::run() {
             appContext.window_.resetWindowResizedFlag();
             appContext.renderContext.recreate_swap_chain();
             vkDeviceWaitIdle(appContext.device_.device());
-            glfwSetWindowUserPointer(window, &controller);
         }
     }
 

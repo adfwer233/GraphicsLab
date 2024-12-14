@@ -42,8 +42,8 @@ struct UIState : Reflectable {
     float mouseXPos{}, lastMouseXPos{};
     float mouseYPos{}, lastMouseYPos{};
 
-    glm::vec2 scope_min;
-    glm::vec2 scope_max;
+    std::map<std::string, glm::vec2> scope_min;
+    std::map<std::string, glm::vec2> scope_max;
 
     struct ProjectStatus : Reflectable {
         std::string name;
@@ -93,45 +93,14 @@ struct UIState : Reflectable {
     std::string python_interpreter_path;
 
     ReflectDataType reflect() override {
-        return {{"python_interpreter_path", TypeErasedValue(&python_interpreter_path)}};
+        return {
+            {"python_interpreter_path", TypeErasedValue(&python_interpreter_path)},
+            {"scope_min", TypeErasedValue(&scope_min)},
+            {"scope_max", TypeErasedValue(&scope_max)}
+        };
     }
 
-    UIState() {
-        spdlog::critical("ui state constructed");
+    UIState() = default;
 
-        std::ifstream file("graphics_lab_state_config.json");
-        if (file.is_open()) {
-            std::stringstream buffer;
-            buffer << file.rdbuf();
-
-            json j;
-            buffer >> j;
-            spdlog::critical(j.dump());
-
-            deserialization(j);
-
-            // spdlog::info(Py_EncodeLocale(Py_GetPath(), nullptr));
-            if (not python_interpreter_path.empty()) {
-                // wchar_t *program = Py_DecodeLocale(python_interpreter_path.c_str(), nullptr);
-                //
-                // Py_SetProgramName(program);  // Optional: sets the program name (default to the binary)
-                // Py_SetPath(program);         // Set Python interpreter path
-            }
-        } else {
-            auto result = serialization();
-            std::ofstream ofstream("graphics_lab_state_config.json");
-            ofstream << result.dump(4);
-        }
-
-        // Py_Initialize();
-    }
-
-    ~UIState() {
-        auto result = serialization();
-        std::ofstream ofstream("graphics_lab_state_config.json");
-        ofstream << result.dump(4);
-        spdlog::critical("ui state destructed");
-
-        // Py_Finalize();
-    }
+    ~UIState() = default;
 };

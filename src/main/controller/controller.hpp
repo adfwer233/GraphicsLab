@@ -149,8 +149,8 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
         }
 
         if (button == GLFW_MOUSE_BUTTON_LEFT and state == GLFW_PRESS) {
-            rayPicking(uiState.mouseXPos - uiState.scope_min.x, uiState.mouseYPos - uiState.scope_min.y,
-                       uiState.scope_max.x - uiState.scope_min.x, uiState.scope_max.y - uiState.scope_min.y);
+            rayPicking(uiState.mouseXPos - uiState.scope_min["scene_render_result"].x, uiState.mouseYPos - uiState.scope_min["scene_render_result"].y,
+                       uiState.scope_max["scene_render_result"].x - uiState.scope_min["scene_render_result"].x, uiState.scope_max["scene_render_result"].y - uiState.scope_min["scene_render_result"].y);
 
             uiState.isMouseLeftPressing = true;
         }
@@ -162,14 +162,14 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
     }
 
     void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
-        // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
+        auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         auto &uiState = uiState_;
 
         uiState.mouseXPos = static_cast<float>(xposIn);
         uiState.mouseYPos = static_cast<float>(yposIn);
 
-        if (xposIn > uiState.scope_min.x and xposIn < uiState.scope_max.x and yposIn > uiState.scope_min.y and
-            yposIn < uiState.scope_max.y) {
+        if (xposIn > uiState.scope_min["scene_render_result"].x and xposIn < uiState.scope_max["scene_render_result"].x and yposIn > uiState.scope_min["scene_render_result"].y and
+            yposIn < uiState.scope_max["scene_render_result"].y) {
             uiState.isMouseInRegion = true;
         } else {
             uiState.isMouseInRegion = false;

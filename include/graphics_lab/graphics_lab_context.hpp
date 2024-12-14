@@ -47,6 +47,7 @@ struct GraphicsLabContext {
     VklDevice *device;
     SceneTree::VklSceneTree *sceneTree;
     LogManager *logManager;
+    Reflectable *uiState;
 
     GraphicsLab::GraphicsLabInternalContext *applicationContext;
 };

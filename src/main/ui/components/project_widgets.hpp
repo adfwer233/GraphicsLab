@@ -90,7 +90,7 @@ class ProjectWidgetComponent : public UIComponent {
                                 auto loadProject = [&]() {
                                     spdlog::info(context_.sceneTree->root->name);
                                     uiState_.project->updateContext(GraphicsLabContext(
-                                        &context_.sceneTree->device_, context_.sceneTree.get(), &LogManager::getInstance(), &context_));
+                                        &context_.sceneTree->device_, context_.sceneTree.get(), &LogManager::getInstance(), &uiState_, &context_));
                                     uiState_.project->afterLoad();
                                     ControllerCallbackHandler::project_controller = uiState_.project->getController();
                                 };

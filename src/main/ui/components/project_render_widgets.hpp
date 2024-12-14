@@ -26,15 +26,6 @@ class ProjectRenderWidgetComponent : public UIComponent {
             ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.projectRenderTexture[0]), wsize);
         }
 
-        if (ImGui::IsItemVisible()) {
-
-            auto min_pos = ImGui::GetItemRectMin();
-            auto max_pos = ImGui::GetItemRectMax();
-
-            uiState_.scope_min = {min_pos.x, min_pos.y};
-            uiState_.scope_max = {max_pos.x, max_pos.y};
-        }
-
         ImGui::End();
     }
 };
