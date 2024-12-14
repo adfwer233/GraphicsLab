@@ -25,22 +25,19 @@ void ApplicationExperimental::run() {
 
     GLFWwindow *window = appContext.window_.getGLFWwindow();
 
-    SceneTree::VklSceneTree scene_tree(appContext.device_);
+    appContext.sceneTree = std::make_unique<SceneTree::VklSceneTree>(appContext.device_);
 
-    scene_tree.root->name = "test";
+    // SceneTree::VklSceneTree scene_tree(appContext.device_);
 
-    spdlog::info(scene_tree.root->name);
+    appContext.sceneTree->root->name = "test";
+
+    spdlog::info(appContext.sceneTree->root->name);
     // scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
-    scene_tree.addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
-    scene_tree.addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
+    appContext.sceneTree->addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
+    appContext.sceneTree->addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 
     UIState state;
-    Controller controller(state, scene_tree);
-    auto env_injector = di::make_injector(di::bind<SceneTree::VklSceneTree>().to(scene_tree),
-                                          di::bind<VklDevice>().to(appContext.device_), di::bind<UIState>().to(state),
-                                          di::bind<Controller>().to(controller),
-                                          di::bind<GraphicsLab::GraphicsLabInternalContext>().to(appContext));
-
+    Controller controller(state, *appContext.sceneTree);
     ControllerCallbackHandler::internal_controller = &controller;
 
     glfwSetWindowUserPointer(window, &controller);
@@ -49,9 +46,9 @@ void ApplicationExperimental::run() {
     glfwSetScrollCallback(window, ControllerCallbackHandler::scroll_callback);
     glfwSetMouseButtonCallback(window, ControllerCallbackHandler::mouse_button_callback);
 
-    UIManager uiManager(scene_tree, controller, state, appContext);
+    UIManager uiManager(controller, state, appContext);
 
-    InternalSceneRenderPass internalSceneRenderPass(appContext.device_, scene_tree, state);
+    InternalSceneRenderPass internalSceneRenderPass(appContext.device_, *appContext.sceneTree, state);
     InternalImguiPass internalImguiPass(appContext.device_, uiManager);
 
     internalSceneRenderPass.set_extent(2048, 2048);

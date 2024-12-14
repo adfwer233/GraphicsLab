@@ -7,7 +7,7 @@ class RenderModelPanel : public UIComponent {
     UIState &uiState_;
 
   public:
-    RenderModelPanel(SceneTree::VklSceneTree &sceneTree, UIState &uiState) : UIComponent(sceneTree), uiState_(uiState) {
+    RenderModelPanel(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState) : UIComponent(context), uiState_(uiState) {
     }
 
     void render() final {

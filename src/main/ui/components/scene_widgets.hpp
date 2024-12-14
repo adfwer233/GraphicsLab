@@ -10,8 +10,8 @@ class SceneWidgetComponent : public UIComponent {
     RenderResources &renderResources_;
 
   public:
-    SceneWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, RenderResources &renderResources)
-        : UIComponent(sceneTree), uiState_(uiState), renderResources_(renderResources) {
+    SceneWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState, RenderResources &renderResources)
+        : UIComponent(context), uiState_(uiState), renderResources_(renderResources) {
     }
 
     void render() final {
@@ -22,8 +22,8 @@ class SceneWidgetComponent : public UIComponent {
                 for (auto &[name, img] : renderResources_.imguiImages) {
                     if (ImGui::BeginTabItem(name.c_str())) { // Create a tab for each image
                         auto wsize = ImGui::GetContentRegionAvail();
-                        if (sceneTree_.active_camera) {
-                            sceneTree_.active_camera->camera.ratio = wsize.x / wsize.y;
+                        if (context_.sceneTree->active_camera) {
+                            context_.sceneTree->active_camera->camera.ratio = wsize.x / wsize.y;
                         }
                         // todo: set frame index
                         ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), wsize);

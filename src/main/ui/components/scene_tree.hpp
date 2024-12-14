@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 class SceneTreeComponent : public UIComponent {
   public:
-    SceneTreeComponent(SceneTree::VklSceneTree &sceneTree) : UIComponent(sceneTree) {
+    SceneTreeComponent(GraphicsLab::GraphicsLabInternalContext &context) : UIComponent(context) {
     }
 
     void render() final {
@@ -22,14 +22,14 @@ class SceneTreeComponent : public UIComponent {
                 std::string file = FileSystem::chooseFile();
                 spdlog::info("Choose Obj File: {}", file);
                 auto result = std::async(std::launch::async, [&]() {
-                    std::scoped_lock scoped_lock(sceneTree_.sceneTreeMutex);
-                    sceneTree_.importFromPath(file);
-                    sceneTree_.addCameraNode("Camera 1", Camera({0, 0, 10}, {0, 1, 0}));
+                    std::scoped_lock scoped_lock(context_.sceneTree->sceneTreeMutex);
+                    context_.sceneTree->importFromPath(file);
+                    context_.sceneTree->addCameraNode("Camera 1", Camera({0, 0, 10}, {0, 1, 0}));
                     spdlog::info("Load Obj File: {}", file);
                 });
-                vkDeviceWaitIdle(sceneTree_.device_.device());
+                vkDeviceWaitIdle(context_.sceneTree->device_.device());
             }
-            RenderTreeNode(sceneTree_.root.get());
+            RenderTreeNode(context_.sceneTree->root.get());
         }
         ImGui::End();
     }
@@ -112,9 +112,9 @@ class SceneTreeComponent : public UIComponent {
                                         camera.camera_front.z)
                                 .c_str());
 
-                if (camera_node != sceneTree_.active_camera) {
+                if (camera_node != context_.sceneTree->active_camera) {
                     if (ImGui::Button("Activate")) {
-                        sceneTree_.active_camera = camera_node;
+                        context_.sceneTree->active_camera = camera_node;
                     }
                 }
             }

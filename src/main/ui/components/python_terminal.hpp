@@ -108,7 +108,7 @@ class PythonTerminalComponent : public UIComponent {
     PythonTerminal terminal;
 
   public:
-    PythonTerminalComponent(SceneTree::VklSceneTree &sceneTree, Controller &controller) : UIComponent(sceneTree) {
+    PythonTerminalComponent(GraphicsLab::GraphicsLabInternalContext &context) : UIComponent(context) {
     }
 
     void render() final {

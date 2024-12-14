@@ -7,16 +7,15 @@
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
 #include "component_register.hpp"
+#include "graphics_lab/graphics_lab_imgui_component.hpp"
+#include "graphics_lab/graphics_lab_context.hpp"
 
 #include "boost/di.hpp"
 namespace di = boost::di;
 
-class UIComponent {
+class UIComponent: public GraphicsLab::IGraphicsLabImguiComponent {
   protected:
-    SceneTree::VklSceneTree &sceneTree_;
+    GraphicsLab::GraphicsLabInternalContext &context_;
 
-    explicit UIComponent(SceneTree::VklSceneTree &sceneTree) : sceneTree_(sceneTree) {};
-
-  public:
-    virtual void render() = 0;
+    explicit UIComponent(GraphicsLab::GraphicsLabInternalContext &context) : context_(context) {};
 };

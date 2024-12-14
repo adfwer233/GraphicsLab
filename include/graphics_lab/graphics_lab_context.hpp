@@ -13,8 +13,9 @@ namespace GraphicsLab {
 struct GraphicsLabInternalContext {
     VklWindow window_;
     VklDevice device_;
-    GraphicsLab::RenderGraph::RenderContext renderContext;
+    RenderGraph::RenderContext renderContext;
 
+    std::unique_ptr<SceneTree::VklSceneTree> sceneTree;
     std::unique_ptr<RenderGraph::RenderGraph> renderGraph;
     std::unique_ptr<RenderGraph::RenderGraphInstance> renderGraphInstance;
     std::unique_ptr<RenderGraph::RenderGraphInstance> newRenderGraphInstance;

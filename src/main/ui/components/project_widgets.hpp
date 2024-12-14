@@ -22,7 +22,6 @@ struct mystruct : public Reflectable {
 
 class ProjectWidgetComponent : public UIComponent {
     UIState &uiState_;
-    GraphicsLab::GraphicsLabInternalContext &appContext_;
     std::future<void> projectFunctionResult;
 
     bool showFunctionCallDialog = false;
@@ -31,20 +30,19 @@ class ProjectWidgetComponent : public UIComponent {
     std::set<std::string> bindClassNames;
 
   public:
-    ProjectWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState,
-                           GraphicsLab::GraphicsLabInternalContext &appContext)
-        : UIComponent(sceneTree), uiState_(uiState), appContext_(appContext) {
+    ProjectWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState)
+        : UIComponent(context), uiState_(uiState) {
     }
 
     void render() final {
         ImGui::Begin("Project Manager");
         {
             if (ImGui::Button("add render pass")) {
-                auto simple_pass = new GraphicsLab::RenderGraph::SimpleRenderPass(appContext_.device_);
+                auto simple_pass = new GraphicsLab::RenderGraph::SimpleRenderPass(context_.device_);
                 simple_pass->set_extent(2048, 2048);
-                appContext_.renderGraph->add_pass(simple_pass, "New simple pass");
+                context_.renderGraph->add_pass(simple_pass, "New simple pass");
 
-                appContext_.compileRenderGraph();
+                context_.compileRenderGraph();
             }
 
             if (ImGui::Button("Choose Path")) {
@@ -71,7 +69,7 @@ class ProjectWidgetComponent : public UIComponent {
             if (uiState_.project != nullptr) {
                 ImGui::SameLine();
                 if (ImGui::Button("Unload Project")) {
-                    sceneTree_.cleanSceneTree();
+                    context_.sceneTree->cleanSceneTree();
 
                     uiState_.project = nullptr;
                     uiState_.projectManager.unloadProject();
@@ -90,11 +88,9 @@ class ProjectWidgetComponent : public UIComponent {
                             if (uiState_.project) {
 
                                 auto loadProject = [&]() {
-                                    spdlog::info((void *)sceneTree_.root.get());
-                                    spdlog::info((void *)&sceneTree_.sceneTreeMutex);
-                                    spdlog::info(sceneTree_.root->name);
+                                    spdlog::info(context_.sceneTree->root->name);
                                     uiState_.project->updateContext(GraphicsLabContext(
-                                        &sceneTree_.device_, &sceneTree_, &LogManager::getInstance(), &appContext_));
+                                        &context_.sceneTree->device_, context_.sceneTree.get(), &LogManager::getInstance(), &context_));
                                     uiState_.project->afterLoad();
                                     ControllerCallbackHandler::project_controller = uiState_.project->getController();
                                 };

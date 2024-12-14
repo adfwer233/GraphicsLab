@@ -10,8 +10,8 @@ class ProjectRenderWidgetComponent : public UIComponent {
     RenderResources &renderResources_;
 
   public:
-    ProjectRenderWidgetComponent(SceneTree::VklSceneTree &sceneTree, UIState &uiState, RenderResources &renderResources)
-        : UIComponent(sceneTree), uiState_(uiState), renderResources_(renderResources) {
+    ProjectRenderWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState, RenderResources &renderResources)
+        : UIComponent(context), uiState_(uiState), renderResources_(renderResources) {
     }
 
     void render() final {
@@ -19,8 +19,8 @@ class ProjectRenderWidgetComponent : public UIComponent {
         ImGui::Begin("Project Render Result");
         {
             auto wsize = ImGui::GetContentRegionMax();
-            if (sceneTree_.active_camera) {
-                sceneTree_.active_camera->camera.ratio = wsize.x / wsize.y;
+            if (context_.sceneTree->active_camera) {
+                context_.sceneTree->active_camera->camera.ratio = wsize.x / wsize.y;
             }
             // todo: set frame index
             ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.projectRenderTexture[0]), wsize);

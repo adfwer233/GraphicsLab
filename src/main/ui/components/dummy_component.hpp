@@ -5,8 +5,7 @@
 
 class DummyComponent : public UIComponent {
   public:
-    DummyComponent(SceneTree::VklSceneTree &sceneTree, Controller &controller) : UIComponent(sceneTree) {
-        spdlog::info("[Controller Address] {}", (void *)&controller);
+    DummyComponent(GraphicsLab::GraphicsLabInternalContext &context, Controller &controller) : UIComponent(context) {
     }
 
     void render() final {

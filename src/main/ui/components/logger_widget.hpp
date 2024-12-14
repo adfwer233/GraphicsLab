@@ -6,7 +6,7 @@
 
 class LoggerWidgetComponent : public UIComponent {
   public:
-    LoggerWidgetComponent(SceneTree::VklSceneTree &sceneTree) : UIComponent(sceneTree) {
+    LoggerWidgetComponent(GraphicsLab::GraphicsLabInternalContext &context) : UIComponent(context) {
     }
 
     void render() final {

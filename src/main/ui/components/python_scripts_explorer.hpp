@@ -24,8 +24,8 @@ class PythonScriptsExplorer : public UIComponent {
     std::filesystem::path script_dir_path;
 
   public:
-    PythonScriptsExplorer(SceneTree::VklSceneTree &sceneTree, UIState &uiState)
-        : UIComponent(sceneTree), uiState_(uiState) {
+    PythonScriptsExplorer(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState)
+        : UIComponent(context), uiState_(uiState) {
     }
 
     void render() final {
