@@ -20,11 +20,11 @@ using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 
 class UIManager {
     std::vector<UIComponent *> component_ptrs;
-
+    UIState &ui_state_;
   public:
     RenderResources renderResources;
 
-    explicit UIManager(Controller &controller, UIState &uiState, GraphicsLab::GraphicsLabInternalContext &context) {
+    explicit UIManager(Controller &controller, UIState &uiState, GraphicsLab::GraphicsLabInternalContext &context): ui_state_(uiState) {
         auto injector = di::make_injector(di::bind<Controller>().to(controller),
                               di::bind<RenderResources>().to(renderResources), di::bind<UIState>().to(uiState),
                               di::bind<GraphicsLab::GraphicsLabInternalContext>().to(context));
@@ -35,6 +35,14 @@ class UIManager {
     void render() {
         for (auto com : component_ptrs) {
             com->render();
+        }
+
+        // render custom components
+
+        if (ui_state_.project != nullptr) {
+            for (auto com: ui_state_.project->getImguiComponents()) {
+                com->render();
+            }
         }
     }
 

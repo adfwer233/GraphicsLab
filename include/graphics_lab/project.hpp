@@ -4,6 +4,7 @@
 
 #include "graphics_lab_context.hpp"
 #include "graphics_lab_controller.hpp"
+#include "graphics_lab_imgui_component.hpp"
 
 #include "pybind11/pybind11.h"
 
@@ -30,6 +31,10 @@ class IGraphicsLabProject : public Reflectable {
 
     virtual ReflectDataType reflect() {
         return {{"tick", TypeErasedValue(&IGraphicsLabProject::tick, this)}};
+    }
+
+    virtual std::vector<GraphicsLab::IGraphicsLabImguiComponent *> getImguiComponents() {
+        return {};
     }
 
   protected:
