@@ -360,7 +360,8 @@ struct VklSceneTree {
         spdlog::info("Scene Tree Created");
     }
 
-    template <SupportedGeometryType GeometryType> void addGeometryNode(GeometryType &&Geometry, std::optional<std::string> name = std::nullopt) {
+    template <SupportedGeometryType GeometryType>
+    void addGeometryNode(GeometryType &&Geometry, std::optional<std::string> name = std::nullopt) {
         auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(std::forward<GeometryType>(Geometry));
         if (name.has_value()) {
             geometry_node->name = name.value();
