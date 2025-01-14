@@ -103,7 +103,7 @@ class VklDevice {
     /**
      * @brief Required Device Extensions
      */
-    const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
 
     /** Auxiliary functions */
 

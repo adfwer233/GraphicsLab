@@ -2,6 +2,7 @@
 
 #include "vkl/core/vkl_frame_info.hpp"
 #include "vkl/core/vkl_graphics_pipeline.hpp"
+#include "vkl/memory/dummy_buffer.hpp"
 
 #include <format>
 #include <iostream>
@@ -49,8 +50,11 @@ class SimpleRenderSystem : public BaseRenderSystem {
     ~SimpleRenderSystem();
 
     template <VklRenderable ModelType> void renderObject(FrameInfo<ModelType> &frameInfo);
+
     template <VklRenderable ModelType>
     void renderObject(FrameInfo<ModelType> &frameInfo, PushConstantInfoList pushData);
+
+    void renderPipeline(VkCommandBuffer commandBuffer);
 
     void bindPipeline(VkCommandBuffer commandBuffer) {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->graphicsPipeline_);
