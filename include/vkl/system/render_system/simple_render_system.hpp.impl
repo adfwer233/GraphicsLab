@@ -256,16 +256,16 @@ void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::re
     frameInfo.model.draw(frameInfo.commandBuffer);
 }
 
-
 template <uint32_t Subpass, VklPushConstantInfoListConcept PushConstantInfoList,
           VklPipelineModifierType PipelineModifierType>
-void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::renderPipeline(VkCommandBuffer commandBuffer) {
+void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::renderPipeline(
+    VkCommandBuffer commandBuffer) {
     // spdlog::info("Rendering Pipeline");
     VkBuffer buffers[] = {Vkl::DummyBuffer::getDummyBuffer(device_)};
     // spdlog::info("Rendering Pipeline");
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->graphicsPipeline_);
     // spdlog::info("Rendering Pipeline");
-    VkDeviceSize offsets[] = { 0 };
+    VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
     vkCmdDraw(commandBuffer, 1, 1, 0, 0);

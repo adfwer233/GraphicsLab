@@ -303,7 +303,8 @@ struct RenderPass {
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    explicit RenderPass(VklDevice &device, const VkClearColorValue clear_color = {0.01f, 0.01f, 0.01f, 1.0f}) : device_(device), clear_color_(clear_color) {
+    explicit RenderPass(VklDevice &device, const VkClearColorValue clear_color = {0.01f, 0.01f, 0.01f, 1.0f})
+        : device_(device), clear_color_(clear_color) {
     }
 
     VklDevice &device_;
