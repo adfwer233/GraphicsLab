@@ -279,8 +279,8 @@ struct RenderPass {
          * @todo: auto generate clear values
          */
         std::array<VkClearValue, 3> clearValues{};
-        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-        clearValues[1].color = {0.01f, 0.01f, 0.01f, 1.0f};
+        clearValues[0].color = clear_color_;
+        clearValues[1].color = clear_color_;
         clearValues[2].depthStencil = {1.0f, 0};
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();
@@ -303,7 +303,7 @@ struct RenderPass {
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    explicit RenderPass(VklDevice &device) : device_(device) {
+    explicit RenderPass(VklDevice &device, const VkClearColorValue clear_color = {0.01f, 0.01f, 0.01f, 1.0f}) : device_(device), clear_color_(clear_color) {
     }
 
     VklDevice &device_;
@@ -315,6 +315,8 @@ struct RenderPass {
     std::unique_ptr<VklFramebuffer> vkl_frame_buffer;
 
     uint32_t width_ = 2048, height_ = 2048;
+
+    VkClearColorValue clear_color_;
 
     friend class RenderGraphCompiler;
 };
