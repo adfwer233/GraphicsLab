@@ -13,7 +13,7 @@
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
     explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState)
-        : RenderPass(device), sceneTree_(sceneTree), uiState_(uiState) {
+        : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree), uiState_(uiState) {
     }
 
     RenderPassReflection render_pass_reflect() override {
