@@ -73,7 +73,7 @@ struct GraphicsTransformation : Reflectable {
                 {"rotation", TypeErasedValue(&rotation)}};
     }
 
-    glm::mat4 quatToMat4(const glm::quat& q) const {
+    glm::mat4 quatToMat4(const glm::quat &q) const {
         glm::mat4 result(1.0f); // Initialize with identity matrix
 
         float x2 = q.x + q.x;
