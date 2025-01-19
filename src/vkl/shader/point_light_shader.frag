@@ -23,15 +23,16 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
 
 void main() {
 
+    vec3 lightPosition = vec3(0.0, 5.0, 0.0);
     vec3 lightColor = ubo.pointLight.color.rgb;
-
+//lightPosition.y = -lightPosition.y;
     // ambient lighting
     float ambientStrength = 0.2;
     vec3 ambient = ambientStrength * ubo.pointLight.color.rgb;
 
     // diffuse lighting
     vec3 norm = normalize(fragNormalWorld);
-    vec3 lightDirection = normalize(ubo.pointLight.position.xyz - fragPosWorld);
+    vec3 lightDirection = normalize(lightPosition - fragPosWorld);
     float diff = max(dot(norm, lightDirection), 0.0);
     vec3 diffuse = diff * lightColor;
 
@@ -42,5 +43,12 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;
 
-    outColor = vec4(ambient + diffuse + specular, 1.0f);
+//    outColor = vec4(fragColor, 1.0f);
+//    if (dot(norm, lightDirection) > 0)
+        outColor = vec4((ambient + diffuse + specular) * fragColor, 1.0f);
+//    else
+//        outColor = vec4(ambient, 1.0f);
+
+    if (fragTexCoord.x < 0.005)
+        outColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

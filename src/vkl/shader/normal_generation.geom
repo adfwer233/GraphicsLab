@@ -27,7 +27,7 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
 } ubo;
 
 void main(void) {
-    float normalLength = 1.0;
+    float normalLength = pushConstants.normalStrength;
 
     for (int i = 0; i < gl_in.length(); i++) {
         vec3 pos = gl_in[i].gl_Position.xyz;

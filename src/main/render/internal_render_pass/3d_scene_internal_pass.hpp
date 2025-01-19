@@ -9,6 +9,7 @@
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
+#include "vkl/system/render_system/normal_render_system.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
@@ -50,7 +51,7 @@ struct InternalSceneRenderPass : public RenderPass {
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
@@ -63,6 +64,13 @@ struct InternalSceneRenderPass : public RenderPass {
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
+        normal_render_system = std::make_unique<NormalRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/normal_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {std::format("{}/normal_generation.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
@@ -89,6 +97,8 @@ struct InternalSceneRenderPass : public RenderPass {
         auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto colorKey = color_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto normalKey = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
         try {
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
@@ -121,6 +131,11 @@ struct InternalSceneRenderPass : public RenderPass {
                     node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
                 }
 
+                if (node_mesh->mesh->uniformBuffers.contains(normalKey)) {
+                    node_mesh->mesh->uniformBuffers[normalKey][frame_index]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[normalKey][frame_index]->flush();
+                }
+
                 FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
                     .frameIndex = static_cast<int>(frame_index) % 2,
                     .frameTime = 0,
@@ -142,37 +157,68 @@ struct InternalSceneRenderPass : public RenderPass {
                         color_render_system->renderObject(frameInfo);
                     }
                 }
+
+                // NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
+                // normalRenderSystemPushConstantData.normalStrength = 0.005;
+                // normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
+                // NormalRenderSystemPushConstantDataList list;
+                // list.data[0] = normalRenderSystemPushConstantData;
+                // normal_render_system->renderObject(frameInfo, list);
             }
 
-            // draw box for the picked object
+            auto curve_mesh3d_buffer = SceneTree::VklNodeMeshBuffer<CurveMesh3D>::instance();
+            for (auto [curve_mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<CurveMesh3D>()) {
+                if (not curve_mesh3d_nodes->visible)
+                    continue;
 
-            if (sceneTree_.activeNode != nullptr) {
-                auto line_render_system_key = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
-                auto wire3d_buffer = SceneTree::VklNodeMeshBuffer<Wire3D>::instance();
+                ubo.model = trans;
 
-                auto wire_mesh = wire3d_buffer->getGeometryModel(device_, &boxNode);
-
-                if (not uiState_.boxMeshRecreated) {
-                    boxNode.data = Box3DConstructor::create(uiState_.box.min_pos, uiState_.box.max_pos);
-                    wire_mesh->recreateMeshes();
-                    uiState_.boxMeshRecreated = true;
+                auto curve_node_mesh = curve_mesh3d_buffer->getGeometryModel(device_, curve_mesh3d_nodes);
+                if (curve_node_mesh->mesh->uniformBuffers.contains(lineKey)) {
+                    curve_node_mesh->mesh->uniformBuffers[lineKey][frame_index]->writeToBuffer(&ubo);
+                    curve_node_mesh->mesh->uniformBuffers[lineKey][frame_index]->flush();
                 }
 
-                if (wire_mesh->mesh->uniformBuffers.contains(line_render_system_key)) {
-                    wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->writeToBuffer(&ubo);
-                    wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->flush();
-                }
-
-                FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
+                FrameInfo<std::decay_t<decltype(*curve_node_mesh)>::render_type> frameInfo{
                     .frameIndex = static_cast<int>(frame_index) % 2,
                     .frameTime = 0,
                     .commandBuffer = commandBuffer,
                     .camera = sceneTree_.active_camera->camera,
-                    .model = *wire_mesh->mesh,
+                    .model = *curve_node_mesh->mesh,
                 };
 
                 line_render_system->renderObject(frameInfo);
             }
+
+            // draw box for the picked object
+
+            // if (sceneTree_.activeNode != nullptr) {
+            //     auto line_render_system_key = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+            //     auto wire3d_buffer = SceneTree::VklNodeMeshBuffer<Wire3D>::instance();
+            //
+            //     auto wire_mesh = wire3d_buffer->getGeometryModel(device_, &boxNode);
+            //
+            //     if (not uiState_.boxMeshRecreated) {
+            //         boxNode.data = Box3DConstructor::create(uiState_.box.min_pos, uiState_.box.max_pos);
+            //         wire_mesh->recreateMeshes();
+            //         uiState_.boxMeshRecreated = true;
+            //     }
+            //
+            //     if (wire_mesh->mesh->uniformBuffers.contains(line_render_system_key)) {
+            //         wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->writeToBuffer(&ubo);
+            //         wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->flush();
+            //     }
+            //
+            //     FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
+            //         .frameIndex = static_cast<int>(frame_index) % 2,
+            //         .frameTime = 0,
+            //         .commandBuffer = commandBuffer,
+            //         .camera = sceneTree_.active_camera->camera,
+            //         .model = *wire_mesh->mesh,
+            //     };
+            //
+            //     line_render_system->renderObject(frameInfo);
+            // }
         } catch (std::exception &e) {
             spdlog::error("{}", e.what());
         }
@@ -189,5 +235,6 @@ struct InternalSceneRenderPass : public RenderPass {
     std::unique_ptr<SimpleRenderSystem<>> raw_render_system = nullptr;
     std::unique_ptr<LineRenderSystem<>> line_render_system = nullptr;
     std::unique_ptr<SimpleWireFrameRenderSystem<>> wireframe_render_system = nullptr;
+    std::unique_ptr<NormalRenderSystem<>> normal_render_system = nullptr;
 };
 } // namespace GraphicsLab::RenderGraph

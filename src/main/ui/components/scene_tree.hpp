@@ -50,6 +50,9 @@ class SceneTreeComponent : public UIComponent {
                 if (value.type() == typeid(bool)) {
                     auto &boolval = *reinterpret_cast<bool *>(value.get());
                     ImGui::Checkbox(key.c_str(), &boolval);
+                } else if (value.type() == typeid(glm::quat)) {
+                    auto &quat = *reinterpret_cast<glm::quat *>(value.get());
+                    ImGui::Text(std::format("{}: {} {} {} {}", key, quat.w, quat.x, quat.y, quat.z).c_str());
                 }
                 if (value.isReflectable) {
                     if (ImGui::TreeNode(key.c_str())) {
@@ -105,10 +108,10 @@ class SceneTreeComponent : public UIComponent {
                 ImGui::Text(std::format("Position {:.3f} {:.3f} {:.3f}", camera.position.x, camera.position.y,
                                         camera.position.z)
                                 .c_str());
-                ImGui::Text(std::format("Front {:.3f} {:.3f} {:.3f}", camera.camera_up_axis.x, camera.camera_up_axis.y,
+                ImGui::Text(std::format("Up {:.3f} {:.3f} {:.3f}", camera.camera_up_axis.x, camera.camera_up_axis.y,
                                         camera.camera_up_axis.z)
                                 .c_str());
-                ImGui::Text(std::format("Up {:.3f} {:.3f} {:.3f}", camera.camera_front.x, camera.camera_front.y,
+                ImGui::Text(std::format("Front {:.3f} {:.3f} {:.3f}", camera.camera_front.x, camera.camera_front.y,
                                         camera.camera_front.z)
                                 .c_str());
 

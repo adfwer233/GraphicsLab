@@ -26,7 +26,7 @@ enum class NodeType {
 struct PointLightSource {};
 struct AreaLightSource {};
 
-using GeometryTypes = MetaProgramming::TypeList<Mesh3D, Wire3D, BezierCurve2D, TensorProductBezierSurface>;
+using GeometryTypes = MetaProgramming::TypeList<Mesh3D, CurveMesh3D, Wire3D, BezierCurve2D, TensorProductBezierSurface>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>
@@ -56,13 +56,13 @@ struct VklSceneTree;
 struct GraphicsTransformation : Reflectable {
     glm::vec3 translation = glm::vec3(0.0f);
     glm::vec3 scaling = glm::vec3(1.0f);
-    glm::quat rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
+    glm::quat rotation = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
 
     [[nodiscard]] glm::mat4 getTransformation() const {
         glm::mat4 model(1.0f);
-        model = glm::translate(model, translation);
-        model = glm::rotate(model, rotation.w, glm::axis(rotation));
-        model = glm::scale(model, scaling);
+        // model = glm::translate(model, translation);
+        model = quatToMat4(rotation);
+        // model = glm::scale(model, scaling);
 
         return model;
     }
@@ -71,6 +71,40 @@ struct GraphicsTransformation : Reflectable {
         return {{"translation", TypeErasedValue(&translation)},
                 {"scaling", TypeErasedValue(&scaling)},
                 {"rotation", TypeErasedValue(&rotation)}};
+    }
+
+    glm::mat4 quatToMat4(const glm::quat& q) const {
+        glm::mat4 result(1.0f); // Initialize with identity matrix
+
+        float x2 = q.x + q.x;
+        float y2 = q.y + q.y;
+        float z2 = q.z + q.z;
+
+        float xx = q.x * x2;
+        float yy = q.y * y2;
+        float zz = q.z * z2;
+
+        float xy = q.x * y2;
+        float xz = q.x * z2;
+        float yz = q.y * z2;
+
+        float wx = q.w * x2;
+        float wy = q.w * y2;
+        float wz = q.w * z2;
+
+        result[0][0] = 1.0f - (yy + zz);
+        result[0][1] = xy + wz;
+        result[0][2] = xz - wy;
+
+        result[1][0] = xy - wz;
+        result[1][1] = 1.0f - (xx + zz);
+        result[1][2] = yz + wx;
+
+        result[2][0] = xz + wy;
+        result[2][1] = yz - wx;
+        result[2][2] = 1.0f - (xx + yy);
+
+        return result;
     }
 };
 
@@ -117,6 +151,9 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         result.emplace("transformation", TypeErasedValue(&transformation));
         result.emplace("visible", TypeErasedValue(&visible));
         result.emplace("Apply Transformation", TypeErasedValue(&GeometryNode::applyTransformation, this));
+        result.emplace("rotateX", TypeErasedValue(&GeometryNode::rotateX, this));
+        result.emplace("rotateY", TypeErasedValue(&GeometryNode::rotateY, this));
+        result.emplace("rotateZ", TypeErasedValue(&GeometryNode::rotateZ, this));
         return result;
     }
 
@@ -154,6 +191,27 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
             boxUpdated = true;
 
             mesh.box.reset();
+        }
+    }
+
+    void rotateX() {
+        if constexpr (std::is_same_v<GeometryType, Mesh3D>) {
+            const glm::quat rotation = glm::angleAxis(glm::radians(45.0f), glm::normalize(glm::vec3{1.0f, 0.0f, 0.0f}));
+            transformation.rotation = rotation * transformation.rotation;
+        }
+    }
+
+    void rotateY() {
+        if constexpr (std::is_same_v<GeometryType, Mesh3D>) {
+            const glm::quat rotation = glm::angleAxis(glm::radians(45.0f), glm::normalize(glm::vec3{0.0f, 1.0f, 0.0f}));
+            transformation.rotation = rotation * transformation.rotation;
+        }
+    }
+
+    void rotateZ() {
+        if constexpr (std::is_same_v<GeometryType, Mesh3D>) {
+            const glm::quat rotation = glm::angleAxis(glm::radians(45.0f), glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f}));
+            transformation.rotation = rotation * transformation.rotation;
         }
     }
 };

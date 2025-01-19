@@ -24,10 +24,11 @@ class SceneWidgetComponent : public UIComponent {
                     if (ImGui::BeginTabItem(name.c_str())) { // Create a tab for each image
                         auto wsize = ImGui::GetContentRegionAvail();
                         if (context_.sceneTree->active_camera) {
-                            context_.sceneTree->active_camera->camera.ratio = wsize.x / wsize.y;
+                            context_.sceneTree->active_camera->camera.ratio = 1.0;
                         }
                         // todo: set frame index
-                        ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), wsize);
+                        float min_size = std::min(wsize.x, wsize.y);
+                        ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), ImVec2(min_size, min_size));
 
                         auto min_pos = ImGui::GetItemRectMin();
                         auto max_pos = ImGui::GetItemRectMax();
