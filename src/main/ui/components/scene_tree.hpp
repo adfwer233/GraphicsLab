@@ -3,9 +3,12 @@
 #include "component.hpp"
 
 #include "../../project/file_system.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "language/reflection/reflectors.hpp"
 #include "project/file_system.hpp"
 #include "project/project_manager.hpp"
+
+#include "geometry/constructor/rectangle3d.hpp"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -29,12 +32,57 @@ class SceneTreeComponent : public UIComponent {
                 });
                 vkDeviceWaitIdle(context_.sceneTree->device_.device());
             }
+
+            if (ImGui::Button("Add Rectangle")) {
+                show_add_rectangle_dialog = true;
+            }
+
+            if (show_add_rectangle_dialog) {
+                add_rectangle_dialog_render();
+            }
+
             RenderTreeNode(context_.sceneTree->root.get());
         }
         ImGui::End();
     }
 
   private:
+
+    void add_rectangle_dialog_render() {
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        ImGui::Begin("Input Dialog", &show_add_rectangle_dialog,
+                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Text("Enter your arguments:");
+
+        thread_local glm::vec3 base_point(0.0f), direction1(0.0f), direction2(0.0f);
+        thread_local char name[64] = "default";
+
+        ImGui::InputText("##InputText", name, 64);
+        ImGui::InputFloat3("base point", glm::value_ptr(base_point));
+        ImGui::InputFloat3("direction1", glm::value_ptr(direction1));
+        ImGui::InputFloat3("direction2", glm::value_ptr(direction2));
+
+        if (ImGui::Button("OK")) {
+            show_add_rectangle_dialog = false;
+
+            auto rect = RectangleConstructor::create(base_point, direction1, direction2, 50, 50);
+            context_.sceneTree->addGeometryNode<Mesh3D>(std::move(rect));
+
+            spdlog::info("Add Rectangle {} Dialog OK", name);
+            spdlog::info("base point: {} {} {}", base_point.x, base_point.y, base_point.z);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel")) {
+            show_add_rectangle_dialog = false;
+        }
+
+        ImGui::End();
+    }
+
     void showReflectable(Reflectable *reflectableObject) {
         auto rfl = reflectableObject->reflect();
         for (auto &[key, value] : reflectableObject->reflect()) {
@@ -133,6 +181,8 @@ class SceneTreeComponent : public UIComponent {
             ImGui::TreePop();
         }
     }
+
+    bool show_add_rectangle_dialog = false;
 };
 
 META_REGISTER_TYPE(MainComponentRegisterTag, SceneTreeComponent)

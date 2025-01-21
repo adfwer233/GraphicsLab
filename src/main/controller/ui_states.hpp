@@ -23,6 +23,7 @@ struct UIState : Reflectable {
 
     RenderMode renderMode = RenderMode::raw;
     LightingMode lightingMode = LightingMode::simple;
+    bool showNormal = false;
 
     bool isMouseLeftPressing{false};
     bool isMouseMidPressing{false};

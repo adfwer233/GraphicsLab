@@ -39,6 +39,8 @@ class RenderModelPanel : public UIComponent {
         ImGui::RadioButton("Solid Shading", (int *)&uiState_.lightingMode,
                            ShadeModelType(UIState::LightingMode::solid));
 
+        ImGui::Checkbox("Show Normal", &uiState_.showNormal);
+
         ImGui::End();
     }
 };

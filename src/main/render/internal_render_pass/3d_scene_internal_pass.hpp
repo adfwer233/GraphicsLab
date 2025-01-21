@@ -8,8 +8,8 @@
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
-#include "vkl/system/render_system/normal_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
+#include "vkl/system/render_system/normal_render_system.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
@@ -45,7 +45,7 @@ struct InternalSceneRenderPass : public RenderPass {
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         color_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
@@ -158,12 +158,15 @@ struct InternalSceneRenderPass : public RenderPass {
                     }
                 }
 
-                // NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
-                // normalRenderSystemPushConstantData.normalStrength = 0.005;
-                // normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
-                // NormalRenderSystemPushConstantDataList list;
-                // list.data[0] = normalRenderSystemPushConstantData;
-                // normal_render_system->renderObject(frameInfo, list);
+                if (uiState_.showNormal) {
+                    NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
+                    normalRenderSystemPushConstantData.normalStrength = 0.005;
+                    normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
+                    NormalRenderSystemPushConstantDataList list;
+                    list.data[0] = normalRenderSystemPushConstantData;
+                    normal_render_system->renderObject(frameInfo, list);
+                }
+
             }
 
             auto curve_mesh3d_buffer = SceneTree::VklNodeMeshBuffer<CurveMesh3D>::instance();

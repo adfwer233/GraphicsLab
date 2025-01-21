@@ -49,6 +49,6 @@ void main() {
 //    else
 //        outColor = vec4(ambient, 1.0f);
 
-    if (fragTexCoord.x < 0.005)
-        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+//    if (fragTexCoord.x < 0.005)
+//        outColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
