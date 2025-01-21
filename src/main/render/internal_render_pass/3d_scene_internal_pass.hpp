@@ -8,8 +8,8 @@
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
-#include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 #include "vkl/system/render_system/normal_render_system.hpp"
+#include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
@@ -166,7 +166,6 @@ struct InternalSceneRenderPass : public RenderPass {
                     list.data[0] = normalRenderSystemPushConstantData;
                     normal_render_system->renderObject(frameInfo, list);
                 }
-
             }
 
             auto curve_mesh3d_buffer = SceneTree::VklNodeMeshBuffer<CurveMesh3D>::instance();
