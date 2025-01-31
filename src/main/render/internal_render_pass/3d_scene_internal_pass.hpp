@@ -10,6 +10,7 @@
 #include "vkl/system/render_system/line_render_system.hpp"
 #include "vkl/system/render_system/normal_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
+#include "vkl/system/render_system/aabb_box_render_system.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
@@ -71,6 +72,14 @@ struct InternalSceneRenderPass : public RenderPass {
                 {std::format("{}/normal_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {std::format("{}/normal_generation.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+
+        box_render_system = std::make_unique<Box3DRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/3d_aabb_box.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/3d_aabb_box.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {std::format("{}/3d_aabb_box.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+
 
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
@@ -193,34 +202,18 @@ struct InternalSceneRenderPass : public RenderPass {
             }
 
             // draw box for the picked object
+            if (sceneTree_.activeNode != nullptr) {
+                glm::mat4 mvp = sceneTree_.active_camera->camera.get_proj_transformation() * sceneTree_.active_camera->camera.get_view_transformation();
+                glm::vec4 min_pos(uiState_.box.min_pos, 0.0f);
+                glm::vec4 max_pos(uiState_.box.max_pos, 0.0f);
+                min_pos.y *= -1;
+                max_pos.y *= -1;
+                Box3DRenderSystemPushConstantData push_constant_data{mvp, min_pos, max_pos};
+                VklPushConstantInfoList<Box3DRenderSystemPushConstantData> push_constant_data_list;
+                push_constant_data_list.data[0] = push_constant_data;
+                box_render_system->renderPipeline(commandBuffer, push_constant_data_list);
+            }
 
-            // if (sceneTree_.activeNode != nullptr) {
-            //     auto line_render_system_key = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
-            //     auto wire3d_buffer = SceneTree::VklNodeMeshBuffer<Wire3D>::instance();
-            //
-            //     auto wire_mesh = wire3d_buffer->getGeometryModel(device_, &boxNode);
-            //
-            //     if (not uiState_.boxMeshRecreated) {
-            //         boxNode.data = Box3DConstructor::create(uiState_.box.min_pos, uiState_.box.max_pos);
-            //         wire_mesh->recreateMeshes();
-            //         uiState_.boxMeshRecreated = true;
-            //     }
-            //
-            //     if (wire_mesh->mesh->uniformBuffers.contains(line_render_system_key)) {
-            //         wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->writeToBuffer(&ubo);
-            //         wire_mesh->mesh->uniformBuffers[line_render_system_key][frame_index]->flush();
-            //     }
-            //
-            //     FrameInfo<std::decay_t<decltype(*wire_mesh)>::render_type> frameInfo{
-            //         .frameIndex = static_cast<int>(frame_index) % 2,
-            //         .frameTime = 0,
-            //         .commandBuffer = commandBuffer,
-            //         .camera = sceneTree_.active_camera->camera,
-            //         .model = *wire_mesh->mesh,
-            //     };
-            //
-            //     line_render_system->renderObject(frameInfo);
-            // }
         } catch (std::exception &e) {
             spdlog::error("{}", e.what());
         }
@@ -238,5 +231,6 @@ struct InternalSceneRenderPass : public RenderPass {
     std::unique_ptr<LineRenderSystem<>> line_render_system = nullptr;
     std::unique_ptr<SimpleWireFrameRenderSystem<>> wireframe_render_system = nullptr;
     std::unique_ptr<NormalRenderSystem<>> normal_render_system = nullptr;
+    std::unique_ptr<Box3DRenderSystem> box_render_system = nullptr;
 };
 } // namespace GraphicsLab::RenderGraph

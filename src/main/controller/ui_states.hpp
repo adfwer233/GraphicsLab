@@ -11,6 +11,7 @@
 struct UIState : Reflectable {
     enum class RenderMode {
         raw,
+        color,
         wireframe,
         material,
         path_tracing
