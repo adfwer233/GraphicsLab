@@ -23,7 +23,8 @@ class RenderModelPanel : public UIComponent {
         ImGui::RadioButton("Wire Frame", (RenderModelType *)&uiState_.renderMode,
                            RenderModelType(UIState::RenderMode::wireframe));
         ImGui::SameLine();
-        ImGui::RadioButton("Color", (RenderModelType *)&uiState_.renderMode, RenderModelType(UIState::RenderMode::color));
+        ImGui::RadioButton("Color", (RenderModelType *)&uiState_.renderMode,
+                           RenderModelType(UIState::RenderMode::color));
         ImGui::SameLine();
         ImGui::RadioButton("Material", (RenderModelType *)&uiState_.renderMode,
                            RenderModelType(UIState::RenderMode::material));

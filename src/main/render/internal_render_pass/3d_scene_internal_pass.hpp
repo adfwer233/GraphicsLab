@@ -7,10 +7,10 @@
 #include "graphics_lab/render_graph/render_pass.hpp"
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
+#include "vkl/system/render_system/aabb_box_render_system.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
 #include "vkl/system/render_system/normal_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
-#include "vkl/system/render_system/aabb_box_render_system.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
@@ -79,7 +79,6 @@ struct InternalSceneRenderPass : public RenderPass {
                 {std::format("{}/3d_aabb_box.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/3d_aabb_box.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {std::format("{}/3d_aabb_box.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
-
 
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
@@ -203,7 +202,8 @@ struct InternalSceneRenderPass : public RenderPass {
 
             // draw box for the picked object
             if (sceneTree_.activeNode != nullptr) {
-                glm::mat4 mvp = sceneTree_.active_camera->camera.get_proj_transformation() * sceneTree_.active_camera->camera.get_view_transformation();
+                glm::mat4 mvp = sceneTree_.active_camera->camera.get_proj_transformation() *
+                                sceneTree_.active_camera->camera.get_view_transformation();
                 glm::vec4 min_pos(uiState_.box.min_pos, 0.0f);
                 glm::vec4 max_pos(uiState_.box.max_pos, 0.0f);
                 min_pos.y *= -1;

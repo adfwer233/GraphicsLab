@@ -14,7 +14,7 @@ std::string FileSystem::chooseDirectory() {
     if (pidl != nullptr) {
         // Get the name of the folder
         if (SHGetPathFromIDList(pidl, path)) {
-            return { path };
+            return {path};
         }
         CoTaskMemFree(pidl); // Free memory allocated by the dialog
     }
@@ -31,7 +31,7 @@ std::string FileSystem::chooseFile() {
     if (pidl != nullptr) {
         // Get the name of the folder
         if (SHGetPathFromIDList(pidl, path)) {
-            return { path };
+            return {path};
         }
         CoTaskMemFree(pidl); // Free memory allocated by the dialog
     }
