@@ -17,6 +17,18 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+#if(MINGW)
+#    # Disable pthread and use the MinGW-w64 version of pthreads
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_PTHREADS")
+#
+#    # Link against the correct threading library
+#    set(THREADS_PREFER_PTHREAD_FLAG ON)
+#    find_package(Threads REQUIRED)
+#
+#    # Add additional flags for MinGW if necessary
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic")
+#endif()
+
 if (CUDA_ENABLE)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
         set(CMAKE_CUDA_ARCHITECTURES 50)
@@ -48,7 +60,7 @@ set(PYBIND11_INSTALL ON)
 set(GLM_BUILD_INSTALL ON)
 set(Random_BuildTests OFF)
 
-set(SPDLOG_BUILD_SHARED ON)
+# set(SPDLOG_BUILD_SHARED ON)
 set(SPIRV_CROSS_FORCE_PIC ON)
 set(ASSIMP_BUILD_ZLIB ON)
 
@@ -120,7 +132,7 @@ add_subdirectory(src/simulation)
 add_subdirectory(src/main)
 add_subdirectory(test)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)

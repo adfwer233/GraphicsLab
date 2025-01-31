@@ -31,7 +31,6 @@ class UIManager {
             di::bind<Controller>().to(controller), di::bind<RenderResources>().to(renderResources),
             di::bind<UIState>().to(uiState), di::bind<GraphicsLab::GraphicsLabInternalContext>().to(context));
         create_component_instances(injector, ComponentTypeList{});
-        context.sceneTree->root.get();
     }
 
     void render() {

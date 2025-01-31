@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#define NOMINMAX
 #include "Eigen/Eigen"
 #include <Eigen/Sparse>
 #include <igl/boundary_facets.h>

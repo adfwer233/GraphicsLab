@@ -343,6 +343,7 @@ struct TypeDispatcher {
         if (result != nullptr) {
             return result;
         }
+        return result;
     }
 
   private:
