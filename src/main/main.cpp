@@ -1,8 +1,25 @@
 #include "application.hpp"
 #include "iostream"
 
-int main() {
+#include "argparse/argparse.hpp"
+
+int main(int argc, char *argv[]) {
+    argparse::ArgumentParser args;
+    args.add_argument("-i", "--input").default_value(std::string("path"));
+
+    try {
+        args.parse_args(argc, argv);
+    } catch (const std::exception &err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << args;
+        std::exit(1);
+    }
+
     ApplicationExperimental app{};
+
+    if (args.is_used("--input")) {
+        app.appOption.load_obj_path = args.get<std::string>("--input");
+    }
 
     try {
         app.run();

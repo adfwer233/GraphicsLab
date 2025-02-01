@@ -27,12 +27,12 @@ void ApplicationExperimental::run() {
 
     appContext.sceneTree = std::make_unique<SceneTree::VklSceneTree>(appContext.device_);
 
-    // SceneTree::VklSceneTree scene_tree(appContext.device_);
-
     appContext.sceneTree->root->name = "test";
 
-    spdlog::info(appContext.sceneTree->root->name);
-    // scene_tree.importFromPath(std::format("{}/nanosuit/nanosuit.obj", DATA_DIR));
+    if (appOption.load_obj_path.has_value()) {
+        appContext.sceneTree->importFromPath(appOption.load_obj_path.value());
+    }
+
     appContext.sceneTree->addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     appContext.sceneTree->addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 

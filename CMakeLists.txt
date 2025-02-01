@@ -93,6 +93,7 @@ include(fetch-spdlog)
 include(fetch-boost_di)
 include(fetch-pybind11)
 include(fetch-xtensor)
+include(fetch-argparse)
 
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
