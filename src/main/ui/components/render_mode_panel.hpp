@@ -43,6 +43,8 @@ class RenderModelPanel : public UIComponent {
                            ShadeModelType(UIState::LightingMode::solid));
 
         ImGui::Checkbox("Show Normal", &uiState_.showNormal);
+        ImGui::SameLine();
+        ImGui::Checkbox("Show Axis", &uiState_.showAxis);
 
         ImGui::End();
     }

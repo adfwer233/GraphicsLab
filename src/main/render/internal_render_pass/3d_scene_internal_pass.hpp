@@ -11,6 +11,7 @@
 #include "vkl/system/render_system/line_render_system.hpp"
 #include "vkl/system/render_system/normal_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
+#include "vkl/system/render_system/world_axis_render_system.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
@@ -79,6 +80,13 @@ struct InternalSceneRenderPass : public RenderPass {
                 {std::format("{}/3d_aabb_box.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/3d_aabb_box.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {std::format("{}/3d_aabb_box.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+
+        axis_render_system = std::make_unique<WorldAxisRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/3d_world_axis.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/3d_world_axis.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {std::format("{}/3d_world_axis.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         boxNode.data = Box3DConstructor::create({0, 0, 0}, {5, 5, 5});
     }
@@ -214,6 +222,14 @@ struct InternalSceneRenderPass : public RenderPass {
                 box_render_system->renderPipeline(commandBuffer, push_constant_data_list);
             }
 
+            if (uiState_.showAxis) {
+                glm::mat4 mvp = sceneTree_.active_camera->camera.get_proj_transformation() *
+                                sceneTree_.active_camera->camera.get_view_transformation();
+                WorldAxisRenderSystemPushConstantData push_constant_data{mvp};
+                VklPushConstantInfoList<WorldAxisRenderSystemPushConstantData> push_constant_data_list;
+                push_constant_data_list.data[0] = push_constant_data;
+                axis_render_system->renderPipeline(commandBuffer, push_constant_data_list);
+            }
         } catch (std::exception &e) {
             spdlog::error("{}", e.what());
         }
@@ -232,5 +248,6 @@ struct InternalSceneRenderPass : public RenderPass {
     std::unique_ptr<SimpleWireFrameRenderSystem<>> wireframe_render_system = nullptr;
     std::unique_ptr<NormalRenderSystem<>> normal_render_system = nullptr;
     std::unique_ptr<Box3DRenderSystem> box_render_system = nullptr;
+    std::unique_ptr<WorldAxisRenderSystem> axis_render_system = nullptr;
 };
 } // namespace GraphicsLab::RenderGraph
