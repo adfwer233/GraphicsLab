@@ -17,4 +17,5 @@ struct WorldAxisRenderSystemPushConstantData {
     }
 };
 
-using WorldAxisRenderSystem = SimpleRenderSystem<0, VklPushConstantInfoList<WorldAxisRenderSystemPushConstantData>, WorldAxisRenderSystemModifier>;
+using WorldAxisRenderSystem = SimpleRenderSystem<0, VklPushConstantInfoList<WorldAxisRenderSystemPushConstantData>,
+                                                 WorldAxisRenderSystemModifier>;
