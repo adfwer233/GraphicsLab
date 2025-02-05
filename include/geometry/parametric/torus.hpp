@@ -4,38 +4,40 @@
 #include "glm/glm.hpp"
 
 #include "parametric_space.hpp"
+#include "parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
 
-struct Torus {
+struct Torus: public ParamSurface {
     struct SurfaceTrait{};
     struct SceneTreeGeometryTypeTrait {};
 
-    using PointType = glm::vec<3, double>;
-    using ParamType = glm::vec<2, double>;
     using VecType = PointType;
 
     PointType center;
-    VecType base_normal, direction1, direction2;
+    VecType base_normal, direction1, direction2{};
 
     double major_radius;
     double minor_radius;
     ParametricSpace parametric_space;
 
-    explicit Torus(const PointType &center, const double major_radius, const double minor_radius,
-                   const decltype(parametric_space) &parametric_space, const VecType& base_normal, const VecType& direction1)
-    : center(center), major_radius(major_radius), minor_radius(minor_radius), parametric_space(parametric_space),
-      base_normal(base_normal), direction1(direction1) {
+    explicit Torus(const PointType &center, const double major_radius, const double minor_radius, const VecType& base_normal, const VecType& direction1)
+    : center(center), base_normal(base_normal), direction1(direction1), major_radius(major_radius), minor_radius(minor_radius) {
         this->base_normal = glm::normalize(base_normal);
         this->direction1 = glm::normalize(direction1);
         direction2 = glm::normalize(glm::cross(base_normal, direction1));
     }
 
-    PointType get_center() const { return center; }
-    double get_major_radius() const { return major_radius; }
-    double get_minor_radius() const { return minor_radius; }
+    Torus(Torus&& rhs) noexcept
+        : center(rhs.center), base_normal(rhs.base_normal), direction1(rhs.direction1), direction2(rhs.direction2), major_radius(rhs.major_radius), minor_radius(rhs.minor_radius) {
+        mesh = std::move(rhs.mesh);
+    }
 
-    PointType evaluate(const ParamType& param_to_evaluate) const {
+    [[nodiscard]] PointType get_center() const { return center; }
+    [[nodiscard]] double get_major_radius() const { return major_radius; }
+    [[nodiscard]] double get_minor_radius() const { return minor_radius; }
+
+    PointType evaluate(const ParamType param_to_evaluate) override {
         ParamType param = move_param_to_domain(param_to_evaluate);
 
         double x = (major_radius + minor_radius * std::cos(2 * std::numbers::pi * param.y)) * std::cos(2 * std::numbers::pi * param.x);
@@ -45,7 +47,7 @@ struct Torus {
         return center + direction1 * x + direction2 * y + base_normal * z;
     }
 
-    PointType normal(const ParamType& param_to_evaluate) const {
+    PointType normal(const ParamType& param_to_evaluate) {
         ParamType param = move_param_to_domain(param_to_evaluate);
 
         PointType position = evaluate(param);

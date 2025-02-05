@@ -8,6 +8,7 @@
 
 #include <geometry/parametric/parametric_space.hpp>
 #include <geometry/parametric/sphere.hpp>
+#include <geometry/parametric/traits.hpp>
 #include <numbers>
 
 namespace SceneTree {
@@ -84,8 +85,8 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<Me
     }
 };
 
-template<> class VklNodeMesh<GraphicsLab::Geometry::Sphere> {
-    SceneTree::GeometryNode<GraphicsLab::Geometry::Sphere> *node_;
+template<GraphicsLab::Geometry::IsParametricSurface T> class VklNodeMesh<T> {
+    SceneTree::GeometryNode<T> *node_;
 
     VklDevice &device_;
 

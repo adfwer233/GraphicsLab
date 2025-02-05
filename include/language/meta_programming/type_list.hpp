@@ -24,6 +24,10 @@ template <typename... Ts> struct TypeList {
     template <template <typename...> typename T> using monad = TypeList<T<Ts>...>;
 };
 
+template <typename... Ts, typename Func> void ForEachType(TypeList<Ts...>, Func&& func) {
+    (func.template operator()<Ts>(), ...);
+}
+
 namespace TypeListFunctions {
 
 template <typename TypeList>

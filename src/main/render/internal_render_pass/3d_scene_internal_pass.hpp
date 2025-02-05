@@ -13,6 +13,8 @@
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 #include "vkl/system/render_system/world_axis_render_system.hpp"
 
+#include <geometry/parametric/torus.hpp>
+
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
     explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState)
@@ -116,139 +118,79 @@ struct InternalSceneRenderPass : public RenderPass {
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto normalKey = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
+        using RenderableTypeList = MetaProgramming::TypeList<Mesh3D, Geometry::Sphere, Geometry::Torus>;
+
+
         try {
-            auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<Mesh3D>::instance();
-            for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
 
-                if (not mesh3d_nodes->visible)
-                    continue;
+            MetaProgramming::ForEachType(RenderableTypeList{}, [&]<typename T>() {
+                auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
+                for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
 
-                ubo.model = trans;
+                    if (not mesh3d_nodes->visible)
+                        continue;
 
-                auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
+                    ubo.model = trans;
 
-                if (mesh3d_nodes->updated) {
-                    node_mesh->recreateMeshes();
-                    mesh3d_nodes->updated = false;
-                }
+                    auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
 
-                if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
-                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
-                }
+                    if (mesh3d_nodes->updated) {
+                        node_mesh->recreateMeshes();
+                        mesh3d_nodes->updated = false;
+                    }
 
-                if (node_mesh->mesh->uniformBuffers.contains(colorKey)) {
-                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->flush();
-                }
+                    if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
+                        node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
+                        node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
+                    }
 
-                if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
-                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
-                }
+                    if (node_mesh->mesh->uniformBuffers.contains(colorKey)) {
+                        node_mesh->mesh->uniformBuffers[colorKey][frame_index]->writeToBuffer(&ubo);
+                        node_mesh->mesh->uniformBuffers[colorKey][frame_index]->flush();
+                    }
 
-                if (node_mesh->mesh->uniformBuffers.contains(normalKey)) {
-                    node_mesh->mesh->uniformBuffers[normalKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[normalKey][frame_index]->flush();
-                }
+                    if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
+                        node_mesh->mesh->uniformBuffers[rawKey][frame_index]->writeToBuffer(&ubo);
+                        node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
+                    }
 
-                FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                    .frameIndex = static_cast<int>(frame_index) % 2,
-                    .frameTime = 0,
-                    .commandBuffer = commandBuffer,
-                    .camera = sceneTree_.active_camera->camera,
-                    .model = *node_mesh->mesh,
-                };
+                    if (node_mesh->mesh->uniformBuffers.contains(normalKey)) {
+                        node_mesh->mesh->uniformBuffers[normalKey][frame_index]->writeToBuffer(&ubo);
+                        node_mesh->mesh->uniformBuffers[normalKey][frame_index]->flush();
+                    }
 
-                if (uiState_.renderMode == UIState::RenderMode::raw) {
-                    raw_render_system->renderObject(frameInfo);
-                } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
-                    wireframe_render_system->renderObject(frameInfo);
-                } else if (uiState_.renderMode == UIState::RenderMode::material) {
-                    if (node_mesh->mesh->textures_.size() >=
-                        simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
-                            .size()) {
-                        simple_render_system->renderObject(frameInfo);
-                    } else {
-                        color_render_system->renderObject(frameInfo);
+                    FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                        .frameIndex = static_cast<int>(frame_index) % 2,
+                        .frameTime = 0,
+                        .commandBuffer = commandBuffer,
+                        .camera = sceneTree_.active_camera->camera,
+                        .model = *node_mesh->mesh,
+                    };
+
+                    if (uiState_.renderMode == UIState::RenderMode::raw) {
+                        raw_render_system->renderObject(frameInfo);
+                    } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
+                        wireframe_render_system->renderObject(frameInfo);
+                    } else if (uiState_.renderMode == UIState::RenderMode::material) {
+                        if (node_mesh->mesh->textures_.size() >=
+                            simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
+                                .size()) {
+                            simple_render_system->renderObject(frameInfo);
+                        } else {
+                            color_render_system->renderObject(frameInfo);
+                        }
+                    }
+
+                    if (uiState_.showNormal) {
+                        NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
+                        normalRenderSystemPushConstantData.normalStrength = 0.005;
+                        normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
+                        NormalRenderSystemPushConstantDataList list;
+                        list.data[0] = normalRenderSystemPushConstantData;
+                        normal_render_system->renderObject(frameInfo, list);
                     }
                 }
-
-                if (uiState_.showNormal) {
-                    NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
-                    normalRenderSystemPushConstantData.normalStrength = 0.005;
-                    normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
-                    NormalRenderSystemPushConstantDataList list;
-                    list.data[0] = normalRenderSystemPushConstantData;
-                    normal_render_system->renderObject(frameInfo, list);
-                }
-            }
-
-            auto sphere_buffer = SceneTree::VklNodeMeshBuffer<Geometry::Sphere>::instance();
-            for (auto [sphere_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Geometry::Sphere>()) {
-                if (not sphere_nodes->visible)
-                    continue;
-
-                ubo.model = trans;
-
-                auto node_mesh = sphere_buffer->getGeometryModel(device_, sphere_nodes);
-
-                if (sphere_nodes->updated) {
-                    node_mesh->recreateMeshes();
-                    sphere_nodes->updated = false;
-                }
-
-                if (node_mesh->mesh->uniformBuffers.contains(textureKey)) {
-                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[textureKey][frame_index]->flush();
-                }
-
-                if (node_mesh->mesh->uniformBuffers.contains(colorKey)) {
-                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[colorKey][frame_index]->flush();
-                }
-
-                if (node_mesh->mesh->uniformBuffers.contains(rawKey)) {
-                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
-                }
-
-                if (node_mesh->mesh->uniformBuffers.contains(normalKey)) {
-                    node_mesh->mesh->uniformBuffers[normalKey][frame_index]->writeToBuffer(&ubo);
-                    node_mesh->mesh->uniformBuffers[normalKey][frame_index]->flush();
-                }
-
-                FrameInfo<std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                    .frameIndex = static_cast<int>(frame_index) % 2,
-                    .frameTime = 0,
-                    .commandBuffer = commandBuffer,
-                    .camera = sceneTree_.active_camera->camera,
-                    .model = *node_mesh->mesh,
-                };
-
-                if (uiState_.renderMode == UIState::RenderMode::raw) {
-                    raw_render_system->renderObject(frameInfo);
-                } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
-                    wireframe_render_system->renderObject(frameInfo);
-                } else if (uiState_.renderMode == UIState::RenderMode::material) {
-                    if (node_mesh->mesh->textures_.size() >=
-                        simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
-                            .size()) {
-                        simple_render_system->renderObject(frameInfo);
-                    } else {
-                        color_render_system->renderObject(frameInfo);
-                    }
-                }
-
-                if (uiState_.showNormal) {
-                    NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
-                    normalRenderSystemPushConstantData.normalStrength = 0.005;
-                    normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
-                    NormalRenderSystemPushConstantDataList list;
-                    list.data[0] = normalRenderSystemPushConstantData;
-                    normal_render_system->renderObject(frameInfo, list);
-                }
-            }
+            });
 
             auto curve_mesh3d_buffer = SceneTree::VklNodeMeshBuffer<CurveMesh3D>::instance();
             for (auto [curve_mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<CurveMesh3D>()) {
