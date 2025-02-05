@@ -4,11 +4,11 @@
 #include "controller/controller.hpp"
 
 #include "geometry/parametric/sphere.hpp"
-#include "geometry/parametric/torus.hpp"
 #include "geometry/parametric/tessellator.hpp"
+#include "geometry/parametric/torus.hpp"
 
 class ConstructorWidget : public UIComponent {
-public:
+  public:
     ConstructorWidget(GraphicsLab::GraphicsLabInternalContext &context, Controller &controller) : UIComponent(context) {
     }
 
@@ -44,7 +44,7 @@ public:
         }
     }
 
-private:
+  private:
     void render_add_rectangle_dialog() {
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -104,7 +104,8 @@ private:
         if (ImGui::Button("OK")) {
             show_add_torus_dialog = false;
 
-            auto torus = GraphicsLab::Geometry::Torus(torus_center, major_radius, minor_radius, normal_direction, direction1);
+            auto torus =
+                GraphicsLab::Geometry::Torus(torus_center, major_radius, minor_radius, normal_direction, direction1);
             GraphicsLab::Geometry::Tessellator::tessellate(torus);
             context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::Torus>(std::move(torus), name);
         }
@@ -133,7 +134,6 @@ private:
         ImGui::InputText("##InputText", name, sizeof(name));
         ImGui::InputFloat3("Center", glm::value_ptr(sphere_center));
         ImGui::InputDouble("Radius", &sphere_radius);
-
 
         if (ImGui::Button("OK")) {
             show_add_sphere_dialog = false;

@@ -2,8 +2,6 @@
 
 namespace GraphicsLab::Geometry {
 
-struct ParametricSpace {
+struct ParametricSpace {};
 
-};
-
-}
+} // namespace GraphicsLab::Geometry

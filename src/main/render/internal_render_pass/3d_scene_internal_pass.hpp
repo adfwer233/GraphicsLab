@@ -120,7 +120,6 @@ struct InternalSceneRenderPass : public RenderPass {
 
         using RenderableTypeList = MetaProgramming::TypeList<Mesh3D, Geometry::Sphere, Geometry::Torus>;
 
-
         try {
 
             MetaProgramming::ForEachType(RenderableTypeList{}, [&]<typename T>() {
@@ -173,8 +172,8 @@ struct InternalSceneRenderPass : public RenderPass {
                         wireframe_render_system->renderObject(frameInfo);
                     } else if (uiState_.renderMode == UIState::RenderMode::material) {
                         if (node_mesh->mesh->textures_.size() >=
-                            simple_render_system->descriptorSetLayout->descriptorSetLayoutKey.sampledImageBufferDescriptors
-                                .size()) {
+                            simple_render_system->descriptorSetLayout->descriptorSetLayoutKey
+                                .sampledImageBufferDescriptors.size()) {
                             simple_render_system->renderObject(frameInfo);
                         } else {
                             color_render_system->renderObject(frameInfo);

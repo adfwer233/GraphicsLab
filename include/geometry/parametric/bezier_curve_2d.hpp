@@ -81,8 +81,8 @@ struct BezierCurve2D {
     }
 
     /**
-    * @brief elevate the degree of current bezier curve
-    */
+     * @brief elevate the degree of current bezier curve
+     */
     void degree_elevation() {
         std::vector<PointType> new_control_points;
         new_control_points.push_back(control_points_.front());
@@ -109,4 +109,4 @@ struct BezierCurve2D {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

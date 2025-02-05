@@ -9,6 +9,7 @@ namespace GraphicsLab::Geometry {
 
 using ParametricSurfaceTypeList = MetaProgramming::TypeList<Sphere, Torus>;
 
-template<typename T> concept IsParametricSurface = MetaProgramming::TypeListFunctions::IsAnyOf<ParametricSurfaceTypeList, T>::value;
+template <typename T>
+concept IsParametricSurface = MetaProgramming::TypeListFunctions::IsAnyOf<ParametricSurfaceTypeList, T>::value;
 
-}
+} // namespace GraphicsLab::Geometry

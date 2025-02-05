@@ -2,13 +2,13 @@
 
 #include <memory>
 
-#include "parametric_surface.hpp"
 #include "geometry/mesh/mesh.hpp"
 #include "geometry/vertex/vertex.hpp"
+#include "parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
 struct Tessellator {
-    static void tessellate(ParamSurface& surface, const int n = 32, const int m = 32) {
+    static void tessellate(ParamSurface &surface, const int n = 32, const int m = 32) {
         surface.mesh = std::make_unique<Mesh3D>();
         for (int i = 0; i <= n; i++) {
             for (int j = 0; j <= m; j++) {
@@ -45,4 +45,4 @@ struct Tessellator {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

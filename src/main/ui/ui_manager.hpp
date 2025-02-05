@@ -4,6 +4,7 @@
 
 #include "render_resources.hpp"
 
+#include "components/constructor_widget.hpp"
 #include "components/dummy_component.hpp"
 #include "components/logger_widget.hpp"
 #include "components/project_render_widgets.hpp"
@@ -13,7 +14,6 @@
 #include "components/render_mode_panel.hpp"
 #include "components/scene_tree.hpp"
 #include "components/scene_widgets.hpp"
-#include "components/constructor_widget.hpp"
 
 #include "graphics_lab/graphics_lab_context.hpp"
 

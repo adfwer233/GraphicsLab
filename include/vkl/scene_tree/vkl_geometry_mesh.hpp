@@ -85,7 +85,7 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<Me
     }
 };
 
-template<GraphicsLab::Geometry::IsParametricSurface T> class VklNodeMesh<T> {
+template <GraphicsLab::Geometry::IsParametricSurface T> class VklNodeMesh<T> {
     SceneTree::GeometryNode<T> *node_;
 
     VklDevice &device_;
@@ -105,7 +105,7 @@ template<GraphicsLab::Geometry::IsParametricSurface T> class VklNodeMesh<T> {
         mesh = std::make_unique<render_type>(device_, builder);
     }
 
-public:
+  public:
     using render_type = VklMesh<Vertex3D, TriangleIndex>;
     std::unique_ptr<render_type> mesh;
 
