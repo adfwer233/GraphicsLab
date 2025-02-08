@@ -617,7 +617,6 @@ void VklDevice::createAllocator() {
     }
 }
 
-
 VkFormat VklDevice::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
                                         VkFormatFeatureFlags features) {
     for (VkFormat format : candidates) {
