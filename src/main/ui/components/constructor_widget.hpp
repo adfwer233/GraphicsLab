@@ -6,6 +6,9 @@
 #include "geometry/parametric/sphere.hpp"
 #include "geometry/parametric/tessellator.hpp"
 #include "geometry/parametric/torus.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#include <geometry/constructor/rectangle3d.hpp>
 
 class ConstructorWidget : public UIComponent {
   public:

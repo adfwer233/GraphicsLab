@@ -7,6 +7,8 @@
 #include "vector"
 #include "vkl_window.hpp"
 
+#include <vk_mem_alloc.h>
+
 /**
  * \page devicePage Vulkan Device
  *
@@ -95,6 +97,8 @@ class VklDevice {
 
     VkPhysicalDeviceProperties properties_; /** Physical device properties */
 
+    VmaAllocator allocator = VK_NULL_HANDLE;
+
     /**
      * @brief Required Validation Layers
      */
@@ -104,7 +108,12 @@ class VklDevice {
      * @brief Required Device Extensions
      */
     const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-                                                        VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
+                                                        VK_EXT_ROBUSTNESS_2_EXTENSION_NAME,
+                                                        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+                                                        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+                                                        VK_KHR_RAY_QUERY_EXTENSION_NAME,
+                                                        VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME};
 
     /** Auxiliary functions */
 
@@ -117,6 +126,7 @@ class VklDevice {
     void pickPhysicalDevice();
     void createLogicalDevice();
     void createCommandPool();
+    void createAllocator();
 
     [[nodiscard]] std::vector<const char *> getRequiredExtensions() const;
 
@@ -165,6 +175,10 @@ class VklDevice {
 
     QueueFamilyIndices findPhysicalQueueFamilies() {
         return findQueueFamilies(physicalDevice_);
+    }
+
+    VmaAllocator getAllocator() const {
+        return allocator;
     }
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

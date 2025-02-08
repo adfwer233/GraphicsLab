@@ -22,6 +22,7 @@ set(SRC_FILE core/vkl_window.cpp
         scene/vkl_collection.cpp
         io/vkl_image_export.cpp
         core/vkl_graphic_pipeline.cpp
+        core/vkl_vma_impl.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui_demo.cpp
@@ -63,7 +64,7 @@ if(OpenCV_FOUND)
 else()
     target_link_libraries(LAB_vkl PRIVATE glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry)
 endif()
-target_link_libraries(LAB_vkl PUBLIC Vulkan::Vulkan)
+target_link_libraries(LAB_vkl PUBLIC Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
 
 ############## Build SHADERS #######################
 

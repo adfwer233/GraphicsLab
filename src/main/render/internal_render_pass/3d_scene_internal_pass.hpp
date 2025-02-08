@@ -13,6 +13,8 @@
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 #include "vkl/system/render_system/world_axis_render_system.hpp"
 
+#include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"
+
 #include <geometry/parametric/torus.hpp>
 
 namespace GraphicsLab::RenderGraph {

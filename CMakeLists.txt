@@ -94,6 +94,7 @@ include(fetch-boost_di)
 include(fetch-pybind11)
 include(fetch-xtensor)
 include(fetch-argparse)
+include(fetch-vma)
 
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )

@@ -120,6 +120,9 @@ void VklDevice::setupDebugMessenger() {
 VklDevice::~VklDevice() {
     delete VklBufferDestroyList::instance();
 
+    if (allocator)
+        vmaDestroyAllocator(allocator);
+
     vkDestroyCommandPool(device_, commandPool_, nullptr);
     vkDestroyDevice(device_, nullptr);
 
@@ -138,6 +141,7 @@ VklDevice::VklDevice(VklWindow &window) : window_(window) {
     pickPhysicalDevice();
     createLogicalDevice();
     createCommandPool();
+    createAllocator();
 }
 
 /**
@@ -601,6 +605,18 @@ void VklDevice::createImageWithInfo(const VkImageCreateInfo &imageInfo, VkMemory
         throw std::runtime_error("failed to bind image memory!");
     }
 }
+
+void VklDevice::createAllocator() {
+    VmaAllocatorCreateInfo allocatorInfo{};
+    allocatorInfo.physicalDevice = physicalDevice_;
+    allocatorInfo.device = device_;
+    allocatorInfo.instance = instance_;
+
+    if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create VMA allocator!");
+    }
+}
+
 
 VkFormat VklDevice::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
                                         VkFormatFeatureFlags features) {

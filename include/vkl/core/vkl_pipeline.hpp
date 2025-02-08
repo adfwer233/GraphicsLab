@@ -41,6 +41,17 @@ class VklPipeline {
         }
     }
 
+    VkPipelineShaderStageCreateInfo loadShader(const std::string &filepath, VkShaderStageFlagBits stage) {
+        VkShaderModule shaderModule;
+        createShaderModule(readFile(filepath), &shaderModule);
+        VkPipelineShaderStageCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        createInfo.stage = stage;
+        createInfo.module = shaderModule;
+        createInfo.pName = "main";
+        return createInfo;
+    }
+
     std::vector<char> readFile(const std::string &filepath) {
         std::string enginePath = filepath;
         std::ifstream file{enginePath, std::ios::ate | std::ios::binary};
