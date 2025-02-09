@@ -46,7 +46,7 @@ void ApplicationExperimental::run() {
 
     UIManager uiManager(controller, state, appContext);
 
-    InternalSceneRenderPass internalSceneRenderPass(appContext.device_, *appContext.sceneTree, state);
+    InternalSceneRenderPass internalSceneRenderPass(appContext.device_, *appContext.sceneTree, state, uiManager.renderResources);
     InternalImguiPass internalImguiPass(appContext.device_, uiManager);
 
     internalSceneRenderPass.set_extent(2048, 2048);

@@ -11,9 +11,13 @@
 #include <assimp/scene.h>
 
 #include "vkl_camera.hpp"
-#include "vkl_material.hpp"
+// #include "vkl_material.hpp"
 
 #include "glm/gtc/quaternion.hpp"
+
+#include <vkl/bvh/vkl_bvh_gpu.hpp>
+
+struct Material;
 
 namespace SceneTree {
 enum class NodeType {
@@ -272,42 +276,42 @@ class AssimpImporter {
         return processNode(scene->mRootNode, scene);
     }
 
-    auto importMaterial() {
-        Assimp::Importer importer;
-        auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
-        }
-
-        std::vector<Material> materials;
-
-        for (int i = 0; i < scene->mNumMaterials; i++) {
-            auto material = scene->mMaterials[i];
-
-            Material mat;
-
-            material->Get(AI_MATKEY_COLOR_DIFFUSE, mat.diffuse);
-            material->Get(AI_MATKEY_COLOR_SPECULAR, mat.specular);
-            material->Get(AI_MATKEY_COLOR_AMBIENT, mat.ambient);
-            material->Get(AI_MATKEY_COLOR_EMISSIVE, mat.emissive);
-            material->Get(AI_MATKEY_SHININESS, mat.shininess);
-
-            int count = material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
-
-            for (int j = 0; j < material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE); j++) {
-                aiString str;
-                material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, j, &str);
-
-                mat.textures.push_back(
-                    createTextureImage(std::format("{}/{}", this->directory, std::string(str.C_Str()))));
-            }
-
-            materials.push_back(mat);
-        }
-
-        return materials;
-    }
+    // auto importMaterial() {
+    //     Assimp::Importer importer;
+    //     auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    //
+    //     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+    //         throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
+    //     }
+    //
+    //     std::vector<Material> materials;
+    //     //
+    //     // for (int i = 0; i < scene->mNumMaterials; i++) {
+    //     //     auto material = scene->mMaterials[i];
+    //     //
+    //     //     Material mat;
+    //     //
+    //     //     material->Get(AI_MATKEY_COLOR_DIFFUSE, mat.diffuse);
+    //     //     material->Get(AI_MATKEY_COLOR_SPECULAR, mat.specular);
+    //     //     material->Get(AI_MATKEY_COLOR_AMBIENT, mat.ambient);
+    //     //     material->Get(AI_MATKEY_COLOR_EMISSIVE, mat.emissive);
+    //     //     material->Get(AI_MATKEY_SHININESS, mat.shininess);
+    //     //
+    //     //     int count = material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
+    //     //
+    //     //     for (int j = 0; j < material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE); j++) {
+    //     //         aiString str;
+    //     //         material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, j, &str);
+    //     //
+    //     //         mat.textures.push_back(
+    //     //             createTextureImage(std::format("{}/{}", this->directory, std::string(str.C_Str()))));
+    //     //     }
+    //     //
+    //     //     materials.push_back(mat);
+    //     // }
+    //
+    //     return materials;
+    // }
 
   private:
     VklTexture *createTextureImage(const std::string &texturePath) {
@@ -398,7 +402,7 @@ class AssimpImporter {
 struct VklSceneTree {
     VklDevice &device_;
     std::unique_ptr<SceneTree::TreeNode> root;
-    std::vector<Material> materials;
+    std::vector<VklBVHGPUModel::Material> materials;
 
     CameraNode *active_camera = nullptr;
     TreeNode *activeNode = nullptr;
@@ -416,6 +420,23 @@ struct VklSceneTree {
     explicit VklSceneTree(VklDevice &device) : device_(device) {
         root = std::make_unique<SceneTree::InternalNode>();
         spdlog::info("Scene Tree Created");
+
+        VklBVHGPUModel::Material gray{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0,
+                                      glm::vec3(0.77f, 0.77f, 0.80f)};
+        VklBVHGPUModel::Material red{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0, glm::vec3(0.8f, 0.0f, 0.0f)};
+        VklBVHGPUModel::Material green{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0,
+                                       glm::vec3(0.0f, 0.8f, 0.0f)};
+        VklBVHGPUModel::Material whiteLight{VklBVHGPUModel::MaterialType::LightSource, 0.0, 0.0, 1.0,
+                                            glm::vec3(2.0f, 2.0f, 2.0f)};
+        VklBVHGPUModel::Material metal{VklBVHGPUModel::MaterialType::Metal, 0.5, 0.0, 1.0, glm::vec3(1.0f, 0.9f, 0.0f)};
+        VklBVHGPUModel::Material glass{VklBVHGPUModel::MaterialType::Glass, 0.0, 0.0, 1.0, glm::vec3(1.0f, 1.0f, 1.0f)};
+
+        materials.push_back(gray);
+        materials.push_back(red);
+        materials.push_back(green);
+        materials.push_back(whiteLight);
+        materials.push_back(metal);
+        materials.push_back(glass);
     }
 
     template <SupportedGeometryType GeometryType>
@@ -441,7 +462,7 @@ struct VklSceneTree {
     void importFromPath(const std::string &path) {
         AssimpImporter assimpImporter(device_, path);
         root = assimpImporter.importScene();
-        materials = assimpImporter.importMaterial();
+        // materials = assimpImporter.importMaterial();
         set_scene_to_nodes(root.get());
         active_camera = nullptr;
     }
@@ -480,11 +501,11 @@ struct VklSceneTree {
     ~VklSceneTree() {
         spdlog::info("Scene Tree Destructed");
 
-        for (auto &mat : materials) {
-            for (auto tex : mat.textures) {
-                delete tex;
-            }
-        }
+        // for (auto &mat : materials) {
+        //     for (auto tex : mat.textures) {
+        //         delete tex;
+        //     }
+        // }
     }
 
   private:

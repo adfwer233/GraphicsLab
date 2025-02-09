@@ -18,29 +18,29 @@ class RenderModelPanel : public UIComponent {
 
         using RenderModelType = std::underlying_type_t<UIState::RenderMode>;
 
-        ImGui::RadioButton("Raw", (RenderModelType *)&uiState_.renderMode, RenderModelType(UIState::RenderMode::raw));
+        ImGui::RadioButton("Raw", reinterpret_cast<RenderModelType *>(&uiState_.renderMode), static_cast<RenderModelType>(UIState::RenderMode::raw));
         ImGui::SameLine();
-        ImGui::RadioButton("Wire Frame", (RenderModelType *)&uiState_.renderMode,
-                           RenderModelType(UIState::RenderMode::wireframe));
+        ImGui::RadioButton("Wire Frame", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
+                           static_cast<RenderModelType>(UIState::RenderMode::wireframe));
         ImGui::SameLine();
-        ImGui::RadioButton("Color", (RenderModelType *)&uiState_.renderMode,
-                           RenderModelType(UIState::RenderMode::color));
+        ImGui::RadioButton("Color", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
+                           static_cast<RenderModelType>(UIState::RenderMode::color));
         ImGui::SameLine();
-        ImGui::RadioButton("Material", (RenderModelType *)&uiState_.renderMode,
-                           RenderModelType(UIState::RenderMode::material));
+        ImGui::RadioButton("Material", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
+                           static_cast<RenderModelType>(UIState::RenderMode::material));
 
         // ImGui::SameLine();
-        // ImGui::RadioButton("Path Tracing", (int *)&uiManager_.renderMode, RenderMode::PathTracing);
+        ImGui::RadioButton("Path Tracing", reinterpret_cast<RenderModelType *>(&uiState_.renderMode), static_cast<RenderModelType>(UIState::RenderMode::path_tracing));
 
         ImGui::SeparatorText("Shading Mode");
 
         using ShadeModelType = std::underlying_type_t<UIState::LightingMode>;
 
-        ImGui::RadioButton("Color Shading", (int *)&uiState_.lightingMode,
-                           ShadeModelType(UIState::LightingMode::simple));
+        ImGui::RadioButton("Color Shading", reinterpret_cast<int *>(&uiState_.lightingMode),
+                           static_cast<ShadeModelType>(UIState::LightingMode::simple));
         ImGui::SameLine();
-        ImGui::RadioButton("Solid Shading", (int *)&uiState_.lightingMode,
-                           ShadeModelType(UIState::LightingMode::solid));
+        ImGui::RadioButton("Solid Shading", reinterpret_cast<int *>(&uiState_.lightingMode),
+                           static_cast<ShadeModelType>(UIState::LightingMode::solid));
 
         ImGui::Checkbox("Show Normal", &uiState_.showNormal);
         ImGui::SameLine();
