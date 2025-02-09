@@ -157,6 +157,10 @@ struct InternalSceneRenderPass : public RenderPass {
             path_tracing_compute_system->computeModel_.ubo.rand2 = 1201456;
             path_tracing_compute_system->updateUniformBuffer(frame_index);
 
+            if (uiState_.reset_camera == true) {
+                uiState_.reset_camera = false;
+                path_tracing_compute_model->ubo.currentSample = 0;
+            }
 
             if (auto colorTexture = dynamic_cast<ColorTextureResource *>(target)) {
                 path_tracing_compute_system->recordCommandBuffer(commandBuffer, targetTexture, accumulationTexture,

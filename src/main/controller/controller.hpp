@@ -83,6 +83,7 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
                 camera.camera_target = glm::vec3(0.0f);
                 camera.zoom = 45;
                 camera.update_camera_vectors();
+                uiState_.reset_camera = true;
             }
         }
 
@@ -96,6 +97,7 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
                 camera.camera_target = glm::vec3(0.0f);
                 camera.zoom = 45;
                 camera.update_camera_vectors();
+                uiState_.reset_camera = true;
             }
         }
 
@@ -110,6 +112,7 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
                 camera.camera_target = glm::vec3(0.0f);
                 camera.zoom = 45;
                 camera.update_camera_vectors();
+                uiState_.reset_camera = true;
             }
         }
 
@@ -129,6 +132,7 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
         // auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         if (sceneTree_.get().active_camera) {
             sceneTree_.get().active_camera->camera.process_mouse_scroll(y_offset);
+            uiState_.reset_camera = true;
         }
     }
 
@@ -224,8 +228,11 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
                     }
                 } else if (uiState.isPressingShift) {
                     camera.process_mouse_shift_movement(x_offset, y_offset);
+                    uiState_.reset_camera = true;
+
                 } else {
                     camera.process_mouse_movement(x_offset, y_offset);
+                    uiState_.reset_camera = true;
                 }
             }
         }

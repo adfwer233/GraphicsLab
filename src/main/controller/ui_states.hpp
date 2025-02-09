@@ -101,6 +101,8 @@ struct UIState : Reflectable {
                 {"scope_max", TypeErasedValue(&scope_max)}};
     }
 
+    bool reset_camera = false;
+
     UIState() = default;
 
     ~UIState() = default;

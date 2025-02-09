@@ -116,15 +116,21 @@ public:
                         VklBVHGPUModel::Triangle{trans * glm::vec4(mesh->vertices[tri_indices.i].position, 1.0f),
                                                  trans * glm::vec4(mesh->vertices[tri_indices.j].position, 1.0f),
                                                  trans * glm::vec4(mesh->vertices[tri_indices.k].position, 1.0f),
-                                                 static_cast<uint32_t>(mesh3d_nodes->material_index.has_value() ? mesh3d_nodes->material_index.value() : 0)};
-
-                    if (bvhObject.triangle.v0.x > 0) {
-                        bvhObject.triangle.materialIndex = 3;
-                    }
+                                                 static_cast<uint32_t>(1)};
                     objects.push_back(bvhObject);
                 }
             }
         });
+
+        BVHObject bvhObject;
+        bvhObject.object_index = objects.size();
+        bvhObject.triangle =
+            VklBVHGPUModel::Triangle{glm::vec4(0.0, 15.0, 5.0, 1.0f),
+                                     glm::vec4(5.0, 15.0, -5.0, 1.0f),
+                                     glm::vec4(5.0, 15.0, 5.0, 1.0f),
+                                     static_cast<uint32_t>(3)};
+        objects.push_back(bvhObject);
+
 
         std::vector<BVHNode> intermediate;
         int nodeCounter = 0;
