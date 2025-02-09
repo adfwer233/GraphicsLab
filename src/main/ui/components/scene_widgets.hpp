@@ -22,9 +22,11 @@ class SceneWidgetComponent : public UIComponent {
             if (ImGui::BeginTabBar("RenderTabs")) { // Start a tab bar
                 for (auto &[name, img] : renderResources_.imguiImages) {
                     if (uiState_.renderMode == UIState::RenderMode::path_tracing) {
-                        if (name == "scene_render_result") continue;
+                        if (name == "scene_render_result")
+                            continue;
                     } else {
-                        if (name == "path_tracing_result") continue;
+                        if (name == "path_tracing_result")
+                            continue;
                     }
                     if (ImGui::BeginTabItem(name.c_str())) { // Create a tab for each image
                         auto wsize = ImGui::GetContentRegionAvail();

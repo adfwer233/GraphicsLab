@@ -3,10 +3,10 @@
 #include <format>
 
 #include "base_compute_system.hpp"
-#include "vkl/scene_tree/acceleration_structure/vkl_scene_tree_bvh.hpp"
-#include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/bvh/vkl_bvh.hpp"
 #include "vkl/core/vkl_image.hpp"
+#include "vkl/scene_tree/acceleration_structure/vkl_scene_tree_bvh.hpp"
+#include "vkl/scene_tree/vkl_scene_tree.hpp"
 
 #include "glm/glm.hpp"
 
@@ -307,8 +307,8 @@ class PathTracingComputeModel {
                              nullptr, 0, nullptr, 1, &gen2TranDst);
 
         VkImageMemoryBarrier resultColor2Dst = VklImageUtils::ColorToTransferDstBarrier(renderOutputImage);
-        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-                             0, nullptr, 0, nullptr, 1, &resultColor2Dst);
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &resultColor2Dst);
 
         VkImageCopy region = VklImageUtils::imageCopyRegion(1024, 1024);
         vkCmdCopyImage(commandBuffer, targetTexture, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, accumulationTexture,
@@ -333,4 +333,4 @@ class PathTracingComputeModel {
 
 using PathTracingComputeSystem = BaseComputeSystem<PathTracingUniformBufferObject, PathTracingComputeModel>;
 
-}
+} // namespace vkl

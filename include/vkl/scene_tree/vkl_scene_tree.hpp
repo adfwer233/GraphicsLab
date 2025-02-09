@@ -423,7 +423,8 @@ struct VklSceneTree {
 
         VklBVHGPUModel::Material gray{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0,
                                       glm::vec3(0.77f, 0.77f, 0.80f)};
-        VklBVHGPUModel::Material red{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0, glm::vec3(0.8f, 0.0f, 0.0f)};
+        VklBVHGPUModel::Material red{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0,
+                                     glm::vec3(0.8f, 0.0f, 0.0f)};
         VklBVHGPUModel::Material green{VklBVHGPUModel::MaterialType::Lambertian, 0.0, 0.5, 1.0,
                                        glm::vec3(0.0f, 0.8f, 0.0f)};
         VklBVHGPUModel::Material whiteLight{VklBVHGPUModel::MaterialType::LightSource, 0.0, 0.0, 1.0,

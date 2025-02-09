@@ -14,16 +14,18 @@
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 #include "vkl/system/render_system/world_axis_render_system.hpp"
 
-#include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"
 #include "vkl/system/compute_system/scene_tree_path_tracing_compute_model.hpp"
+#include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"
 
 #include <geometry/parametric/torus.hpp>
 #include <ui/render_resources.hpp>
 
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
-    explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState, RenderResources &renderResources)
-        : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree), uiState_(uiState), renderResources_(renderResources) {
+    explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState,
+                                     RenderResources &renderResources)
+        : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree), uiState_(uiState),
+          renderResources_(renderResources) {
     }
 
     RenderPassReflection render_pass_reflect() override {
@@ -99,17 +101,21 @@ struct InternalSceneRenderPass : public RenderPass {
          * Initialize path tracing texture
          */
         path_tracing_compute_model = std::make_unique<vkl::PathTracingComputeModel>(device_, sceneTree_);
-        path_tracing_compute_system = std::make_unique<vkl::PathTracingComputeSystem>(device_, *path_tracing_compute_model);
-        path_tracing_texture = std::make_unique<VklTexture>(device_, 1024, 1024, 4, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
-                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, VK_SAMPLE_COUNT_1_BIT);
+        path_tracing_compute_system =
+            std::make_unique<vkl::PathTracingComputeSystem>(device_, *path_tracing_compute_model);
+        path_tracing_texture = std::make_unique<VklTexture>(
+            device_, 1024, 1024, 4,
+            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, VK_SAMPLE_COUNT_1_BIT);
 
         vkDeviceWaitIdle(device_.device());
         spdlog::critical("test asdf asdf 1");
 
         auto imguiContext = ImguiContext::getInstance(device_, render_context->get_glfw_window(),
-                                                 render_context->get_swap_chain_render_pass());
-        renderResources_.imguiImages["path_tracing_result"] = ImguiUtils::getImguiTextureFromVklTexture(path_tracing_texture.get());
+                                                      render_context->get_swap_chain_render_pass());
+        renderResources_.imguiImages["path_tracing_result"] =
+            ImguiUtils::getImguiTextureFromVklTexture(path_tracing_texture.get());
         spdlog::critical("test asdf asdf ");
     }
 
@@ -142,7 +148,6 @@ struct InternalSceneRenderPass : public RenderPass {
 
         if (uiState_.renderMode == UIState::RenderMode::path_tracing) {
 
-
             auto target = render_context->resource_manager.get_resource("scene_render_result");
 
             auto targetTexture = path_tracing_compute_model->getTargetTexture();
@@ -164,7 +169,7 @@ struct InternalSceneRenderPass : public RenderPass {
 
             if (auto colorTexture = dynamic_cast<ColorTextureResource *>(target)) {
                 path_tracing_compute_system->recordCommandBuffer(commandBuffer, targetTexture, accumulationTexture,
-                                                                     path_tracing_texture->image_, frame_index);
+                                                                 path_tracing_texture->image_, frame_index);
             }
             begin_render_pass(commandBuffer);
 

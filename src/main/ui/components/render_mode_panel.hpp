@@ -18,7 +18,8 @@ class RenderModelPanel : public UIComponent {
 
         using RenderModelType = std::underlying_type_t<UIState::RenderMode>;
 
-        ImGui::RadioButton("Raw", reinterpret_cast<RenderModelType *>(&uiState_.renderMode), static_cast<RenderModelType>(UIState::RenderMode::raw));
+        ImGui::RadioButton("Raw", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
+                           static_cast<RenderModelType>(UIState::RenderMode::raw));
         ImGui::SameLine();
         ImGui::RadioButton("Wire Frame", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
                            static_cast<RenderModelType>(UIState::RenderMode::wireframe));
@@ -30,7 +31,8 @@ class RenderModelPanel : public UIComponent {
                            static_cast<RenderModelType>(UIState::RenderMode::material));
 
         // ImGui::SameLine();
-        ImGui::RadioButton("Path Tracing", reinterpret_cast<RenderModelType *>(&uiState_.renderMode), static_cast<RenderModelType>(UIState::RenderMode::path_tracing));
+        ImGui::RadioButton("Path Tracing", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
+                           static_cast<RenderModelType>(UIState::RenderMode::path_tracing));
 
         ImGui::SeparatorText("Shading Mode");
 

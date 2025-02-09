@@ -33,7 +33,7 @@ struct SceneTreeBvh {
         std::vector<BVHObject> objects;
     };
 
-private:
+  private:
     SceneTree::VklSceneTree &scene_;
 
     static AABB surroundingBox(AABB box0, AABB box1) {
@@ -78,7 +78,7 @@ private:
         return boxCompare(a.triangle, b.triangle, 2);
     }
 
-public:
+  public:
     std::vector<BVHObject> objects;
     std::vector<VklBVHGPUModel::Light> lights;
     std::vector<VklBVHGPUModel::Triangle> triangles;
@@ -96,13 +96,15 @@ public:
         // create bvh objects
         this->objects.clear();
 
-        using RenderableTypeList = MetaProgramming::TypeList<Mesh3D, GraphicsLab::Geometry::Sphere, GraphicsLab::Geometry::Torus>;
+        using RenderableTypeList =
+            MetaProgramming::TypeList<Mesh3D, GraphicsLab::Geometry::Sphere, GraphicsLab::Geometry::Torus>;
 
         MetaProgramming::ForEachType(RenderableTypeList{}, [&]<typename T>() {
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
             for (auto [mesh3d_nodes, trans] : scene_.traverse_geometry_nodes_with_trans<T>()) {
-                Mesh3D* mesh = nullptr;
-                if constexpr (std::is_same_v<T, GraphicsLab::Geometry::Sphere> or std::is_same_v<T, GraphicsLab::Geometry::Torus>) {
+                Mesh3D *mesh = nullptr;
+                if constexpr (std::is_same_v<T, GraphicsLab::Geometry::Sphere> or
+                              std::is_same_v<T, GraphicsLab::Geometry::Torus>) {
                     mesh = mesh3d_nodes->data.mesh.get();
                 } else if constexpr (std::is_same_v<T, Mesh3D>) {
                     mesh = &mesh3d_nodes->data;
@@ -112,11 +114,10 @@ public:
                     auto tri_indices = mesh->indices[k];
                     BVHObject bvhObject;
                     bvhObject.object_index = objects.size();
-                    bvhObject.triangle =
-                        VklBVHGPUModel::Triangle{trans * glm::vec4(mesh->vertices[tri_indices.i].position, 1.0f),
-                                                 trans * glm::vec4(mesh->vertices[tri_indices.j].position, 1.0f),
-                                                 trans * glm::vec4(mesh->vertices[tri_indices.k].position, 1.0f),
-                                                 static_cast<uint32_t>(1)};
+                    bvhObject.triangle = VklBVHGPUModel::Triangle{
+                        trans * glm::vec4(mesh->vertices[tri_indices.i].position, 1.0f),
+                        trans * glm::vec4(mesh->vertices[tri_indices.j].position, 1.0f),
+                        trans * glm::vec4(mesh->vertices[tri_indices.k].position, 1.0f), static_cast<uint32_t>(1)};
                     objects.push_back(bvhObject);
                 }
             }
@@ -124,13 +125,9 @@ public:
 
         BVHObject bvhObject;
         bvhObject.object_index = objects.size();
-        bvhObject.triangle =
-            VklBVHGPUModel::Triangle{glm::vec4(0.0, 15.0, 5.0, 1.0f),
-                                     glm::vec4(5.0, 15.0, -5.0, 1.0f),
-                                     glm::vec4(5.0, 15.0, 5.0, 1.0f),
-                                     static_cast<uint32_t>(3)};
+        bvhObject.triangle = VklBVHGPUModel::Triangle{glm::vec4(0.0, 15.0, 5.0, 1.0f), glm::vec4(5.0, 15.0, -5.0, 1.0f),
+                                                      glm::vec4(5.0, 15.0, 5.0, 1.0f), static_cast<uint32_t>(3)};
         objects.push_back(bvhObject);
-
 
         std::vector<BVHNode> intermediate;
         int nodeCounter = 0;
@@ -210,7 +207,8 @@ public:
 
         for (size_t i = 0; i < triangles.size(); i++) {
             auto t = triangles[i];
-            //        if (scene_.materials[triangles[i].materialIndex].type == VklBVHGPUModel::MaterialType::LightSource) {
+            //        if (scene_.materials[triangles[i].materialIndex].type ==
+            //        VklBVHGPUModel::MaterialType::LightSource) {
             if (scene_.materials[triangles[i].materialIndex].type == VklBVHGPUModel::MaterialType::LightSource) {
                 float area = glm::length(glm::cross(t.v1 - t.v0, t.v2 - t.v0)) * 0.5f;
                 lights.emplace_back(static_cast<uint32_t>(i), area);
@@ -220,4 +218,4 @@ public:
         return output;
     }
 };
-}
+} // namespace vkl
