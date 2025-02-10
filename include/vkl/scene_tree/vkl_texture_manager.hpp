@@ -16,10 +16,12 @@ struct TextureManager {
 
     std::map<std::string, TextureMetadata> textures_metadata;
 
-    explicit TextureManager(VklDevice &device): device(device) {}
-    ~TextureManager() {}
+    explicit TextureManager(VklDevice &device) : device(device) {
+    }
+    ~TextureManager() {
+    }
 
-    void load_texture(const std::string& texture_path) {
+    void load_texture(const std::string &texture_path) {
         // get the file name
         std::string texture_name = texture_path.substr(texture_path.find_last_of('/') + 1);
         texture_name = texture_name.substr(0, texture_name.find_last_of('.'));
@@ -39,7 +41,7 @@ struct TextureManager {
         textures_metadata[texture_name] = metadata;
     }
 
-    [[nodiscard]] auto get_texture(const std::string& texture_name) -> VklTexture* {
+    [[nodiscard]] auto get_texture(const std::string &texture_name) -> VklTexture * {
         if (textures_metadata.find(texture_name) == textures_metadata.end()) {
             throw std::runtime_error("texture not found");
         }
@@ -47,7 +49,7 @@ struct TextureManager {
         return textures[textures_metadata[texture_name].texture_index].get();
     }
 
-private:
+  private:
     auto createTextureImage(const std::string &texturePath) const -> std::unique_ptr<VklTexture> {
         int texWidth, texHeight, texChannels;
         stbi_uc *pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -70,11 +72,11 @@ private:
         auto texture = std::make_unique<VklTexture>(device, texWidth, texHeight, texChannels);
 
         device.transitionImageLayout(texture->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         device.copyBufferToImage(stagingBuffer.getBuffer(), texture->image_, static_cast<uint32_t>(texWidth),
-                                  static_cast<uint32_t>(texHeight), 1);
+                                 static_cast<uint32_t>(texHeight), 1);
         device.transitionImageLayout(texture->image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         stbi_image_free(pixels);
 
@@ -82,4 +84,4 @@ private:
     }
 };
 
-}
+} // namespace vkl

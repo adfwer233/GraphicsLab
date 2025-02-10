@@ -10,8 +10,7 @@ class TextureManager : public UIComponent {
     RenderResources &renderResources_;
 
   public:
-    TextureManager(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState,
-                         RenderResources &renderResources)
+    TextureManager(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState, RenderResources &renderResources)
         : UIComponent(context), uiState_(uiState), renderResources_(renderResources) {
     }
 
@@ -24,15 +23,17 @@ class TextureManager : public UIComponent {
                 context_.sceneTree->texture_manager.load_texture(path);
             }
 
-            for (auto& [name, texture_meta]: context_.sceneTree->texture_manager.textures_metadata) {
+            for (auto &[name, texture_meta] : context_.sceneTree->texture_manager.textures_metadata) {
                 auto texture = context_.sceneTree->texture_manager.textures[texture_meta.texture_index].get();
 
                 if (not renderResources_.textureImguiImages.contains(name)) {
-                    renderResources_.textureImguiImages[name] = GraphicsLab::ImguiUtils::getImguiTextureFromVklTexture(texture);
+                    renderResources_.textureImguiImages[name] =
+                        GraphicsLab::ImguiUtils::getImguiTextureFromVklTexture(texture);
                 }
 
                 ImGui::BeginGroup();
-                ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.textureImguiImages[name].front()), ImVec2(128, 128));
+                ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.textureImguiImages[name].front()),
+                             ImVec2(128, 128));
                 ImGui::Text(name.c_str());
                 ImGui::EndGroup();
 
