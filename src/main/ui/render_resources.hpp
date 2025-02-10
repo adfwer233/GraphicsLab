@@ -9,4 +9,6 @@ struct RenderResources {
     std::vector<VkDescriptorSet> projectRenderTexture;
 
     std::map<std::string, std::vector<VkDescriptorSet>> imguiImages;
+
+    std::map<std::string, std::vector<VkDescriptorSet>> textureImguiImages;
 };

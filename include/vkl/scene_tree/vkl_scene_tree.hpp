@@ -11,6 +11,7 @@
 #include <assimp/scene.h>
 
 #include "vkl_camera.hpp"
+#include "vkl_texture_manager.hpp"
 // #include "vkl_material.hpp"
 
 #include "glm/gtc/quaternion.hpp"
@@ -411,13 +412,15 @@ struct VklSceneTree {
 
     std::mutex sceneTreeMutex;
 
+    vkl::TextureManager texture_manager;
+
     void sceneUpdated() {
         if (sceneUpdateCallBack) {
             sceneUpdateCallBack();
         }
     }
 
-    explicit VklSceneTree(VklDevice &device) : device_(device) {
+    explicit VklSceneTree(VklDevice &device) : device_(device), texture_manager(device) {
         root = std::make_unique<SceneTree::InternalNode>();
         spdlog::info("Scene Tree Created");
 
