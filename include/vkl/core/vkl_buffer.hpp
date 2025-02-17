@@ -4,6 +4,7 @@
 
 #include "vk_mem_alloc.h"
 
+#include <cstring>
 #include <stdexcept>
 
 namespace vkl {

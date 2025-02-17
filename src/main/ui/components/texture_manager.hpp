@@ -34,7 +34,7 @@ class TextureManager : public UIComponent {
                 ImGui::BeginGroup();
                 ImGui::Image(reinterpret_cast<ImTextureID>(renderResources_.textureImguiImages[name].front()),
                              ImVec2(128, 128));
-                ImGui::Text(name.c_str());
+                ImGui::Text("%s", name.c_str());
                 ImGui::EndGroup();
 
                 ImGui::SameLine();
