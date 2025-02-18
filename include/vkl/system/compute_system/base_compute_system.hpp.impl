@@ -12,7 +12,7 @@ BaseComputeSystem<UniformBufferType, ComputeModelType>::BaseComputeSystem(VklDev
     createUniformBuffers();
     createDescriptorPool();
     createComputeDescriptorSets();
-    createCommandBuffer();
+    // createCommandBuffer();
     createSyncObjects();
 }
 

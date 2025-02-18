@@ -120,6 +120,14 @@ struct InternalSceneRenderPass : public RenderPass {
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
+        if (uiState_.reset_gpu_bvh) {
+            path_tracing_compute_model = std::make_unique<vkl::PathTracingComputeModel>(device_, sceneTree_);
+            path_tracing_compute_system =
+                std::make_unique<vkl::PathTracingComputeSystem>(device_, *path_tracing_compute_model);
+            vkDeviceWaitIdle(device_.device());
+            uiState_.reset_gpu_bvh = false;
+        }
+
         auto commandBuffer = render_context->get_current_command_buffer();
 
         uint32_t frame_index = render_context->get_current_frame_index();
@@ -147,7 +155,6 @@ struct InternalSceneRenderPass : public RenderPass {
         using RenderableTypeList = MetaProgramming::TypeList<Mesh3D, Geometry::Sphere, Geometry::Torus>;
 
         if (uiState_.renderMode == UIState::RenderMode::path_tracing) {
-
             auto target = render_context->resource_manager.get_resource("scene_render_result");
 
             auto targetTexture = path_tracing_compute_model->getTargetTexture();

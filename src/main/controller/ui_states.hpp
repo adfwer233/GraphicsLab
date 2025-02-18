@@ -102,6 +102,7 @@ struct UIState : Reflectable {
     }
 
     bool reset_camera = false;
+    bool reset_gpu_bvh = false;
 
     UIState() = default;
 

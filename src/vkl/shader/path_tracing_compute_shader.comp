@@ -255,7 +255,7 @@ bool scatter(Ray ray, inout hitRecord rec, inout vec3 factor, inout vec3 ambient
         materialSample = sampleMetal(ray.dir, rec.normal, materialSamplePdf);
     } else if(materials[rec.materialIndex].materialType == LIGHT_MATERIAL) {
         factor = vec3(0.0);
-        ambient = vec3(2.0);
+        ambient = vec3(1.0);
         return true;
     }
 
