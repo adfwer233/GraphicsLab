@@ -58,10 +58,14 @@ class ImguiContext {
 
         ImGui_ImplVulkan_Init(&init_info);
 
-        io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
+        if (set_font) {
+            io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
+        }
     }
 
   public:
+    static inline bool set_font = true;
+
     void cleanContext() {
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();

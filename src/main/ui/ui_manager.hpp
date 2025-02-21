@@ -20,8 +20,11 @@
 
 using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 
+using ScenePanelRenderOrder = MetaProgramming::TypeList<SceneWidgetComponent, TextureManager>;
+
 class UIManager {
     std::vector<UIComponent *> component_ptrs;
+
     UIState &ui_state_;
 
   public:

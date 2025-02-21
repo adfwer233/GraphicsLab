@@ -19,3 +19,6 @@ class UIComponent : public GraphicsLab::IGraphicsLabImguiComponent {
 
     explicit UIComponent(GraphicsLab::GraphicsLabInternalContext &context) : context_(context) {};
 };
+
+template<typename T>
+concept DerivableFromUIComponent = std::is_base_of_v<UIComponent, T>;
