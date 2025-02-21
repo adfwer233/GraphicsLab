@@ -6,8 +6,8 @@
 
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
-#include "graphics_lab/render_passes/simple_pass.hpp"
 #include "graphics_lab/render_passes/simple_imgui_pass.hpp"
+#include "graphics_lab/render_passes/simple_pass.hpp"
 #include "vkl/core/vkl_window.hpp"
 
 FluidSimulationApplication::~FluidSimulationApplication() {

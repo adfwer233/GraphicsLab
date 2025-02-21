@@ -21,8 +21,9 @@ struct BaseFluidSimulator {
     const float viscosity = 0.0f;
 
     BaseFluidSimulator(int width, int height)
-        : velocity_x(width, height), velocity_y(width, height),
-          pressure(width, height), divergence(width, height), density(width, height) {}
+        : velocity_x(width, height), velocity_y(width, height), pressure(width, height), divergence(width, height),
+          density(width, height) {
+    }
 
     void add_source(Grid2D<float> &grid, const Grid2D<float> &source) {
         for (int y = 0; y < grid.height; ++y) {
@@ -37,15 +38,16 @@ struct BaseFluidSimulator {
         for (int k = 0; k < 20; ++k) {
             for (int y = 1; y < grid.height - 1; ++y) {
                 for (int x = 1; x < grid.width - 1; ++x) {
-                    grid(x, y) = (prev(x, y) + a * (grid(x - 1, y) + grid(x + 1, y) +
-                                                   grid(x, y - 1) + grid(x, y + 1))) /
-                                 (1 + 4 * a);
+                    grid(x, y) =
+                        (prev(x, y) + a * (grid(x - 1, y) + grid(x + 1, y) + grid(x, y - 1) + grid(x, y + 1))) /
+                        (1 + 4 * a);
                 }
             }
         }
     }
 
-    void advect(Grid2D<float> &grid, const Grid2D<float> &prev, const Grid2D<float> &vel_x, const Grid2D<float> &vel_y) {
+    void advect(Grid2D<float> &grid, const Grid2D<float> &prev, const Grid2D<float> &vel_x,
+                const Grid2D<float> &vel_y) {
         for (int y = 1; y < grid.height - 1; ++y) {
             for (int x = 1; x < grid.width - 1; ++x) {
                 float x0 = x - dt * vel_x(x, y);
@@ -60,8 +62,8 @@ struct BaseFluidSimulator {
                 float s1 = x0 - i0, s0 = 1 - s1;
                 float t1 = y0 - j0, t0 = 1 - t1;
 
-                grid(x, y) = s0 * (t0 * prev(i0, j0) + t1 * prev(i0, j1)) +
-                             s1 * (t0 * prev(i1, j0) + t1 * prev(i1, j1));
+                grid(x, y) =
+                    s0 * (t0 * prev(i0, j0) + t1 * prev(i0, j1)) + s1 * (t0 * prev(i1, j0) + t1 * prev(i1, j1));
             }
         }
     }
@@ -69,8 +71,7 @@ struct BaseFluidSimulator {
     void project(Grid2D<float> &vel_x, Grid2D<float> &vel_y, Grid2D<float> &pressure, Grid2D<float> &divergence) {
         for (int y = 1; y < vel_x.height - 1; ++y) {
             for (int x = 1; x < vel_x.width - 1; ++x) {
-                divergence(x, y) = -0.5f * (vel_x(x + 1, y) - vel_x(x - 1, y) +
-                                           vel_y(x, y + 1) - vel_y(x, y - 1));
+                divergence(x, y) = -0.5f * (vel_x(x + 1, y) - vel_x(x - 1, y) + vel_y(x, y + 1) - vel_y(x, y - 1));
                 pressure(x, y) = 0;
             }
         }
@@ -78,8 +79,8 @@ struct BaseFluidSimulator {
         for (int k = 0; k < 20; ++k) {
             for (int y = 1; y < pressure.height - 1; ++y) {
                 for (int x = 1; x < pressure.width - 1; ++x) {
-                    pressure(x, y) = (divergence(x, y) + pressure(x - 1, y) + pressure(x + 1, y) +
-                                      pressure(x, y - 1) + pressure(x, y + 1)) /
+                    pressure(x, y) = (divergence(x, y) + pressure(x - 1, y) + pressure(x + 1, y) + pressure(x, y - 1) +
+                                      pressure(x, y + 1)) /
                                      4.0f;
                 }
             }
@@ -109,4 +110,4 @@ struct BaseFluidSimulator {
         project(velocity_x, velocity_y, pressure, divergence);
     }
 };
-};
+}; // namespace GraphicsLab::Simulation

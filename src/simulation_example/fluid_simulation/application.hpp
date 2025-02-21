@@ -4,13 +4,13 @@
 #include "graphics_lab/render_graph/render_context.hpp"
 
 struct FluidSimulationApplication {
-private:
+  private:
     static constexpr int WIDTH = 1980;
     static constexpr int HEIGHT = 1080;
 
     GraphicsLab::GraphicsLabInternalContext appContext;
 
-public:
+  public:
     FluidSimulationApplication() : appContext(WIDTH, HEIGHT) {};
     ~FluidSimulationApplication();
 
