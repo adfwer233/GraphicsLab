@@ -5,8 +5,12 @@
 #include "render_pass_reflection.hpp"
 #include "resources.hpp"
 
-namespace GraphicsLab {
-namespace RenderGraph {
+
+namespace GraphicsLab::RenderGraph {
+
+struct ImGuiResources {
+    std::map<std::string, std::vector<VkDescriptorSet>> imguiImages;
+};
 
 struct ResourceManager {
     explicit ResourceManager(VklDevice &device) : device_(device) {
@@ -39,7 +43,7 @@ struct ResourceManager {
                 device_, field.get_width(), field.get_height(), 4,
                 VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, sampleBits);
+                field.get_layout(), VK_FORMAT_R8G8B8A8_SRGB, sampleBits);
             color_texture->copy_annotation(field);
             resources_.push_back(std::move(color_texture));
 
@@ -90,5 +94,4 @@ struct ResourceManager {
     std::vector<std::unique_ptr<Resource>> resources_;
 };
 
-} // namespace RenderGraph
-} // namespace GraphicsLab
+} // namespace GraphicsLab::RenderGraph

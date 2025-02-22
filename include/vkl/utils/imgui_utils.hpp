@@ -2,7 +2,7 @@
 
 #include "vkl/core/vkl_texture.hpp"
 
-namespace GraphicsLab {
+namespace vkl {
 
 struct ImguiUtils {
     static auto getImguiTextureFromVklTexture(VklTexture *texture) {
@@ -13,4 +13,4 @@ struct ImguiUtils {
         return result;
     }
 };
-} // namespace GraphicsLab
+} // namespace vkl

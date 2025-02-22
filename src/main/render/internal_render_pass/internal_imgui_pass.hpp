@@ -5,7 +5,7 @@
 #include "../../ui/ui_manager.hpp"
 #include "graphics_lab/render_passes/swap_chain_pass.hpp"
 
-#include "utils/imgui_utils.hpp"
+#include "vkl/utils/imgui_utils.hpp"
 
 namespace GraphicsLab::RenderGraph {
 struct InternalImguiPass : public SwapChainPass {
@@ -25,7 +25,7 @@ struct InternalImguiPass : public SwapChainPass {
         for (auto r : render_context->resource_manager.get_resource_with_annotation("imgui_show")) {
             if (auto colorTexture = dynamic_cast<ColorTextureResource *>(r)) {
                 uiManager_.renderResources.imguiImages[colorTexture->get_name()] =
-                    ImguiUtils::getImguiTextureFromVklTexture(colorTexture->get_resolved_texture());
+                    vkl::ImguiUtils::getImguiTextureFromVklTexture(colorTexture->get_resolved_texture());
             }
         }
 

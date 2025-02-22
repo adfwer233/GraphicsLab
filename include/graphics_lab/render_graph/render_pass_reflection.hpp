@@ -62,6 +62,10 @@ struct RenderPassReflection {
             format_ = format;
             return *this;
         }
+        Field &layout(VkImageLayout layout) {
+            texture_layout_ = layout;
+            return *this;
+        }
 
         [[nodiscard]] std::string get_name() const {
             return name_;
@@ -80,6 +84,9 @@ struct RenderPassReflection {
         }
         [[nodiscard]] uint32_t get_sample_count() const {
             return sample_count_;
+        }
+        [[nodiscard]] VkImageLayout get_layout() const {
+            return texture_layout_;
         }
 
         [[nodiscard]] VkSampleCountFlagBits get_vk_sample_count_flag_bits() const {
@@ -119,6 +126,8 @@ struct RenderPassReflection {
         VkFormat format_;
 
         Visibility visibility_ = Visibility::Undefined;
+
+        VkImageLayout texture_layout_ = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     };
 
     Field &add_field(const Field &field) {

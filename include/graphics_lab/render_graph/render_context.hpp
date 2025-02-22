@@ -12,6 +12,7 @@ namespace RenderGraph {
  */
 struct RenderContext {
     ResourceManager resource_manager;
+    ImGuiResources imgui_resources;
 
     uint32_t get_width() const {
         return width_;

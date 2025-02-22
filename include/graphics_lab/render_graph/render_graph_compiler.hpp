@@ -50,6 +50,9 @@ struct RenderGraphCompiler {
     void create_resources(RenderContext *context) {
         for (auto pass : render_graph_.get_all_passes_generator()) {
             for (auto &f : pass->render_pass_reflect()) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
+                    auto resource = context->resource_manager.add_resource(f);
+                }
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
                     auto resource = context->resource_manager.add_resource(f);
                 }

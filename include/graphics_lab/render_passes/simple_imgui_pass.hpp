@@ -32,7 +32,26 @@ struct SimpleImGuiPass : public SwapChainPass {
 
         begin_swap_chain_render_pass(commandBuffer, render_context);
         ImGui::DockSpaceOverViewport();
-        ImGui::ShowDemoWindow();
+        ImGui::Begin("Render Result");
+        {
+            if (ImGui::BeginTabBar("RenderTabs")) { // Start a tab bar
+                for (auto &[name, img] : render_context->imgui_resources.imguiImages) {
+                    if (ImGui::BeginTabItem(name.c_str())) { // Create a tab for each image
+                        auto wsize = ImGui::GetContentRegionAvail();
+                        // todo: set frame index
+                        float min_size = std::min(wsize.x, wsize.y);
+                        ImGui::Image(reinterpret_cast<ImTextureID>(img.front()), ImVec2(min_size, min_size));
+
+                        ImGui::EndTabItem(); // End the tab for the current image
+                    }
+                    if (ImGui::IsItemVisible()) {
+                    }
+                }
+            }
+            ImGui::EndTabBar(); // End the tab bar
+        }
+
+        ImGui::End();
         ImGui::Render();
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         end_render_pass(commandBuffer);

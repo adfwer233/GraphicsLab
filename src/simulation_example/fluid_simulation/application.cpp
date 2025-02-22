@@ -10,6 +10,8 @@
 #include "graphics_lab/render_passes/simple_pass.hpp"
 #include "vkl/core/vkl_window.hpp"
 
+#include "graphics_lab/render_passes/grid2d_render_pass.hpp"
+
 FluidSimulationApplication::~FluidSimulationApplication() {
 }
 
@@ -23,10 +25,26 @@ void FluidSimulationApplication::run() {
     GLFWwindow *window = appContext.window_.getGLFWwindow();
 
     ImguiContext::set_font = false;
+    ImguiContext::getInstance(appContext.device_, appContext.window_.getGLFWwindow(), appContext.renderContext.get_swap_chain_render_pass());
+
+    GraphicsLab::Simulation::Grid2D<float> grid(1024, 1024);
+
+    for (int i = 0; i < 1024; i++) {
+        for (int j = 0; j < 1024; j++) {
+            if (std::pow(i - 512, 2) + std::pow(j - 512, 2) <= std::pow(100, 2)) {
+                grid(i, j) = 0.5f;
+            }
+        }
+    }
 
     SimpleImGuiPass simple_pass(appContext.device_);
+    Grid2DRenderPass grid_2d_render_pass(appContext.device_, [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return grid; });
+
     simple_pass.set_extent(WIDTH, HEIGHT);
+
+    appContext.renderGraph->add_pass(&grid_2d_render_pass, "grid_pass");
     appContext.renderGraph->add_pass(&simple_pass, "simple_pass");
+    appContext.renderGraph->add_edge("grid_pass", "simple_pass");
     appContext.compileRenderGraph();
 
     float deltaTime = 0, lastFrame = 0;
@@ -48,7 +66,6 @@ void FluidSimulationApplication::run() {
         ImGui_ImplVulkan_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
         appContext.renderContext.begin_frame();
         {
             std::scoped_lock instanceLock(appContext.renderGraphInstanceMutex);

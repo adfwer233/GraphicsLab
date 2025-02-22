@@ -5,7 +5,7 @@
 #include "../../controller/ui_states.hpp"
 #include "geometry/constructor/box3d.hpp"
 #include "graphics_lab/render_graph/render_pass.hpp"
-#include "utils/imgui_utils.hpp"
+#include "vkl/utils/imgui_utils.hpp"
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/aabb_box_render_system.hpp"
@@ -115,7 +115,7 @@ struct InternalSceneRenderPass : public RenderPass {
         auto imguiContext = ImguiContext::getInstance(device_, render_context->get_glfw_window(),
                                                       render_context->get_swap_chain_render_pass());
         renderResources_.imguiImages["path_tracing_result"] =
-            ImguiUtils::getImguiTextureFromVklTexture(path_tracing_texture.get());
+            vkl::ImguiUtils::getImguiTextureFromVklTexture(path_tracing_texture.get());
         spdlog::critical("test asdf asdf ");
     }
 
