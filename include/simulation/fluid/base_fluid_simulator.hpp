@@ -15,14 +15,16 @@ struct BaseFluidSimulator {
     Grid2D<float> pressure;
     Grid2D<float> divergence;
     Grid2D<float> density;
+    Grid2D<float> curl;
+    Grid2D<float> speed;
 
     const float dt = 0.1f;
-    const float diffusion = 1.0f;
+    const float diffusion = 0.0f;
     const float viscosity = 1.0f;
 
     BaseFluidSimulator(int width, int height)
         : velocity_x(width, height), velocity_y(width, height), pressure(width, height), divergence(width, height),
-          density(width, height) {
+          density(width, height), curl(width, height), speed(width, height) {
     }
 
     void add_source(Grid2D<float> &grid, const Grid2D<float> &source) {
@@ -114,6 +116,29 @@ struct BaseFluidSimulator {
         advect(velocity_y, prev_vel_y, velocity_x, velocity_y);
 
         project(velocity_x, velocity_y, pressure, divergence);
+
+        compute_curl(velocity_x, velocity_y, curl);
+        compute_speed(velocity_x, velocity_y, speed);
+    }
+
+    void compute_curl(const Grid2D<float> &vel_x, const Grid2D<float> &vel_y, Grid2D<float> &curl) {
+        #pragma omp parallel for
+        for (int y = 1; y < curl.height - 1; ++y) {
+            for (int x = 1; x < curl.width - 1; ++x) {
+                float vx_dy = (vel_x(x, y) - vel_x(x, y - 1));
+                float vy_dx = (vel_y(x, y) - vel_y(x - 1, y));
+                curl(x, y) = vx_dy - vy_dx;
+            }
+        }
+    }
+
+    void compute_speed(const Grid2D<float> &vel_x, const Grid2D<float> &vel_y, Grid2D<float> &speed) {
+        #pragma omp parallel for
+        for (int y = 1; y < speed.height - 1; ++y) {
+            for (int x = 1; x < speed.width - 1; ++x) {
+                speed(x, y) = std::sqrt(std::pow(vel_x(x, y), 2) + std::pow(vel_y(x, y), 2));
+            }
+        }
     }
 };
 }; // namespace GraphicsLab::Simulation
