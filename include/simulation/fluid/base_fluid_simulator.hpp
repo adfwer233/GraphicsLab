@@ -17,8 +17,8 @@ struct BaseFluidSimulator {
     Grid2D<float> density;
 
     const float dt = 0.1f;
-    const float diffusion = 0.0f;
-    const float viscosity = 0.0f;
+    const float diffusion = 1.0f;
+    const float viscosity = 1.0f;
 
     BaseFluidSimulator(int width, int height)
         : velocity_x(width, height), velocity_y(width, height), pressure(width, height), divergence(width, height),
@@ -26,6 +26,7 @@ struct BaseFluidSimulator {
     }
 
     void add_source(Grid2D<float> &grid, const Grid2D<float> &source) {
+#pragma omp parallel for
         for (int y = 0; y < grid.height; ++y) {
             for (int x = 0; x < grid.width; ++x) {
                 grid(x, y) += dt * source(x, y);
@@ -36,6 +37,7 @@ struct BaseFluidSimulator {
     void diffuse(Grid2D<float> &grid, const Grid2D<float> &prev, float diff) {
         float a = dt * diff * grid.width * grid.height;
         for (int k = 0; k < 20; ++k) {
+#pragma omp parallel for
             for (int y = 1; y < grid.height - 1; ++y) {
                 for (int x = 1; x < grid.width - 1; ++x) {
                     grid(x, y) =
@@ -48,6 +50,7 @@ struct BaseFluidSimulator {
 
     void advect(Grid2D<float> &grid, const Grid2D<float> &prev, const Grid2D<float> &vel_x,
                 const Grid2D<float> &vel_y) {
+#pragma omp parallel for
         for (int y = 1; y < grid.height - 1; ++y) {
             for (int x = 1; x < grid.width - 1; ++x) {
                 float x0 = x - dt * vel_x(x, y);
@@ -69,6 +72,7 @@ struct BaseFluidSimulator {
     }
 
     void project(Grid2D<float> &vel_x, Grid2D<float> &vel_y, Grid2D<float> &pressure, Grid2D<float> &divergence) {
+#pragma omp parallel for
         for (int y = 1; y < vel_x.height - 1; ++y) {
             for (int x = 1; x < vel_x.width - 1; ++x) {
                 divergence(x, y) = -0.5f * (vel_x(x + 1, y) - vel_x(x - 1, y) + vel_y(x, y + 1) - vel_y(x, y - 1));
@@ -77,6 +81,7 @@ struct BaseFluidSimulator {
         }
 
         for (int k = 0; k < 20; ++k) {
+#pragma omp parallel for
             for (int y = 1; y < pressure.height - 1; ++y) {
                 for (int x = 1; x < pressure.width - 1; ++x) {
                     pressure(x, y) = (divergence(x, y) + pressure(x - 1, y) + pressure(x + 1, y) + pressure(x, y - 1) +
@@ -86,6 +91,7 @@ struct BaseFluidSimulator {
             }
         }
 
+#pragma omp parallel for
         for (int y = 1; y < vel_x.height - 1; ++y) {
             for (int x = 1; x < vel_x.width - 1; ++x) {
                 vel_x(x, y) -= 0.5f * (pressure(x + 1, y) - pressure(x - 1, y));

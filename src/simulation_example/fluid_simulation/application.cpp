@@ -12,6 +12,8 @@
 
 #include "graphics_lab/render_passes/grid2d_render_pass.hpp"
 
+#include "simulation/fluid/base_fluid_simulator.hpp"
+
 FluidSimulationApplication::~FluidSimulationApplication() {
 }
 
@@ -37,8 +39,19 @@ void FluidSimulationApplication::run() {
         }
     }
 
+    GraphicsLab::Simulation::BaseFluidSimulator simulator(512, 512);
+
+    for (int i = 0; i < 512; i++) {
+        for (int j = 0; j < 512; j++) {
+            if (std::pow(i - 100, 2) + std::pow(j - 256, 2) <= std::pow(10, 2)) {
+                simulator.density(i, j) = 5.0f;
+                simulator.velocity_x(i, j) = 50.0f;
+            }
+        }
+    }
+
     SimpleImGuiPass simple_pass(appContext.device_);
-    Grid2DRenderPass grid_2d_render_pass(appContext.device_, [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return grid; });
+    Grid2DRenderPass grid_2d_render_pass(appContext.device_, [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.density; });
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
@@ -59,6 +72,8 @@ void FluidSimulationApplication::run() {
         auto currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
+
+        simulator.step();
 
         glfwSetWindowTitle(window, std::format("Graphics Lab {:.2f} FPS", 1 / deltaTime).c_str());
 

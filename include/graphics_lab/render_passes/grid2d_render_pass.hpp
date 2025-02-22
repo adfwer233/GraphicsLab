@@ -31,7 +31,7 @@ struct Grid2DRenderPass : public RenderPass {
             .visibility(RenderPassReflection::Field::Visibility::Internal)
             .layout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
             .format(VkFormat::VK_FORMAT_R8G8B8A8_SRGB)
-            .extent(1024, 1024);
+            .extent(grid_width, grid_height);
 
         reflection.add_input("grid_output", "the input grid texture")
             .type(RenderPassReflection::Field::Type::Texture2D)
