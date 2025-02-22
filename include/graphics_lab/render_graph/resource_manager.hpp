@@ -5,7 +5,6 @@
 #include "render_pass_reflection.hpp"
 #include "resources.hpp"
 
-
 namespace GraphicsLab::RenderGraph {
 
 struct ImGuiResources {
@@ -39,11 +38,11 @@ struct ResourceManager {
             sampleBits = VK_SAMPLE_COUNT_8_BIT;
         if (field.get_type() == RenderPassReflection::Field::Type::Texture2D) {
             auto color_texture = std::make_unique<ColorTextureResource>(field.get_name());
-            color_texture->create_instance(
-                device_, field.get_width(), field.get_height(), 4,
-                VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
-                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                field.get_layout(), field.get_format(), sampleBits);
+            color_texture->create_instance(device_, field.get_width(), field.get_height(), 4,
+                                           VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                                               VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                                               VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+                                           field.get_layout(), field.get_format(), sampleBits);
             color_texture->copy_annotation(field);
             resources_.push_back(std::move(color_texture));
 

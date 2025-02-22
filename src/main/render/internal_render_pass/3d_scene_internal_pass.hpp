@@ -5,7 +5,6 @@
 #include "../../controller/ui_states.hpp"
 #include "geometry/constructor/box3d.hpp"
 #include "graphics_lab/render_graph/render_pass.hpp"
-#include "vkl/utils/imgui_utils.hpp"
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/aabb_box_render_system.hpp"
@@ -13,6 +12,7 @@
 #include "vkl/system/render_system/normal_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 #include "vkl/system/render_system/world_axis_render_system.hpp"
+#include "vkl/utils/imgui_utils.hpp"
 
 #include "vkl/system/compute_system/scene_tree_path_tracing_compute_model.hpp"
 #include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"

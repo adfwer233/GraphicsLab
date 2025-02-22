@@ -122,7 +122,7 @@ struct BaseFluidSimulator {
     }
 
     void compute_curl(const Grid2D<float> &vel_x, const Grid2D<float> &vel_y, Grid2D<float> &curl) {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int y = 1; y < curl.height - 1; ++y) {
             for (int x = 1; x < curl.width - 1; ++x) {
                 float vx_dy = (vel_x(x, y) - vel_x(x, y - 1));
@@ -133,7 +133,7 @@ struct BaseFluidSimulator {
     }
 
     void compute_speed(const Grid2D<float> &vel_x, const Grid2D<float> &vel_y, Grid2D<float> &speed) {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int y = 1; y < speed.height - 1; ++y) {
             for (int x = 1; x < speed.width - 1; ++x) {
                 speed(x, y) = std::sqrt(std::pow(vel_x(x, y), 2) + std::pow(vel_y(x, y), 2));

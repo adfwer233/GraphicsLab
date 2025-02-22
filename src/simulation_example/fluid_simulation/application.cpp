@@ -27,7 +27,8 @@ void FluidSimulationApplication::run() {
     GLFWwindow *window = appContext.window_.getGLFWwindow();
 
     ImguiContext::set_font = false;
-    ImguiContext::getInstance(appContext.device_, appContext.window_.getGLFWwindow(), appContext.renderContext.get_swap_chain_render_pass());
+    ImguiContext::getInstance(appContext.device_, appContext.window_.getGLFWwindow(),
+                              appContext.renderContext.get_swap_chain_render_pass());
 
     GraphicsLab::Simulation::Grid2D<float> grid(1024, 1024);
 
@@ -60,7 +61,8 @@ void FluidSimulationApplication::run() {
     }
 
     SimpleImGuiPass simple_pass(appContext.device_);
-    Grid2DRenderPass grid_2d_render_pass(appContext.device_, [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.speed; });
+    Grid2DRenderPass grid_2d_render_pass(appContext.device_,
+                                         [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.speed; });
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 

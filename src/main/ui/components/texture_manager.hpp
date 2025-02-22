@@ -27,8 +27,7 @@ class TextureManager : public UIComponent {
                 auto texture = context_.sceneTree->texture_manager.textures[texture_meta.texture_index].get();
 
                 if (not renderResources_.textureImguiImages.contains(name)) {
-                    renderResources_.textureImguiImages[name] =
-                        vkl::ImguiUtils::getImguiTextureFromVklTexture(texture);
+                    renderResources_.textureImguiImages[name] = vkl::ImguiUtils::getImguiTextureFromVklTexture(texture);
                 }
 
                 ImGui::BeginGroup();

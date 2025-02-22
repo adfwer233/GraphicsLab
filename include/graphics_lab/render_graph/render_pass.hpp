@@ -52,7 +52,7 @@ struct RenderPass {
          */
 
         bool has_internal_resources = false;
-        for (auto f: compile_data.connected_resources) {
+        for (auto f : compile_data.connected_resources) {
             if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
                 has_internal_resources = true;
             }
@@ -63,9 +63,11 @@ struct RenderPass {
 
             auto descriptorSetLayoutBuilder = VklDescriptorSetLayout::Builder(device_);
             int bind_index = 0;
-            for (auto f: compile_data.connected_resources) {
+            for (auto f : compile_data.connected_resources) {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
-                    descriptorSetLayoutBuilder.addBinding(bind_index, VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+                    descriptorSetLayoutBuilder.addBinding(bind_index,
+                                                          VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                                          VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
                     bind_index++;
                 }
             }
@@ -80,9 +82,10 @@ struct RenderPass {
             VklDescriptorWriter writer(*descriptorSetLayout.get(), *descriptorPool);
 
             bind_index = 0;
-            for (auto f: compile_data.connected_resources) {
+            for (auto f : compile_data.connected_resources) {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
-                    if (auto tex = dynamic_cast<ColorTextureResource*>(render_context->resource_manager.get_resource(f.get_name()))) {
+                    if (auto tex = dynamic_cast<ColorTextureResource *>(
+                            render_context->resource_manager.get_resource(f.get_name()))) {
                         auto image_info = tex->getTexture()->descriptorInfo();
                         writer.writeImage(bind_index, &image_info);
                     }
