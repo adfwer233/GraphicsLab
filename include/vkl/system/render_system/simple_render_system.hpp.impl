@@ -128,18 +128,12 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
             if (setShaderId >= setResources.size())
                 setResources.resize(setShaderId + 1);
             setResources[setShaderId].uniformBuffers.push_back(buffer);
-
-            // descriptorSetLayoutBuilder.addBinding(bindingIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            // VK_SHADER_STAGE_ALL_GRAPHICS);
         }
 
         for (const auto &image : resources.sampled_images) {
             uint32_t setShaderId = compiler.get_decoration(image.id, spv::DecorationDescriptorSet);
             uint32_t bindingIndex = compiler.get_decoration(image.id, spv::DecorationBinding);
             spdlog::info("Sampled Images {}, shader id {}, binding {}\n", image.name, setShaderId, bindingIndex);
-
-            // descriptorSetLayoutBuilder.addBinding(bindingIndex, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            // VK_SHADER_STAGE_FRAGMENT_BIT);
         }
 
         for (const auto &buffer : resources.storage_buffers) {
@@ -259,7 +253,7 @@ void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::re
 template <uint32_t Subpass, VklPushConstantInfoListConcept PushConstantInfoList,
           VklPipelineModifierType PipelineModifierType>
 void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::renderPipeline(
-    VkCommandBuffer commandBuffer, std::optional<PushConstantInfoList> pushData) {
+    VkCommandBuffer commandBuffer, std::optional<PushConstantInfoList> pushData, std::optional<VkDescriptorSet*> descriptorSet) {
     VkBuffer buffers[] = {Vkl::DummyBuffer::getDummyBuffer(device_)};
     VkDeviceSize offsets[] = {0};
 
@@ -272,6 +266,10 @@ void SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::re
                                pushConstantRawPointers[i]);
             i++;
         }
+    }
+
+    if (descriptorSet.has_value()) {
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, descriptorSet.value(), 0, nullptr);
     }
 
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);

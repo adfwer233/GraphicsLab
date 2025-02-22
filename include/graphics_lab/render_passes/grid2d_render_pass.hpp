@@ -3,7 +3,7 @@
 #include <functional>
 #include <utility>
 
-#include "vkl/system/render_system/simple_render_system.hpp"
+#include "vkl/system/render_system/single_texture_render_system.hpp"
 #include "graphics_lab/render_graph/render_pass.hpp"
 
 #include "simulation/fluid/grid.hpp"
@@ -29,13 +29,34 @@ struct Grid2DRenderPass : public RenderPass {
             .type(RenderPassReflection::Field::Type::Texture2D)
             .sample_count(1)
             .visibility(RenderPassReflection::Field::Visibility::Internal)
-            .layout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+            .layout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
             .format(VkFormat::VK_FORMAT_R8G8B8A8_SRGB)
             .extent(1024, 1024);
+
+        reflection.add_input("grid_output", "the input grid texture")
+            .type(RenderPassReflection::Field::Type::Texture2D)
+            .sample_count(8)
+            .visibility(RenderPassReflection::Field::Visibility::Output)
+            .format(VkFormat::VK_FORMAT_R8G8B8A8_SRGB)
+            .extent(2048, 2048)
+            .set_annotation("imgui_show", true);
+
+        reflection.add_input("grid_output_depth", "the input grid texture")
+            .type(RenderPassReflection::Field::Type::TextureDepth)
+            .sample_count(8)
+            .visibility(RenderPassReflection::Field::Visibility::Output)
+            .format(VkFormat::VK_FORMAT_R8G8B8A8_SRGB)
+            .extent(2048, 2048);
         return reflection;
     }
 
     void post_compile(RenderContext *render_context) override {
+        simple_render_system = std::make_unique<SingleTextureRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/2d_texture_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/2d_texture_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {std::format("{}/2d_texture_shader.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
         data_buffer = std::make_unique<vkl::Buffer>(device_, grid_width * grid_height * sizeof(float), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO);
 
         if (render_context->resource_manager.get_resource("grid_input")) {
@@ -43,7 +64,7 @@ struct Grid2DRenderPass : public RenderPass {
         }
         if (auto input = dynamic_cast<ColorTextureResource*>(render_context->resource_manager.get_resource("grid_input"))) {
             spdlog::info("Grid2DRenderPass create imgui texture");
-            render_context->imgui_resources.imguiImages["grid_result"] = vkl::ImguiUtils::getImguiTextureFromVklTexture(input->getTexture());
+            render_context->imgui_resources.imguiImages["grid_result2"] = vkl::ImguiUtils::getImguiTextureFromVklTexture(input->getTexture());
         }
 
     }
@@ -70,11 +91,26 @@ struct Grid2DRenderPass : public RenderPass {
         copyRegion.imageExtent = VkExtent3D{static_cast<uint32_t>(grid_width), static_cast<uint32_t>(grid_height), 1};
 
         if (auto input = dynamic_cast<ColorTextureResource*>(render_context->resource_manager.get_resource("grid_input"))) {
+
+            VkImageMemoryBarrier read2dst = VklImageUtils::ReadOnlyToDstBarrier(input->getTexture()->image_);
+            vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0,
+                                 nullptr, 0, nullptr, 1, &read2dst);
+
             vkCmdCopyBufferToImage(commandBuffer, data_buffer->get_handle(), input->getTexture()->image_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+            VkImageMemoryBarrier dst2read = VklImageUtils::transferDstToReadOnlyBarrier(input->getTexture()->image_);
+            vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0,
+                                 nullptr, 0, nullptr, 1, &dst2read);
+
         }
+
+        begin_render_pass(commandBuffer);
+        simple_render_system->renderPipeline(commandBuffer, std::nullopt, &descriptorSet);
+        end_render_pass(commandBuffer);
     }
 
 private:
+    std::unique_ptr<SingleTextureRenderSystem> simple_render_system = nullptr;
     std::unique_ptr<vkl::Buffer> data_buffer = nullptr;
     std::unique_ptr<VklTexture> result_texture = nullptr;
 };

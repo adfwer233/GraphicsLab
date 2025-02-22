@@ -28,7 +28,7 @@ class TextureManager : public UIComponent {
 
                 if (not renderResources_.textureImguiImages.contains(name)) {
                     renderResources_.textureImguiImages[name] =
-                        GraphicsLab::ImguiUtils::getImguiTextureFromVklTexture(texture);
+                        vkl::ImguiUtils::getImguiTextureFromVklTexture(texture);
                 }
 
                 ImGui::BeginGroup();

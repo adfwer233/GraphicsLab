@@ -5,6 +5,8 @@
 
 #include "graphics_lab/render_passes/swap_chain_pass.hpp"
 
+#include <vkl/utils/imgui_utils.hpp>
+
 namespace GraphicsLab::RenderGraph {
 struct SimpleImGuiPass : public SwapChainPass {
     explicit SimpleImGuiPass(VklDevice &device) : SwapChainPass(device) {
@@ -24,6 +26,13 @@ struct SimpleImGuiPass : public SwapChainPass {
         for (int i = 0; i < swapChain->imageCount(); i++) {
             device_.transitionImageLayout(swapChain->getImage(i), swapChain->getSwapChainImageFormat(),
                                           VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        }
+
+        for (auto r : render_context->resource_manager.get_resource_with_annotation("imgui_show")) {
+            if (auto colorTexture = dynamic_cast<ColorTextureResource *>(r)) {
+                render_context->imgui_resources.imguiImages[colorTexture->get_name()] =
+                    vkl::ImguiUtils::getImguiTextureFromVklTexture(colorTexture->get_resolved_texture());
+            }
         }
     }
 

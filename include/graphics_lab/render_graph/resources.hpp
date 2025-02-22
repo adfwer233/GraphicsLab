@@ -60,6 +60,7 @@ struct ColorTextureResource : public Resource {
                                                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
                          VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED, VkFormat format = VK_FORMAT_R8G8B8A8_SRGB,
                          VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT) {
+        spdlog::info("Create Resource: {}, format {}", name_, (int)format);
         texture_ =
             std::make_unique<VklTexture>(device_, texWidth, texHeight, texChannels, usage, layout, format, samples);
         if (samples != VK_SAMPLE_COUNT_1_BIT) {

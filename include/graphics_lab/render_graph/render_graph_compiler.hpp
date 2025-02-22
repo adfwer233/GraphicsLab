@@ -108,6 +108,9 @@ struct RenderGraphCompiler {
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Output) {
                     connected_resources.add_field(f);
                 }
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
+                    connected_resources.add_field(f);
+                }
                 if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
                     for (auto f_iter : fields) {
                         if (f_iter.get_name() == f.get_name()) {

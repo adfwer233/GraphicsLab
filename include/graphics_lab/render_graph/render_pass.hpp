@@ -48,9 +48,53 @@ struct RenderPass {
 
     virtual void compile(RenderContext *render_context, const CompileData &compile_data) {
         /**
-         * create VkRenderPass
+         * create descriptors for internal resouces
          */
 
+        bool has_internal_resources = false;
+        for (auto f: compile_data.connected_resources) {
+            if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
+                has_internal_resources = true;
+            }
+        }
+
+        if (has_internal_resources) {
+            spdlog::info("RenderPass {} has been compiled with internal resources", name_);
+
+            auto descriptorSetLayoutBuilder = VklDescriptorSetLayout::Builder(device_);
+            int bind_index = 0;
+            for (auto f: compile_data.connected_resources) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
+                    descriptorSetLayoutBuilder.addBinding(bind_index, VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+                    bind_index++;
+                }
+            }
+            descriptorSetLayout = descriptorSetLayoutBuilder.build();
+
+            int pool_size = 10;
+            descriptorPool =
+                VklDescriptorPool::Builder(device_)
+                    .setMaxSets(VklSwapChain::MAX_FRAMES_IN_FLIGHT * pool_size)
+                    .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VklSwapChain::MAX_FRAMES_IN_FLIGHT * pool_size)
+                    .build();
+            VklDescriptorWriter writer(*descriptorSetLayout.get(), *descriptorPool);
+
+            bind_index = 0;
+            for (auto f: compile_data.connected_resources) {
+                if (f.get_visibility() == RenderPassReflection::Field::Visibility::Internal) {
+                    if (auto tex = dynamic_cast<ColorTextureResource*>(render_context->resource_manager.get_resource(f.get_name()))) {
+                        auto image_info = tex->getTexture()->descriptorInfo();
+                        writer.writeImage(bind_index, &image_info);
+                    }
+                    bind_index++;
+                }
+            }
+            writer.build(descriptorSet);
+        }
+
+        /**
+         * create VkRenderPass
+         */
         std::vector<VkAttachmentDescription> attachments;
         std::vector<VkAttachmentReference> input_refs;
         std::vector<VkAttachmentReference> output_refs;
@@ -218,6 +262,7 @@ struct RenderPass {
 
         vkl_render_pass = std::make_unique<VklRenderPass>(device_, renderPassCreateInfo);
 
+        spdlog::info("Compiling render pass {}, render pass attachment count {}", name_, attachments.size());
         // create VkFrameBuffer
 
         std::vector<VkImageView> attachmentImageViews;
@@ -238,7 +283,7 @@ struct RenderPass {
                         attachmentImageViews.push_back(color_texture->get_resolved_texture()->getTextureImageView());
                     }
                 }
-            } else {
+            } else if (f.get_visibility() == RenderPassReflection::Field::Visibility::Input) {
                 if (resource->get_type() == Resource::Type::ColorTexture) {
                     auto color_texture = reinterpret_cast<ColorTextureResource *>(resource);
                     if (color_texture->get_resolved_texture()) {
@@ -249,6 +294,8 @@ struct RenderPass {
                 }
             }
         }
+
+        spdlog::info("Compiling render pass {}, framebuffer attachment count {}", name_, attachmentImageViews.size());
 
         vkl_frame_buffer = std::make_unique<VklFramebuffer>(device_, vkl_render_pass->renderPass,
                                                             static_cast<uint32_t>(attachmentImageViews.size()),
@@ -318,6 +365,10 @@ struct RenderPass {
     uint32_t width_ = 2048, height_ = 2048;
 
     VkClearColorValue clear_color_;
+
+    std::unique_ptr<VklDescriptorSetLayout> descriptorSetLayout = nullptr;
+    std::unique_ptr<VklDescriptorPool> descriptorPool = nullptr;
+    VkDescriptorSet descriptorSet = nullptr;
 
     friend class RenderGraphCompiler;
 };
