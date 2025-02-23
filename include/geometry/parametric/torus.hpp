@@ -58,7 +58,7 @@ struct Torus : public ParamSurface {
         return center + direction1 * x + direction2 * y + base_normal * z;
     }
 
-    PointType normal(const ParamType &param_to_evaluate) {
+    PointType normal(const ParamType param_to_evaluate) {
         ParamType param = move_param_to_domain(param_to_evaluate);
 
         PointType position = evaluate(param);
@@ -66,6 +66,16 @@ struct Torus : public ParamSurface {
         double major_circle_y = major_radius * std::sin(2 * std::numbers::pi * param.x);
         auto circle_position = center + direction1 * major_circle_x + direction2 * major_circle_y;
         return glm::normalize(position - circle_position);
+    }
+
+    std::pair<PointType, ParamType> project(const PointType point) override {
+        // @todo: implement project function
+        return {point, {0.0, 0.0}};
+    }
+
+    bool test_point(const PointType point) override {
+        // @todo: implement test point function
+        return point.x == center.x && point.y == center.y;
     }
 
   private:

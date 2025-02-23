@@ -3,8 +3,9 @@
 #include "glm/glm.hpp"
 #include "parametric_space.hpp"
 #include "parametric_surface.hpp"
-
 #include <numbers>
+
+#include "configuration.hpp"
 
 namespace GraphicsLab::Geometry {
 struct Sphere : public ParamSurface {
@@ -25,6 +26,20 @@ struct Sphere : public ParamSurface {
 
         return center +
                radius * PointType(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
+    }
+
+    PointType normal(const ParamType param) override {
+        auto pos = evaluate(param);
+        return glm::normalize(pos - center);
+    }
+
+    bool test_point(const PointType point) override {
+        return std::abs(glm::distance(point, center) - radius) < ParametricConfiguration::system_tolerance;
+    }
+
+    std::pair<PointType, ParamType> project(const PointType point) override {
+        auto projection = glm::normalize(point - center) * radius + center;
+        return {projection, {0.0, 0.0}};
     }
 };
 } // namespace GraphicsLab::Geometry
