@@ -23,7 +23,7 @@ using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 using ScenePanelRenderOrder = MetaProgramming::TypeList<TextureManager, SceneWidgetComponent>;
 
 namespace UIManagerImpl {
-    using RenderOrder = TypeList<TextureManager, SceneWidgetComponent>;
+using RenderOrder = TypeList<TextureManager, SceneWidgetComponent>;
 }
 
 class UIManager {
@@ -45,24 +45,30 @@ class UIManager {
             component_map[i] = i;
         }
         using PreviousType = typename MetaProgramming::TypeListFunctions::KthOf<UIManagerImpl::RenderOrder, 0>::type;
-        constexpr int TypeIndex1 = MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, SceneWidgetComponent>::value;
-        constexpr int PreviousTypeIndex2 = MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, PreviousType>::value;
-        MetaProgramming::ForEachTypeWithIndices(UIManagerImpl::RenderOrder{}, [&]<typename T, size_t i>(){
+        constexpr int TypeIndex1 =
+            MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, SceneWidgetComponent>::value;
+        constexpr int PreviousTypeIndex2 =
+            MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, PreviousType>::value;
+        MetaProgramming::ForEachTypeWithIndices(UIManagerImpl::RenderOrder{}, [&]<typename T, size_t i>() {
             if constexpr (i > 0) {
-                using PreviousType = typename MetaProgramming::TypeListFunctions::KthOf<UIManagerImpl::RenderOrder, i - 1>::type;
+                using PreviousType =
+                    typename MetaProgramming::TypeListFunctions::KthOf<UIManagerImpl::RenderOrder, i - 1>::type;
                 constexpr int TypeIndex = MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, T>::value;
-                constexpr int PreviousTypeIndex = MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, PreviousType>::value;
+                constexpr int PreviousTypeIndex =
+                    MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, PreviousType>::value;
                 component_map[TypeIndex] = component_map[PreviousTypeIndex] + 1;
             }
         });
 
-        std::map<UIComponent*, int> components_priority;
+        std::map<UIComponent *, int> components_priority;
 
         for (int i = 0; i < component_ptrs.size(); ++i) {
             components_priority[component_ptrs[i]] = component_map[i];
         }
 
-        std::ranges::sort(component_ptrs, [&components_priority](UIComponent* l, UIComponent* r) -> bool { return components_priority[l] < components_priority[r]; });
+        std::ranges::sort(component_ptrs, [&components_priority](UIComponent *l, UIComponent *r) -> bool {
+            return components_priority[l] < components_priority[r];
+        });
     }
 
     void render() {

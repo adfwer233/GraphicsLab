@@ -4,9 +4,9 @@
 #include <utility>
 
 #include "graphics_lab/render_graph/render_pass.hpp"
+#include "simulation/fluid/grid.hpp"
 #include "vkl/system/render_system/single_texture_render_system.hpp"
 #include "vkl/utils/image_utils.hpp"
-#include "simulation/fluid/grid.hpp"
 
 #include <vkl/core/vkl_image.hpp>
 #include <vkl/utils/imgui_utils.hpp>
@@ -21,7 +21,8 @@ struct Grid2DRenderPass : public RenderPass {
 
     std::unique_ptr<Simulation::Grid2D<vkl::SRGBColor4>> grid_color;
 
-    explicit Grid2DRenderPass(VklDevice &device, decltype(get_gird_to_show) get_grid_func, std::optional<decltype(get_color)> get_color_func = std::nullopt)
+    explicit Grid2DRenderPass(VklDevice &device, decltype(get_gird_to_show) get_grid_func,
+                              std::optional<decltype(get_color)> get_color_func = std::nullopt)
         : RenderPass(device), get_gird_to_show(std::move(get_grid_func)) {
         const auto &grid = get_gird_to_show();
         grid_width = grid.width;
@@ -138,7 +139,9 @@ struct Grid2DRenderPass : public RenderPass {
                     color = glm::vec4(grid(i, j), 0.0f, 0.0f, 1.0f);
                 }
 
-                (*grid_color)(i, j) = vkl::SRGBColor4{vkl::ImageUtils::toSRGB(color.x), vkl::ImageUtils::toSRGB(color.y), vkl::ImageUtils::toSRGB(color.z), vkl::ImageUtils::toSRGB(color.w)};
+                (*grid_color)(i, j) =
+                    vkl::SRGBColor4{vkl::ImageUtils::toSRGB(color.x), vkl::ImageUtils::toSRGB(color.y),
+                                    vkl::ImageUtils::toSRGB(color.z), vkl::ImageUtils::toSRGB(color.w)};
             }
         }
     }

@@ -37,7 +37,7 @@ void ForEachTypeWithIndicesHelper(TypeList<Ts...>, std::index_sequence<Indices..
 
 template <typename... Ts, typename Func> void ForEachTypeWithIndices(TypeList<Ts...>, Func &&func) {
     details::ForEachTypeWithIndicesHelper<Func>(TypeList<Ts...>{}, std::index_sequence_for<Ts...>{},
-                                                                 std::forward<Func>(func));
+                                                std::forward<Func>(func));
 }
 
 namespace TypeListFunctions {

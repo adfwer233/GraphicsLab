@@ -1,15 +1,15 @@
 #pragma once
 
-#include <iostream>
-#include <glm/vec3.hpp> // For glm::vec3
 #include <glm/glm.hpp>  // For glm::clamp
+#include <glm/vec3.hpp> // For glm::vec3
+#include <iostream>
 
 #define TINYCOLORMAP_WITH_GLM
 #include "tinycolormap.hpp"
 
 // Base class for interpolation
 class ColorInterpolator {
-protected:
+  protected:
     double minInput, maxInput;
 
     // Normalize the input to the [0, 1] range
@@ -18,13 +18,13 @@ protected:
     }
 
     // Linear interpolation between two colors (glm::vec3)
-    glm::vec3 lerp(const glm::vec3& c1, const glm::vec3& c2, float t) const {
+    glm::vec3 lerp(const glm::vec3 &c1, const glm::vec3 &c2, float t) const {
         return c1 + t * (c2 - c1);
     }
 
-public:
-    ColorInterpolator(double minInput, double maxInput)
-            : minInput(minInput), maxInput(maxInput) {}
+  public:
+    ColorInterpolator(double minInput, double maxInput) : minInput(minInput), maxInput(maxInput) {
+    }
 
     // Input is a real number between [minInput, maxInput] and output is the interpolated color
     virtual glm::vec3 interpolate(double input) const = 0;
@@ -33,9 +33,9 @@ public:
 };
 
 class ViridisInterpolator : public ColorInterpolator {
-public:
-    ViridisInterpolator(double minInput, double maxInput)
-            : ColorInterpolator(minInput, maxInput) {}
+  public:
+    ViridisInterpolator(double minInput, double maxInput) : ColorInterpolator(minInput, maxInput) {
+    }
 
     glm::vec3 interpolate(double input) const override {
         input = std::clamp(input, minInput, maxInput);
@@ -51,12 +51,13 @@ public:
 
 // Derived class for two-point interpolation
 class TwoPointInterpolator : public ColorInterpolator {
-private:
+  private:
     glm::vec3 color1, color2;
 
-public:
-    TwoPointInterpolator(const glm::vec3& c1, const glm::vec3& c2, double minInput, double maxInput)
-            : ColorInterpolator(minInput, maxInput), color1(c1), color2(c2) {}
+  public:
+    TwoPointInterpolator(const glm::vec3 &c1, const glm::vec3 &c2, double minInput, double maxInput)
+        : ColorInterpolator(minInput, maxInput), color1(c1), color2(c2) {
+    }
 
     glm::vec3 interpolate(double input) const override {
         // Normalize the input and clamp it between 0 and 1
@@ -68,13 +69,14 @@ public:
 
 // Derived class for three-point interpolation
 class ThreePointInterpolator : public ColorInterpolator {
-private:
+  private:
     glm::vec3 color1, color2, color3;
 
-public:
-    ThreePointInterpolator(const glm::vec3& c1, const glm::vec3& c2, const glm::vec3& c3,
-                           double minInput, double maxInput)
-            : ColorInterpolator(minInput, maxInput), color1(c1), color2(c2), color3(c3) {}
+  public:
+    ThreePointInterpolator(const glm::vec3 &c1, const glm::vec3 &c2, const glm::vec3 &c3, double minInput,
+                           double maxInput)
+        : ColorInterpolator(minInput, maxInput), color1(c1), color2(c2), color3(c3) {
+    }
 
     glm::vec3 interpolate(double input) const override {
         // Normalize the input and clamp it between 0 and 1
@@ -82,10 +84,10 @@ public:
 
         if (normalizedInput < 0.5) {
             // First half: interpolate between color1 and color2
-            return lerp(color1, color2, normalizedInput * 2);  // Scale [0, 0.5] to [0, 1]
+            return lerp(color1, color2, normalizedInput * 2); // Scale [0, 0.5] to [0, 1]
         } else {
             // Second half: interpolate between color2 and color3
-            return lerp(color2, color3, (normalizedInput - 0.5) * 2);  // Scale [0.5, 1] to [0, 1]
+            return lerp(color2, color3, (normalizedInput - 0.5) * 2); // Scale [0.5, 1] to [0, 1]
         }
     }
 };

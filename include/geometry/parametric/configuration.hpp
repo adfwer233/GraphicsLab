@@ -6,4 +6,4 @@ struct ParametricConfiguration {
     constexpr static double system_tolerance = 1e-6;
 };
 
-}
+} // namespace GraphicsLab::Geometry

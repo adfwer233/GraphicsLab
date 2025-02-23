@@ -65,9 +65,9 @@ void FluidSimulationApplication::run() {
     }
 
     SimpleImGuiPass simple_pass(appContext.device_);
-    Grid2DRenderPass grid_2d_render_pass(appContext.device_,
-                                         [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.density; },
-                                         [&](float x){ return glm::vec4(viridis_interpolator.interpolate(x), 1.0f); });
+    Grid2DRenderPass grid_2d_render_pass(
+        appContext.device_, [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.density; },
+        [&](float x) { return glm::vec4(viridis_interpolator.interpolate(x), 1.0f); });
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 

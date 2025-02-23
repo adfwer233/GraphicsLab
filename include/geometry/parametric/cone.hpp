@@ -4,7 +4,5 @@
 #include "parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
-struct Cone: public ParamSurface {
-
-};
-}
+struct Cone : public ParamSurface {};
+} // namespace GraphicsLab::Geometry

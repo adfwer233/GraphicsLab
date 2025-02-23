@@ -6,8 +6,8 @@
 
 namespace GraphicsLab::Geometry {
 
-struct NURBSSurface: public ParamSurface {
-    struct SurfaceTrait{};
+struct NURBSSurface : public ParamSurface {
+    struct SurfaceTrait {};
     struct SceneTreeGeometryTypeTrait {};
 
     using PointType = glm::vec<3, T>;
@@ -23,20 +23,12 @@ struct NURBSSurface: public ParamSurface {
     int order_v = 0;
     int degree_v = 0;
 
-//    ParametricSpace<T, Configuration> parametric_space;
+    //    ParametricSpace<T, Configuration> parametric_space;
 
-    NURBSSurface(std::vector<std::vector<PointType>> ctrl_pts,
-                 std::vector<T> knots_u,
-                 std::vector<T> knots_v,
-                 std::vector<std::vector<T>> wts,
-                 const int degree_u, const int degree_v)
-                : control_points(std::move(ctrl_pts)),
-                  knot_vector_u(std::move(knots_u)),
-                  knot_vector_v(std::move(knots_v)),
-                  weights(std::move(wts)),
-                  degree_u(degree_u),
-                  degree_v(degree_v)
-                {
+    NURBSSurface(std::vector<std::vector<PointType>> ctrl_pts, std::vector<T> knots_u, std::vector<T> knots_v,
+                 std::vector<std::vector<T>> wts, const int degree_u, const int degree_v)
+        : control_points(std::move(ctrl_pts)), knot_vector_u(std::move(knots_u)), knot_vector_v(std::move(knots_v)),
+          weights(std::move(wts)), degree_u(degree_u), degree_v(degree_v) {
         assert(is_valid());
     }
 
@@ -79,7 +71,8 @@ struct NURBSSurface: public ParamSurface {
         // Normalize the resulting normal vector
         return glm::normalize(n);
     }
-private:
+
+  private:
     PointType partial_derivative_u(T u, T v) const {
         assert(is_valid());
         T denominator = 0;
@@ -137,7 +130,7 @@ private:
     }
 
     // Derivative of the basis function
-    T basis_function_derivative(size_t i, int d, T t, const std::vector<T>& knot_vector) const {
+    T basis_function_derivative(size_t i, int d, T t, const std::vector<T> &knot_vector) const {
         if (d == 0) {
             return 0;
         }
@@ -153,7 +146,7 @@ private:
         return d * (left_term - right_term);
     }
 
-    T basis_function(size_t i, int d, T t, const std::vector<T>& knot_vector) const {
+    T basis_function(size_t i, int d, T t, const std::vector<T> &knot_vector) const {
         if (d == 0) {
             return (t >= knot_vector[i] && t <= knot_vector[i + 1]) ? 1.0 : 0.0;
         }
@@ -183,13 +176,10 @@ private:
         size_t num_knots_u = knot_vector_u.size();
         size_t num_knots_v = knot_vector_v.size();
 
-        return num_control_points_u > degree_u &&
-               num_control_points_v > degree_v &&
-               num_weights_u == num_control_points_u &&
-               num_weights_v == num_control_points_v &&
-               num_knots_u == num_control_points_u + degree_u + 1 &&
-               num_knots_v == num_control_points_v + degree_v + 1;
+        return num_control_points_u > degree_u && num_control_points_v > degree_v &&
+               num_weights_u == num_control_points_u && num_weights_v == num_control_points_v &&
+               num_knots_u == num_control_points_u + degree_u + 1 && num_knots_v == num_control_points_v + degree_v + 1;
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry
