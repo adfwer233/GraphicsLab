@@ -14,6 +14,8 @@
 
 #include "simulation/fluid/base_fluid_simulator.hpp"
 
+#include "vkl/utils/color_interpolator.hpp"
+
 FluidSimulationApplication::~FluidSimulationApplication() {
 }
 
