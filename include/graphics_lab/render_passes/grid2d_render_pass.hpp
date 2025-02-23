@@ -21,13 +21,17 @@ struct Grid2DRenderPass : public RenderPass {
 
     std::unique_ptr<Simulation::Grid2D<vkl::SRGBColor4>> grid_color;
 
-    explicit Grid2DRenderPass(VklDevice &device, decltype(get_gird_to_show) get_grid_func)
+    explicit Grid2DRenderPass(VklDevice &device, decltype(get_gird_to_show) get_grid_func, std::optional<decltype(get_color)> get_color_func = std::nullopt)
         : RenderPass(device), get_gird_to_show(std::move(get_grid_func)) {
         const auto &grid = get_gird_to_show();
         grid_width = grid.width;
         grid_height = grid.height;
 
         grid_color = std::make_unique<Simulation::Grid2D<vkl::SRGBColor4>>(grid_width, grid_height);
+
+        if (get_color_func.has_value()) {
+            get_color = std::move(get_color_func.value());
+        }
         spdlog::info("Grid2DRenderPass created");
     }
 

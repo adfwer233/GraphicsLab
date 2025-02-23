@@ -42,6 +42,8 @@ void FluidSimulationApplication::run() {
         }
     }
 
+    ViridisInterpolator viridis_interpolator(0.0, 1.0);
+
     GraphicsLab::Simulation::BaseFluidSimulator simulator(512, 512);
 
     for (int i = 0; i < 512; i++) {
@@ -64,7 +66,8 @@ void FluidSimulationApplication::run() {
 
     SimpleImGuiPass simple_pass(appContext.device_);
     Grid2DRenderPass grid_2d_render_pass(appContext.device_,
-                                         [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.density; });
+                                         [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.density; },
+                                         [&](float x){ return glm::vec4(viridis_interpolator.interpolate(x), 1.0f); });
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
