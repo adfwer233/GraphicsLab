@@ -29,14 +29,14 @@ template <typename... Ts, typename Func> void ForEachType(TypeList<Ts...>, Func 
 }
 
 namespace details {
-template <typename... Ts, typename Func, std::size_t... Indices>
-void ForEachTypeWithIndicesHelper(std::index_sequence<Indices...>, Func &&func) {
-    (func.template operator()<Ts>(Indices), ...);
+template <typename Func, typename... Ts, std::size_t... Indices>
+void ForEachTypeWithIndicesHelper(TypeList<Ts...>, std::index_sequence<Indices...>, Func &&func) {
+    (func.template operator()<Ts, Indices>(), ...);
 }
 } // namespace details
 
 template <typename... Ts, typename Func> void ForEachTypeWithIndices(TypeList<Ts...>, Func &&func) {
-    details::ForEachTypeWithIndicesHelper<TypeList<Ts...>, Func>(std::index_sequence_for<Ts...>{},
+    details::ForEachTypeWithIndicesHelper<Func>(TypeList<Ts...>{}, std::index_sequence_for<Ts...>{},
                                                                  std::forward<Func>(func));
 }
 

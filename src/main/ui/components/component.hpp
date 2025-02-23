@@ -18,6 +18,9 @@ class UIComponent : public GraphicsLab::IGraphicsLabImguiComponent {
     GraphicsLab::GraphicsLabInternalContext &context_;
 
     explicit UIComponent(GraphicsLab::GraphicsLabInternalContext &context) : context_(context) {};
+
+  public:
+    virtual ~UIComponent() = default;
 };
 
 template <typename T>
