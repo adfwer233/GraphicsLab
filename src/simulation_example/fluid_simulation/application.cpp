@@ -45,7 +45,7 @@ void FluidSimulationApplication::run() {
     for (int i = 0; i < 512; i++) {
         for (int j = 0; j < 512; j++) {
             if (std::pow(i - 100, 2) + std::pow(j - 256, 2) <= std::pow(50, 2)) {
-                simulator.density(i, j) = 5.0f;
+                simulator.density(i, j) = 1.0f;
                 simulator.velocity_x(i, j) = 5.0f;
             }
         }
@@ -54,15 +54,15 @@ void FluidSimulationApplication::run() {
     for (int i = 0; i < 512; i++) {
         for (int j = 0; j < 512; j++) {
             if (std::pow(i - 300, 2) + std::pow(j - 256, 2) <= std::pow(10, 2)) {
-                simulator.density(i, j) = 5.0f;
-                simulator.velocity_x(i, j) = -10.0f;
+                simulator.density(i, j) = 1.0f;
+                simulator.velocity_x(i, j) = -5.0f;
             }
         }
     }
 
     SimpleImGuiPass simple_pass(appContext.device_);
     Grid2DRenderPass grid_2d_render_pass(appContext.device_,
-                                         [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.speed; });
+                                         [&]() -> GraphicsLab::Simulation::Grid2D<float> & { return simulator.density; });
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 

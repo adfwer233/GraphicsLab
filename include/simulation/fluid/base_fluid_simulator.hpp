@@ -20,7 +20,7 @@ struct BaseFluidSimulator {
 
     const float dt = 0.1f;
     const float diffusion = 0.0f;
-    const float viscosity = 1.0f;
+    const float viscosity = 0.1f;
 
     BaseFluidSimulator(int width, int height)
         : velocity_x(width, height), velocity_y(width, height), pressure(width, height), divergence(width, height),

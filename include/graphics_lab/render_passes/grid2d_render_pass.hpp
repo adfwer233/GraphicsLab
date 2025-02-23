@@ -5,7 +5,7 @@
 
 #include "graphics_lab/render_graph/render_pass.hpp"
 #include "vkl/system/render_system/single_texture_render_system.hpp"
-
+#include "vkl/utils/image_utils.hpp"
 #include "simulation/fluid/grid.hpp"
 
 #include <vkl/core/vkl_image.hpp>
@@ -15,12 +15,19 @@ namespace GraphicsLab::RenderGraph {
 
 struct Grid2DRenderPass : public RenderPass {
     std::function<Simulation::Grid2D<float> &()> get_gird_to_show;
+    std::function<glm::vec4(float)> get_color = nullptr;
+
     int grid_width, grid_height;
+
+    std::unique_ptr<Simulation::Grid2D<vkl::SRGBColor4>> grid_color;
+
     explicit Grid2DRenderPass(VklDevice &device, decltype(get_gird_to_show) get_grid_func)
         : RenderPass(device), get_gird_to_show(std::move(get_grid_func)) {
         const auto &grid = get_gird_to_show();
         grid_width = grid.width;
         grid_height = grid.height;
+
+        grid_color = std::make_unique<Simulation::Grid2D<vkl::SRGBColor4>>(grid_width, grid_height);
         spdlog::info("Grid2DRenderPass created");
     }
 
@@ -58,8 +65,8 @@ struct Grid2DRenderPass : public RenderPass {
                 {std::format("{}/2d_texture_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/2d_texture_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {std::format("{}/2d_texture_shader.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
-        data_buffer = std::make_unique<vkl::Buffer>(device_, grid_width * grid_height * sizeof(float),
-                                                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO);
+        data_buffer = std::make_unique<vkl::Buffer>(device_, grid_width * grid_height * 4,
+                                                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
         if (render_context->resource_manager.get_resource("grid_input")) {
             spdlog::info("Resource has been released");
@@ -74,7 +81,8 @@ struct Grid2DRenderPass : public RenderPass {
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
         auto grid = get_gird_to_show();
-        data_buffer->update(grid.data.data(), grid_width * grid_height * sizeof(float));
+        get_color_map();
+        data_buffer->update(grid_color->data.data(), grid_width * grid_height * 4);
 
         auto commandBuffer = render_context->get_current_command_buffer();
 
@@ -114,6 +122,23 @@ struct Grid2DRenderPass : public RenderPass {
     }
 
   private:
+    void get_color_map() {
+        auto grid = get_gird_to_show();
+#pragma omp parallel for
+        for (int i = 0; i < grid_width; i++) {
+            for (int j = 0; j < grid_height; j++) {
+                glm::vec4 color = glm::vec4();
+                if (get_color != nullptr) {
+                    color = get_color(grid(i, j));
+                } else {
+                    color = glm::vec4(grid(i, j), 0.0f, 0.0f, 1.0f);
+                }
+
+                (*grid_color)(i, j) = vkl::SRGBColor4{vkl::ImageUtils::toSRGB(color.x), vkl::ImageUtils::toSRGB(color.y), vkl::ImageUtils::toSRGB(color.z), vkl::ImageUtils::toSRGB(color.w)};
+            }
+        }
+    }
+
     std::unique_ptr<SingleTextureRenderSystem> simple_render_system = nullptr;
     std::unique_ptr<vkl::Buffer> data_buffer = nullptr;
     std::unique_ptr<VklTexture> result_texture = nullptr;
