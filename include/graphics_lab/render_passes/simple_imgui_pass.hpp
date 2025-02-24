@@ -9,7 +9,12 @@
 
 namespace GraphicsLab::RenderGraph {
 struct SimpleImGuiPass : public SwapChainPass {
-    explicit SimpleImGuiPass(VklDevice &device) : SwapChainPass(device) {
+    std::function<void()> imgui_render_callback = nullptr;
+
+    explicit SimpleImGuiPass(VklDevice &device, std::optional<std::function<void()>> imgui_callback = std::nullopt) : SwapChainPass(device) {
+        if (imgui_callback.has_value()) {
+            imgui_render_callback = imgui_callback.value();
+        }
     }
 
     RenderPassReflection render_pass_reflect() override {
@@ -61,6 +66,10 @@ struct SimpleImGuiPass : public SwapChainPass {
         }
 
         ImGui::End();
+
+        if (imgui_render_callback) {
+            imgui_render_callback();
+        }
         ImGui::Render();
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         end_render_pass(commandBuffer);
