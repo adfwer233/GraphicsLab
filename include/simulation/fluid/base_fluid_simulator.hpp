@@ -104,13 +104,15 @@ struct BaseFluidSimulator {
 
         diffuse(staggered_grid.velocity_x, prev_vel_x, viscosity);
         diffuse(staggered_grid.velocity_y, prev_vel_y, viscosity);
-        project(staggered_grid.velocity_x, staggered_grid.velocity_y, staggered_grid.pressure, staggered_grid.divergence);
+        project(staggered_grid.velocity_x, staggered_grid.velocity_y, staggered_grid.pressure,
+                staggered_grid.divergence);
 
         advect(staggered_grid.density, prev_density, staggered_grid.velocity_x, staggered_grid.velocity_y);
         advect(staggered_grid.velocity_x, prev_vel_x, staggered_grid.velocity_x, staggered_grid.velocity_y);
         advect(staggered_grid.velocity_y, prev_vel_y, staggered_grid.velocity_x, staggered_grid.velocity_y);
 
-        project(staggered_grid.velocity_x, staggered_grid.velocity_y, staggered_grid.pressure, staggered_grid.divergence);
+        project(staggered_grid.velocity_x, staggered_grid.velocity_y, staggered_grid.pressure,
+                staggered_grid.divergence);
 
         compute_curl(staggered_grid.velocity_x, staggered_grid.velocity_y, curl);
         compute_speed(staggered_grid.velocity_x, staggered_grid.velocity_y, speed);

@@ -48,7 +48,8 @@ void FluidSimulationApplication::run() {
     }
 
     ViridisInterpolator viridis_interpolator(0.0, 1.0);
-    ThreePointInterpolator three_point_interpolator({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, -0.5, 0.5);
+    ThreePointInterpolator three_point_interpolator({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, -0.5,
+                                                    0.5);
 
     GraphicsLab::Simulation::BaseFluidSimulator simulator(512, 512);
 
@@ -71,16 +72,18 @@ void FluidSimulationApplication::run() {
     // }
 
     VisualizeQuantity visualization_quantity = VisualizeQuantity::Density;
-    const char* items[] = {"Density", "Curl"};
+    const char *items[] = {"Density", "Curl"};
 
-    SimpleImGuiPass simple_pass(appContext.device_, [&](){
+    SimpleImGuiPass simple_pass(appContext.device_, [&]() {
         ImGui::Begin("Settings");
-        ImGui::Combo("Select Quantity to Visualize", reinterpret_cast<int*>(&visualization_quantity), items, IM_ARRAYSIZE(items));
+        ImGui::Combo("Select Quantity to Visualize", reinterpret_cast<int *>(&visualization_quantity), items,
+                     IM_ARRAYSIZE(items));
         ImGui::End();
     });
 
     Grid2DRenderPass grid_2d_render_pass(
-        appContext.device_, [&]() -> GraphicsLab::Simulation::Grid2D<float> & {
+        appContext.device_,
+        [&]() -> GraphicsLab::Simulation::Grid2D<float> & {
             if (visualization_quantity == VisualizeQuantity::Density) {
                 return simulator.staggered_grid.density;
             } else if (visualization_quantity == VisualizeQuantity::Curl) {
@@ -93,8 +96,7 @@ void FluidSimulationApplication::run() {
             } else if (visualization_quantity == VisualizeQuantity::Curl) {
                 return glm::vec4(three_point_interpolator.interpolate(x), 1.0f);
             }
-        }
-    );
+        });
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
@@ -123,7 +125,6 @@ void FluidSimulationApplication::run() {
         ImGui_ImplGlfw_NewFrame();
         ImGui_ImplVulkan_NewFrame();
         ImGui::NewFrame();
-
 
         appContext.renderContext.begin_frame();
         {

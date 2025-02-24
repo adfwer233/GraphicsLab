@@ -11,7 +11,8 @@ namespace GraphicsLab::RenderGraph {
 struct SimpleImGuiPass : public SwapChainPass {
     std::function<void()> imgui_render_callback = nullptr;
 
-    explicit SimpleImGuiPass(VklDevice &device, std::optional<std::function<void()>> imgui_callback = std::nullopt) : SwapChainPass(device) {
+    explicit SimpleImGuiPass(VklDevice &device, std::optional<std::function<void()>> imgui_callback = std::nullopt)
+        : SwapChainPass(device) {
         if (imgui_callback.has_value()) {
             imgui_render_callback = imgui_callback.value();
         }
