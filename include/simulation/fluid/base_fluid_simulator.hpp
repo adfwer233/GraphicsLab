@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "grid.hpp"
+#include "staggered_grid.hpp"
 
 namespace GraphicsLab::Simulation {
 
@@ -10,11 +10,7 @@ namespace GraphicsLab::Simulation {
  * Base class for fluid simulation, using basic Euler view
  */
 struct BaseFluidSimulator {
-    Grid2D<float> velocity_x;
-    Grid2D<float> velocity_y;
-    Grid2D<float> pressure;
-    Grid2D<float> divergence;
-    Grid2D<float> density;
+    StaggeredGrid2D<float> staggered_grid;
     Grid2D<float> curl;
     Grid2D<float> speed;
 
@@ -23,8 +19,7 @@ struct BaseFluidSimulator {
     const float viscosity = 0.1f;
 
     BaseFluidSimulator(int width, int height)
-        : velocity_x(width, height), velocity_y(width, height), pressure(width, height), divergence(width, height),
-          density(width, height), curl(width, height), speed(width, height) {
+        : staggered_grid(width, height), curl(width, height), speed(width, height) {
     }
 
     void add_source(Grid2D<float> &grid, const Grid2D<float> &source) {
@@ -103,22 +98,22 @@ struct BaseFluidSimulator {
     }
 
     void step() {
-        Grid2D<float> prev_density = density;
-        Grid2D<float> prev_vel_x = velocity_x;
-        Grid2D<float> prev_vel_y = velocity_y;
+        Grid2D<float> prev_density = staggered_grid.density;
+        Grid2D<float> prev_vel_x = staggered_grid.velocity_x;
+        Grid2D<float> prev_vel_y = staggered_grid.velocity_y;
 
-        diffuse(velocity_x, prev_vel_x, viscosity);
-        diffuse(velocity_y, prev_vel_y, viscosity);
-        project(velocity_x, velocity_y, pressure, divergence);
+        diffuse(staggered_grid.velocity_x, prev_vel_x, viscosity);
+        diffuse(staggered_grid.velocity_y, prev_vel_y, viscosity);
+        project(staggered_grid.velocity_x, staggered_grid.velocity_y, staggered_grid.pressure, staggered_grid.divergence);
 
-        advect(density, prev_density, velocity_x, velocity_y);
-        advect(velocity_x, prev_vel_x, velocity_x, velocity_y);
-        advect(velocity_y, prev_vel_y, velocity_x, velocity_y);
+        advect(staggered_grid.density, prev_density, staggered_grid.velocity_x, staggered_grid.velocity_y);
+        advect(staggered_grid.velocity_x, prev_vel_x, staggered_grid.velocity_x, staggered_grid.velocity_y);
+        advect(staggered_grid.velocity_y, prev_vel_y, staggered_grid.velocity_x, staggered_grid.velocity_y);
 
-        project(velocity_x, velocity_y, pressure, divergence);
+        project(staggered_grid.velocity_x, staggered_grid.velocity_y, staggered_grid.pressure, staggered_grid.divergence);
 
-        compute_curl(velocity_x, velocity_y, curl);
-        compute_speed(velocity_x, velocity_y, speed);
+        compute_curl(staggered_grid.velocity_x, staggered_grid.velocity_y, curl);
+        compute_speed(staggered_grid.velocity_x, staggered_grid.velocity_y, speed);
     }
 
     void compute_curl(const Grid2D<float> &vel_x, const Grid2D<float> &vel_y, Grid2D<float> &curl) {
