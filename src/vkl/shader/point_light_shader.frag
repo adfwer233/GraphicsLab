@@ -45,7 +45,7 @@ void main() {
 
 //    outColor = vec4(fragColor, 1.0f);
 //    if (dot(norm, lightDirection) > 0)
-        outColor = vec4((ambient + diffuse + specular) * fragColor, 1.0f);
+        outColor = vec4((ambient + diffuse + specular) * vec3(0.9, 0.9, 0.9), 1.0f);
 //    else
 //        outColor = vec4(ambient, 1.0f);
 

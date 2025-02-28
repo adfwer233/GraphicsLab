@@ -143,7 +143,7 @@ struct InternalSceneRenderPass : public RenderPass {
         ubo.view = sceneTree_.active_camera->camera.get_view_transformation();
         ubo.proj = sceneTree_.active_camera->camera.get_proj_transformation();
         ubo.model = glm::mat4(1.0f);
-        ubo.pointLight = PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 0.0});
+        ubo.pointLight = PointLight(glm::vec4(sceneTree_.active_camera->camera.position, 1.0), {1.0, 1.0, 1.0, 1.0});
         ubo.cameraPos = sceneTree_.active_camera->camera.position;
 
         auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
@@ -228,7 +228,7 @@ struct InternalSceneRenderPass : public RenderPass {
                         };
 
                         if (uiState_.renderMode == UIState::RenderMode::raw) {
-                            raw_render_system->renderObject(frameInfo);
+                            color_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
                             wireframe_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::material) {
