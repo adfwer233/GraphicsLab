@@ -8,11 +8,11 @@
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/aabb_box_render_system.hpp"
+#include "vkl/system/render_system/directional_field_render_system.hpp"
 #include "vkl/system/render_system/line_render_system.hpp"
 #include "vkl/system/render_system/normal_render_system.hpp"
 #include "vkl/system/render_system/simple_wireframe_render_system.hpp"
 #include "vkl/system/render_system/world_axis_render_system.hpp"
-#include "vkl/system/render_system/directional_field_render_system.hpp"
 #include "vkl/utils/imgui_utils.hpp"
 
 #include "vkl/system/compute_system/scene_tree_path_tracing_compute_model.hpp"
@@ -103,8 +103,7 @@ struct InternalSceneRenderPass : public RenderPass {
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/directional_field_3d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/directional_field_3d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
-                {std::format("{}/directional_field_3d.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}
-            });
+                {std::format("{}/directional_field_3d.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         /**
          * Initialize path tracing texture
@@ -287,8 +286,10 @@ struct InternalSceneRenderPass : public RenderPass {
                 }
 
                 auto directional_field_buffer = SceneTree::VklNodeMeshBuffer<DirectionalField3D>::instance();
-                for (auto [directional_field_node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<DirectionalField3D>()) {
-                    if (not directional_field_node->visible) continue;
+                for (auto [directional_field_node, trans] :
+                     sceneTree_.traverse_geometry_nodes_with_trans<DirectionalField3D>()) {
+                    if (not directional_field_node->visible)
+                        continue;
                     ubo.model = trans;
 
                     auto mesh = directional_field_buffer->getGeometryModel(device_, directional_field_node);

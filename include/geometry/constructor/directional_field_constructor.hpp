@@ -37,4 +37,4 @@ struct SimpleDirectionalFieldConstructor {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry
