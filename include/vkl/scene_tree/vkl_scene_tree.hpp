@@ -31,7 +31,7 @@ enum class NodeType {
 struct PointLightSource {};
 struct AreaLightSource {};
 
-using GeometryTypes = MetaProgramming::TypeList<Mesh3D, CurveMesh3D, Wire3D, BezierCurve2D, TensorProductBezierSurface>;
+using GeometryTypes = MetaProgramming::TypeList<Mesh3D, CurveMesh3D, Wire3D, DirectionalField3D, BezierCurve2D, TensorProductBezierSurface>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>

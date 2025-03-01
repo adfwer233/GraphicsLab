@@ -4,6 +4,8 @@
 
 #include "vkl/imgui/imgui_context.hpp"
 
+#include "geometry/constructor/directional_field_constructor.hpp"
+
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_passes/simple_pass.hpp"
@@ -35,6 +37,10 @@ void ApplicationExperimental::run() {
 
     appContext.sceneTree->addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     appContext.sceneTree->addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
+
+    auto directional_field = GraphicsLab::Geometry::SimpleDirectionalFieldConstructor::create();
+
+    appContext.sceneTree->addGeometryNode(std::move(directional_field), "dir");
 
     UIState state;
     Controller controller(state, *appContext.sceneTree);

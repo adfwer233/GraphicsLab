@@ -97,3 +97,4 @@ using CurveMesh3D = MeshGeometry<Vertex3D, LineIndex, 3>;
 using Wire3D = MeshGeometry<Vertex3DRaw, LineIndex, 3>;
 using PointCloud3D = MeshGeometry<Vertex3D, NullIndex, 3>;
 using PointCloud2D = MeshGeometry<Vertex2D, NullIndex, 2>;
+using DirectionalField3D = MeshGeometry<DirectionalFieldVertex3D, NullIndex, 3>;
