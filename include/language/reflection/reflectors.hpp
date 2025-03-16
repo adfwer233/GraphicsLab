@@ -235,22 +235,19 @@ template <typename T> struct DispatchedType : public DispatchedTypeBase {
     }
 };
 
-template<typename... Args, std::size_t... I>
-auto tupleFromAnyVector(const std::vector<std::any>& args, std::index_sequence<I...>) {
+template <typename... Args, std::size_t... I>
+auto tupleFromAnyVector(const std::vector<std::any> &args, std::index_sequence<I...>) {
     return std::make_tuple(std::any_cast<Args>(args[I])...);
 }
 
 // General function to wrap member function calls dynamically
-template<typename T, typename... Args>
-auto wrapMethod(T* obj, void(T::*method)(Args...)) {
-    return [method, obj](const std::vector<std::any>& args) {
+template <typename T, typename... Args> auto wrapMethod(T *obj, void (T::*method)(Args...)) {
+    return [method, obj](const std::vector<std::any> &args) {
         if (args.size() != sizeof...(Args)) {
             throw std::runtime_error("Argument count mismatch!");
         }
         auto tup = tupleFromAnyVector<Args...>(args, std::index_sequence_for<Args...>{});
-        std::apply([obj, method](Args... unpackedArgs) {
-            (obj->*method)(unpackedArgs...);
-        }, tup);
+        std::apply([obj, method](Args... unpackedArgs) { (obj->*method)(unpackedArgs...); }, tup);
     };
 }
 
@@ -261,7 +258,7 @@ struct TypeErasedValue {
     std::function<void(void)> call_func; // Callable for member functions
     std::optional<GraphicsLabReflection::GraphicsLabFunction> function_with_pack;
 
-    std::function<void(const std::vector<std::any>&)> call_func_with_param;
+    std::function<void(const std::vector<std::any> &)> call_func_with_param;
 
     DispatchedTypeBase *dispatched;
     TypeErasedValue() = default;

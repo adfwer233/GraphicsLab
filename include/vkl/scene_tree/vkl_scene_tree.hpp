@@ -66,9 +66,9 @@ struct GraphicsTransformation : Reflectable {
 
     [[nodiscard]] glm::mat4 getTransformation() const {
         glm::mat4 model(1.0f);
-        model = glm::translate(model, translation);   // Apply translation
-        model *= quatToMat4(rotation);                // Apply rotation
-        model = glm::scale(model, scaling);           // Apply scaling
+        model = glm::translate(model, translation); // Apply translation
+        model *= quatToMat4(rotation);              // Apply rotation
+        model = glm::scale(model, scaling);         // Apply scaling
 
         return model;
     }
@@ -161,8 +161,11 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         result.emplace("rotateY", TypeErasedValue(&GeometryNode::rotateY, this));
         result.emplace("rotateZ", TypeErasedValue(&GeometryNode::rotateZ, this));
 
-        result.emplace("updateColor", TypeErasedValue(&GeometryNode::updateColor, this, std::tuple<glm::vec3>(glm::vec3(1.0f, 1.0f, 1.0f)), {"New Color"}));
-        result.emplace("testReflectionFunction", TypeErasedValue(&GeometryNode::testReflectionFunction, this, {1, 2, 3}, {"x", "y", "z"}));
+        result.emplace("updateColor",
+                       TypeErasedValue(&GeometryNode::updateColor, this,
+                                       std::tuple<glm::vec3>(glm::vec3(1.0f, 1.0f, 1.0f)), {"New Color"}));
+        result.emplace("testReflectionFunction",
+                       TypeErasedValue(&GeometryNode::testReflectionFunction, this, {1, 2, 3}, {"x", "y", "z"}));
         return result;
     }
 
@@ -188,7 +191,6 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     }
 
     void testReflectionFunction(int x, int y, int z) {
-
     }
 
     void applyTransformation() {

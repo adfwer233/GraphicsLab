@@ -24,12 +24,10 @@ struct DirectionalFieldVertex3D {
     glm::vec3 direction{};
     glm::vec3 values{};
 
-    REFLECT(
-        Property{"position", &DirectionalFieldVertex3D::position},
-        Property{"color", &DirectionalFieldVertex3D::color},
-        Property{"direction", &DirectionalFieldVertex3D::direction},
-        Property{"values", &DirectionalFieldVertex3D::values}
-    )
+    REFLECT(Property{"position", &DirectionalFieldVertex3D::position},
+            Property{"color", &DirectionalFieldVertex3D::color},
+            Property{"direction", &DirectionalFieldVertex3D::direction},
+            Property{"values", &DirectionalFieldVertex3D::values})
 };
 
 struct TriangleIndex {
