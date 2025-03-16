@@ -26,7 +26,7 @@ struct Tessellator {
                 Mesh3D::vertex_type vertex;
                 vertex.position = surface.evaluate({param_u, param_v});
                 vertex.color = {0, 1, 0};
-                vertex.normal = {0, 0, 0};
+                vertex.normal = surface.normal({param_u, param_v});
                 surface.mesh->vertices.push_back(vertex);
             }
         }
