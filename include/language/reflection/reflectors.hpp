@@ -235,12 +235,34 @@ template <typename T> struct DispatchedType : public DispatchedTypeBase {
     }
 };
 
+template<typename... Args, std::size_t... I>
+auto tupleFromAnyVector(const std::vector<std::any>& args, std::index_sequence<I...>) {
+    return std::make_tuple(std::any_cast<Args>(args[I])...);
+}
+
+// General function to wrap member function calls dynamically
+template<typename T, typename... Args>
+auto wrapMethod(T* obj, void(T::*method)(Args...)) {
+    return [method, obj](const std::vector<std::any>& args) {
+        if (args.size() != sizeof...(Args)) {
+            throw std::runtime_error("Argument count mismatch!");
+        }
+        auto tup = tupleFromAnyVector<Args...>(args, std::index_sequence_for<Args...>{});
+        std::apply([obj, method](Args... unpackedArgs) {
+            (obj->*method)(unpackedArgs...);
+        }, tup);
+    };
+}
+
 // Type-erased wrapper that holds type information for both data members and functions
 struct TypeErasedValue {
     std::function<const std::type_info &()> type_info_func;
     std::function<void *(void)> get_ptr_func;
     std::function<void(void)> call_func; // Callable for member functions
     std::optional<GraphicsLabReflection::GraphicsLabFunction> function_with_pack;
+
+    std::function<void(const std::vector<std::any>&)> call_func_with_param;
+
     DispatchedTypeBase *dispatched;
     TypeErasedValue() = default;
 
@@ -282,9 +304,23 @@ struct TypeErasedValue {
         function_with_pack = GraphicsLabReflection::GraphicsLabFunction{};
         function_with_pack.value().meta =
             GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<C, R, args...>(
-                func, obj, default_values, names);
+                func, default_values, names);
         function_with_pack->function_with_parameter =
             [func, obj](GraphicsLabReflection::GraphicsLabFunctionParameterPack pack) { (obj->*func)(pack); };
+    }
+
+    template <typename R, typename C, typename... Args>
+    TypeErasedValue(R (C::*func)(Args...), C *obj, std::tuple<Args...> default_values, std::vector<std::string> names) {
+        type_info_func = [func]() -> const std::type_info & { return typeid(func); };
+        get_ptr_func = nullptr; // Not a data member
+        call_func = nullptr;
+
+        function_with_pack = GraphicsLabReflection::GraphicsLabFunction{};
+        function_with_pack.value().meta =
+            GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<C, R, Args...>(
+                func, default_values, names);
+
+        call_func_with_param = wrapMethod(obj, func);
     }
 
     const std::type_info &type() const {

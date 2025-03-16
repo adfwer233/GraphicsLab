@@ -160,6 +160,9 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         result.emplace("rotateX", TypeErasedValue(&GeometryNode::rotateX, this));
         result.emplace("rotateY", TypeErasedValue(&GeometryNode::rotateY, this));
         result.emplace("rotateZ", TypeErasedValue(&GeometryNode::rotateZ, this));
+
+        result.emplace("updateColor", TypeErasedValue(&GeometryNode::updateColor, this, std::tuple<glm::vec3>(glm::vec3(1.0f, 1.0f, 1.0f)), {"New Color"}));
+        result.emplace("testReflectionFunction", TypeErasedValue(&GeometryNode::testReflectionFunction, this, {1, 2, 3}, {"x", "y", "z"}));
         return result;
     }
 
@@ -177,6 +180,16 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     // sync objects
     bool updated = false;
     bool boxUpdated = false;
+
+    void updateColor(glm::vec3 color) {
+        // auto color = std::any_cast<glm::vec3>(parameterPack.parameters[0].param);
+
+        spdlog::info("updating color, {} {} {}", color.x, color.y, color.z);
+    }
+
+    void testReflectionFunction(int x, int y, int z) {
+
+    }
 
     void applyTransformation() {
         if constexpr (std::is_same_v<GeometryType, Mesh3D>) {

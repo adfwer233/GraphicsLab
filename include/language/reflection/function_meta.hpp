@@ -41,7 +41,7 @@ struct GraphicsLabFunction {
 
 struct MemberFunctionReflection {
     template <typename C, typename R, typename... args>
-    static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(GraphicsLabFunctionParameterPack), C *obj,
+    static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(GraphicsLabFunctionParameterPack),
                                                              std::tuple<args...> default_value_tuple) {
         GraphicsLabFunctionMeta result;
         int param_index = 0;
@@ -54,11 +54,42 @@ struct MemberFunctionReflection {
     }
 
     template <typename C, typename R, typename... args>
-    static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(GraphicsLabFunctionParameterPack), C *obj,
+    static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(GraphicsLabFunctionParameterPack),
                                                               std::tuple<args...> default_value_tuple,
                                                               std::vector<std::string> names) {
         if (sizeof...(args) != names.size()) {
-            return createDefaultFunctionMeta(func, obj, default_value_tuple);
+            return createDefaultFunctionMeta(func, default_value_tuple);
+        }
+        GraphicsLabFunctionMeta result;
+        int param_index = 0;
+        auto default_values = convertTupleToVectorOfAny(default_value_tuple);
+
+        result.arguments = std::vector<Argument>{
+            Argument{.name = names[param_index++],
+                     .default_value = default_values[param_index - 1],
+                     .type_info_func = []() -> const std::type_info & { return typeid(args); }}...};
+        return result;
+    }
+
+    template <typename C, typename R, typename... args>
+    static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(args...),
+                                                             std::tuple<args...> default_value_tuple) {
+        GraphicsLabFunctionMeta result;
+        int param_index = 0;
+        auto default_values = convertTupleToVectorOfAny(default_value_tuple);
+        result.arguments = std::vector<Argument>{
+            Argument{.name = std::format("param-{}", param_index++),
+                     .default_value = default_values[param_index - 1],
+                     .type_info_func = []() -> const std::type_info & { return typeid(args); }}...};
+        return result;
+    }
+
+    template <typename C, typename R, typename... args>
+    static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(args...),
+                                                              std::tuple<args...> default_value_tuple,
+                                                              std::vector<std::string> names) {
+        if (sizeof...(args) != names.size()) {
+            return createDefaultFunctionMeta(func, default_value_tuple);
         }
         GraphicsLabFunctionMeta result;
         int param_index = 0;

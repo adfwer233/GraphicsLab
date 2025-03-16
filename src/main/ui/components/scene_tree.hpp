@@ -64,9 +64,15 @@ class SceneTreeComponent : public UIComponent {
                         ImGui::TreePop();
                     }
                 }
-            } else {
+            } else if (value.call_func != nullptr) {
                 if (ImGui::Button(std::format("{}", key).c_str())) {
                     value.call();
+                }
+            } else if (value.call_func_with_param != nullptr) {
+                if (ImGui::Button(std::format("{}", key).c_str())) {
+                    for (int i = 0; auto &meta: value.function_with_pack->meta.arguments) {
+                        spdlog::info("Param {}: {}", i++, meta.name);
+                    }
                 }
             }
         }
