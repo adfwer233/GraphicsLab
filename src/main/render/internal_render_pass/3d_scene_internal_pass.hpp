@@ -57,13 +57,13 @@ struct InternalSceneRenderPass : public RenderPass {
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         color_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
@@ -237,9 +237,11 @@ struct InternalSceneRenderPass : public RenderPass {
                         };
 
                         if (uiState_.renderMode == UIState::RenderMode::raw) {
-                            color_render_system->renderObject(frameInfo);
+                            raw_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
                             wireframe_render_system->renderObject(frameInfo);
+                        } else if (uiState_.renderMode == UIState::RenderMode::color) {
+                            color_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::material) {
                             if (node_mesh->mesh->textures_.size() >=
                                 simple_render_system->descriptorSetLayout->descriptorSetLayoutKey
@@ -316,8 +318,6 @@ struct InternalSceneRenderPass : public RenderPass {
                                     sceneTree_.active_camera->camera.get_view_transformation();
                     glm::vec4 min_pos(uiState_.box.min_pos, 0.0f);
                     glm::vec4 max_pos(uiState_.box.max_pos, 0.0f);
-                    min_pos.y *= -1;
-                    max_pos.y *= -1;
                     Box3DRenderSystemPushConstantData push_constant_data{mvp, min_pos, max_pos};
                     VklPushConstantInfoList<Box3DRenderSystemPushConstantData> push_constant_data_list;
                     push_constant_data_list.data[0] = push_constant_data;

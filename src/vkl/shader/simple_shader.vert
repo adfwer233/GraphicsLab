@@ -27,8 +27,11 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
 void main() {
     vec4 positionWorld = ubo.model * vec4(inPosition, 1.0);
     gl_Position = ubo.proj * ubo.view * positionWorld;
+
+    mat3 normalMatrix = transpose(inverse(mat3(ubo.model)));
+    fragNormalWorld = normalize(normalMatrix * inNormal);
+
     fragPosWorld = positionWorld.xyz;
-    fragNormalWorld = inNormal;
     fragColor = inColor;
     fragTextCoord = inUV;
 }

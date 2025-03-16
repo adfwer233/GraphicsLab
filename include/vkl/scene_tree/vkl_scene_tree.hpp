@@ -62,13 +62,13 @@ struct VklSceneTree;
 struct GraphicsTransformation : Reflectable {
     glm::vec3 translation = glm::vec3(0.0f);
     glm::vec3 scaling = glm::vec3(1.0f);
-    glm::quat rotation = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
     [[nodiscard]] glm::mat4 getTransformation() const {
         glm::mat4 model(1.0f);
-        // model = glm::translate(model, translation);
-        model = quatToMat4(rotation);
-        // model = glm::scale(model, scaling);
+        model = glm::translate(model, translation);   // Apply translation
+        model *= quatToMat4(rotation);                // Apply rotation
+        model = glm::scale(model, scaling);           // Apply scaling
 
         return model;
     }
