@@ -35,10 +35,40 @@ class SceneTreeComponent : public UIComponent {
 
             RenderTreeNode(context_.sceneTree->root.get());
         }
+
+        render_call_function_dialog();
+
         ImGui::End();
     }
 
   private:
+    bool show_call_function_dialog = false;
+    std::optional<TypeErasedValue> function_to_call = std::nullopt;
+    std::vector<std::any> args;
+
+    void render_call_function_dialog() {
+        if (show_call_function_dialog) {
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+            ImGui::Begin("Input Dialog", &show_call_function_dialog,
+                         ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+            for (int i = 0; auto &arg : function_to_call.value().function_with_pack->meta.arguments) {
+                if (arg.default_value.type() == typeid(glm::vec3)) {
+                    auto* vec = std::any_cast<glm::vec3>(&args[i]);
+                    ImGui::InputFloat3(arg.name.c_str(), glm::value_ptr(*vec));
+                }
+                i++;
+            }
+
+            if (ImGui::Button("OK")) {
+                function_to_call->call_func_with_param(args);
+                show_call_function_dialog = false;
+            }
+            ImGui::End();
+        }
+    }
+
     void showReflectable(Reflectable *reflectableObject) {
         auto rfl = reflectableObject->reflect();
         for (auto &[key, value] : reflectableObject->reflect()) {
@@ -70,9 +100,14 @@ class SceneTreeComponent : public UIComponent {
                 }
             } else if (value.call_func_with_param != nullptr) {
                 if (ImGui::Button(std::format("{}", key).c_str())) {
+                    args.clear();
                     for (int i = 0; auto &meta : value.function_with_pack->meta.arguments) {
                         spdlog::info("Param {}: {}", i++, meta.name);
+                        args.emplace_back(meta.default_value);
                     }
+
+                    function_to_call = value;
+                    show_call_function_dialog = true;
                 }
             }
         }

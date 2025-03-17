@@ -38,9 +38,8 @@ void ApplicationExperimental::run() {
     appContext.sceneTree->addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     appContext.sceneTree->addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
 
-    auto directional_field = GraphicsLab::Geometry::SimpleDirectionalFieldConstructor::create();
-
-    appContext.sceneTree->addGeometryNode(std::move(directional_field), "dir");
+    // auto directional_field = GraphicsLab::Geometry::SimpleDirectionalFieldConstructor::create();
+    // appContext.sceneTree->addGeometryNode(std::move(directional_field), "dir");
 
     UIState state;
     Controller controller(state, *appContext.sceneTree);
