@@ -29,19 +29,19 @@ struct GraphicsLabFunctionMeta {
     std::vector<Argument> arguments;
 };
 
-struct GraphicsLabFunctionParameterPack {
+[[deprecated]] struct GraphicsLabFunctionParameterPack {
     std::vector<Parameter> parameters;
 };
 
 struct GraphicsLabFunction {
     GraphicsLabFunctionMeta meta;
 
-    std::function<void(GraphicsLabFunctionParameterPack)> function_with_parameter;
+    [[deprecated]] std::function<void(GraphicsLabFunctionParameterPack)> function_with_parameter;
 };
 
 struct MemberFunctionReflection {
     template <typename C, typename R, typename... args>
-    static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(GraphicsLabFunctionParameterPack),
+    [[deprecated]] static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(GraphicsLabFunctionParameterPack),
                                                              std::tuple<args...> default_value_tuple) {
         GraphicsLabFunctionMeta result;
         int param_index = 0;
@@ -54,7 +54,7 @@ struct MemberFunctionReflection {
     }
 
     template <typename C, typename R, typename... args>
-    static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(GraphicsLabFunctionParameterPack),
+    [[deprecated]] static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(GraphicsLabFunctionParameterPack),
                                                               std::tuple<args...> default_value_tuple,
                                                               std::vector<std::string> names) {
         if (sizeof...(args) != names.size()) {
