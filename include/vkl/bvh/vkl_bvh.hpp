@@ -1,3 +1,4 @@
+#define NOMINMAX
 #pragma once
 
 #include "vkl_bvh_gpu.hpp"

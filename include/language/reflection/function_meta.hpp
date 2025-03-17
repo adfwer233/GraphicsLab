@@ -29,7 +29,7 @@ struct GraphicsLabFunctionMeta {
     std::vector<Argument> arguments;
 };
 
-[[deprecated]] struct GraphicsLabFunctionParameterPack {
+struct [[deprecated]] GraphicsLabFunctionParameterPack {
     std::vector<Parameter> parameters;
 };
 

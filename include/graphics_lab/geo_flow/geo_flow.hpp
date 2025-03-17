@@ -1,8 +1,10 @@
 #pragma once
 
+#define NOMINMAX
+#include "igl/per_vertex_normals.h"
+
 #include "Eigen/Eigen"
 #include "geometry/geometry.hpp"
-#include "igl/per_vertex_normals.h"
 #include "language/reflection/static_reflector.hpp"
 #include <string>
 

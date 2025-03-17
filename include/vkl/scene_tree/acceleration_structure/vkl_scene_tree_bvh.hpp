@@ -1,3 +1,6 @@
+#pragma once
+
+#define NOMINMAX
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 
 #include <vkl/bvh/vkl_bvh_gpu.hpp>

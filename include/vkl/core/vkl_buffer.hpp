@@ -14,7 +14,7 @@ struct Buffer {
     Buffer(const Buffer &) = delete;
     Buffer(Buffer &&other) = default;
     Buffer &operator=(const Buffer &) = delete;
-    Buffer &operator=(Buffer &&) = default;
+    Buffer &operator=(Buffer &&) = delete;
 
     Buffer(VklDevice &device, VkDeviceSize size, VkBufferUsageFlags buffer_usage, VmaMemoryUsage memory_usage,
            VmaAllocationCreateFlags flags = VMA_ALLOCATION_CREATE_MAPPED_BIT |

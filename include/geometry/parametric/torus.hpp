@@ -58,7 +58,7 @@ struct Torus : public ParamSurface {
         return center + direction1 * x + direction2 * y + base_normal * z;
     }
 
-    PointType normal(const ParamType param_to_evaluate) {
+    PointType normal(const ParamType param_to_evaluate) override {
         ParamType param = move_param_to_domain(param_to_evaluate);
 
         PointType position = evaluate(param);
