@@ -23,8 +23,6 @@ struct NURBSSurface : public ParamSurface {
     int order_v = 0;
     int degree_v = 0;
 
-    //    ParametricSpace<T, Configuration> parametric_space;
-
     NURBSSurface(std::vector<std::vector<PointType>> ctrl_pts, std::vector<T> knots_u, std::vector<T> knots_v,
                  std::vector<std::vector<T>> wts, const int degree_u, const int degree_v)
         : control_points(std::move(ctrl_pts)), knot_vector_u(std::move(knots_u)), knot_vector_v(std::move(knots_v)),
@@ -32,7 +30,7 @@ struct NURBSSurface : public ParamSurface {
         assert(is_valid());
     }
 
-    PointType evaluate(ParamType param) const {
+    PointType evaluate(ParamType param) override {
         T u = param.x * knot_vector_u.back();
         T v = param.y * knot_vector_v.back();
         assert(is_valid());
@@ -57,7 +55,7 @@ struct NURBSSurface : public ParamSurface {
         return numerator / denominator;
     }
 
-    PointType normal(ParamType param) const {
+    PointType normal(ParamType param) override {
         T u = param.x * knot_vector_u.back();
         T v = param.y * knot_vector_v.back();
 
@@ -70,6 +68,16 @@ struct NURBSSurface : public ParamSurface {
 
         // Normalize the resulting normal vector
         return glm::normalize(n);
+    }
+
+    std::pair<PointType, ParamType> project(const PointType point) override {
+        // @todo: implement project function
+        return {point, {0.0, 0.0}};
+    }
+
+    bool test_point(const PointType point) override {
+        // @todo: implement test point function
+        return false;
     }
 
   private:

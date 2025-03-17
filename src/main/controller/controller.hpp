@@ -6,6 +6,8 @@
 
 #include "ui_states.hpp"
 
+#include "geometry/parametric/surface_type_list.hpp"
+
 #ifdef RENDERDOC_DIR
 #include "graphics_lab/utils/render_doc.hpp"
 #endif
@@ -267,10 +269,19 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
                 } catch (std::exception e) {
                     spdlog::error(e.what());
                 }
-                // spdlog::info("box updated {} {}", Reflection::serialize(uiState_.box.min_pos).dump(),
-                // Reflection::serialize(uiState_.box.max_pos).dump());
                 uiState_.boxMeshRecreated = false;
             }
+
+            MetaProgramming::ForEachType(GraphicsLab::Geometry::ParamSurfaceTypeList{}, [&]<typename T>() {
+                if (auto meshNode = dynamic_cast<SceneTree::GeometryNode<T> *>(picking_result->hitGeometryNode)) {
+                    try {
+                        uiState_.box = meshNode->data.mesh->getMeshBox();
+                    } catch (std::exception e) {
+                        spdlog::error(e.what());
+                    }
+                    uiState_.boxMeshRecreated = false;
+                }
+            });
         }
     }
 
