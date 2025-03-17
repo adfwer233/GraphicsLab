@@ -26,8 +26,7 @@ template <typename T, typename Class> struct Property {
         return std::make_tuple(__VA_ARGS__);                                                                           \
     }
 
-template <size_t N>
-struct StringLiteral {
+template <size_t N> struct StringLiteral {
     constexpr StringLiteral(const char (&str)[N]) {
         std::copy_n(str, N, value);
     }
@@ -43,8 +42,7 @@ struct StaticReflect {
                    properties);
     }
 
-    template <typename T, StringLiteral Name>
-    static constexpr bool HasField() {
+    template <typename T, StringLiteral Name> static constexpr bool HasField() {
         constexpr auto properties = T::staticReflect();
         return std::apply([](auto &&...props) { return ((props.name == Name.value) || ...); }, properties);
     }

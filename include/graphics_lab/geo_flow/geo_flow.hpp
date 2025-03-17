@@ -9,7 +9,7 @@
 #include <string>
 
 template <typename T, typename MeshType, typename... Args>
-concept GeoFlowPerVertexExecutor = requires(MeshType* mesh, Args... args) {
+concept GeoFlowPerVertexExecutor = requires(MeshType *mesh, Args... args) {
     { T::run(mesh, args...) } -> std::same_as<Eigen::MatrixXd>;
 };
 
@@ -19,7 +19,8 @@ concept GeoFlowMeshType = requires(T t) {
     { t.vertices } -> std::same_as<std::vector<typename T::vertex_type> &>;
 } and MeshVertexConcept<typename T::vertex_type>;
 
-template <GeoFlowMeshType MeshType, typename Executor, typename... Args> requires GeoFlowPerVertexExecutor<Executor, MeshType, Args...>
+template <GeoFlowMeshType MeshType, typename Executor, typename... Args>
+    requires GeoFlowPerVertexExecutor<Executor, MeshType, Args...>
 struct GeoFlowPerVertexMap {
     MeshType *mesh;
     std::string targetFieldName;

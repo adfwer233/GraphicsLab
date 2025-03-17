@@ -114,7 +114,7 @@ class RayPicker {
 
         MetaProgramming::ForEachType(GraphicsLab::Geometry::ParametricSurfaceTypeList{}, [&]<typename T>() {
             for (auto [param_node, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
-                Mesh3D* mesh = param_node->data.mesh.get();
+                Mesh3D *mesh = param_node->data.mesh.get();
                 for (auto face : mesh->indices) {
                     auto int_res =
                         ray_.ray_triangle_intersection(trans * glm::vec4(mesh->vertices[face.i].position, 1.0f),
@@ -127,10 +127,9 @@ class RayPicker {
                                                            .v = int_res.v,
                                                            .w = int_res.w};
                     }
+                }
             }
-        }
         });
-
 
         std::optional<RayPickingResult> result = std::nullopt;
 

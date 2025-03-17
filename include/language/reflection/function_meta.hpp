@@ -41,8 +41,8 @@ struct GraphicsLabFunction {
 
 struct MemberFunctionReflection {
     template <typename C, typename R, typename... args>
-    [[deprecated]] static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(GraphicsLabFunctionParameterPack),
-                                                             std::tuple<args...> default_value_tuple) {
+    [[deprecated]] static GraphicsLabFunctionMeta createDefaultFunctionMeta(
+        R (C::*func)(GraphicsLabFunctionParameterPack), std::tuple<args...> default_value_tuple) {
         GraphicsLabFunctionMeta result;
         int param_index = 0;
         auto default_values = convertTupleToVectorOfAny(default_value_tuple);
@@ -54,9 +54,9 @@ struct MemberFunctionReflection {
     }
 
     template <typename C, typename R, typename... args>
-    [[deprecated]] static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(GraphicsLabFunctionParameterPack),
-                                                              std::tuple<args...> default_value_tuple,
-                                                              std::vector<std::string> names) {
+    [[deprecated]] static GraphicsLabFunctionMeta createFunctionMetaWithName(
+        R (C::*func)(GraphicsLabFunctionParameterPack), std::tuple<args...> default_value_tuple,
+        std::vector<std::string> names) {
         if (sizeof...(args) != names.size()) {
             return createDefaultFunctionMeta(func, default_value_tuple);
         }

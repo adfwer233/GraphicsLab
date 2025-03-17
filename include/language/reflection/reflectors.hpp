@@ -293,7 +293,7 @@ struct TypeErasedValue {
 
     template <typename R, typename C, typename... args>
     [[deprecated]] TypeErasedValue(R (C::*func)(GraphicsLabReflection::GraphicsLabFunctionParameterPack), C *obj,
-                    std::tuple<args...> default_values, std::vector<std::string> names) {
+                                   std::tuple<args...> default_values, std::vector<std::string> names) {
         type_info_func = [func]() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = nullptr;

@@ -55,7 +55,7 @@ class SceneTreeComponent : public UIComponent {
                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
             for (int i = 0; auto &arg : function_to_call.value().function_with_pack->meta.arguments) {
                 if (arg.default_value.type() == typeid(glm::vec3)) {
-                    auto* vec = std::any_cast<glm::vec3>(&args[i]);
+                    auto *vec = std::any_cast<glm::vec3>(&args[i]);
                     ImGui::InputFloat3(arg.name.c_str(), glm::value_ptr(*vec));
                 }
                 i++;

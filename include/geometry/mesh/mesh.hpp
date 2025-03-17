@@ -40,9 +40,7 @@ template <typename T>
 concept MeshVertexConcept = requires { typename T::IsStaticReflected; };
 
 template <typename T>
-concept MeshGeometryTrait = requires {
-    typename T::MeshGeometryTrait;
-};
+concept MeshGeometryTrait = requires { typename T::MeshGeometryTrait; };
 
 template <typename VertexType, typename IndicesType, size_t Dimension = 3> class MeshGeometry {
   public:

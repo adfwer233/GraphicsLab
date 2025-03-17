@@ -26,8 +26,6 @@ struct ParamSurface {
 };
 
 template <typename T>
-concept ParamSurfaceTrait = requires {
-    typename T::ParamSurfaceTrait;
-};
+concept ParamSurfaceTrait = requires { typename T::ParamSurfaceTrait; };
 
 } // namespace GraphicsLab::Geometry
