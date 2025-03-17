@@ -10,6 +10,8 @@ struct ParamSurface {
     struct SurfaceTrait {};
     struct SceneTreeGeometryTypeTrait {};
 
+    struct ParamSurfaceTrait {};
+
     using T = double;
     using ParamType = glm::vec<2, double>;
     using PointType = glm::vec<3, double>;
@@ -21,6 +23,11 @@ struct ParamSurface {
     virtual bool test_point(const PointType point) = 0;
 
     std::unique_ptr<Mesh3D> mesh = nullptr;
+};
+
+template <typename T>
+concept ParamSurfaceTrait = requires {
+    typename T::ParamSurfaceTrait;
 };
 
 } // namespace GraphicsLab::Geometry

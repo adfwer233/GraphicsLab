@@ -6,9 +6,9 @@
 #include "language/reflection/static_reflector.hpp"
 #include <string>
 
-template <typename T, typename MeshType>
-concept GeoFlowPerVertexExecutor = requires(MeshType *mesh) {
-    { T::run(mesh) } -> std::same_as<Eigen::MatrixXd>;
+template <typename T, typename MeshType, typename... Args>
+concept GeoFlowPerVertexExecutor = requires(MeshType* mesh, Args... args) {
+    { T::run(mesh, args...) } -> std::same_as<Eigen::MatrixXd>;
 };
 
 template <typename T>
@@ -17,15 +17,16 @@ concept GeoFlowMeshType = requires(T t) {
     { t.vertices } -> std::same_as<std::vector<typename T::vertex_type> &>;
 } and MeshVertexConcept<typename T::vertex_type>;
 
-template <GeoFlowMeshType MeshType, GeoFlowPerVertexExecutor<MeshType> Executor> struct GeoFlowPerVertexMap {
+template <GeoFlowMeshType MeshType, typename Executor, typename... Args> requires GeoFlowPerVertexExecutor<Executor, MeshType, Args...>
+struct GeoFlowPerVertexMap {
     MeshType *mesh;
     std::string targetFieldName;
 
-    void perform() {
-        Eigen::MatrixXd result = Executor::run(mesh);
+    void perform(Args... args) {
+        Eigen::MatrixXd result = Executor::run(mesh, args...);
         int n = result.rows();
 
-        using vertex_type = MeshType::vertex_type;
+        using vertex_type = typename MeshType::vertex_type;
 
         for (int i = 0; i < n; i++) {
             glm::vec3 vec{result(i, 0), result(i, 1), result(i, 2)};
@@ -63,4 +64,18 @@ struct NormalVector {
     }
 };
 
+struct SetColor {
+    static Eigen::MatrixXd run(Mesh3D *mesh, glm::vec3 color) {
+        int n = mesh->vertices.size();
+        Eigen::MatrixXd V = Eigen::MatrixXd::Zero(n, 3);
+        for (int i = 0; i < n; i++) {
+            V(i, 0) = color.x;
+            V(i, 1) = color.y;
+            V(i, 2) = color.z;
+        }
+        return V;
+    }
+};
+
 using test = GeoFlowPerVertexMap<Mesh3D, NormalVector>;
+using test2 = GeoFlowPerVertexMap<Mesh3D, SetColor, glm::vec3>;

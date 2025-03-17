@@ -16,7 +16,12 @@
 
 #include "glm/gtc/quaternion.hpp"
 
+#include <geometry/parametric/parametric_surface.hpp>
 #include <vkl/bvh/vkl_bvh_gpu.hpp>
+
+#include "graphics_lab/geo_flow/geo_flow.hpp"
+
+#include <geometry/parametric/torus.hpp>
 
 struct Material;
 
@@ -185,9 +190,21 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     bool boxUpdated = false;
 
     void updateColor(glm::vec3 color) {
-        // auto color = std::any_cast<glm::vec3>(parameterPack.parameters[0].param);
+        if constexpr (MeshGeometryTrait<GeometryType>) {
+            if constexpr (StaticReflect::HasField<typename GeometryType::vertex_type, "color">()) {
+                GeoFlowPerVertexMap<GeometryType, SetColor, glm::vec3> set_color;
+                set_color.mesh = &this->data;
+                set_color.targetFieldName = "color";
+                set_color.perform(color);
+            }
+        } else if constexpr (GraphicsLab::Geometry::ParamSurfaceTrait<GeometryType>) {
+            GeoFlowPerVertexMap<Mesh3D, SetColor, glm::vec3> set_color;
+            set_color.mesh = this->data.mesh.get();
+            set_color.targetFieldName = "color";
+            set_color.perform(color);
+        }
 
-        spdlog::info("updating color, {} {} {}", color.x, color.y, color.z);
+        updated = true;
     }
 
     void testReflectionFunction(int x, int y, int z) {

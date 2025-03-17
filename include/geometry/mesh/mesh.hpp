@@ -39,8 +39,14 @@ template <typename VertexType, typename IndicesType> class MeshModelTemplate {
 template <typename T>
 concept MeshVertexConcept = requires { typename T::IsStaticReflected; };
 
+template <typename T>
+concept MeshGeometryTrait = requires {
+    typename T::MeshGeometryTrait;
+};
+
 template <typename VertexType, typename IndicesType, size_t Dimension = 3> class MeshGeometry {
   public:
+    struct MeshGeometryTrait {};
     using vertex_type = VertexType;
     using indices_type = IndicesType;
     using box_type = typename AABBType<Dimension>::type;
