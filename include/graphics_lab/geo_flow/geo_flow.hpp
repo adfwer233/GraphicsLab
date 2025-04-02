@@ -67,8 +67,9 @@ struct NormalVector {
     }
 };
 
+template<GeoFlowMeshType MeshType>
 struct SetColor {
-    static Eigen::MatrixXd run(Mesh3D *mesh, glm::vec3 color) {
+    static Eigen::MatrixXd run(MeshType *mesh, glm::vec3 color) {
         int n = mesh->vertices.size();
         Eigen::MatrixXd V = Eigen::MatrixXd::Zero(n, 3);
         for (int i = 0; i < n; i++) {
@@ -81,4 +82,4 @@ struct SetColor {
 };
 
 using test = GeoFlowPerVertexMap<Mesh3D, NormalVector>;
-using test2 = GeoFlowPerVertexMap<Mesh3D, SetColor, glm::vec3>;
+using test2 = GeoFlowPerVertexMap<Mesh3D, SetColor<Mesh3D>, glm::vec3>;

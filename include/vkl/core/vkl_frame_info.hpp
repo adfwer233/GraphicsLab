@@ -25,6 +25,6 @@ template <VklRenderable RenderableModel> struct FrameInfo {
     int frameIndex;
     float frameTime;
     VkCommandBuffer commandBuffer;
-    Camera &camera;
+    // Camera &camera;
     RenderableModel &model;
 };

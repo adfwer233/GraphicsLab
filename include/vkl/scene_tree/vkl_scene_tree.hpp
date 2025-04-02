@@ -192,13 +192,13 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     void updateColor(glm::vec3 color) {
         if constexpr (MeshGeometryTrait<GeometryType>) {
             if constexpr (StaticReflect::HasField<typename GeometryType::vertex_type, "color">()) {
-                GeoFlowPerVertexMap<GeometryType, SetColor, glm::vec3> set_color;
+                GeoFlowPerVertexMap<GeometryType, SetColor<GeometryType>, glm::vec3> set_color;
                 set_color.mesh = &this->data;
                 set_color.targetFieldName = "color";
                 set_color.perform(color);
             }
         } else if constexpr (GraphicsLab::Geometry::ParamSurfaceTrait<GeometryType>) {
-            GeoFlowPerVertexMap<Mesh3D, SetColor, glm::vec3> set_color;
+            GeoFlowPerVertexMap<Mesh3D, SetColor<Mesh3D>, glm::vec3> set_color;
             set_color.mesh = this->data.mesh.get();
             set_color.targetFieldName = "color";
             set_color.perform(color);

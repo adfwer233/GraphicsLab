@@ -232,7 +232,6 @@ struct InternalSceneRenderPass : public RenderPass {
                             .frameIndex = static_cast<int>(frame_index) % 2,
                             .frameTime = 0,
                             .commandBuffer = commandBuffer,
-                            .camera = sceneTree_.active_camera->camera,
                             .model = *node_mesh->mesh,
                         };
 
@@ -280,7 +279,6 @@ struct InternalSceneRenderPass : public RenderPass {
                         .frameIndex = static_cast<int>(frame_index) % 2,
                         .frameTime = 0,
                         .commandBuffer = commandBuffer,
-                        .camera = sceneTree_.active_camera->camera,
                         .model = *curve_node_mesh->mesh,
                     };
 
@@ -305,7 +303,6 @@ struct InternalSceneRenderPass : public RenderPass {
                         .frameIndex = static_cast<int>(frame_index) % 2,
                         .frameTime = 0,
                         .commandBuffer = commandBuffer,
-                        .camera = sceneTree_.active_camera->camera,
                         .model = *mesh->mesh,
                     };
 
