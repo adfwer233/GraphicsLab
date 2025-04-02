@@ -10,6 +10,8 @@
 // #include "graphics_lab/render_passes/simple_pass.hpp"
 #include "vkl/core/vkl_window.hpp"
 
+#include "random_curve_generator.hpp"
+
 #include "scene.hpp"
 
 BezierGeneratorApplication::~BezierGeneratorApplication() {
@@ -35,6 +37,8 @@ void BezierGeneratorApplication::run() {
 
     GraphicsLab::BezierGenerator::Scene2D scene;
     scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{glm::vec<2, double>{0.0, 0.0}, glm::vec<2, double>{1.0, 1.0}}));
+
+    scene.curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
 
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> scene_node(std::move(scene));
 
