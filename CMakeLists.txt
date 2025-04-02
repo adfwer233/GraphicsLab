@@ -134,6 +134,7 @@ add_subdirectory(src/geometry_processing)
 add_subdirectory(src/geometry)
 add_subdirectory(src/simulation)
 add_subdirectory(src/simulation_example)
+add_subdirectory(src/applications)
 add_subdirectory(src/main)
 add_subdirectory(test)
 
