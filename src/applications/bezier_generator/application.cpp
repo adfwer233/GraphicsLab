@@ -10,6 +10,7 @@
 // #include "graphics_lab/render_passes/simple_pass.hpp"
 #include "vkl/core/vkl_window.hpp"
 
+#include "scene.hpp"
 
 BezierGeneratorApplication::~BezierGeneratorApplication() {
 }
@@ -27,20 +28,23 @@ void BezierGeneratorApplication::run() {
     ImguiContext::getInstance(appContext.device_, appContext.window_.getGLFWwindow(),
                               appContext.renderContext.get_swap_chain_render_pass());
 
-    const char *items[] = {"Density", "Curl"};
 
-    SimpleImGuiPass simple_pass(appContext.device_, [&]() {
-        ImGui::Begin("Settings");
-//        ImGui::Combo("Select Quantity to Visualize", reinterpret_cast<int *>(&visualization_quantity), items,
-//                     IM_ARRAYSIZE(items));
-        ImGui::End();
-    });
+    SimpleImGuiPass simple_pass(appContext.device_);
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
-    appContext.renderGraph->add_pass(&simple_pass, "simple_pass");
-    appContext.compileRenderGraph();
+    GraphicsLab::BezierGenerator::Scene2D scene;
+    scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{glm::vec<2, double>{0.0, 0.0}, glm::vec<2, double>{1.0, 1.0}}));
 
+    SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> scene_node(std::move(scene));
+
+    BezierRenderPass bezier_render_pass(appContext.device_, &scene_node);
+
+    appContext.renderGraph->add_pass(&bezier_render_pass, "bezier_pass");
+    appContext.renderGraph->add_pass(&simple_pass, "simple_pass");
+    appContext.renderGraph->add_edge("bezier_pass", "simple_pass");
+
+    appContext.compileRenderGraph();
     float deltaTime = 0, lastFrame = 0;
 
     while (not glfwWindowShouldClose(window)) {
