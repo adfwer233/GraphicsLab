@@ -44,4 +44,4 @@ struct RandomCurveGenerator {
     }
 };
 
-}
+} // namespace GraphicsLab

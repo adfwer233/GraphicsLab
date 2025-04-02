@@ -30,13 +30,13 @@ void BezierGeneratorApplication::run() {
     ImguiContext::getInstance(appContext.device_, appContext.window_.getGLFWwindow(),
                               appContext.renderContext.get_swap_chain_render_pass());
 
-
     SimpleImGuiPass simple_pass(appContext.device_);
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
     GraphicsLab::BezierGenerator::Scene2D scene;
-    scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{glm::vec<2, double>{0.0, 0.0}, glm::vec<2, double>{1.0, 1.0}}));
+    scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{
+        glm::vec<2, double>{0.0, 0.0}, glm::vec<2, double>{1.0, 1.0}}));
 
     scene.curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
 

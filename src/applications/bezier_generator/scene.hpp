@@ -9,16 +9,16 @@
 namespace GraphicsLab::BezierGenerator {
 
 struct Scene2D {
-    struct SceneTreeGeometryTypeTrait{};
+    struct SceneTreeGeometryTypeTrait {};
 
     std::vector<Geometry::BezierCurve2D> curves;
 };
 
-}
+} // namespace GraphicsLab::BezierGenerator
 
 namespace SceneTree {
 
-template<> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
+template <> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
 
     using CurveRenderType = VklCurveMesh2D;
     std::unique_ptr<CurveRenderType> curve_mesh = nullptr;
@@ -26,15 +26,14 @@ template<> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
         int num = 100;
 
         CurveRenderType::Builder curve_mesh_builder;
-        for (auto& curve : node_->data.curves) {
+        for (auto &curve : node_->data.curves) {
             for (int i = 0; i < num; i++) {
                 float t = i / (num - 1.0f);
                 curve_mesh_builder.vertices.push_back({curve.evaluate(t), glm::vec3(1.0f, 0.0f, 0.0f)});
                 if (i > 0) {
-                    curve_mesh_builder.indices.push_back({
-                        static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 2),
-                        static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 1)
-                    });
+                    curve_mesh_builder.indices.push_back(
+                        {static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 2),
+                         static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 1)});
                 }
             }
         }
@@ -42,19 +41,20 @@ template<> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
         curve_mesh = std::make_unique<CurveRenderType>(device_, curve_mesh_builder);
     }
 
-    VklNodeMesh(VklDevice& device, SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D>* node): device_(device), node_(node) {
+    VklNodeMesh(VklDevice &device, SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> *node)
+        : device_(device), node_(node) {
         createMesh();
     }
 
-private:
-    VklDevice& device_;
-    SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D>* node_;
+  private:
+    VklDevice &device_;
+    SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> *node_;
 };
 
-}
+} // namespace SceneTree
 
 namespace GraphicsLab::RenderGraph {
-    struct BezierRenderPass: public RenderPass {
+struct BezierRenderPass : public RenderPass {
     explicit BezierRenderPass(VklDevice &device, SceneTree::GeometryNode<BezierGenerator::Scene2D> *t_scene)
         : RenderPass(device, {0.0f, 0.0f, 0.0f, 1.0f}), scene(t_scene) {
     }
@@ -67,7 +67,7 @@ namespace GraphicsLab::RenderGraph {
             .format(VK_FORMAT_R8G8B8A8_SRGB)
             .extent(2048, 2048)
             .set_annotation("imgui_show", true);
-            // .set_annotation("do_not_release", true);
+        // .set_annotation("do_not_release", true);
 
         reflection.add_input("bezier_render_depth", "the input grid texture")
             .type(RenderPassReflection::Field::Type::TextureDepth)
@@ -80,13 +80,13 @@ namespace GraphicsLab::RenderGraph {
 
     void post_compile(RenderContext *render_context) override {
         spdlog::info("{}/curve2d.vert", SHADER_DIR);
-        render_system = std::make_unique<LineRenderSystem<>>(device_, vkl_render_pass->renderPass, std::vector<VklShaderModuleInfo>{
+        render_system = std::make_unique<LineRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
                 {std::format("{}/curve2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/curve2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}
-        });
+                {std::format("{}/curve2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         spdlog::info("{}/curve2d.vert compile success", SHADER_DIR);
-
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
@@ -99,7 +99,7 @@ namespace GraphicsLab::RenderGraph {
 
         auto scene_model = bezier_mesh_buffer->getGeometryModel(device_, scene);
 
-        FrameInfo<std::decay_t<decltype(*scene_model)>::CurveRenderType> frameInfo {
+        FrameInfo<std::decay_t<decltype(*scene_model)>::CurveRenderType> frameInfo{
             .frameIndex = static_cast<int>(frame_index) % 2,
             .frameTime = 0,
             .commandBuffer = commandBuffer,
@@ -114,10 +114,9 @@ namespace GraphicsLab::RenderGraph {
         end_render_pass(commandBuffer);
     }
 
-
-private:
+  private:
     std::unique_ptr<LineRenderSystem<>> render_system = nullptr;
 
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> *scene;
 };
-}
+} // namespace GraphicsLab::RenderGraph

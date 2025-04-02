@@ -67,8 +67,7 @@ struct NormalVector {
     }
 };
 
-template<GeoFlowMeshType MeshType>
-struct SetColor {
+template <GeoFlowMeshType MeshType> struct SetColor {
     static Eigen::MatrixXd run(MeshType *mesh, glm::vec3 color) {
         int n = mesh->vertices.size();
         Eigen::MatrixXd V = Eigen::MatrixXd::Zero(n, 3);
