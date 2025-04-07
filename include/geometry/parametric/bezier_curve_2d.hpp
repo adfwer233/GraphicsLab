@@ -115,31 +115,31 @@ struct BezierCurve2D {
             right.push_back(triangle[n - i - 1][i]);
         }
 
-        return { BezierCurve2D(std::move(left)), BezierCurve2D(std::move(right)) };
+        return {BezierCurve2D(std::move(left)), BezierCurve2D(std::move(right))};
     }
 
     // Bounding box
     std::pair<PointType, PointType> boundingBox() const {
         PointType minPt = control_points_[0];
         PointType maxPt = control_points_[0];
-        for (const auto& pt : control_points_) {
+        for (const auto &pt : control_points_) {
             minPt = glm::min(minPt, pt);
             maxPt = glm::max(maxPt, pt);
         }
         return {minPt, maxPt};
     }
 
-    BezierCurve2D operator + (const PointType& offset) const {
+    BezierCurve2D operator+(const PointType &offset) const {
         BezierCurve2D new_curve = *this;
-        for (auto& pt: new_curve.control_points_) {
+        for (auto &pt : new_curve.control_points_) {
             pt += offset;
         }
         return new_curve;
     }
 
-    BezierCurve2D operator - (const PointType& offset) const {
+    BezierCurve2D operator-(const PointType &offset) const {
         BezierCurve2D new_curve = *this;
-        for (auto & pt: new_curve.control_points_) {
+        for (auto &pt : new_curve.control_points_) {
             pt -= offset;
         }
         return new_curve;

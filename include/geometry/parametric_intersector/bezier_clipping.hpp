@@ -1,15 +1,14 @@
 #pragma once
 
-#include <ranges>
 #include "glm/glm.hpp"
+#include <ranges>
 
 #include "bezier_root_finder.hpp"
 
 namespace GraphicsLab::Geometry {
-template<typename T>
-struct BezierClipping {
-public:
-    static uint32_t bezier_clipping(glm::vec<2, T> test_point, const std::vector<glm::vec<2, T>>& points) {
+template <typename T> struct BezierClipping {
+  public:
+    static uint32_t bezier_clipping(glm::vec<2, T> test_point, const std::vector<glm::vec<2, T>> &points) {
         bool quadrant1 = false, quadrant2 = false, quadrant3 = false, quadrant4 = false;
 
         for (auto &point : points) {
@@ -54,12 +53,12 @@ public:
         auto result = finder.get_roots();
 
         size_t valid_num =
-                std::ranges::count_if(result, [&](double param) { return evaluate(param, x_poly) > test_point.x; });
+            std::ranges::count_if(result, [&](double param) { return evaluate(param, x_poly) > test_point.x; });
 
         return valid_num % 2;
     }
 
-private:
+  private:
     static double evaluate(double param, std::vector<T> &coefficients) {
         T h = 1.0;
         T result = coefficients[0];
@@ -87,4 +86,4 @@ private:
         return result;
     }
 };
-}
+} // namespace GraphicsLab::Geometry

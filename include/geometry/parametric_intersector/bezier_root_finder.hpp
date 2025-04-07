@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <iterator>
+#include <vector>
 
 namespace GraphicsLab::Geometry {
 
@@ -12,7 +12,7 @@ namespace GraphicsLab::Geometry {
  * @reference Revisiting the problem of zeros of univariate scalar Béziers
  */
 struct BezierRootFinder {
-private:
+  private:
     uint32_t degree;
 
     std::vector<double> coefficients_;
@@ -202,7 +202,7 @@ private:
         }
     }
 
-public:
+  public:
     explicit BezierRootFinder(std::vector<double> &&coefficients) : coefficients_(coefficients) {
         degree = coefficients.size() - 1;
         for (int i = 1; i < degree; i++) {
@@ -215,4 +215,4 @@ public:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

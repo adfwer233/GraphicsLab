@@ -64,7 +64,7 @@ struct RandomCurveGenerator {
             } else {
                 while (true) {
                     bool intersected_with_previous = false;
-                    for (auto& c: result) {
+                    for (auto &c : result) {
                         bool break_flag = false;
                         for (int k = -2; k <= 2; k++) {
                             auto inter = Geometry::Bezier2DIntersector::intersect(c1 + PointType{k, 0}, c);
@@ -74,7 +74,8 @@ struct RandomCurveGenerator {
                                 break;
                             }
                         }
-                        if (break_flag) break;
+                        if (break_flag)
+                            break;
                     }
 
                     if (not intersected_with_previous) {
@@ -94,7 +95,7 @@ struct RandomCurveGenerator {
             generate_new_curve(-1, 0, 3);
         }
 
-        for (auto &c: result) {
+        for (auto &c : result) {
             auto end = c.end_position();
             spdlog::info("{} {}", end.x, end.y);
         }
