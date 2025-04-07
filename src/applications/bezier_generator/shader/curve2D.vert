@@ -14,6 +14,6 @@ layout(set = 0, binding = 0) uniform Ubo {
 } ubo;
 
 void main() {
-    gl_Position = vec4((inPosition.x - 0.5) * 2, (inPosition.y - 0.5) * 2, 0.0, 1.0);
+    gl_Position = vec4((inPosition.x - 0.5) * 2 * 0.5, (inPosition.y - 0.5) * 2 * 0.5, 0.0, 1.0);
     outColor = inColor;
 }
