@@ -96,6 +96,39 @@ struct BezierCurve2D {
         update_bounds();
     }
 
+    // Subdivide at t into two curves
+    std::pair<BezierCurve2D, BezierCurve2D> subdivide(double t) const {
+        std::vector<std::vector<PointType>> triangle;
+        triangle.push_back(control_points_);
+        int n = control_points_.size();
+        for (int k = 1; k < n; ++k) {
+            std::vector<PointType> row;
+            for (int i = 0; i < n - k; ++i) {
+                row.push_back(glm::mix(triangle.back()[i], triangle.back()[i + 1], t));
+            }
+            triangle.push_back(row);
+        }
+
+        std::vector<PointType> left, right;
+        for (int i = 0; i < n; ++i) {
+            left.push_back(triangle[i][0]);
+            right.push_back(triangle[n - i - 1][i]);
+        }
+
+        return { BezierCurve2D(std::move(left)), BezierCurve2D(std::move(right)) };
+    }
+
+    // Bounding box
+    std::pair<PointType, PointType> boundingBox() const {
+        PointType minPt = control_points_[0];
+        PointType maxPt = control_points_[0];
+        for (const auto& pt : control_points_) {
+            minPt = glm::min(minPt, pt);
+            maxPt = glm::max(maxPt, pt);
+        }
+        return {minPt, maxPt};
+    }
+
     PointType start_position() const {
         return control_points_.front();
     }

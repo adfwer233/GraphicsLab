@@ -2,6 +2,8 @@
 #include <geometry/parametric/bezier_curve_2d.hpp>
 #include <random>
 
+#include "geometry/parametric_intersector/bezier_2d_intersector.hpp"
+
 namespace GraphicsLab {
 
 struct Sampler {
@@ -36,10 +38,45 @@ struct RandomCurveGenerator {
         int n = 3;
 
         std::vector<Geometry::BezierCurve2D> result;
+
+        auto generate_new_curve = [&](int n, int m, int d) {
+            auto c1 = generate_curve(n, m, d);
+
+            if (result.empty()) {
+                result.push_back(c1);
+            } else {
+                while (true) {
+                    bool intersected_with_previous = false;
+                    for (auto& c: result) {
+                        auto inter = Geometry::Bezier2DIntersector::intersect(c1, c);
+                        if (not inter.empty()) {
+                            intersected_with_previous = true;
+                            break;
+                        }
+                    }
+
+                    if (not intersected_with_previous) {
+                        result.push_back(c1);
+                        break;
+                    }
+
+                    spdlog::info("regenerate");
+                    c1 = generate_curve(n, m, d);
+                }
+            }
+
+            return c1;
+        };
         for (int i = 1; i <= n; i++) {
-            result.push_back(generate_curve(1, 0, 3));
-            result.push_back(generate_curve(-1, 0, 3));
+            generate_new_curve(1, 0, 3);
+            generate_new_curve(1, 0, 3);
         }
+
+        for (auto &c: result) {
+            auto end = c.end_position();
+            spdlog::info("{} {}", end.x, end.y);
+        }
+
         return result;
     }
 };
