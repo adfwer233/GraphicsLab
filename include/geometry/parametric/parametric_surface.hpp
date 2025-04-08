@@ -23,8 +23,8 @@ struct ParamSurface {
     virtual bool test_point(const PointType point) const = 0;
 
     /**
-    * @brief Sample n * m points uniformly
-    */
+     * @brief Sample n * m points uniformly
+     */
     std::vector<std::pair<PointType, ParamType>> sample(int n, int m) const {
         std::vector<std::pair<PointType, ParamType>> result;
 

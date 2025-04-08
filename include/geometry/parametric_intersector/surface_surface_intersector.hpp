@@ -2,8 +2,6 @@
 
 namespace GraphicsLab::Geometry {
 
-struct SurfaceSurfaceIntersector {
+struct SurfaceSurfaceIntersector {};
 
-};
-
-}
+} // namespace GraphicsLab::Geometry

@@ -15,14 +15,8 @@ struct NURBSCurve {
 
     int degree = 0;
 
-    NURBSCurve(std::vector<PointType> ctrl_pts,
-               std::vector<size_t> knots,
-               std::vector<double> wts,
-               int degree)
-        : control_points(std::move(ctrl_pts)),
-          knot_vector(std::move(knots)),
-          weights(std::move(wts)),
-          degree(degree) {
+    NURBSCurve(std::vector<PointType> ctrl_pts, std::vector<size_t> knots, std::vector<double> wts, int degree)
+        : control_points(std::move(ctrl_pts)), knot_vector(std::move(knots)), weights(std::move(wts)), degree(degree) {
         assert(is_valid());
     }
 
@@ -80,7 +74,7 @@ struct NURBSCurve {
         return evaluate(knot_vector[knot_vector.size() - degree - 1]);
     }
 
-private:
+  private:
     double basis_function(size_t i, int d, double t) const {
         if (d == 0) {
             return (t >= knot_vector[i] && t < knot_vector[i + 1]) ? 1.0 : 0.0;
@@ -118,14 +112,12 @@ private:
         size_t num_weights = weights.size();
         size_t num_knots = knot_vector.size();
 
-        return num_control_points > degree &&
-               num_weights == num_control_points &&
+        return num_control_points > degree && num_weights == num_control_points &&
                num_knots == num_control_points + degree + 1;
     }
 
     static void fit(std::vector<PointType> &points) {
-
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

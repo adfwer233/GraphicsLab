@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <Eigen/Eigen>
+#include <glm/glm.hpp>
 
 #include "geometry/parametric/torus.hpp"
 
@@ -14,10 +14,8 @@ struct TorusTorusIntersector {
     using ParamType = glm::dvec2;
 
     // Newton refinement to solve F(u,v,s,t) = S1(u,v) - S2(s,t) = 0
-    static std::pair<ParamType, ParamType> refine_with_newton(
-        const Torus& torus1, const Torus& torus2,
-        ParamType param1, ParamType param2
-    ) {
+    static std::pair<ParamType, ParamType> refine_with_newton(const Torus &torus1, const Torus &torus2,
+                                                              ParamType param1, ParamType param2) {
         constexpr int max_newton_iter = 10;
         constexpr double tol = 1e-8;
 
@@ -26,7 +24,8 @@ struct TorusTorusIntersector {
             PointType p2 = torus2.evaluate(param2);
             VecType F = p1 - p2;
 
-            if (glm::length(F) < tol) break;
+            if (glm::length(F) < tol)
+                break;
 
             auto [du1, dv1] = torus1.derivative(param1);
             auto [du2, dv2] = torus2.derivative(param2);
@@ -54,17 +53,16 @@ struct TorusTorusIntersector {
             // spdlog::info("dv2: {}, {}, {}", dv2.x, dv2.y, dv2.z);
             // spdlog::info("J: {} {} {} {}", J(0, 0), J(0, 1), J(0, 2), J(0, 3));
             // spdlog::info("delta: {} {} {} {}", delta[0], delta[1], delta[2], delta[3]);
-            // spdlog::info("refine newton iter: {}, param1: ({}, {}), param2: ({}, {})", i, param1.x, param1.y, param2.x, param2.y);
+            // spdlog::info("refine newton iter: {}, param1: ({}, {}), param2: ({}, {})", i, param1.x, param1.y,
+            // param2.x, param2.y);
         }
 
         return {param1, param2};
     }
 
     // Compute the tangent direction in parameter space by crossing the normals
-    static std::pair<ParamType, ParamType> compute_tangent_direction(
-        const Torus& torus1, const Torus& torus2,
-        ParamType param1, ParamType param2
-    ) {
+    static std::pair<ParamType, ParamType> compute_tangent_direction(const Torus &torus1, const Torus &torus2,
+                                                                     ParamType param1, ParamType param2) {
         VecType n1 = torus1.normal(param1);
         VecType n2 = torus2.normal(param2);
         VecType tangent = glm::normalize(glm::cross(n1, n2));
@@ -73,16 +71,14 @@ struct TorusTorusIntersector {
         auto [du2, dv2] = torus2.derivative(param2);
 
         Eigen::Matrix2d A1;
-        A1 << glm::dot(du1, tangent), glm::dot(dv1, tangent),
-              0, 0;
+        A1 << glm::dot(du1, tangent), glm::dot(dv1, tangent), 0, 0;
         Eigen::Vector2d b1;
         b1 << glm::dot(tangent, tangent), 0;
 
         Eigen::Vector2d d_param1 = A1.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b1);
 
         Eigen::Matrix2d A2;
-        A2 << glm::dot(du2, tangent), glm::dot(dv2, tangent),
-              0, 0;
+        A2 << glm::dot(du2, tangent), glm::dot(dv2, tangent), 0, 0;
         Eigen::Vector2d b2;
         b2 << glm::dot(tangent, tangent), 0;
 
@@ -99,7 +95,7 @@ struct TorusTorusIntersector {
         double min_distance = std::numeric_limits<double>::max();
         ParamType param1, param2;
 
-        for (auto [pos, param]: torus1_sample) {
+        for (auto [pos, param] : torus1_sample) {
             auto [proj, proj_param] = torus2.project(pos);
             if (glm::distance(proj, pos) < min_distance) {
                 min_distance = glm::distance(proj, pos);
@@ -125,8 +121,9 @@ struct TorusTorusIntersector {
 
         auto [begin_param1, begin_param2] = find_initial_guess(torus1, torus2);
 
-        // spdlog::info("initial guess: ({}, {}), ({}, {})", begin_param1.x, begin_param1.y, begin_param2.x, begin_param2.y);
-        // spdlog::info("initial distance: {}", glm::distance(torus1.evaluate(begin_param1), torus2.evaluate(begin_param2)));
+        // spdlog::info("initial guess: ({}, {}), ({}, {})", begin_param1.x, begin_param1.y, begin_param2.x,
+        // begin_param2.y); spdlog::info("initial distance: {}", glm::distance(torus1.evaluate(begin_param1),
+        // torus2.evaluate(begin_param2)));
         constexpr int max_iter = 1000;
         constexpr double length_iter = 0.0001;
         constexpr double step_length = 0.01;
@@ -159,7 +156,6 @@ struct TorusTorusIntersector {
 
         return intersections;
     }
-
 };
 
-}
+} // namespace GraphicsLab::Geometry

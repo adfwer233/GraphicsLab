@@ -46,7 +46,7 @@ void IntersectorDemoApplication::run() {
 
     ParametricSpaceScene scene;
 
-    for (auto item: res) {
+    for (auto item : res) {
         scene.points.push_back(item.param1);
     }
 

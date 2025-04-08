@@ -117,7 +117,7 @@ struct Torus : public ParamSurface {
 
         // Get angle v around the minor circle
         VecType ortho1 = glm::normalize(base_normal);
-        VecType ortho2 = glm::normalize(circle_center - center);  // normal to both
+        VecType ortho2 = glm::normalize(circle_center - center); // normal to both
 
         double s = glm::dot(to_point, ortho2);
         double t = glm::dot(to_point, ortho1);

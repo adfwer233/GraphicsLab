@@ -16,7 +16,7 @@ struct ParametricSpaceScene {
 
 namespace SceneTree {
 
-template<> struct VklNodeMesh<ParametricSpaceScene> {
+template <> struct VklNodeMesh<ParametricSpaceScene> {
     using PointCloudRenderType = SceneTree::VklPointCloudMesh2D;
     std::unique_ptr<PointCloudRenderType> point_cloud_mesh = nullptr;
 
@@ -30,20 +30,19 @@ template<> struct VklNodeMesh<ParametricSpaceScene> {
         point_cloud_mesh = std::make_unique<PointCloudRenderType>(device_, point_cloud_mesh_builder);
     }
 
-    VklNodeMesh(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *node)
-    : device_(device), node_(node) {
+    VklNodeMesh(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *node) : device_(device), node_(node) {
         create_mesh();
     }
 
-    VklDevice& device_;
+    VklDevice &device_;
     SceneTree::GeometryNode<ParametricSpaceScene> *node_ = nullptr;
 };
 
-}
+} // namespace SceneTree
 
 namespace GraphicsLab::RenderGraph {
 
-struct ParametricSpaceRenderPass: public RenderPass {
+struct ParametricSpaceRenderPass : public RenderPass {
 
     explicit ParametricSpaceRenderPass(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *t_scene)
         : RenderPass(device, {0.0f, 0.0f, 0.0f, 1.0f}), scene(t_scene) {
@@ -69,10 +68,11 @@ struct ParametricSpaceRenderPass: public RenderPass {
     }
 
     void post_compile(RenderContext *render_context) override {
-        point_cloud_render_system = std::make_unique<SimplePointCloudRenderSystem>(device_, vkl_render_pass->renderPass, std::vector<VklShaderModuleInfo>{
+        point_cloud_render_system = std::make_unique<SimplePointCloudRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
                 {std::format("{}/point_cloud_2d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_cloud_2d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}
-        });
+                {std::format("{}/point_cloud_2d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
@@ -103,7 +103,6 @@ struct ParametricSpaceRenderPass: public RenderPass {
     SceneTree::GeometryNode<ParametricSpaceScene> *scene;
 
     std::unique_ptr<SimplePointCloudRenderSystem> point_cloud_render_system = nullptr;
-
 };
 
-}
+} // namespace GraphicsLab::RenderGraph
