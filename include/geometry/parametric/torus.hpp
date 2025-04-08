@@ -46,7 +46,7 @@ struct Torus : public ParamSurface {
         return minor_radius;
     }
 
-    PointType evaluate(const ParamType param_to_evaluate) override {
+    PointType evaluate(const ParamType param_to_evaluate) const override {
         ParamType param = move_param_to_domain(param_to_evaluate);
 
         double x = (major_radius + minor_radius * std::cos(2 * std::numbers::pi * param.y)) *
@@ -58,7 +58,7 @@ struct Torus : public ParamSurface {
         return center + direction1 * x + direction2 * y + base_normal * z;
     }
 
-    PointType normal(const ParamType param_to_evaluate) override {
+    PointType normal(const ParamType param_to_evaluate) const override {
         ParamType param = move_param_to_domain(param_to_evaluate);
 
         PointType position = evaluate(param);
@@ -69,8 +69,8 @@ struct Torus : public ParamSurface {
     }
 
     std::pair<VecType, VecType> derivative(const ParamType param) const {
-        double u = param.x; // major angle
-        double v = param.y; // minor angle
+        double u = 2 * std::numbers::pi * param.x; // major angle
+        double v = 2 * std::numbers::pi * param.y; // minor angle
 
         // Orthonormal basis assumed
         VecType n = glm::normalize(base_normal);
@@ -90,10 +90,10 @@ struct Torus : public ParamSurface {
         // Partial derivative w.r.t v (around the minor circle)
         VecType dP_dv = -r * sin_v * (cos_u * d1 + sin_u * d2) + r * cos_v * n;
 
-        return {dP_du, dP_dv};
+        return {2 * std::numbers::pi * dP_du, 2 * std::numbers::pi * dP_dv};
     }
 
-    std::pair<PointType, ParamType> project(const PointType point) override {
+    std::pair<PointType, ParamType> project(const PointType point) const override {
         // Transform the point into the local coordinate system of the torus
         VecType rel = point - center;
 
@@ -117,20 +117,19 @@ struct Torus : public ParamSurface {
 
         // Get angle v around the minor circle
         VecType ortho1 = glm::normalize(base_normal);
-        VecType ortho2 = glm::normalize(cross(ortho1, direction1));  // normal to both
-        VecType ortho3 = glm::cross(ortho1, ortho2); // completes right-handed system
+        VecType ortho2 = glm::normalize(circle_center - center);  // normal to both
 
         double s = glm::dot(to_point, ortho2);
-        double t = glm::dot(to_point, ortho3);
+        double t = glm::dot(to_point, ortho1);
         double v = std::atan2(t, s);
 
         // Compute closest point on torus
-        PointType surface_point = circle_center + minor_radius * (cos(v) * ortho2 + sin(v) * ortho3);
+        PointType surface_point = circle_center + minor_radius * (cos(v) * ortho2 + sin(v) * ortho1);
 
-        return {surface_point, {u, v}};
+        return {surface_point, {u / (2 * std::numbers::pi), v / (2 * std::numbers::pi)}};
     }
 
-    bool test_point(const PointType point) override {
+    bool test_point(const PointType point) const override {
         VecType rel = point - center;
 
         // Distance from the point to the torus axis

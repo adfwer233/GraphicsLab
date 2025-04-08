@@ -19,7 +19,7 @@ struct Plane : public ParamSurface {
         normal = glm::cross(u_direction, v_direction);
     }
 
-    PointType evaluate(const ParamType param) override {
+    PointType evaluate(const ParamType param) const override {
         return base_point + u_direction * param.x + v_direction * param.y;
     }
 };

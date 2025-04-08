@@ -20,7 +20,7 @@ struct Sphere : public ParamSurface {
         radius = rhs.radius;
         mesh = std::move(rhs.mesh);
     }
-    PointType evaluate(const ParamType param) override {
+    PointType evaluate(const ParamType param) const override {
         const double theta = 2 * std::numbers::pi * param.x; // Azimuthal angle (0 to 2π)
         const double phi = std::numbers::pi * param.y;       // Polar angle (0 to π)
 
@@ -28,16 +28,16 @@ struct Sphere : public ParamSurface {
                radius * PointType(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
     }
 
-    PointType normal(const ParamType param) override {
+    PointType normal(const ParamType param) const override {
         auto pos = evaluate(param);
         return glm::normalize(pos - center);
     }
 
-    bool test_point(const PointType point) override {
+    bool test_point(const PointType point) const override {
         return std::abs(glm::distance(point, center) - radius) < ParametricConfiguration::system_tolerance;
     }
 
-    std::pair<PointType, ParamType> project(const PointType point) override {
+    std::pair<PointType, ParamType> project(const PointType point) const override {
         auto projection = glm::normalize(point - center) * radius + center;
         return {projection, {0.0, 0.0}};
     }

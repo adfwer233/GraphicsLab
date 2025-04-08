@@ -10,6 +10,8 @@
 // #include "graphics_lab/render_passes/simple_pass.hpp"
 #include "vkl/core/vkl_window.hpp"
 
+#include "geometry/parametric_intersector/torus_torus_intersector.hpp"
+
 IntersectorDemoApplication::~IntersectorDemoApplication() {
 }
 
@@ -29,6 +31,16 @@ void IntersectorDemoApplication::run() {
     SimpleImGuiPass simple_pass(appContext.device_);
 
     simple_pass.set_extent(WIDTH, HEIGHT);
+
+    GraphicsLab::Geometry::Torus torus1({0.0f, 0.0f, 0.0f}, 1.0f, 0.5f, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f});
+    GraphicsLab::Geometry::Torus torus2({2.5f, 0.0f, 0.0f}, 1.0f, 0.5f, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f});
+
+    auto res = GraphicsLab::Geometry::TorusTorusIntersector::intersect(torus1, torus2);
+    for (auto &item : res) {
+        spdlog::info("intersect: {}, {}, {}", item.x, item.y, item.z);
+    }
+
+    spdlog::info("intersect num: {}", res.size());
 
 //    appContext.renderGraph->add_pass(&bezier_render_pass, "bezier_pass");
     appContext.renderGraph->add_pass(&simple_pass, "simple_pass");
