@@ -68,14 +68,78 @@ struct Torus : public ParamSurface {
         return glm::normalize(position - circle_position);
     }
 
+    std::pair<VecType, VecType> derivative(const ParamType param) const {
+        double u = param.x; // major angle
+        double v = param.y; // minor angle
+
+        // Orthonormal basis assumed
+        VecType n = glm::normalize(base_normal);
+        VecType d1 = glm::normalize(direction1);
+        VecType d2 = glm::normalize(direction2);
+
+        double R = major_radius;
+        double r = minor_radius;
+
+        // Common terms
+        double cos_u = std::cos(u), sin_u = std::sin(u);
+        double cos_v = std::cos(v), sin_v = std::sin(v);
+
+        // Partial derivative w.r.t u (around the major circle)
+        VecType dP_du = -(R + r * cos_v) * sin_u * d1 + (R + r * cos_v) * cos_u * d2;
+
+        // Partial derivative w.r.t v (around the minor circle)
+        VecType dP_dv = -r * sin_v * (cos_u * d1 + sin_u * d2) + r * cos_v * n;
+
+        return {dP_du, dP_dv};
+    }
+
     std::pair<PointType, ParamType> project(const PointType point) override {
-        // @todo: implement project function
-        return {point, {0.0, 0.0}};
+        // Transform the point into the local coordinate system of the torus
+        VecType rel = point - center;
+
+        // Project onto the plane of the torus
+        double height = glm::dot(rel, base_normal);
+        VecType projected = rel - height * base_normal;
+
+        // Get angle u along the major circle
+        double x = glm::dot(projected, direction1);
+        double y = glm::dot(projected, direction2);
+        double u = std::atan2(y, x);
+
+        // Center of the minor circle in world space
+        PointType circle_center = center + major_radius * (std::cos(u) * direction1 + std::sin(u) * direction2);
+
+        // Vector from the minor circle center to the point
+        VecType to_point = point - circle_center;
+
+        // Remove any component along base_normal
+        VecType radial = to_point - glm::dot(to_point, base_normal) * base_normal;
+
+        // Get angle v around the minor circle
+        VecType ortho1 = glm::normalize(base_normal);
+        VecType ortho2 = glm::normalize(cross(ortho1, direction1));  // normal to both
+        VecType ortho3 = glm::cross(ortho1, ortho2); // completes right-handed system
+
+        double s = glm::dot(to_point, ortho2);
+        double t = glm::dot(to_point, ortho3);
+        double v = std::atan2(t, s);
+
+        // Compute closest point on torus
+        PointType surface_point = circle_center + minor_radius * (cos(v) * ortho2 + sin(v) * ortho3);
+
+        return {surface_point, {u, v}};
     }
 
     bool test_point(const PointType point) override {
-        // @todo: implement test point function
-        return point.x == center.x && point.y == center.y;
+        VecType rel = point - center;
+
+        // Distance from the point to the torus axis
+        VecType d = rel - dot(rel, base_normal) * base_normal; // projection on torus plane
+        double dist_major = glm::length(d);
+        double dist_minor = glm::length(rel - d); // height above/below torus plane
+
+        double r = sqrt((dist_major - major_radius) * (dist_major - major_radius) + dist_minor * dist_minor);
+        return std::abs(r - minor_radius) < 1e-6;
     }
 
   private:

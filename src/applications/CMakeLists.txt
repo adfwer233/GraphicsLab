@@ -1,1 +1,2 @@
 add_subdirectory(bezier_generator)
+add_subdirectory(intersector_demo)
