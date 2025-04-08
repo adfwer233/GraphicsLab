@@ -30,7 +30,7 @@ struct NURBSSurface : public ParamSurface {
         assert(is_valid());
     }
 
-    PointType evaluate(ParamType param) override {
+    PointType evaluate(ParamType param) const override {
         T u = param.x * knot_vector_u.back();
         T v = param.y * knot_vector_v.back();
         assert(is_valid());
@@ -55,7 +55,7 @@ struct NURBSSurface : public ParamSurface {
         return numerator / denominator;
     }
 
-    PointType normal(ParamType param) override {
+    PointType normal(ParamType param) const override {
         T u = param.x * knot_vector_u.back();
         T v = param.y * knot_vector_v.back();
 
@@ -70,12 +70,12 @@ struct NURBSSurface : public ParamSurface {
         return glm::normalize(n);
     }
 
-    std::pair<PointType, ParamType> project(const PointType point) override {
+    std::pair<PointType, ParamType> project(const PointType point) const override {
         // @todo: implement project function
         return {point, {0.0, 0.0}};
     }
 
-    bool test_point(const PointType point) override {
+    bool test_point(const PointType point) const override {
         // @todo: implement test point function
         return false;
     }
