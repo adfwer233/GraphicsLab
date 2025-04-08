@@ -114,8 +114,14 @@ struct TorusTorusIntersector {
         return refine_with_newton(torus1, torus2, param1, param2);
     }
 
-    static std::vector<PointType> intersect(const Torus &torus1, const Torus &torus2) {
-        std::vector<PointType> intersections;
+    struct IntersectionInfo {
+        ParamType param1;
+        ParamType param2;
+        PointType position;
+    };
+
+    static std::vector<IntersectionInfo> intersect(const Torus &torus1, const Torus &torus2) {
+        std::vector<IntersectionInfo> intersections;
 
         auto [begin_param1, begin_param2] = find_initial_guess(torus1, torus2);
 
@@ -139,7 +145,7 @@ struct TorusTorusIntersector {
                 param2 = refine_param2;
             }
 
-            intersections.push_back(torus1.evaluate(param1));
+            intersections.emplace_back(param1, param2, torus1.evaluate(param1));
 
             auto [param1_tangent, param2_tangent] = compute_tangent_direction(torus1, torus2, param1, param2);
 
