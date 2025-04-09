@@ -6,6 +6,8 @@
 
 #include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
 
+#include "ui_state.hpp"
+
 using SimplePointCloudRenderSystem = SimpleRenderSystem<0, SimplePushConstantInfoList, PointCloud2DPipelineModifier>;
 
 struct ParametricSpaceScene {
@@ -44,8 +46,8 @@ namespace GraphicsLab::RenderGraph {
 
 struct ParametricSpaceRenderPass : public RenderPass {
 
-    explicit ParametricSpaceRenderPass(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *t_scene)
-        : RenderPass(device, {0.0f, 0.0f, 0.0f, 1.0f}), scene(t_scene) {
+    explicit ParametricSpaceRenderPass(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *t_scene, UIState *ui_state)
+        : RenderPass(device, {1.0f, 1.0f, 1.0f, 1.0f}), scene(t_scene), ui_state(ui_state) {
     }
 
     RenderPassReflection render_pass_reflect() override {
@@ -93,6 +95,11 @@ struct ParametricSpaceRenderPass : public RenderPass {
             .model = *scene_model->point_cloud_mesh,
         };
 
+        auto simple_key = point_cloud_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        if (scene_model->point_cloud_mesh->uniformBuffers.contains(simple_key)) {
+            scene_model->point_cloud_mesh->uniformBuffers[simple_key][frame_index]->writeToBuffer(&ui_state->ubo);
+            scene_model->point_cloud_mesh->uniformBuffers[simple_key][frame_index]->flush();
+        }
         point_cloud_render_system->renderObject(frameInfo);
 
         // auto simpleKey = render_system->descriptorSetLayout->descriptorSetLayoutKey;
@@ -100,8 +107,8 @@ struct ParametricSpaceRenderPass : public RenderPass {
         end_render_pass(commandBuffer);
     }
 
+    UIState *ui_state;
     SceneTree::GeometryNode<ParametricSpaceScene> *scene;
-
     std::unique_ptr<SimplePointCloudRenderSystem> point_cloud_render_system = nullptr;
 };
 

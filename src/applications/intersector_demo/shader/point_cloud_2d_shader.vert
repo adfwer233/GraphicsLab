@@ -16,8 +16,8 @@ layout(set = 0, binding = 0) uniform Ubo {
 void main() {
 
     gl_PointSize = 20.0;
-    gl_Position = vec4((inPosition.x - 0.5) * 2,
-    (inPosition.y - 0.5 ) * 2,
+    gl_Position = vec4((inPosition.x - 0.5 + ubo.offset_x) * 2 * ubo.zoom,
+    (inPosition.y - 0.5 + ubo.offset_y) * 2 * ubo.zoom,
     0.0, 1.0);
     fragColor = inColor.rgb;
 }

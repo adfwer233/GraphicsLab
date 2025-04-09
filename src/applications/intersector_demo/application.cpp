@@ -45,15 +45,20 @@ void IntersectorDemoApplication::run() {
     spdlog::info("intersect num: {}", res.size());
 
     ParametricSpaceScene scene;
+    UIState ui_state;
+
+    ui_state.ubo = ParametricSpaceUBO{
+        .zoom = 0.5f,
+        .offset_x = 0.0f,
+        .offset_y = 0.0f,
+    };
 
     for (auto item : res) {
-        scene.points.push_back(item.param1);
+        scene.points.push_back(item.param2);
     }
 
-    spdlog::info("ts {}", scene.points.size());
-
     SceneTree::GeometryNode<ParametricSpaceScene> scene_node(std::move(scene));
-    ParametricSpaceRenderPass parametric_space_render_pass(appContext.device_, &scene_node);
+    ParametricSpaceRenderPass parametric_space_render_pass(appContext.device_, &scene_node, &ui_state);
 
     appContext.renderGraph->add_pass(&parametric_space_render_pass, "parametric_space_render_pass");
     appContext.renderGraph->add_pass(&simple_pass, "simple_pass");
