@@ -13,6 +13,9 @@
 #include "geometry/parametric_intersector/torus_torus_intersector.hpp"
 
 #include "render_pass/parametric_space_render_pass.hpp"
+#include "geometry/parametric_topology/boundary_representation.hpp"
+
+#include "geometry/parametric/bspline_curve_2d.hpp"
 
 IntersectorDemoApplication::~IntersectorDemoApplication() {
 }
@@ -53,8 +56,21 @@ void IntersectorDemoApplication::run() {
         .offset_y = 0.0f,
     };
 
-    for (auto item : res) {
-        scene.points.push_back(item.param2);
+    std::vector<glm::dvec2> points;
+    for (auto item: res) {
+        points.push_back(item.param2);
+    }
+
+    auto pcurve = GraphicsLab::Geometry::BSplineCurve2D::fit(points, 3, 50);
+
+    // for (auto item : res) {
+    //     scene.points.push_back(item.param2);
+    // }
+    spdlog::info("fit success");
+    for (int i = 0; i < 100; i++) {
+        auto param = static_cast<double>(i) / 100;
+        auto point = pcurve.evaluate(param);
+        scene.points.push_back(point);
     }
 
     SceneTree::GeometryNode<ParametricSpaceScene> scene_node(std::move(scene));

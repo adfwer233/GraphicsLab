@@ -2,10 +2,11 @@
 
 #include "glm/glm.hpp"
 #include <vector>
+#include "parametric_curve.hpp"
 
 namespace GraphicsLab::Geometry {
 
-struct BezierCurve2D {
+struct BezierCurve2D: ParamCurve2D {
     struct SceneTreeGeometryTypeTrait {};
 
     using PointType = glm::vec<2, double>;
