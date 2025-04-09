@@ -46,7 +46,8 @@ namespace GraphicsLab::RenderGraph {
 
 struct ParametricSpaceRenderPass : public RenderPass {
 
-    explicit ParametricSpaceRenderPass(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *t_scene, UIState *ui_state)
+    explicit ParametricSpaceRenderPass(VklDevice &device, SceneTree::GeometryNode<ParametricSpaceScene> *t_scene,
+                                       UIState *ui_state)
         : RenderPass(device, {1.0f, 1.0f, 1.0f, 1.0f}), scene(t_scene), ui_state(ui_state) {
     }
 

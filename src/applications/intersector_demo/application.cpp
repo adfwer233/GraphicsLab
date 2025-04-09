@@ -12,8 +12,8 @@
 
 #include "geometry/parametric_intersector/torus_torus_intersector.hpp"
 
-#include "render_pass/parametric_space_render_pass.hpp"
 #include "geometry/parametric_topology/boundary_representation.hpp"
+#include "render_pass/parametric_space_render_pass.hpp"
 
 #include "geometry/parametric/bspline_curve_2d.hpp"
 
@@ -57,7 +57,7 @@ void IntersectorDemoApplication::run() {
     };
 
     std::vector<glm::dvec2> points;
-    for (auto item: res) {
+    for (auto item : res) {
         points.push_back(item.param2);
     }
 

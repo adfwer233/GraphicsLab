@@ -1,7 +1,7 @@
 #pragma once
 
-#include "parametric_curve.hpp"
 #include "bezier_curve_2d.hpp"
+#include "parametric_curve.hpp"
 
 #include <Eigen/Eigen>
 
@@ -19,7 +19,8 @@ struct BSplineCurve2D : ParamCurve2D {
     glm::vec3 color;
 
     BSplineCurve2D(std::vector<PointType> control_points, std::vector<double> knots, int degree)
-        : control_points_(std::move(control_points)), knots_(std::move(knots)), degree_(degree) {}
+        : control_points_(std::move(control_points)), knots_(std::move(knots)), degree_(degree) {
+    }
 
     PointType evaluate(double u) const override {
         using namespace glm;
@@ -35,7 +36,7 @@ struct BSplineCurve2D : ParamCurve2D {
         // Find knot span index s such that knots_[s] <= u < knots_[s+1]
         int s = -1;
         if (u == 1.0) {
-            s = n;  // Special case at the end
+            s = n; // Special case at the end
         } else {
             for (int i = k; i <= n; ++i) {
                 if (u >= knots_[i] && u < knots_[i + 1]) {
@@ -45,7 +46,8 @@ struct BSplineCurve2D : ParamCurve2D {
             }
         }
         spdlog::info("test");
-        if (s == -1) return control_points_.back();  // fallback
+        if (s == -1)
+            return control_points_.back(); // fallback
 
         // Initialize d[j] = control point at i = s - k + j
         std::vector<PointType> d(k + 1);
@@ -65,7 +67,6 @@ struct BSplineCurve2D : ParamCurve2D {
 
         return d[k];
     }
-
 
     std::vector<BezierCurve2D> convert_to_bezier() const {
         std::vector<BezierCurve2D> result;
@@ -112,13 +113,13 @@ struct BSplineCurve2D : ParamCurve2D {
         return new_curve;
     }
 
-    static BSplineCurve2D fit(const std::vector<PointType>& points, int degree, int num_ctrl_points) {
+    static BSplineCurve2D fit(const std::vector<PointType> &points, int degree, int num_ctrl_points) {
         using namespace Eigen;
         const int num_points = static_cast<int>(points.size());
         const int k = degree;
 
         assert(num_ctrl_points >= k + 1);
-        assert(num_points > num_ctrl_points);  // Overdetermined
+        assert(num_points > num_ctrl_points); // Overdetermined
 
         // 1. Chord-length parameterization in [0, 1]
         std::vector<double> u(num_points);
@@ -126,7 +127,7 @@ struct BSplineCurve2D : ParamCurve2D {
         for (int i = 1; i < num_points; ++i)
             u[i] = u[i - 1] + glm::length(points[i] - points[i - 1]);
         double total_length = u.back();
-        for (double& val : u)
+        for (double &val : u)
             val /= total_length;
 
         // 2. Normalized knot vector in [0, 1]
@@ -165,10 +166,10 @@ struct BSplineCurve2D : ParamCurve2D {
             control_points.emplace_back(P(i, 0), P(i, 1));
         }
 
-        return BSplineCurve2D(std::move(control_points), std::move(knots), k);  // knots saved separately below
+        return BSplineCurve2D(std::move(control_points), std::move(knots), k); // knots saved separately below
     }
 
-    static double basis_function(int i, int k, double u, const std::vector<double>& knots) {
+    static double basis_function(int i, int k, double u, const std::vector<double> &knots) {
         if (k == 0) {
             // Handle the special case at u = 1
             if (u == 1.0 && i == knots.size() - 2)
@@ -185,6 +186,5 @@ struct BSplineCurve2D : ParamCurve2D {
             term2 = (knots[i + k + 1] - u) / denom2 * basis_function(i + 1, k - 1, u, knots);
         return term1 + term2;
     }
-
 };
-}
+} // namespace GraphicsLab::Geometry
