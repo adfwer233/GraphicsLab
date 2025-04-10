@@ -29,7 +29,7 @@ template <typename T, typename Class> struct Property {
 
 // Reflection macro for defining properties
 #define REFLECT(...)                                                                                                   \
-    struct StaticReflected {};                                                                                         \
+    struct IsStaticReflected {};                                                                                       \
     static constexpr auto staticReflect() {                                                                            \
         return std::make_tuple(__VA_ARGS__);                                                                           \
     }

@@ -18,6 +18,7 @@ enable_testing()
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw autodiff LAB_vkl LAB_geometry GTest::gtest_main nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw autodiff LAB_vkl LAB_geometry GTest::gtest GTest::gtest_main nlohmann_json)
 
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+include(GoogleTest)
+gtest_discover_tests(${PROJECT_NAME})
