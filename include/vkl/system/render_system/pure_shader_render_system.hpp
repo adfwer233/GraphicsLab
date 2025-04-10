@@ -2,7 +2,7 @@
 
 #include "simple_render_system.hpp"
 
-struct PureShaderRenderSystemModifier{
+struct PureShaderRenderSystemModifier {
     static constexpr const int poolSize = 20000;
     static void modifyPipeline(PipelineConfigInfo &configInfo) {
         configInfo.inputAssemblyInfo.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
@@ -17,4 +17,5 @@ struct PureShaderRenderSystemPushConstantData {
     }
 };
 
-using PureShaderRenderSystem = SimpleRenderSystem<0, VklPushConstantInfoList<PureShaderRenderSystemPushConstantData>, PureShaderRenderSystemModifier>;
+using PureShaderRenderSystem = SimpleRenderSystem<0, VklPushConstantInfoList<PureShaderRenderSystemPushConstantData>,
+                                                  PureShaderRenderSystemModifier>;

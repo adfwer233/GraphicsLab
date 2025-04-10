@@ -35,13 +35,11 @@ void BezierGeneratorApplication::run() {
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
-    UIState ui_state{
-        .ubo = {
-            .zoom = 0.5f,
-            .offset_x = 0.0f,
-            .offset_y = 0.0f,
-        }
-    };
+    UIState ui_state{.ubo = {
+                         .zoom = 0.5f,
+                         .offset_x = 0.0f,
+                         .offset_y = 0.0f,
+                     }};
 
     GraphicsLab::BezierGenerator::Scene2D scene;
     scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{

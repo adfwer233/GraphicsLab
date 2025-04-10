@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../cmake-build-release-visual-studio/_deps/assimp-src/contrib/poly2tri/poly2tri/common/shapes.h"#include <geometry/parametric/bezier_curve_2d.hpp>
+#include "../../../cmake-build-release-visual-studio/_deps/assimp-src/contrib/poly2tri/poly2tri/common/shapes.h" #include < geometry / parametric / bezier_curve_2d.hpp>
 #include <random>
 
 #include "geometry/parametric_intersector/bezier_2d_intersector.hpp"
@@ -96,9 +96,8 @@ struct RandomCurveGenerator {
             generate_new_curve(-1, 0, 3);
         }
 
-        std::ranges::sort(result, [](const auto &a, const auto &b) {
-            return a.start_position().y < b.start_position().y;
-        });
+        std::ranges::sort(result,
+                          [](const auto &a, const auto &b) { return a.start_position().y < b.start_position().y; });
 
         for (int i = 0; i < result.size(); i++) {
             if (i % 2 == 0 and result[i].start_position().x > result[i].end_position().x) {

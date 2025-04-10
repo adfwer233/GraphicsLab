@@ -7,14 +7,12 @@
 #include "nlohmann/json.hpp"
 
 template <typename T>
-concept Streamable = requires(std::ostream& os, T val) {
-    { os << val } -> std::same_as<std::ostream&>;
+concept Streamable = requires(std::ostream &os, T val) {
+    { os << val } -> std::same_as<std::ostream &>;
 };
 
 template <typename T>
-concept IsStaticReflectedType = requires {
-    typename T::IsStaticReflected;
-};
+concept IsStaticReflectedType = requires { typename T::IsStaticReflected; };
 
 // Helper type for member reflection
 template <typename T, typename Class> struct Property {
@@ -67,21 +65,17 @@ struct StaticReflect {
     }
 
     // Serialize
-    template <typename T>
-    static nlohmann::json serialization(const T &obj) {
+    template <typename T> static nlohmann::json serialization(const T &obj) {
         constexpr auto properties = T::staticReflect();
         nlohmann::json json;
 
-        std::apply([&](auto &&...props) {
-            (..., (json[props.name] = serialize_field(props.get(obj))));
-        }, properties);
+        std::apply([&](auto &&...props) { (..., (json[props.name] = serialize_field(props.get(obj)))); }, properties);
 
         return json;
     }
 
-private:
-    template <typename FieldType>
-    static nlohmann::json serialize_field(const FieldType& field) {
+  private:
+    template <typename FieldType> static nlohmann::json serialize_field(const FieldType &field) {
         if constexpr (Streamable<FieldType>) {
             return field;
         } else if constexpr (StdVector<FieldType>) {
@@ -92,10 +86,9 @@ private:
     }
 
     // Handle std::vector<T>
-    template <typename T>
-    static nlohmann::json serialize_vector(const std::vector<T>& vec) {
+    template <typename T> static nlohmann::json serialize_vector(const std::vector<T> &vec) {
         nlohmann::json array = nlohmann::json::array();
-        for (const auto& item : vec) {
+        for (const auto &item : vec) {
             if constexpr (IsStaticReflectedType<T>) {
                 array.push_back(serialization(item));
             } else {

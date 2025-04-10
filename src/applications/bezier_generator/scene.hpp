@@ -65,7 +65,8 @@ template <> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
 
 namespace GraphicsLab::RenderGraph {
 struct BezierRenderPass : public RenderPass {
-    explicit BezierRenderPass(VklDevice &device, SceneTree::GeometryNode<BezierGenerator::Scene2D> *t_scene, UIState* ui_state)
+    explicit BezierRenderPass(VklDevice &device, SceneTree::GeometryNode<BezierGenerator::Scene2D> *t_scene,
+                              UIState *ui_state)
         : RenderPass(device, {1.0f, 1.0f, 1.0f, 1.0f}), scene(t_scene), ui_state_(ui_state) {
     }
 
@@ -96,11 +97,13 @@ struct BezierRenderPass : public RenderPass {
                 {std::format("{}/curve2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/curve2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-        rectangle_line_render_system = std::make_unique<PureShaderRenderSystem>(device_, vkl_render_pass->renderPass, std::vector<VklShaderModuleInfo>{
+        rectangle_line_render_system = std::make_unique<PureShaderRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
                 {std::format("{}/rectangle.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/rectangle.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT},
                 {std::format("{}/rectangle.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
-        });
+            });
         spdlog::info("{}/curve2d.vert compile success", SHADER_DIR);
     }
 
@@ -129,8 +132,8 @@ struct BezierRenderPass : public RenderPass {
         }
         render_system->renderObject(frameInfo);
 
-
-        PureShaderRenderSystemPushConstantData push_constant_data{ui_state_->ubo.zoom, ui_state_->ubo.offset_x, ui_state_->ubo.offset_y};
+        PureShaderRenderSystemPushConstantData push_constant_data{ui_state_->ubo.zoom, ui_state_->ubo.offset_x,
+                                                                  ui_state_->ubo.offset_y};
         VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
         push_constant_data_list.data[0] = push_constant_data;
         rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
