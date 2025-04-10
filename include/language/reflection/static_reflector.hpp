@@ -11,6 +11,11 @@ concept Streamable = requires(std::ostream& os, T val) {
     { os << val } -> std::same_as<std::ostream&>;
 };
 
+template <typename T>
+concept IsStaticReflectedType = requires {
+    typename T::IsStaticReflected;
+};
+
 // Helper type for member reflection
 template <typename T, typename Class> struct Property {
     std::string_view name;
@@ -91,7 +96,11 @@ private:
     static nlohmann::json serialize_vector(const std::vector<T>& vec) {
         nlohmann::json array = nlohmann::json::array();
         for (const auto& item : vec) {
-            array.push_back(serialize_field(item));
+            if constexpr (IsStaticReflectedType<T>) {
+                array.push_back(serialization(item));
+            } else {
+                array.push_back(serialize_field(item));
+            }
         }
         return array;
     }

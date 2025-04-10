@@ -52,3 +52,26 @@ TEST(ReflectionTest, TestGLMVectorSerialization) {
     auto test = StaticReflect::serialization(reflectionStruct);
     EXPECT_EQ(test.dump(), R"({"a":{"x":1.0,"y":2.0,"z":3.0}})");
 }
+
+TEST(ReflectionTest, TestNestedSerialization) {
+    struct A {
+        int a = 1;
+        double b = 2.0;
+
+        REFLECT(Property{"a", &A::a}, Property{"b", &A::b})
+    };
+    struct ReflectionStructNested {
+        std::vector<A> data;
+
+        REFLECT(Property{"data", &ReflectionStructNested::data})
+    };
+
+    ReflectionStructNested reflectionStruct {};
+
+    for (int i = 0; i < 3; i++) {
+        reflectionStruct.data.push_back({});
+    }
+    auto test = StaticReflect::serialization(reflectionStruct);
+    spdlog::info(test.dump());
+    EXPECT_EQ(test.dump(), R"({"data":[{"a":1,"b":2.0},{"a":1,"b":2.0},{"a":1,"b":2.0}]})");
+}
