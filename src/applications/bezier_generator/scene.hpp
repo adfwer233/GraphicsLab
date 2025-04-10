@@ -5,6 +5,9 @@
 
 #include <vkl/scene_tree/vkl_geometry_mesh.hpp>
 #include <vkl/system/render_system/line_render_system.hpp>
+#include <vkl/system/render_system/pure_shader_render_system.hpp>
+
+#include "ui_state.hpp"
 
 namespace GraphicsLab::BezierGenerator {
 
@@ -62,8 +65,8 @@ template <> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
 
 namespace GraphicsLab::RenderGraph {
 struct BezierRenderPass : public RenderPass {
-    explicit BezierRenderPass(VklDevice &device, SceneTree::GeometryNode<BezierGenerator::Scene2D> *t_scene)
-        : RenderPass(device, {0.0f, 0.0f, 0.0f, 1.0f}), scene(t_scene) {
+    explicit BezierRenderPass(VklDevice &device, SceneTree::GeometryNode<BezierGenerator::Scene2D> *t_scene, UIState* ui_state)
+        : RenderPass(device, {1.0f, 1.0f, 1.0f, 1.0f}), scene(t_scene), ui_state_(ui_state) {
     }
 
     RenderPassReflection render_pass_reflect() override {
@@ -93,6 +96,11 @@ struct BezierRenderPass : public RenderPass {
                 {std::format("{}/curve2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/curve2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
+        rectangle_line_render_system = std::make_unique<PureShaderRenderSystem>(device_, vkl_render_pass->renderPass, std::vector<VklShaderModuleInfo>{
+                {std::format("{}/rectangle.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/rectangle.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT},
+                {std::format("{}/rectangle.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+        });
         spdlog::info("{}/curve2d.vert compile success", SHADER_DIR);
     }
 
@@ -114,16 +122,27 @@ struct BezierRenderPass : public RenderPass {
             .model = *scene_model->curve_mesh,
         };
 
+        auto simple_key = render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        if (scene_model->curve_mesh->uniformBuffers.contains(simple_key)) {
+            scene_model->curve_mesh->uniformBuffers[simple_key][frame_index]->writeToBuffer(&ui_state_->ubo);
+            scene_model->curve_mesh->uniformBuffers[simple_key][frame_index]->flush();
+        }
         render_system->renderObject(frameInfo);
 
-        auto simpleKey = render_system->descriptorSetLayout->descriptorSetLayoutKey;
+
+        PureShaderRenderSystemPushConstantData push_constant_data{ui_state_->ubo.zoom, ui_state_->ubo.offset_x, ui_state_->ubo.offset_y};
+        VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
+        push_constant_data_list.data[0] = push_constant_data;
+        rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
 
         end_render_pass(commandBuffer);
     }
 
   private:
     std::unique_ptr<LineRenderSystem<>> render_system = nullptr;
+    std::unique_ptr<PureShaderRenderSystem> rectangle_line_render_system = nullptr;
 
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> *scene;
+    UIState *ui_state_;
 };
 } // namespace GraphicsLab::RenderGraph

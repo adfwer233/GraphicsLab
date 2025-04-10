@@ -13,6 +13,7 @@
 #include "random_curve_generator.hpp"
 
 #include "scene.hpp"
+#include "ui_state.hpp"
 
 BezierGeneratorApplication::~BezierGeneratorApplication() {
 }
@@ -34,6 +35,14 @@ void BezierGeneratorApplication::run() {
 
     simple_pass.set_extent(WIDTH, HEIGHT);
 
+    UIState ui_state{
+        .ubo = {
+            .zoom = 0.5f,
+            .offset_x = 0.0f,
+            .offset_y = 0.0f,
+        }
+    };
+
     GraphicsLab::BezierGenerator::Scene2D scene;
     scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{
         glm::vec<2, double>{0.0, 0.0}, glm::vec<2, double>{1.0, 1.0}}));
@@ -42,7 +51,7 @@ void BezierGeneratorApplication::run() {
 
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> scene_node(std::move(scene));
 
-    BezierRenderPass bezier_render_pass(appContext.device_, &scene_node);
+    BezierRenderPass bezier_render_pass(appContext.device_, &scene_node, &ui_state);
 
     appContext.renderGraph->add_pass(&bezier_render_pass, "bezier_pass");
     appContext.renderGraph->add_pass(&simple_pass, "simple_pass");

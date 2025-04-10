@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILE})
 
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
 add_definitions(-DSHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader")
+add_definitions(-DVKL_SHADER_DIR="${CMAKE_SOURCE_DIR}/src/vkl/shader")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
