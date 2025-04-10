@@ -11,12 +11,13 @@ set(SRC_FILE
         templates/meta_programming_test.cpp
         coroutine/generator.cpp
         geometry/function/bezier2d_evaluate.cpp
+        reflection/static_reflector_test.cpp
 )
 
 enable_testing()
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw autodiff LAB_vkl LAB_geometry GTest::gtest_main)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw autodiff LAB_vkl LAB_geometry GTest::gtest_main nlohmann_json)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

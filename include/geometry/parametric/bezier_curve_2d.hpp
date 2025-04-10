@@ -16,12 +16,14 @@ struct BezierCurve2D : ParamCurve2D {
     // for debug
     glm::vec3 color;
 
+    REFLECT(Property{"control_points", &BezierCurve2D::control_points_})
+
     /**
      * evaluate the Bézier curve with de casteljau algorithm
      * @param param
      * @return
      */
-    PointType evaluate(double param) const {
+    PointType evaluate(double param) const override {
         return evaluate_linear(param);
     }
 
