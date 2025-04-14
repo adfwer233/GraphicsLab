@@ -47,6 +47,9 @@ void BezierGeneratorApplication::run() {
 
     scene.curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
 
+    auto scene_json = StaticReflect::serialization(scene);
+    spdlog::info(scene_json.dump(4));
+
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> scene_node(std::move(scene));
 
     BezierRenderPass bezier_render_pass(appContext.device_, &scene_node, &ui_state);

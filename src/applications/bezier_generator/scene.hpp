@@ -15,6 +15,8 @@ struct Scene2D {
     struct SceneTreeGeometryTypeTrait {};
 
     std::vector<Geometry::BezierCurve2D> curves;
+
+    REFLECT(Property{"curves", &Scene2D::curves})
 };
 
 } // namespace GraphicsLab::BezierGenerator
