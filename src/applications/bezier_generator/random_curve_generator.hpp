@@ -83,7 +83,6 @@ struct RandomCurveGenerator {
                         break;
                     }
 
-                    spdlog::info("regenerate");
                     c1 = generate_simple_curve(n, m, d);
                 }
             }
@@ -92,8 +91,8 @@ struct RandomCurveGenerator {
         };
 
         for (int i = 1; i <= n; i++) {
-            generate_new_curve(1, 0, 3);
-            generate_new_curve(-1, 0, 3);
+            generate_new_curve(1, 0, 5);
+            generate_new_curve(-1, 0, 5);
         }
 
         std::ranges::sort(result,
@@ -103,7 +102,6 @@ struct RandomCurveGenerator {
             if (i % 2 == 0 and result[i].start_position().x > result[i].end_position().x) {
                 std::ranges::reverse(result[i].control_points_);
                 result[i] = result[i] + PointType(1, 0);
-                spdlog::info("reverse {}", i);
             } else if (i % 2 == 1 and result[i].start_position().x < result[i].end_position().x) {
                 std::ranges::reverse(result[i].control_points_);
                 result[i] = result[i] - PointType(1, 0);
@@ -112,7 +110,7 @@ struct RandomCurveGenerator {
 
         for (auto &c : result) {
             auto end = c.end_position();
-            spdlog::info("{} {}", end.x, end.y);
+            // spdlog::info("{} {}", end.x, end.y);
         }
 
         return result;

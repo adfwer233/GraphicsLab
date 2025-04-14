@@ -31,10 +31,6 @@ void BezierGeneratorApplication::run() {
     ImguiContext::getInstance(appContext.device_, appContext.window_.getGLFWwindow(),
                               appContext.renderContext.get_swap_chain_render_pass());
 
-    SimpleImGuiPass simple_pass(appContext.device_);
-
-    simple_pass.set_extent(WIDTH, HEIGHT);
-
     UIState ui_state{.ubo = {
                          .zoom = 0.5f,
                          .offset_x = 0.0f,
@@ -42,17 +38,47 @@ void BezierGeneratorApplication::run() {
                      }};
 
     GraphicsLab::BezierGenerator::Scene2D scene;
-    scene.curves.emplace_back(std::move(std::vector<GraphicsLab::Geometry::BezierCurve2D::PointType>{
-        glm::vec<2, double>{0.0, 0.0}, glm::vec<2, double>{1.0, 1.0}}));
 
     scene.curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
 
-    auto scene_json = StaticReflect::serialization(scene);
-    spdlog::info(scene_json.dump(4));
+    GraphicsLab::BezierGenerator::Data data;
+    for (const auto& curve: scene.curves) {
+        data.paths.push_back({{curve}});
+    }
+
+    auto data_json = StaticReflect::serialization(data);
+    spdlog::info(data_json.dump(4));
+
+    spdlog::info("Generate Dataset A");
+
 
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> scene_node(std::move(scene));
 
     BezierRenderPass bezier_render_pass(appContext.device_, &scene_node, &ui_state);
+
+    SimpleImGuiPass simple_pass(appContext.device_, [&]() {
+        ImGui::Begin("Dataset");
+        {
+            if (ImGui::Button("Create Dataset A")) {
+                for (int i = 0; i <= 25; i++) {
+                    spdlog::info("Generate Dataset A: {}", i);
+                    auto curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
+                    GraphicsLab::BezierGenerator::Data param_data;
+                    for (const auto& curve: curves) {
+                        param_data.paths.push_back({{curve}});
+                    }
+                    auto data_json = StaticReflect::serialization(param_data);
+                    auto data_json_str = data_json.dump(4);
+
+                    std::ofstream file(std::format("{}.json", i));
+                    file << data_json_str;
+                    file.close();
+                }
+            }
+        }
+        ImGui::End();
+    });
+    simple_pass.set_extent(WIDTH, HEIGHT);
 
     appContext.renderGraph->add_pass(&bezier_render_pass, "bezier_pass");
     appContext.renderGraph->add_pass(&simple_pass, "simple_pass");

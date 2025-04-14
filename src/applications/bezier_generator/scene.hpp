@@ -19,6 +19,17 @@ struct Scene2D {
     REFLECT(Property{"curves", &Scene2D::curves})
 };
 
+struct Data {
+    struct Path {
+        std::vector<Geometry::BezierCurve2D> curves;
+        REFLECT(Property{"curves", &Path::curves})
+    };
+
+    std::vector<Path> paths;
+    REFLECT(Property{"paths", &Data::paths})
+};
+
+
 } // namespace GraphicsLab::BezierGenerator
 
 namespace SceneTree {
