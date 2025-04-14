@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <geometry/parametric/bspline_curve_2d.hpp>
 #include <geometry/parametric/nurbs_surface.hpp>
 #include <geometry/parametric/plane.hpp>
 #include <geometry/parametric/sphere.hpp>
+#include <vector>
 
 #include "geometry/parametric/parametric_curve.hpp"
 #include "geometry/parametric/parametric_surface.hpp"
@@ -58,14 +58,16 @@ struct BoundaryRepresentationAllocator {
     ParamCurve2DVecsTypeList param_curves_2d;
     ParamSurfaceVecsTypeList param_surfaces;
 
-    template<typename T> requires TypeListFunctions::IsAnyOf<ParamSurfaceTypeList, T>::value
-    consteval std::vector<T>& get_surface_list() {
+    template <typename T>
+        requires TypeListFunctions::IsAnyOf<ParamSurfaceTypeList, T>::value
+    consteval std::vector<T> &get_surface_list() {
         constexpr size_t idx = MetaProgramming::TypeListFunctions::IndexOf<ParamSurfaceTypeList, T>::value;
         return std::get<idx>(param_surfaces);
     }
 
-    template<typename T> requires MetaProgramming::TypeListFunctions::IsAnyOf<ParamCurve3DTypeList, T>::value
-    consteval std::vector<T>& get_curve_list() {
+    template <typename T>
+        requires MetaProgramming::TypeListFunctions::IsAnyOf<ParamCurve3DTypeList, T>::value
+    consteval std::vector<T> &get_curve_list() {
         constexpr size_t idx = MetaProgramming::TypeListFunctions::IndexOf<ParamCurve3DTypeList, T>::value;
         return std::get<idx>(param_curves_2d);
     }

@@ -42,7 +42,7 @@ void BezierGeneratorApplication::run() {
     scene.curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
 
     GraphicsLab::BezierGenerator::Data data;
-    for (const auto& curve: scene.curves) {
+    for (const auto &curve : scene.curves) {
         data.paths.push_back({{curve}});
     }
 
@@ -50,7 +50,6 @@ void BezierGeneratorApplication::run() {
     spdlog::info(data_json.dump(4));
 
     spdlog::info("Generate Dataset A");
-
 
     SceneTree::GeometryNode<GraphicsLab::BezierGenerator::Scene2D> scene_node(std::move(scene));
 
@@ -64,7 +63,7 @@ void BezierGeneratorApplication::run() {
                     spdlog::info("Generate Dataset A: {}", i);
                     auto curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
                     GraphicsLab::BezierGenerator::Data param_data;
-                    for (const auto& curve: curves) {
+                    for (const auto &curve : curves) {
                         param_data.paths.push_back({{curve}});
                     }
                     auto data_json = StaticReflect::serialization(param_data);

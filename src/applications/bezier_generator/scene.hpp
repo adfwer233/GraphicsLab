@@ -29,7 +29,6 @@ struct Data {
     REFLECT(Property{"paths", &Data::paths})
 };
 
-
 } // namespace GraphicsLab::BezierGenerator
 
 namespace SceneTree {
