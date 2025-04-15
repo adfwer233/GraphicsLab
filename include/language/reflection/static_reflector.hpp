@@ -16,6 +16,8 @@ concept IsStaticReflectedType = requires { typename T::IsStaticReflected; };
 
 // Helper type for member reflection
 template <typename T, typename Class> struct Property {
+    using value_type = T;
+
     std::string_view name;
     T Class::*member_ptr;
 
@@ -74,6 +76,20 @@ struct StaticReflect {
         return json;
     }
 
+    // Deserialize
+    template <typename T>
+    static void deserialization(T &obj, const nlohmann::json &json) {
+        constexpr auto properties = T::staticReflect();
+
+        std::apply([&](auto &&...props) {
+            (..., ([&] {
+                if (json.contains(props.name)) {
+                    props.set(obj, deserialize_field<typename std::decay_t<decltype(props)>::value_type>(json[props.name]));
+                }
+            }(), void()));
+        }, properties);
+    }
+
   private:
     template <typename FieldType> static nlohmann::json serialize_field(const FieldType &field) {
         if constexpr (Streamable<FieldType>) {
@@ -96,5 +112,35 @@ struct StaticReflect {
             }
         }
         return array;
+    }
+
+    template <typename FieldType>
+    static FieldType deserialize_field(const nlohmann::json &json) {
+        if constexpr (Streamable<FieldType>) {
+            return json.get<FieldType>();
+        } else if constexpr (StdVector<FieldType>) {
+            return deserialize_vector<FieldType>(json);
+        } else {
+            return custom::custom_deserialize(json, std::type_identity<FieldType>{});
+        }
+    }
+
+    // Handle std::vector<T>
+    template <typename VecType>
+    static VecType deserialize_vector(const nlohmann::json &json) {
+        using ElementType = typename VecType::value_type;
+        VecType vec;
+
+        for (const auto &item : json) {
+            if constexpr (IsStaticReflectedType<ElementType>) {
+                ElementType element;
+                deserialization(element, item);
+                vec.push_back(std::move(element));
+            } else {
+                vec.push_back(deserialize_field<ElementType>(item));
+            }
+        }
+
+        return vec;
     }
 };
