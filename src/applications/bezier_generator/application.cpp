@@ -39,7 +39,7 @@ void BezierGeneratorApplication::run() {
 
     GraphicsLab::BezierGenerator::Scene2D scene;
 
-    scene.curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
+    scene.curves = GraphicsLab::RandomCurveGenerator::generate_biperiodic_curves();
 
     GraphicsLab::BezierGenerator::Data data;
     for (const auto &curve : scene.curves) {

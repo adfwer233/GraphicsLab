@@ -42,20 +42,22 @@ template <> struct VklNodeMesh<GraphicsLab::BezierGenerator::Scene2D> {
 
         CurveRenderType::Builder curve_mesh_builder;
 
-        int repeat = 2;
+        int repeat = 5;
 
         for (int k = -repeat; k <= repeat; k++) {
-            for (auto &curve : node_->data.curves) {
-                for (int i = 0; i < num; i++) {
-                    float t = i / (num - 1.0f);
-                    glm::vec3 red(1.0f, 0.0f, 0.0f);
-                    glm::vec3 blue(0.0f, 0.0f, 1.0f);
-                    glm::vec<2, double> offset(static_cast<float>(k), 0.0f);
-                    curve_mesh_builder.vertices.push_back({curve.evaluate(t) + offset, glm::mix(red, blue, t)});
-                    if (i > 0) {
-                        curve_mesh_builder.indices.push_back(
-                            {static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 2),
-                             static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 1)});
+            for (int l = -repeat; l <= repeat; l++) {
+                for (auto &curve : node_->data.curves) {
+                    for (int i = 0; i < num; i++) {
+                        float t = i / (num - 1.0f);
+                        glm::vec3 red(1.0f, 0.0f, 0.0f);
+                        glm::vec3 blue(0.0f, 0.0f, 1.0f);
+                        glm::vec<2, double> offset(static_cast<float>(k), static_cast<float>(l));
+                        curve_mesh_builder.vertices.push_back({curve.evaluate(t) + offset, glm::mix(red, blue, t)});
+                        if (i > 0) {
+                            curve_mesh_builder.indices.push_back(
+                                {static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 2),
+                                 static_cast<uint32_t>(curve_mesh_builder.vertices.size() - 1)});
+                        }
                     }
                 }
             }
