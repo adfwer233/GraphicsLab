@@ -37,9 +37,16 @@ void BezierGeneratorApplication::run() {
                          .offset_y = 0.0f,
                      }};
 
+    const std::vector<std::pair<int, int>> coprime_numbers = {
+        {2, 3}, {2, 5},
+        {3, 2}, {3, 4}, {3, 5},
+        {4, 3}, {4, 5},
+        {5, 2}, {5, 3}, {5, 4}
+    };
+
     GraphicsLab::BezierGenerator::Scene2D scene;
 
-    scene.curves = GraphicsLab::RandomCurveGenerator::generate_biperiodic_curves();
+    scene.curves = GraphicsLab::RandomCurveGenerator::generate_biperiodic_curves(4, 5);
 
     GraphicsLab::BezierGenerator::Data data;
     for (const auto &curve : scene.curves) {
@@ -59,7 +66,7 @@ void BezierGeneratorApplication::run() {
         ImGui::Begin("Dataset");
         {
             if (ImGui::Button("Create Dataset A")) {
-                for (int i = 0; i <= 25; i++) {
+                for (int i = 0; i < 250; i++) {
                     spdlog::info("Generate Dataset A: {}", i);
                     auto curves = GraphicsLab::RandomCurveGenerator::generate_uniperiodic_curves();
                     GraphicsLab::BezierGenerator::Data param_data;
@@ -72,6 +79,26 @@ void BezierGeneratorApplication::run() {
                     std::ofstream file(std::format("{}.json", i));
                     file << data_json_str;
                     file.close();
+                }
+            }
+
+            if (ImGui::Button("Create Dataset B")) {
+                int counter = 0;
+                for (auto [p, q]: coprime_numbers) {
+                    for (int i = 0; i <= 25; i++) {
+                        spdlog::info("Generate Dataset B: ({}, {}), {}", p, q, i);
+                        auto curves = GraphicsLab::RandomCurveGenerator::generate_biperiodic_curves(p, q);
+                        GraphicsLab::BezierGenerator::Data param_data;
+                        for (const auto &curve : curves) {
+                            param_data.paths.push_back({{curve}});
+                        }
+                        auto data_json = StaticReflect::serialization(param_data);
+                        auto data_json_str = data_json.dump(4);
+
+                        std::ofstream file(std::format("{}.json", counter++));
+                        file << data_json_str;
+                        file.close();
+                    }
                 }
             }
         }

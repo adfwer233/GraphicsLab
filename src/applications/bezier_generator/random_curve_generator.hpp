@@ -1,5 +1,6 @@
 #pragma once
-#include "../../../cmake-build-release-visual-studio/_deps/assimp-src/contrib/poly2tri/poly2tri/common/shapes.h" #include < geometry / parametric / bezier_curve_2d.hpp>
+
+#include <geometry/parametric/bezier_curve_2d.hpp>
 #include <random>
 
 #include "geometry/parametric_intersector/bezier_2d_intersector.hpp"
@@ -133,7 +134,7 @@ struct RandomCurveGenerator {
         return result;
     }
 
-    static std::vector<Geometry::BezierCurve2D> generate_biperiodic_curves() {
+    static std::vector<Geometry::BezierCurve2D> generate_biperiodic_curves(int coeff1, int coeff2) {
         // int n = 3;
 
         std::vector<Geometry::BezierCurve2D> result;
@@ -170,7 +171,7 @@ struct RandomCurveGenerator {
                         break;
                     }
 
-                    spdlog::info("regenerate");
+                    // spdlog::info("regenerate");
 
                     c1 = generate_simple_curve(n, m, d);
                 }
@@ -179,8 +180,6 @@ struct RandomCurveGenerator {
             return c1;
         };
 
-        int coeff1 = 4;
-        int coeff2 = 3;
         for (int i = 1; i <= 1; i++) {
             generate_new_curve(coeff1, coeff2, 3);
             generate_new_curve(-coeff1, -coeff2, 3);

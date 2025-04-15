@@ -104,12 +104,12 @@ struct BezierRenderPass : public RenderPass {
     }
 
     void post_compile(RenderContext *render_context) override {
-        spdlog::info("{}/curve2d.vert", SHADER_DIR);
+        spdlog::info("{}/curve2D.vert", SHADER_DIR);
         render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/curve2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/curve2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {std::format("{}/curve2D.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/curve2D.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         rectangle_line_render_system = std::make_unique<PureShaderRenderSystem>(
             device_, vkl_render_pass->renderPass,
