@@ -6,7 +6,7 @@
 
 #include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
 
-#include "ui_state.hpp"
+#include "../ui_state.hpp"
 
 using SimplePointCloudRenderSystem = SimpleRenderSystem<0, SimplePushConstantInfoList, PointCloud2DPipelineModifier>;
 
