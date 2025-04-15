@@ -37,12 +37,8 @@ void BezierGeneratorApplication::run() {
                          .offset_y = 0.0f,
                      }};
 
-    const std::vector<std::pair<int, int>> coprime_numbers = {
-        {2, 3}, {2, 5},
-        {3, 2}, {3, 4}, {3, 5},
-        {4, 3}, {4, 5},
-        {5, 2}, {5, 3}, {5, 4}
-    };
+    const std::vector<std::pair<int, int>> coprime_numbers = {{2, 3}, {2, 5}, {3, 2}, {3, 4}, {3, 5},
+                                                              {4, 3}, {4, 5}, {5, 2}, {5, 3}, {5, 4}};
 
     GraphicsLab::BezierGenerator::Scene2D scene;
 
@@ -84,7 +80,7 @@ void BezierGeneratorApplication::run() {
 
             if (ImGui::Button("Create Dataset B")) {
                 int counter = 0;
-                for (auto [p, q]: coprime_numbers) {
+                for (auto [p, q] : coprime_numbers) {
                     for (int i = 0; i <= 25; i++) {
                         spdlog::info("Generate Dataset B: ({}, {}), {}", p, q, i);
                         auto curves = GraphicsLab::RandomCurveGenerator::generate_biperiodic_curves(p, q);

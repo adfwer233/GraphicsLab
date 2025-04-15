@@ -77,17 +77,21 @@ struct StaticReflect {
     }
 
     // Deserialize
-    template <typename T>
-    static void deserialization(T &obj, const nlohmann::json &json) {
+    template <typename T> static void deserialization(T &obj, const nlohmann::json &json) {
         constexpr auto properties = T::staticReflect();
 
-        std::apply([&](auto &&...props) {
-            (..., ([&] {
-                if (json.contains(props.name)) {
-                    props.set(obj, deserialize_field<typename std::decay_t<decltype(props)>::value_type>(json[props.name]));
-                }
-            }(), void()));
-        }, properties);
+        std::apply(
+            [&](auto &&...props) {
+                (..., (
+                          [&] {
+                              if (json.contains(props.name)) {
+                                  props.set(obj, deserialize_field<typename std::decay_t<decltype(props)>::value_type>(
+                                                     json[props.name]));
+                              }
+                          }(),
+                          void()));
+            },
+            properties);
     }
 
   private:
@@ -114,8 +118,7 @@ struct StaticReflect {
         return array;
     }
 
-    template <typename FieldType>
-    static FieldType deserialize_field(const nlohmann::json &json) {
+    template <typename FieldType> static FieldType deserialize_field(const nlohmann::json &json) {
         if constexpr (Streamable<FieldType>) {
             return json.get<FieldType>();
         } else if constexpr (StdVector<FieldType>) {
@@ -126,8 +129,7 @@ struct StaticReflect {
     }
 
     // Handle std::vector<T>
-    template <typename VecType>
-    static VecType deserialize_vector(const nlohmann::json &json) {
+    template <typename VecType> static VecType deserialize_vector(const nlohmann::json &json) {
         using ElementType = typename VecType::value_type;
         VecType vec;
 

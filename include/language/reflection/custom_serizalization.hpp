@@ -28,11 +28,13 @@ template <typename T> inline nlohmann::json custom_serialize(const glm::vec<2, T
     return {{"x", v.x}, {"y", v.y}};
 }
 
-template <typename T> inline glm::vec<3, T> custom_deserialize(const nlohmann::json &j, std::type_identity<glm::vec<3, T>>) {
+template <typename T>
+inline glm::vec<3, T> custom_deserialize(const nlohmann::json &j, std::type_identity<glm::vec<3, T>>) {
     return glm::vec<3, T>{j.at("x").get<T>(), j.at("y").get<T>(), j.at("z").get<T>()};
 }
 
-template <typename T> inline glm::vec<2, T> custom_deserialize(const nlohmann::json &j, std::type_identity<glm::vec<2, T>>) {
+template <typename T>
+inline glm::vec<2, T> custom_deserialize(const nlohmann::json &j, std::type_identity<glm::vec<2, T>>) {
     return glm::vec<2, T>{j.at("x").get<T>(), j.at("y").get<T>()};
 }
 

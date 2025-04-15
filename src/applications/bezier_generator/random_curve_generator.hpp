@@ -52,15 +52,17 @@ struct RandomCurveGenerator {
                     }
                     auto inter = Geometry::Bezier2DIntersector::intersect(c, c + offset);
                     if (not inter.empty()) {
-                        for (auto [p1, p2]: inter) {
+                        for (auto [p1, p2] : inter) {
                             if (p1 > 0.001 and p1 < 0.999 and p2 > 0.001 and p2 < 0.999) {
                                 flag = true;
                             }
                         }
-                        if (flag) break;
+                        if (flag)
+                            break;
                     }
                 }
-                if (flag) break;
+                if (flag)
+                    break;
             }
 
             if (not flag) {
