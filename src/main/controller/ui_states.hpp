@@ -48,11 +48,11 @@ struct UIState : Reflectable {
     std::map<std::string, glm::vec2> scope_min;
     std::map<std::string, glm::vec2> scope_max;
 
-    struct ProjectStatus : Reflectable {
+    struct ProjectStatus {
         std::string name;
         std::string projectPath;
 
-        struct BuildConfig : Reflectable {
+        struct BuildConfig {
             std::string buildType;
             std::string dllPath;
 
@@ -61,18 +61,16 @@ struct UIState : Reflectable {
                 : buildType(std::move(t_buildType)), dllPath(std::move(t_dllPath)) {
             }
 
-            ReflectDataType reflect() override {
-                return {{"buildType", TypeErasedValue(&buildType)}, {"dllPath", TypeErasedValue(&dllPath)}};
-            }
+            REFLECT(Property{"buildType", &BuildConfig::buildType}, Property{"dllPath", &BuildConfig::dllPath});
         };
 
         std::vector<BuildConfig> buildConfigs;
 
-        ReflectDataType reflect() override {
-            return {{"name", TypeErasedValue(&name)},
-                    {"projectPath", TypeErasedValue(&projectPath)},
-                    {"buildConfigs", TypeErasedValue(&buildConfigs)}};
-        }
+        REFLECT(
+            Property{"name", &ProjectStatus::name},
+            Property{"projectPath", &ProjectStatus::projectPath},
+            Property{"buildConfigs", &ProjectStatus::projectPath}
+        );
     };
 
     ProjectStatus projectStatus;

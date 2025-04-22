@@ -75,3 +75,18 @@ TEST(DynamicReflectionTest, TestReflectFunctionWithMultipleParameter) {
     reflection["update"].call_func_with_param({3, 4});
     EXPECT_EQ(testStruct.a, 12);
 }
+
+TEST(DynamicReflectionTest, TestAddField) {
+    struct TestStruct: public Reflectable {
+        ReflectDataType reflect() override {
+            return {};
+        }
+    };
+
+    TestStruct testStruct;
+
+    testStruct.addField<int>("a", 10);
+    const int res = testStruct.getField<int>("a");
+
+    EXPECT_EQ(res, 10);
+}

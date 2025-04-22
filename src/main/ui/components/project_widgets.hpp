@@ -111,7 +111,7 @@ class ProjectWidgetComponent : public UIComponent {
             }
 
             if (ImGui::Button("save configuration")) {
-                auto result = uiState_.projectStatus.serialization();
+                auto result = StaticReflect::serialization(uiState_.projectStatus);
                 std::ofstream ofstream("status.json");
                 ofstream << result.dump(4);
             }
@@ -123,7 +123,7 @@ class ProjectWidgetComponent : public UIComponent {
                 json j;
                 buffer >> j;
                 spdlog::critical(j.dump());
-                uiState_.projectStatus.deserialization(j);
+                StaticReflect::deserialization(uiState_.projectStatus, j);
             }
 
             ImGui::Text("Project Functions");
