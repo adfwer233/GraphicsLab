@@ -39,6 +39,53 @@ struct ParamSurface {
         return result;
     }
 
+    [[nodiscard]] ParamType move_param_to_std_domain(ParamType param) const {
+        if (u_periodic) {
+            const int shift = std::floor(param.x);
+            param.x -= shift;
+        }
+
+        if (v_periodic) {
+            const int shift = std::floor(param.y);
+            param.y -= shift;
+        }
+
+        return param;
+    }
+
+    bool u_periodic = false;
+    bool v_periodic = false;
+
+    bool u_periodic_check() const {
+        constexpr int sample_num = 10;
+
+        for (int i = 0; i <= sample_num; i++) {
+            double v = static_cast<double>(i) / sample_num;
+            const auto pos1 = evaluate({0.0, v});
+            const auto pos2 = evaluate({1.0, v});
+            if (glm::distance(pos1, pos2) > 1e-6) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool v_periodic_check() const {
+        constexpr int sample_num = 10;
+
+        for (int i = 0; i <= sample_num; i++) {
+            double u = static_cast<double>(i) / sample_num;
+            const auto pos1 = evaluate({u, 0.0});
+            const auto pos2 = evaluate({u, 1.0});
+
+            if (glm::distance(pos1, pos2) > 1e-6) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     std::unique_ptr<Mesh3D> mesh = nullptr;
 };
 

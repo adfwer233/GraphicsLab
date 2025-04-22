@@ -23,11 +23,11 @@ std::unique_ptr<VklDescriptorSetLayout> VklDescriptorSetLayout::Builder::build()
 VklDescriptorSetLayout::Builder &VklDescriptorSetLayout::Builder::addBindingsFromResource(
     spirv_cross::Compiler &compiler, spirv_cross::ShaderResources &resources) {
     for (const auto &buffer : resources.uniform_buffers) {
-        uint32_t setShaderId = compiler.get_decoration(buffer.id, spv::DecorationDescriptorSet);
+        // uint32_t setShaderId = compiler.get_decoration(buffer.id, spv::DecorationDescriptorSet);
         uint32_t bindingIndex = compiler.get_decoration(buffer.id, spv::DecorationBinding);
 
         auto &type = compiler.get_type(buffer.type_id);
-        auto &type2 = compiler.get_type(buffer.base_type_id);
+        // auto &type2 = compiler.get_type(buffer.base_type_id);
         auto declaredSize = static_cast<uint32_t>(compiler.get_declared_struct_size(type));
 
         addBinding(bindingIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS);

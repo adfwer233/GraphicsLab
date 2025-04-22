@@ -125,7 +125,7 @@ set(SPIRV_CROSS_SHARED ON)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Werror=return-type)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4)
 endif()
 
 add_subdirectory(src/vkl)

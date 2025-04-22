@@ -33,5 +33,5 @@ class VklTexture {
     VkImageLayout getImageLayout() {
         return layout_;
     }
-    VkDescriptorImageInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+    VkDescriptorImageInfo descriptorInfo();
 };

@@ -16,9 +16,7 @@ void Camera::process_mouse_scroll(float offset) {
     position += camera_front * move_speed * offset;
 }
 
-void Camera::process_keyboard(CameraMovement direction, float deltaTime) {
-    float velocity = move_speed * deltaTime;
-
+void Camera::process_keyboard() {
     update_camera_vectors();
 }
 

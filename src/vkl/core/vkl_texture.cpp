@@ -38,6 +38,6 @@ VklTexture::~VklTexture() {
     vkFreeMemory(device_.device(), this->memory_, nullptr);
 }
 
-VkDescriptorImageInfo VklTexture::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) {
+VkDescriptorImageInfo VklTexture::descriptorInfo() {
     return VkDescriptorImageInfo(textureSampler_, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
