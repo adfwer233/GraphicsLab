@@ -18,7 +18,6 @@
 
 #include "geometry/mesh/mesh.hpp"
 #include "geometry/renderable_geometry.hpp"
-#include "geometry/surface/tensor_product_bezier.hpp"
 #include "geometry/vertex/null_index.hpp"
 
 namespace SceneTree {

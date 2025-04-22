@@ -7,22 +7,15 @@ set(SRC_FILE core/vkl_window.cpp
         core/vkl_swap_chain.cpp
         core/vkl_renderer.cpp
         core/vkl_buffer.cpp
-        scene/vkl_model.cpp
-        utils/vkl_camera.cpp
         core/vkl_descriptor.cpp
-        scene/vkl_object.cpp
-        io/assimp_loader.cpp
         core/vkl_texture.cpp
         core/vkl_compute_pipeline.cpp
-        bvh/vkl_bvh.cpp
         core/vkl_image.cpp
         core/vkl_offscreen_renderer.cpp
-        io/tiny_obj_loader.cpp
-        scene/vkl_scene.cpp
-        scene/vkl_collection.cpp
-        io/vkl_image_export.cpp
         core/vkl_graphic_pipeline.cpp
         core/vkl_vma_impl.cpp
+        utils/vkl_camera.cpp
+        utils/stb_src.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_fetch_SOURCE_DIR}/imgui_demo.cpp

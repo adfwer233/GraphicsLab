@@ -1,6 +1,9 @@
 #pragma once
 
+#include "stb_image.h"
 #include "vkl/core/vkl_texture.hpp"
+
+#include <vkl/core/vkl_buffer.hpp>
 
 namespace vkl {
 

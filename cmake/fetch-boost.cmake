@@ -1,6 +1,6 @@
 include(FetchContent)
 
-set(BOOST_INCLUDE_LIBRARIES math numeric)
+set(BOOST_INCLUDE_LIBRARIES math)
 set(BOOST_ENABLE_CMAKE ON)
 set(BOOST_VERSION 1.86.0)
 

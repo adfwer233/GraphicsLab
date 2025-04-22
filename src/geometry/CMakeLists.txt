@@ -3,20 +3,13 @@ project(LAB_geometry VERSION 1.0 DESCRIPTION "Geometry Kernel" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SRC_FILE
-        autodiff/autodiff.cpp
-        surface/tensor_product_bezier.cpp
-        function/bernstein.cpp
-        curve/bezier_curve_2d.cpp
         io/svg_importer.cpp
-        loop/path_2d.cpp
-        curve/bezier_root_finder.cpp
-        curve/bezier_clipping.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
 # set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(${PROJECT_NAME} glm autodiff eigen nlohmann_json)
+target_link_libraries(${PROJECT_NAME} glm eigen nlohmann_json)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC

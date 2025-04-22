@@ -39,16 +39,8 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-cmake_policy(SET CMP0077 NEW)
-
 # install eigen for autodiff
 set(EIGEN_BUILD_CMAKE_PACKAGE ON)
-
-# autodiff settings
-set(AUTODIFF_BUILD_DOCS OFF)
-set(AUTODIFF_BUILD_EXAMPLES OFF)
-set(AUTODIFF_BUILD_PYTHON OFF)
-set(AUTODIFF_BUILD_TESTS OFF)
 
 set(SPIRV_CROSS_SHARED ON)
 set(GLM_BUILD_INSTALL ON)
@@ -65,11 +57,6 @@ set(VMA_ENABLE_INSTALL ON)
 set(SPIRV_CROSS_FORCE_PIC ON)
 set(ASSIMP_BUILD_ZLIB ON)
 
-# assimp importer, we only use obj format
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_OBJ_IMPORTER ON)
-
 include(fetch-glfw)
 include(fetch-glm)
 include(fetch-assimp)
@@ -82,7 +69,7 @@ include(fetch-jsoncpp)
 include(fetch-libigl)
 include(fetch-googletest)
 include(fetch-tinyobjloader)
-include(fetch-autodiff)
+#include(fetch-autodiff)
 include(fetch-random)
 include(fetch-rootfinder)
 include(fetch-svgpp)
@@ -94,12 +81,18 @@ include(fetch-argparse)
 include(fetch-vma)
 include(fetch-tinycolormap)
 
+cmake_policy(SET CMP0077 NEW)
+# assimp importer, we only use obj format
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_OBJ_IMPORTER ON)
+
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
 
 igl_include(copyleft core)
 
-INCLUDE_DIRECTORIES(${autodiff_SOURCE_DIR})
+#INCLUDE_DIRECTORIES(${autodiff_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${stb_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${svgpp_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${svgpp_SOURCE_DIR}/third_party)

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "geometry/surface/surface.hpp"
 #include "language/meta_programming/type_list.hpp"
-#include "vkl/scene/vkl_model.hpp"
 
 #include "language/reflection/reflectors.hpp"
 
@@ -21,6 +19,7 @@
 
 #include "graphics_lab/geo_flow/geo_flow.hpp"
 
+#include <geometry/parametric/bezier_curve_2d.hpp>
 #include <geometry/parametric/torus.hpp>
 
 struct Material;
@@ -36,8 +35,8 @@ enum class NodeType {
 struct PointLightSource {};
 struct AreaLightSource {};
 
-using GeometryTypes = MetaProgramming::TypeList<Mesh3D, CurveMesh3D, Wire3D, DirectionalField3D, BezierCurve2D,
-                                                TensorProductBezierSurface>;
+using GeometryTypes = MetaProgramming::TypeList<Mesh3D, CurveMesh3D, Wire3D, DirectionalField3D,
+                                                GraphicsLab::Geometry::BezierCurve2D>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>
