@@ -23,7 +23,7 @@ using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 using ScenePanelRenderOrder = MetaProgramming::TypeList<TextureManager, SceneWidgetComponent>;
 
 namespace UIManagerImpl {
-using RenderOrder = TypeList<TextureManager, SceneWidgetComponent>;
+using RenderOrder = MetaProgramming::TypeList<TextureManager, SceneWidgetComponent>;
 }
 
 class UIManager {

@@ -17,7 +17,6 @@
 #include "vkl/templates/vkl_concept.hpp"
 
 #include "geometry/mesh/mesh.hpp"
-#include "geometry/renderable_geometry.hpp"
 #include "geometry/vertex/null_index.hpp"
 
 namespace SceneTree {

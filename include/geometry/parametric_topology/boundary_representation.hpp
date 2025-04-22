@@ -59,7 +59,7 @@ struct BoundaryRepresentationAllocator {
     ParamSurfaceVecsTypeList param_surfaces;
 
     template <typename T>
-        requires TypeListFunctions::IsAnyOf<ParamSurfaceTypeList, T>::value
+        requires MetaProgramming::TypeListFunctions::IsAnyOf<ParamSurfaceTypeList, T>::value
     consteval std::vector<T> &get_surface_list() {
         constexpr size_t idx = MetaProgramming::TypeListFunctions::IndexOf<ParamSurfaceTypeList, T>::value;
         return std::get<idx>(param_surfaces);

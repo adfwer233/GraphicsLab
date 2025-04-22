@@ -1,6 +1,5 @@
 #pragma once
 
-#include "geometry/geometry.hpp"
 #include "vkl/core/vkl_device.hpp"
 #include "vkl_mesh_types.hpp"
 
