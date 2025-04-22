@@ -112,7 +112,7 @@ class RayPicker {
             }
         }
 
-        MetaProgramming::ForEachType(GraphicsLab::Geometry::ParametricSurfaceTypeList{}, [&]<typename T>() {
+        MetaProgramming::ForEachType(GraphicsLab::Geometry::ParamSurfaceTypeList{}, [&]<typename T>() {
             for (auto [param_node, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
                 Mesh3D *mesh = param_node->data.mesh.get();
                 for (auto face : mesh->indices) {

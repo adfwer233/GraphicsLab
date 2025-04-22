@@ -18,6 +18,7 @@
 #include "vkl/system/compute_system/scene_tree_path_tracing_compute_model.hpp"
 #include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"
 
+#include <geometry/parametric/surface_type_list.hpp>
 #include <geometry/parametric/torus.hpp>
 #include <ui/render_resources.hpp>
 
@@ -159,7 +160,7 @@ struct InternalSceneRenderPass : public RenderPass {
         auto normalKey = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto directionalfieldKey = point_cloud_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
-        using RenderableTypeList = MetaProgramming::TypeList<Mesh3D, Geometry::Sphere, Geometry::Torus>;
+        using RenderableTypeList = MetaProgramming::TypeListFunctions::Append<Geometry::ParamSurfaceTypeList, Mesh3D>::type;
 
         if (uiState_.renderMode == UIState::RenderMode::path_tracing) {
             auto target = render_context->resource_manager.get_resource("scene_render_result");

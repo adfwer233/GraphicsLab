@@ -9,6 +9,8 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include <geometry/constructor/rectangle3d.hpp>
+#include <geometry/constructor/tensor_product_bezier_example.hpp>
+#include <geometry/parametric/tensor_product_bezier.hpp>
 
 class ConstructorWidget : public UIComponent {
   public:
@@ -30,6 +32,12 @@ class ConstructorWidget : public UIComponent {
 
         if (ImGui::Button("Add Rectangle")) {
             show_add_rectangle_dialog = true;
+        }
+
+        if (ImGui::Button("Add bezier patch")) {
+            auto surf = GraphicsLab::Geometry::TensorProductBezierExample1::create();
+            GraphicsLab::Geometry::Tessellator::tessellate(surf);
+            context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::TensorProductBezier>(std::move(surf), "test");
         }
 
         ImGui::End();
@@ -158,6 +166,7 @@ class ConstructorWidget : public UIComponent {
     bool show_add_rectangle_dialog = false;
     bool show_add_sphere_dialog = false;
     bool show_add_torus_dialog = false;
+    // bool show_add_tensor_product_bezier_dialog = false;
 };
 
 META_REGISTER_TYPE(MainComponentRegisterTag, ConstructorWidget)

@@ -10,13 +10,6 @@ namespace GraphicsLab::Geometry {
 struct Tessellator {
     static void tessellate(ParamSurface &surface, const int n = 32, const int m = 32) {
         surface.mesh = std::make_unique<Mesh3D>();
-        for (int i = 0; i <= n; i++) {
-            for (int j = 0; j <= m; j++) {
-                double param_u = static_cast<double>(i) / static_cast<double>(n);
-                double param_v = static_cast<double>(j) / static_cast<double>(m);
-                surface.evaluate({param_u, param_v});
-            }
-        }
 
         for (int i = 0; i <= n; i++) {
             for (int j = 0; j <= m; j++) {
@@ -42,6 +35,8 @@ struct Tessellator {
                 surface.mesh->indices.push_back({idx1, idx4, idx3});
             }
         }
+
+        spdlog::info("Tessellator tessellate() finish");
     }
 };
 
