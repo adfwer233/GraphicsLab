@@ -10,6 +10,7 @@ set(SRC_FILE
         reflection/dynamic_reflector_test.cpp
         geometry/tensor_product_bezier_test.cpp
         geometry/explicit_surface_test.cpp
+        geometry/explicit_torus_intersector_test.cpp
 )
 
 enable_testing()

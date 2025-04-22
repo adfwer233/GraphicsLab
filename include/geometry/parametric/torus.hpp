@@ -28,6 +28,8 @@ struct Torus : public ParamSurface {
         this->base_normal = glm::normalize(base_normal);
         this->direction1 = glm::normalize(direction1);
         direction2 = glm::normalize(glm::cross(base_normal, direction1));
+        u_periodic = true;
+        v_periodic = true;
     }
 
     Torus(Torus &&rhs) noexcept
