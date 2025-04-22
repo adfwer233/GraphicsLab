@@ -2,6 +2,9 @@
 
 #include "geometry/constructor/tensor_product_bezier_example.hpp"
 #include "geometry/parametric/tensor_product_bezier.hpp"
+
+#include "utils/sampler.hpp"
+
 #include "spdlog/spdlog.h"
 
 TEST(TensorProductBezierTest, TestConstructor) {
@@ -35,4 +38,27 @@ TEST(TensorProductBezierTest, TestNormal) {
     EXPECT_FLOAT_EQ(n.x, 0.0);
     EXPECT_FLOAT_EQ(n.y, 0.0);
     EXPECT_FLOAT_EQ(n.z, 1.0);
+}
+
+TEST(TensorProductBezierTest, TestNormal2) {
+    auto surf = GraphicsLab::Geometry::TensorProductBezierExample2::create();
+
+    auto n = surf.normal({0.5, 0.5});
+
+    spdlog::info("{} {} {}", n.x, n.y, n.z);
+}
+
+TEST(TensorProductBezierTest, TestProjection) {
+    auto surf = GraphicsLab::Geometry::TensorProductBezierExample2::create();
+
+    for (int i = 0; i < 10; i++) {
+        glm::dvec3 pos = GraphicsLab::Sampler::sampleUnitSphere<3>();
+        auto [proj, param] = surf.project(pos);
+
+        auto normal = surf.normal(param);
+
+        auto inner_prod = glm::dot(glm::normalize(normal), glm::normalize(pos - proj));
+
+        spdlog::info("{}, {} {}", inner_prod, param.x, param.y);
+    }
 }

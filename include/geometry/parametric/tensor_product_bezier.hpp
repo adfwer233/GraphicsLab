@@ -1,5 +1,6 @@
 #pragma once
 
+#include "glm/ext/scalar_constants.hpp"
 #include "parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
@@ -94,7 +95,7 @@ struct TensorProductBezier: ParamSurface {
         std::vector<PointType> col(degree_v + 1);
         std::vector<PointType> row(degree_u + 1);
 
-        for (size_t i = 0; i < control_points.size(); ++i) {
+        for (size_t i = 0; i <= degree_v; ++i) {
             for (size_t j = 0; j <= degree_u; ++j) {
                 row[j] = control_points[j][i];
             }
@@ -108,11 +109,35 @@ struct TensorProductBezier: ParamSurface {
     }
 
     std::pair<PointType, ParamType> project(const PointType point) const override {
-        return  {{}, {}};
+        // parameters
+        constexpr int max_iters = 1000;
+        constexpr double step = 0.01;
+        constexpr double epsilon = 1e-4;
+
+        ParamType param(0.5, 0.5); // Initial guess
+
+        for (int i = 0; i < max_iters; ++i) {
+            PointType s = evaluate(param);
+            VectorType du = derivative_u(param);
+            VectorType dv = derivative_v(param);
+            VectorType diff = s - point;
+
+            glm::dvec2 grad(glm::dot(diff, du), glm::dot(diff, dv));
+            param -= step * grad;
+
+            // Clamp to [0,1]^2
+            param = glm::clamp(param, glm::dvec2(0.0), glm::dvec2(1.0));
+
+            if (glm::length(grad) < epsilon)
+                break;
+        }
+
+        return {evaluate(param), param};
     }
 
     bool test_point(const PointType point) const override {
-        return true;
+        auto [pos, param] = project(point);
+        return glm::length(pos - point) < 1e-3;
     }
 
 private:

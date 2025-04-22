@@ -35,7 +35,7 @@ class ConstructorWidget : public UIComponent {
         }
 
         if (ImGui::Button("Add bezier patch")) {
-            auto surf = GraphicsLab::Geometry::TensorProductBezierExample1::create();
+            auto surf = GraphicsLab::Geometry::TensorProductBezierExample2::create();
             GraphicsLab::Geometry::Tessellator::tessellate(surf);
             context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::TensorProductBezier>(std::move(surf), "test");
         }
