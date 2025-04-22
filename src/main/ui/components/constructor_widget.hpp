@@ -49,7 +49,7 @@ class ConstructorWidget : public UIComponent {
                 double b = 1;
 
                 auto v = (param.y() - 0.5) * 2;
-                result.x() = a * cosh(v) *  cos(2 * std::numbers::pi * param.x());
+                result.x() = a * cosh(v) * cos(2 * std::numbers::pi * param.x());
                 result.y() = -b * sinh(v);
                 result.z() = a * cosh(v) * sin(2 * std::numbers::pi * param.x());
 
@@ -58,7 +58,8 @@ class ConstructorWidget : public UIComponent {
 
             GraphicsLab::Geometry::ExplicitSurface surf(f);
             GraphicsLab::Geometry::Tessellator::tessellate(surf);
-            context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test explicit");
+            context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf),
+                                                                                        "test explicit");
         }
 
         ImGui::End();

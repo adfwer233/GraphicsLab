@@ -8,7 +8,7 @@
 namespace GraphicsLab {
 
 struct Sampler {
-    static std::mt19937& rng() {
+    static std::mt19937 &rng() {
         thread_local std::mt19937 gen(std::random_device{}());
         return gen;
     }
@@ -18,8 +18,7 @@ struct Sampler {
         return dist(rng());
     }
 
-    template<size_t dim>
-    static glm::vec<dim, float> sampleUnitSphere() {
+    template <size_t dim> static glm::vec<dim, float> sampleUnitSphere() {
         static_assert(dim == 2 || dim == 3, "Only 2D or 3D sampling is supported.");
 
         if constexpr (dim == 2) {
@@ -33,4 +32,4 @@ struct Sampler {
         }
     }
 };
-}
+} // namespace GraphicsLab

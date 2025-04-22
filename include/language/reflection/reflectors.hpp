@@ -105,8 +105,7 @@ struct TypeErasedValue {
         }
     }
 
-    template<typename... Args>
-    void call_with_param(Args... args) const {
+    template <typename... Args> void call_with_param(Args... args) const {
         std::vector<std::any> unpackedArgs;
         unpackedArgs.reserve(sizeof...(Args));
         unpackedArgs.emplace_back(args...);
@@ -124,20 +123,19 @@ struct DynamicField {
         return type_info_func();
     }
 
-    template <typename T>
-    explicit DynamicField(T v): value(v) {
+    template <typename T> explicit DynamicField(T v) : value(v) {
         type_info_func = []() -> const std::type_info & { return typeid(T); };
     }
 
     explicit DynamicField() = default;
 
-    template<typename T>
-    void set(T& v) {
+    template <typename T> void set(T &v) {
         value = v;
     }
 
-    template<typename T>
-    T get() { return std::any_cast<T>(value); }
+    template <typename T> T get() {
+        return std::any_cast<T>(value);
+    }
 };
 
 // Reflection base class
@@ -146,8 +144,7 @@ struct Reflectable {
     virtual ~Reflectable() = default;
     virtual ReflectDataType reflect() = 0;
 
-    template<typename T>
-    T getField(const std::string& name) {
+    template <typename T> T getField(const std::string &name) {
         if (dynamicFields.contains(name)) {
             return dynamicFields[name].get<T>();
         }
@@ -155,16 +152,14 @@ struct Reflectable {
         throw std::runtime_error("Field '" + name + "' not found!");
     }
 
-    template<typename T>
-    void setField(const std::string& name, const T& value) {
+    template <typename T> void setField(const std::string &name, const T &value) {
         if (dynamicFields.contains(name)) {
             dynamicFields[name].set(value);
         }
         throw std::runtime_error("Field '" + name + "' not found!");
     }
 
-    template<typename T>
-    void addField(const std::string& name, const T& value) {
+    template <typename T> void addField(const std::string &name, const T &value) {
         // dynamicFields[name] = DynamicField(value);
         dynamicFields.emplace(name, value);
     }

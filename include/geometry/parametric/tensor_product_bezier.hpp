@@ -5,9 +5,9 @@
 
 namespace GraphicsLab::Geometry {
 
-struct TensorProductBezier: ParamSurface {
-    struct SurfaceTrait{};
-    struct SceneTreeGeometryTypeTrait{};
+struct TensorProductBezier : ParamSurface {
+    struct SurfaceTrait {};
+    struct SceneTreeGeometryTypeTrait {};
 
     using PointType = glm::dvec3;
     using VectorType = glm::dvec3;
@@ -19,35 +19,30 @@ struct TensorProductBezier: ParamSurface {
     explicit TensorProductBezier() = delete;
 
     // Constructor with control points
-    explicit TensorProductBezier(const std::vector<std::vector<PointType>>& cps)
-        : control_points(cps) {
+    explicit TensorProductBezier(const std::vector<std::vector<PointType>> &cps) : control_points(cps) {
         degree_u = static_cast<int>(control_points.size()) - 1;
         degree_v = !control_points.empty() ? static_cast<int>(control_points[0].size()) - 1 : 0;
     }
 
     // Constructor with move semantics
-    explicit TensorProductBezier(std::vector<std::vector<PointType>>&& cps)
-        : control_points(std::move(cps)) {
+    explicit TensorProductBezier(std::vector<std::vector<PointType>> &&cps) : control_points(std::move(cps)) {
         degree_u = static_cast<int>(control_points.size()) - 1;
         degree_v = !control_points.empty() ? static_cast<int>(control_points[0].size()) - 1 : 0;
     }
 
     // Copy constructor
-    TensorProductBezier(const TensorProductBezier& other)
-        : control_points(other.control_points),
-          degree_u(other.degree_u),
-          degree_v(other.degree_v) {}
+    TensorProductBezier(const TensorProductBezier &other)
+        : control_points(other.control_points), degree_u(other.degree_u), degree_v(other.degree_v) {
+    }
 
     // Move constructor
-    TensorProductBezier(TensorProductBezier&& other) noexcept
-        : control_points(std::move(other.control_points)),
-          degree_u(other.degree_u),
-          degree_v(other.degree_v) {
+    TensorProductBezier(TensorProductBezier &&other) noexcept
+        : control_points(std::move(other.control_points)), degree_u(other.degree_u), degree_v(other.degree_v) {
         mesh = std::move(other.mesh);
     }
 
     // Copy assignment
-    TensorProductBezier& operator=(const TensorProductBezier& other) {
+    TensorProductBezier &operator=(const TensorProductBezier &other) {
         if (this != &other) {
             control_points = other.control_points;
             degree_u = other.degree_u;
@@ -57,7 +52,7 @@ struct TensorProductBezier: ParamSurface {
     }
 
     // Move assignment
-    TensorProductBezier& operator=(TensorProductBezier&& other) noexcept {
+    TensorProductBezier &operator=(TensorProductBezier &&other) noexcept {
         if (this != &other) {
             control_points = std::move(other.control_points);
             degree_u = other.degree_u;
@@ -70,7 +65,7 @@ struct TensorProductBezier: ParamSurface {
     int degree_u, degree_v;
     [[nodiscard]] PointType evaluate(const ParamType param) const override {
         std::vector<PointType> intermediate;
-        for (const auto& row : control_points) {
+        for (const auto &row : control_points) {
             intermediate.push_back(de_casteljau_1d(row, param.y));
         }
         return de_casteljau_1d(intermediate, param.x);
@@ -85,7 +80,7 @@ struct TensorProductBezier: ParamSurface {
 
     [[nodiscard]] VectorType derivative_u(const ParamType param) const {
         std::vector<PointType> intermediate;
-        for (const auto& row : control_points) {
+        for (const auto &row : control_points) {
             intermediate.push_back(de_casteljau_1d(row, param.y));
         }
         return de_casteljau_derivative(intermediate, param.x);
@@ -140,8 +135,7 @@ struct TensorProductBezier: ParamSurface {
         return glm::length(pos - point) < 1e-3;
     }
 
-private:
-
+  private:
     // De Casteljau evaluation along 1D Bézier curve
     static PointType de_casteljau_1d(std::vector<PointType> points, double t) {
         const int n = static_cast<int>(points.size());
@@ -154,7 +148,7 @@ private:
     }
 
     // First derivative using De Casteljau differences
-    static VectorType de_casteljau_derivative(const std::vector<PointType>& points, double t) {
+    static VectorType de_casteljau_derivative(const std::vector<PointType> &points, double t) {
         const int n = static_cast<int>(points.size()) - 1;
         std::vector<PointType> diff(n);
         for (int i = 0; i < n; ++i) {
@@ -164,4 +158,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

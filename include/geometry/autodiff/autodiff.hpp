@@ -108,5 +108,4 @@ struct autodiff_mat2 : autodiff_mat<2, 2> {};
 
 struct autodiff_mat3 : autodiff_mat<3, 3> {};
 
-
-}
+} // namespace GraphicsLab::Geometry

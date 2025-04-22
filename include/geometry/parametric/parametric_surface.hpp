@@ -23,7 +23,7 @@ struct ParamSurface {
     virtual bool test_point(const PointType point) const = 0;
 
     virtual std::pair<VectorType, VectorType> derivative(const ParamType param) const {
-        return{};
+        return {};
     }
 
     /**

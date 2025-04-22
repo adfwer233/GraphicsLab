@@ -223,9 +223,8 @@ class ProjectWidgetComponent : public UIComponent {
         if (ImGui::Button("OK")) {
             showFunctionCallDialog = false;
 
-            projectFunctionResult = std::async(std::launch::async, [this]() {
-                functionWithParamPack(this->functionCallParameters);
-            });
+            projectFunctionResult =
+                std::async(std::launch::async, [this]() { functionWithParamPack(this->functionCallParameters); });
 
             spdlog::info("called");
         }

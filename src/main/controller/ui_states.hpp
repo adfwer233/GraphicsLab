@@ -66,11 +66,8 @@ struct UIState : Reflectable {
 
         std::vector<BuildConfig> buildConfigs;
 
-        REFLECT(
-            Property{"name", &ProjectStatus::name},
-            Property{"projectPath", &ProjectStatus::projectPath},
-            Property{"buildConfigs", &ProjectStatus::projectPath}
-        );
+        REFLECT(Property{"name", &ProjectStatus::name}, Property{"projectPath", &ProjectStatus::projectPath},
+                Property{"buildConfigs", &ProjectStatus::projectPath});
     };
 
     ProjectStatus projectStatus;

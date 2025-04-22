@@ -8,7 +8,6 @@
 
 namespace GraphicsLab::Geometry {
 
-
 template <typename T>
 concept IsParametricSurface = MetaProgramming::TypeListFunctions::IsAnyOf<ParamSurfaceTypeList, T>::value;
 

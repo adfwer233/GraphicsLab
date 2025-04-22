@@ -160,7 +160,8 @@ struct InternalSceneRenderPass : public RenderPass {
         auto normalKey = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto directionalfieldKey = point_cloud_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
-        using RenderableTypeList = MetaProgramming::TypeListFunctions::Append<Geometry::ParamSurfaceTypeList, Mesh3D>::type;
+        using RenderableTypeList =
+            MetaProgramming::TypeListFunctions::Append<Geometry::ParamSurfaceTypeList, Mesh3D>::type;
 
         if (uiState_.renderMode == UIState::RenderMode::path_tracing) {
             auto target = render_context->resource_manager.get_resource("scene_render_result");

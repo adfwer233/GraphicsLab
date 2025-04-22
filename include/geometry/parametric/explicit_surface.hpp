@@ -1,14 +1,14 @@
 #pragma once
 
+#include "geometry/autodiff/autodiff.hpp"
 #include "glm/glm.hpp"
 #include "parametric_surface.hpp"
-#include "geometry/autodiff/autodiff.hpp"
 
 namespace GraphicsLab::Geometry {
 
-struct ExplicitSurface: ParamSurface {
-    struct SurfaceTrait{};
-    struct SceneTreeGeometryTypeTrait{};
+struct ExplicitSurface : ParamSurface {
+    struct SurfaceTrait {};
+    struct SceneTreeGeometryTypeTrait {};
 
     using PointType = glm::dvec3;
     using VectorType = glm::dvec3;
@@ -111,4 +111,4 @@ struct ExplicitSurface: ParamSurface {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

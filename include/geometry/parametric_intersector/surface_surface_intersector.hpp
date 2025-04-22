@@ -1,11 +1,10 @@
 #pragma once
 
-#include "glm/glm.hpp"
 #include "Eigen/Eigen"
+#include "glm/glm.hpp"
 #include "spdlog/spdlog.h"
 
 #include "geometry/parametric/parametric_surface.hpp"
-
 
 namespace GraphicsLab::Geometry {
 
@@ -62,8 +61,9 @@ struct SurfaceSurfaceIntersector {
     }
 
     // Compute the tangent direction in parameter space by crossing the normals
-    static std::pair<ParamType, ParamType> compute_tangent_direction(const ParamSurface &surf1, const ParamSurface &surf2,
-                                                                     ParamType param1, ParamType param2) {
+    static std::pair<ParamType, ParamType> compute_tangent_direction(const ParamSurface &surf1,
+                                                                     const ParamSurface &surf2, ParamType param1,
+                                                                     ParamType param2) {
         VecType n1 = surf1.normal(param1);
         VecType n2 = surf2.normal(param2);
         VecType tangent = glm::normalize(glm::cross(n1, n2));
@@ -111,7 +111,8 @@ struct SurfaceSurfaceIntersector {
         return refine_with_newton(surf1, surf2, param1, param2);
     }
 
-    static std::vector<std::pair<ParamType, ParamType>> find_all_possible_initial_guess(const ParamSurface& surf1, const ParamSurface &surf2) {
+    static std::vector<std::pair<ParamType, ParamType>> find_all_possible_initial_guess(const ParamSurface &surf1,
+                                                                                        const ParamSurface &surf2) {
         auto surf1_sample = surf1.sample(20, 20);
 
         std::vector<std::pair<ParamType, ParamType>> result;
@@ -134,10 +135,12 @@ struct SurfaceSurfaceIntersector {
         PointType position;
     };
 
-    static std::vector<IntersectionInfo> trace_pcurve(const ParamSurface& surf1, const ParamSurface& surf2, ParamType begin_param1, ParamType begin_param2) {
+    static std::vector<IntersectionInfo> trace_pcurve(const ParamSurface &surf1, const ParamSurface &surf2,
+                                                      ParamType begin_param1, ParamType begin_param2) {
         std::vector<IntersectionInfo> intersections;
 
-        spdlog::info("initial guess: ({}, {}), ({}, {})", begin_param1.x, begin_param1.y, begin_param2.x, begin_param2.y);
+        spdlog::info("initial guess: ({}, {}), ({}, {})", begin_param1.x, begin_param1.y, begin_param2.x,
+                     begin_param2.y);
         spdlog::info("initial distance: {}", glm::distance(surf1.evaluate(begin_param1), surf2.evaluate(begin_param2)));
 
         constexpr int max_iter = 1000;
@@ -169,7 +172,8 @@ struct SurfaceSurfaceIntersector {
             param1 = param1 + step_length * param1_tangent;
             param2 = param2 + step_length * param2_tangent;
 
-            if (glm::distance(surf1.move_param_to_std_domain(param1), begin_param1) < 1e-3 and glm::distance(surf2.move_param_to_std_domain(param2), begin_param2) < 1e-3) {
+            if (glm::distance(surf1.move_param_to_std_domain(param1), begin_param1) < 1e-3 and
+                glm::distance(surf2.move_param_to_std_domain(param2), begin_param2) < 1e-3) {
                 break;
             }
         }
@@ -186,7 +190,7 @@ struct SurfaceSurfaceIntersector {
         return trace_pcurve(surf1, surf2, begin_param1, begin_param2);
     }
 
-    static IntersectionResult intersect_all(const ParamSurface& surf1, const ParamSurface& surf2) {
+    static IntersectionResult intersect_all(const ParamSurface &surf1, const ParamSurface &surf2) {
         auto inital = find_all_possible_initial_guess(surf1, surf2);
 
         spdlog::info("initial size {}", inital.size());
