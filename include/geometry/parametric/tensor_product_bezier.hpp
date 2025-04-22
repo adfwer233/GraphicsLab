@@ -91,11 +91,16 @@ struct TensorProductBezier: ParamSurface {
     }
 
     [[nodiscard]] VectorType derivative_v(const ParamType param) const {
-        std::vector<PointType> col(control_points.size());
+        std::vector<PointType> col(degree_v + 1);
+        std::vector<PointType> row(degree_u + 1);
+
         for (size_t i = 0; i < control_points.size(); ++i) {
-            col[i] = de_casteljau_1d(control_points[i], param.y);
+            for (size_t j = 0; j <= degree_u; ++j) {
+                row[j] = control_points[j][i];
+            }
+            col[i] = de_casteljau_1d(row, param.x);
         }
-        return de_casteljau_derivative(col, param.x);
+        return de_casteljau_derivative(col, param.y);
     }
 
     std::pair<VectorType, VectorType> derivative(const ParamType param) const {
