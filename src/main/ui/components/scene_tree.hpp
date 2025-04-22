@@ -53,7 +53,7 @@ class SceneTreeComponent : public UIComponent {
 
             ImGui::Begin("Input Dialog", &show_call_function_dialog,
                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
-            for (int i = 0; auto &arg : function_to_call.value().function_with_pack->meta.arguments) {
+            for (int i = 0; auto &arg : function_to_call->call_func_with_param_meta->arguments) {
                 if (arg.default_value.type() == typeid(glm::vec3)) {
                     auto *vec = std::any_cast<glm::vec3>(&args[i]);
                     ImGui::InputFloat3(arg.name.c_str(), glm::value_ptr(*vec));
@@ -101,7 +101,7 @@ class SceneTreeComponent : public UIComponent {
             } else if (value.call_func_with_param != nullptr) {
                 if (ImGui::Button(std::format("{}", key).c_str())) {
                     args.clear();
-                    for (int i = 0; auto &meta : value.function_with_pack->meta.arguments) {
+                    for (int i = 0; auto &meta : value.call_func_with_param_meta->arguments) {
                         spdlog::info("Param {}: {}", i++, meta.name);
                         args.emplace_back(meta.default_value);
                     }

@@ -7,6 +7,7 @@ set(SRC_FILE
         templates/meta_programming_test.cpp
         coroutine/generator.cpp
         reflection/static_reflector_test.cpp
+        reflection/dynamic_reflector_test.cpp
 )
 
 enable_testing()

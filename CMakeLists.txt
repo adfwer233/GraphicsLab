@@ -117,6 +117,12 @@ find_package(OpenMP REQUIRED)
 
 set(SPIRV_CROSS_SHARED ON)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Werror=return-type)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/W4 /WX)
+endif()
+
 add_subdirectory(src/vkl)
 #add_subdirectory(src/demo)
 add_subdirectory(src/geometry_processing)

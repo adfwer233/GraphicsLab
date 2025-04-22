@@ -92,7 +92,6 @@ template <typename T> struct DispatchedType : public DispatchedTypeBase {
     }
 
     std::optional<T> deserialize_single(const json &j) {
-        auto ptr = reinterpret_cast<T *>(dataPtr);
         if constexpr (CustomReflectImpl<T>) {
             return T::ReflectImpl::deserialize(j);
         } else if constexpr (CustomReflectable<T>) {
@@ -256,8 +255,8 @@ struct TypeErasedValue {
     std::function<const std::type_info &()> type_info_func;
     std::function<void *(void)> get_ptr_func;
     std::function<void(void)> call_func; // Callable for member functions
-    std::optional<GraphicsLabReflection::GraphicsLabFunction> function_with_pack;
 
+    std::optional<GraphicsLabReflection::GraphicsLabFunctionMeta> call_func_with_param_meta;
     std::function<void(const std::vector<std::any> &)> call_func_with_param;
 
     DispatchedTypeBase *dispatched;
@@ -266,10 +265,6 @@ struct TypeErasedValue {
     bool isReflectable = false;
 
     template <typename T> bool isObjectReflectable() {
-        bool test = std::is_base_of<Reflectable, T>::value;
-        if (test) {
-            int x = 0;
-        }
         return std::is_base_of<Reflectable, T>::value;
     }
 
@@ -291,29 +286,14 @@ struct TypeErasedValue {
         call_func = [func, obj]() { (obj->*func)(); };
     }
 
-    template <typename R, typename C, typename... args>
-    [[deprecated]] TypeErasedValue(R (C::*func)(GraphicsLabReflection::GraphicsLabFunctionParameterPack), C *obj,
-                                   std::tuple<args...> default_values, std::vector<std::string> names) {
-        type_info_func = [func]() -> const std::type_info & { return typeid(func); };
-        get_ptr_func = nullptr; // Not a data member
-        call_func = nullptr;
-
-        function_with_pack = GraphicsLabReflection::GraphicsLabFunction{};
-        function_with_pack.value().meta =
-            GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<C, R, args...>(
-                func, default_values, names);
-        function_with_pack->function_with_parameter =
-            [func, obj](GraphicsLabReflection::GraphicsLabFunctionParameterPack pack) { (obj->*func)(pack); };
-    }
-
     template <typename R, typename C, typename... Args>
     TypeErasedValue(R (C::*func)(Args...), C *obj, std::tuple<Args...> default_values, std::vector<std::string> names) {
         type_info_func = [func]() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = nullptr;
 
-        function_with_pack = GraphicsLabReflection::GraphicsLabFunction{};
-        function_with_pack.value().meta =
+        call_func_with_param_meta = GraphicsLabReflection::GraphicsLabFunctionMeta{};
+        call_func_with_param_meta.value() =
             GraphicsLabReflection::MemberFunctionReflection::createFunctionMetaWithName<C, R, Args...>(
                 func, default_values, names);
 
@@ -334,6 +314,14 @@ struct TypeErasedValue {
         } else {
             std::cerr << "Error: Not a callable function." << std::endl;
         }
+    }
+
+    template<typename... Args>
+    void call_with_param(Args... args) const {
+        std::vector<std::any> unpackedArgs;
+        unpackedArgs.reserve(sizeof...(Args));
+        unpackedArgs.emplace_back(args...);
+        call_func_with_param(unpackedArgs);
     }
 };
 
@@ -408,6 +396,7 @@ struct TypeDispatcher {
 // Reflection base class
 class Reflectable {
   public:
+    virtual ~Reflectable() = default;
     virtual ReflectDataType reflect() = 0;
 
     json serialization() {

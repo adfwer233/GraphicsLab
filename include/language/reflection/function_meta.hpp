@@ -29,50 +29,13 @@ struct GraphicsLabFunctionMeta {
     std::vector<Argument> arguments;
 };
 
-struct [[deprecated]] GraphicsLabFunctionParameterPack {
-    std::vector<Parameter> parameters;
-};
-
 struct GraphicsLabFunction {
     GraphicsLabFunctionMeta meta;
-
-    [[deprecated]] std::function<void(GraphicsLabFunctionParameterPack)> function_with_parameter;
 };
 
 struct MemberFunctionReflection {
     template <typename C, typename R, typename... args>
-    [[deprecated]] static GraphicsLabFunctionMeta createDefaultFunctionMeta(
-        R (C::*func)(GraphicsLabFunctionParameterPack), std::tuple<args...> default_value_tuple) {
-        GraphicsLabFunctionMeta result;
-        int param_index = 0;
-        auto default_values = convertTupleToVectorOfAny(default_value_tuple);
-        result.arguments = std::vector<Argument>{
-            Argument{.name = std::format("param-{}", param_index++),
-                     .default_value = default_values[param_index - 1],
-                     .type_info_func = []() -> const std::type_info & { return typeid(args); }}...};
-        return result;
-    }
-
-    template <typename C, typename R, typename... args>
-    [[deprecated]] static GraphicsLabFunctionMeta createFunctionMetaWithName(
-        R (C::*func)(GraphicsLabFunctionParameterPack), std::tuple<args...> default_value_tuple,
-        std::vector<std::string> names) {
-        if (sizeof...(args) != names.size()) {
-            return createDefaultFunctionMeta(func, default_value_tuple);
-        }
-        GraphicsLabFunctionMeta result;
-        int param_index = 0;
-        auto default_values = convertTupleToVectorOfAny(default_value_tuple);
-
-        result.arguments = std::vector<Argument>{
-            Argument{.name = names[param_index++],
-                     .default_value = default_values[param_index - 1],
-                     .type_info_func = []() -> const std::type_info & { return typeid(args); }}...};
-        return result;
-    }
-
-    template <typename C, typename R, typename... args>
-    static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*func)(args...),
+    static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*)(args...),
                                                              std::tuple<args...> default_value_tuple) {
         GraphicsLabFunctionMeta result;
         int param_index = 0;

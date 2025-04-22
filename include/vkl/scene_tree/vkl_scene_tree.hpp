@@ -207,6 +207,7 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     }
 
     void testReflectionFunction(int x, int y, int z) {
+        spdlog::info("x: {}, y: {}, z: {}", x, y, z);
     }
 
     void applyTransformation() {

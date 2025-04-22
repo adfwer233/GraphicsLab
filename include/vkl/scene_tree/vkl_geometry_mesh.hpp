@@ -112,7 +112,7 @@ template <GraphicsLab::Geometry::IsParametricSurface T> class VklNodeMesh<T> {
         createMesh();
     }
 
-    VklNodeMesh(VklDevice &device, decltype(node_) node) : device_(device), node_(node) {
+    VklNodeMesh(VklDevice &device, decltype(node_) node) : node_(node), device_(device) {
         createMesh();
     }
 };

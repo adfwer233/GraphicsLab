@@ -25,7 +25,8 @@ class ProjectWidgetComponent : public UIComponent {
     std::future<void> projectFunctionResult;
 
     bool showFunctionCallDialog = false;
-    GraphicsLabReflection::GraphicsLabFunction functionWithParamPack;
+    std::function<void(std::vector<std::any> &)> functionWithParamPack;
+    GraphicsLabReflection::GraphicsLabFunctionMeta functionWithParamPackMeta;
     std::vector<std::any> functionCallParameters;
     std::set<std::string> bindClassNames;
 
@@ -157,10 +158,10 @@ class ProjectWidgetComponent : public UIComponent {
                             }
                         }
 
-                        if (erased.function_with_pack.has_value()) {
+                        if (erased.call_func_with_param) {
                             if (ImGui::Button(name.c_str())) {
                                 functionCallParameters.clear();
-                                for (auto &arg : erased.function_with_pack.value().meta.arguments) {
+                                for (auto &arg : erased.call_func_with_param_meta->arguments) {
                                     functionCallParameters.push_back(arg.default_value);
                                     spdlog::info(arg.name);
                                 }
@@ -173,7 +174,7 @@ class ProjectWidgetComponent : public UIComponent {
 
                                 showFunctionCallDialog = true;
 
-                                functionWithParamPack = erased.function_with_pack.value();
+                                functionWithParamPack = erased.call_func_with_param;
                                 // erased.call();
                                 // projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call();
                                 // });
@@ -200,31 +201,30 @@ class ProjectWidgetComponent : public UIComponent {
 
         ImGui::Text("Enter your arguments:");
 
-        GraphicsLabReflection::GraphicsLabFunctionParameterPack parameterPack;
-        for (int i = 0; auto &arg : functionWithParamPack.meta.arguments) {
-            GraphicsLabReflection::Parameter parameter;
+        for (int i = 0; auto &arg : functionWithParamPackMeta.arguments) {
+            std::any parameter;
 
             if (arg.type_info_func() == typeid(float)) {
                 float &val = std::any_cast<float &>(functionCallParameters[i]);
                 ImGui::InputFloat(std::format("Param: {} (Float)", arg.name).c_str(), &val);
-                parameter.param = val;
+                parameter = val;
             }
 
             if (arg.type_info_func() == typeid(int)) {
                 int &val = std::any_cast<int &>(functionCallParameters[i]);
                 ImGui::InputInt(std::format("Param: {} (Int)", arg.name).c_str(), &val);
-                parameter.param = val;
+                parameter = val;
             }
 
-            parameterPack.parameters.push_back(parameter);
+            functionCallParameters.push_back(parameter);
             i++;
         }
 
         if (ImGui::Button("OK")) {
             showFunctionCallDialog = false;
 
-            projectFunctionResult = std::async(std::launch::async, [parameterPack, this]() {
-                functionWithParamPack.function_with_parameter(parameterPack);
+            projectFunctionResult = std::async(std::launch::async, [this]() {
+                functionWithParamPack(this->functionCallParameters);
             });
 
             spdlog::info("called");
