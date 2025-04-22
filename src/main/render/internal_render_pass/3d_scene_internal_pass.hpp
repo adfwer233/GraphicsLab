@@ -118,13 +118,11 @@ struct InternalSceneRenderPass : public RenderPass {
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, VK_SAMPLE_COUNT_1_BIT);
 
         vkDeviceWaitIdle(device_.device());
-        spdlog::critical("test asdf asdf 1");
 
         auto imguiContext = ImguiContext::getInstance(device_, render_context->get_glfw_window(),
                                                       render_context->get_swap_chain_render_pass());
         renderResources_.imguiImages["path_tracing_result"] =
             vkl::ImguiUtils::getImguiTextureFromVklTexture(path_tracing_texture.get());
-        spdlog::critical("test asdf asdf ");
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
