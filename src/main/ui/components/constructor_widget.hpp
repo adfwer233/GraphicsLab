@@ -10,6 +10,7 @@
 
 #include <geometry/constructor/rectangle3d.hpp>
 #include <geometry/constructor/tensor_product_bezier_example.hpp>
+#include <geometry/parametric/explicit_surface.hpp>
 #include <geometry/parametric/tensor_product_bezier.hpp>
 
 class ConstructorWidget : public UIComponent {
@@ -38,6 +39,26 @@ class ConstructorWidget : public UIComponent {
             auto surf = GraphicsLab::Geometry::TensorProductBezierExample2::create();
             GraphicsLab::Geometry::Tessellator::tessellate(surf);
             context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::TensorProductBezier>(std::move(surf), "test");
+        }
+
+        if (ImGui::Button("Add Explicit")) {
+            auto f = [](GraphicsLab::Geometry::autodiff_vec2 param) -> GraphicsLab::Geometry::autodiff_vec3 {
+                GraphicsLab::Geometry::autodiff_vec3 result;
+
+                double a = 2;
+                double b = 1;
+
+                auto v = (param.y() - 0.5) * 2;
+                result.x() = a * cosh(v) *  cos(2 * std::numbers::pi * param.x());
+                result.y() = -b * sinh(v);
+                result.z() = a * cosh(v) * sin(2 * std::numbers::pi * param.x());
+
+                return result;
+            };
+
+            GraphicsLab::Geometry::ExplicitSurface surf(f);
+            GraphicsLab::Geometry::Tessellator::tessellate(surf);
+            context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test explicit");
         }
 
         ImGui::End();

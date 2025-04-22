@@ -3,6 +3,7 @@
 #include "language/meta_programming/type_list.hpp"
 
 #include "cone.hpp"
+#include "explicit_surface.hpp"
 #include "plane.hpp"
 #include "sphere.hpp"
 #include "torus.hpp"
@@ -11,5 +12,5 @@
 #include "tensor_product_bezier.hpp"
 
 namespace GraphicsLab::Geometry {
-using ParamSurfaceTypeList = MetaProgramming::TypeList<Sphere, Torus, TensorProductBezier>;
+using ParamSurfaceTypeList = MetaProgramming::TypeList<Sphere, Torus, TensorProductBezier, ExplicitSurface>;
 }
