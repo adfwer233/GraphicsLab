@@ -1,4 +1,4 @@
-#include "application.hpp"
+#include "graphics_lab/application.hpp"
 #include "iostream"
 
 #include "argparse/argparse.hpp"
@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
-    ApplicationExperimental app{};
+    GraphicsLabApplication app{};
 
     if (args.is_used("--input")) {
         app.appOption.load_obj_path = args.get<std::string>("--input");

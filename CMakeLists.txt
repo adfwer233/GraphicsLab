@@ -151,7 +151,7 @@ build_doxygen()
 include(clang-format)
 
 add_custom_target(BUILD_ALL)
-add_dependencies(BUILD_ALL LAB_vkl LAB_geometry LAB_test LAB_main)
+add_dependencies(BUILD_ALL LAB_vkl LAB_geometry LAB_test GraphicsLab_main)
 
 add_library(GraphicsLabLib INTERFACE)
 target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)

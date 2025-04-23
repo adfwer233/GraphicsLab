@@ -1,14 +1,14 @@
-project(LAB_main VERSION 1.0 DESCRIPTION "Graphics Lab Main Application" LANGUAGES CXX)
+project(GraphicsLab_Lib VERSION 1.0 DESCRIPTION "Graphics Lab Main Application" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SRC_FILE main.cpp
+set(SRC_FILE
         application.cpp
         project/project_manager.cpp
         project/file_system.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SRC_FILE})
+add_library(${PROJECT_NAME} ${SRC_FILE})
 
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
 add_definitions(-DSHADER_DIR="${CMAKE_SOURCE_DIR}/src/vkl/shader")
@@ -41,3 +41,7 @@ add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets/font" $<TARGET_FILE_DIR:${PROJECT_NAME}>/font
 )
+
+
+add_executable(GraphicsLab_main main.cpp)
+target_link_libraries(GraphicsLab_main GraphicsLab_Lib)

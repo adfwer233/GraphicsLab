@@ -1,4 +1,4 @@
-#include "application.hpp"
+#include "graphics_lab/application.hpp"
 
 #include <thread>
 
@@ -15,10 +15,10 @@
 #include "render/internal_render_pass/3d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/internal_imgui_pass.hpp"
 
-ApplicationExperimental::~ApplicationExperimental() {
+GraphicsLabApplication::~GraphicsLabApplication() {
 }
 
-void ApplicationExperimental::run() {
+void GraphicsLabApplication::run() {
     using namespace GraphicsLab::RenderGraph;
     using namespace std::chrono_literals;
 

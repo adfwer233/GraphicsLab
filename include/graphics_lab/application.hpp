@@ -7,7 +7,7 @@ struct ApplicationOption {
     std::optional<std::string> load_obj_path = std::nullopt;
 };
 
-struct ApplicationExperimental {
+struct GraphicsLabApplication {
   private:
     static constexpr int WIDTH = 1024 + 768;
     static constexpr int HEIGHT = 1280;
@@ -15,11 +15,11 @@ struct ApplicationExperimental {
     GraphicsLab::GraphicsLabInternalContext appContext;
 
   public:
-    ApplicationExperimental() : appContext(WIDTH, HEIGHT) {};
-    ~ApplicationExperimental();
+    GraphicsLabApplication() : appContext(WIDTH, HEIGHT) {};
+    ~GraphicsLabApplication();
 
-    ApplicationExperimental(const ApplicationExperimental &) = delete;
-    ApplicationExperimental &operator=(const ApplicationExperimental &) = delete;
+    GraphicsLabApplication(const GraphicsLabApplication &) = delete;
+    GraphicsLabApplication &operator=(const GraphicsLabApplication &) = delete;
 
     ApplicationOption appOption;
     void run();
