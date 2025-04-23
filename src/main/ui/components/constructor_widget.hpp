@@ -3,6 +3,8 @@
 #include "component.hpp"
 #include "controller/controller.hpp"
 
+#include "utils/sampler.hpp"
+
 #include "geometry/parametric/sphere.hpp"
 #include "geometry/parametric/tessellator.hpp"
 #include "geometry/parametric/torus.hpp"
@@ -60,6 +62,15 @@ class ConstructorWidget : public UIComponent {
             GraphicsLab::Geometry::Tessellator::tessellate(surf);
             context_.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf),
                                                                                         "test explicit");
+        }
+
+        if (ImGui::Button("Add Random Point Cloud")) {
+            PointCloud3D point_cloud;
+
+            for (int i = 0; i < 100; i++) {
+                point_cloud.vertices.emplace_back(GraphicsLab::Sampler::sampleUnitSphere<3>());
+            }
+            context_.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), "point cloud");
         }
 
         ImGui::End();

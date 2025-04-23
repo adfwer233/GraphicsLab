@@ -72,7 +72,7 @@ struct ExplicitSurface : ParamSurface {
         return {dx, dy, dz};
     }
 
-    std::pair<VectorType, VectorType> derivative(const ParamType t_param) const {
+    std::pair<VectorType, VectorType> derivative(const ParamType t_param) const override {
         auto param = move_param_to_std_domain(t_param);
 
         return std::make_pair(derivative_u(param), derivative_v(param));

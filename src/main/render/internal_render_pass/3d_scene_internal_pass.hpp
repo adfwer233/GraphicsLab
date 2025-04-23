@@ -102,6 +102,13 @@ struct InternalSceneRenderPass : public RenderPass {
         point_cloud_render_system = std::make_unique<PointCloud3DRenderSystem>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
+                {std::format("{}/point_cloud_3d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/point_cloud_3d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}
+            });
+
+        directional_filed_render_system = std::make_unique<PointCloud3DRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
                 {std::format("{}/directional_field_3d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/directional_field_3d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {std::format("{}/directional_field_3d.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
@@ -158,7 +165,8 @@ struct InternalSceneRenderPass : public RenderPass {
         auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto normalKey = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
-        auto directionalfieldKey = point_cloud_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto directionalfieldKey = directional_filed_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto pointcloudKey = point_cloud_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
         using RenderableTypeList =
             MetaProgramming::TypeListFunctions::Append<Geometry::ParamSurfaceTypeList, Mesh3D>::type;
@@ -285,6 +293,9 @@ struct InternalSceneRenderPass : public RenderPass {
                     line_render_system->renderObject(frameInfo);
                 }
 
+                /**
+                 * render direction field
+                 */
                 auto directional_field_buffer = SceneTree::VklNodeMeshBuffer<DirectionalField3D>::instance();
                 for (auto [directional_field_node, trans] :
                      sceneTree_.traverse_geometry_nodes_with_trans<DirectionalField3D>()) {
@@ -297,6 +308,31 @@ struct InternalSceneRenderPass : public RenderPass {
                     if (mesh->mesh->uniformBuffers.contains(directionalfieldKey)) {
                         mesh->mesh->uniformBuffers[directionalfieldKey][frame_index]->writeToBuffer(&ubo);
                         mesh->mesh->uniformBuffers[directionalfieldKey][frame_index]->flush();
+                    }
+
+                    FrameInfo<std::decay_t<decltype(*mesh)>::render_type> frameInfo{
+                        .frameIndex = static_cast<int>(frame_index) % 2,
+                        .frameTime = 0,
+                        .commandBuffer = commandBuffer,
+                        .model = *mesh->mesh,
+                    };
+
+                    directional_filed_render_system->renderObject(frameInfo);
+                }
+
+                /**
+                 * render point cloud
+                 */
+                auto point_cloud_buffer = SceneTree::VklNodeMeshBuffer<PointCloud3D>::instance();
+                for (auto [point_cloud_node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<PointCloud3D>()) {
+                    if (not point_cloud_node->visible) continue;
+
+                    ubo.model = trans;
+                    auto mesh = point_cloud_buffer->getGeometryModel(device_, point_cloud_node);
+
+                    if (mesh->mesh->uniformBuffers.contains(pointcloudKey)) {
+                        mesh->mesh->uniformBuffers[pointcloudKey][frame_index]->writeToBuffer(&ubo);
+                        mesh->mesh->uniformBuffers[pointcloudKey][frame_index]->flush();
                     }
 
                     FrameInfo<std::decay_t<decltype(*mesh)>::render_type> frameInfo{
@@ -350,6 +386,7 @@ struct InternalSceneRenderPass : public RenderPass {
     std::unique_ptr<NormalRenderSystem<>> normal_render_system = nullptr;
     std::unique_ptr<Box3DRenderSystem> box_render_system = nullptr;
     std::unique_ptr<WorldAxisRenderSystem> axis_render_system = nullptr;
+    std::unique_ptr<PointCloud3DRenderSystem> directional_filed_render_system = nullptr;
     std::unique_ptr<PointCloud3DRenderSystem> point_cloud_render_system = nullptr;
 
     std::unique_ptr<vkl::PathTracingComputeModel> path_tracing_compute_model = nullptr;

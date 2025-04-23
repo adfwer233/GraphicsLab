@@ -42,21 +42,8 @@ struct SurfaceSurfaceIntersector {
             Eigen::Vector3d b(F.x, F.y, F.z);
             Eigen::Vector4d delta = svd.solve(b);
 
-            // std::cout << "Singular values: " << svd.singularValues().transpose() << std::endl;
-            // std::cout << svd.matrixU() << std::endl;
-            // std::cout << svd.matrixV() << std::endl;
             param1 -= ParamType(delta[0], delta[1]);
             param2 -= ParamType(delta[2], delta[3]);
-
-            // spdlog::info("F: {} {} {}", F.x, F.y, F.z);
-            // spdlog::info("du1: {}, {}, {}", du1.x, du1.y, du1.z);
-            // spdlog::info("dv1: {}, {}, {}", dv1.x, dv1.y, dv1.z);
-            // spdlog::info("du2: {}, {}, {}", du2.x, du2.y, du2.z);
-            // spdlog::info("dv2: {}, {}, {}", dv2.x, dv2.y, dv2.z);
-            // spdlog::info("J: {} {} {} {}", J(0, 0), J(0, 1), J(0, 2), J(0, 3));
-            // spdlog::info("delta: {} {} {} {}", delta[0], delta[1], delta[2], delta[3]);
-            // spdlog::info("refine newton iter: {}, param1: ({}, {}), param2: ({}, {})", i, param1.x, param1.y,
-            // param2.x, param2.y);
         }
 
         return {param1, param2};
