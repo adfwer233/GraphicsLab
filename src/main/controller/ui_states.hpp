@@ -73,6 +73,7 @@ struct UIState : Reflectable {
     ProjectStatus projectStatus;
     ProjectManager projectManager;
     IGraphicsLabProject *project = nullptr;
+    bool project_load_by_factory = false;
 
     /**
      * picked bounding box data

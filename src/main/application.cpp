@@ -64,6 +64,16 @@ void GraphicsLabApplication::run() {
 
     appContext.compileRenderGraph();
 
+    if (projectFactory != nullptr) {
+        state.project = projectFactory();
+        state.project->updateContext(
+                                        GraphicsLabContext(&appContext.sceneTree->device_, appContext.sceneTree.get(),
+                                                           &LogManager::getInstance(), &state, &appContext));
+        state.project->afterLoad();
+        state.project_load_by_factory = true;
+        ControllerCallbackHandler::project_controller = state.project->getController();
+    }
+
     float deltaTime = 0, lastFrame = 0;
 
 #ifdef RENDERDOC_DIR

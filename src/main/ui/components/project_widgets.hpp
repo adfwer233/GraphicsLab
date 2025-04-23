@@ -130,8 +130,8 @@ class ProjectWidgetComponent : public UIComponent {
 
             // spdlog::info("stat {}", int(projectFunctionResult.wait_for(std::chrono::milliseconds(500))));
 
-            if (projectFunctionResult.valid() and
-                projectFunctionResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+            if ((projectFunctionResult.valid() and
+                projectFunctionResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) or uiState_.project_load_by_factory) {
 
                 // projectFunctionResult.get();
                 // projectFunctionResult = std::future<void>();

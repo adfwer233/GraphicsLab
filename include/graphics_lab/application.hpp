@@ -2,6 +2,7 @@
 
 #include "graphics_lab/graphics_lab_context.hpp"
 #include "graphics_lab/render_graph/render_context.hpp"
+#include "project.hpp"
 
 struct ApplicationOption {
     std::optional<std::string> load_obj_path = std::nullopt;
@@ -15,6 +16,8 @@ struct GraphicsLabApplication {
     GraphicsLab::GraphicsLabInternalContext appContext;
 
   public:
+    std::function<IGraphicsLabProject*()> projectFactory = nullptr;
+
     GraphicsLabApplication() : appContext(WIDTH, HEIGHT) {};
     ~GraphicsLabApplication();
 
