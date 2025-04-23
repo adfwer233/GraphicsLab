@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "geometry/constructor/explicit_surface_constructors.hpp"
 #include "geometry/parametric_intersector/surface_surface_intersector.hpp"
 
 #include <geometry/parametric/explicit_surface.hpp>
