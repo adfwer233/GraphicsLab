@@ -16,7 +16,7 @@ struct GraphicsLabApplication {
     GraphicsLab::GraphicsLabInternalContext appContext;
 
   public:
-    std::function<IGraphicsLabProject*()> projectFactory = nullptr;
+    std::function<IGraphicsLabProject *()> projectFactory = nullptr;
 
     GraphicsLabApplication() : appContext(WIDTH, HEIGHT) {};
     ~GraphicsLabApplication();

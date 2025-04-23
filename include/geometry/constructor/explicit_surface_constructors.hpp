@@ -12,7 +12,7 @@ struct ExplicitSurfaceConstructor {
             double b = 1;
 
             auto v = (param.y() - 0.5) * 2;
-            result.x() = a * cosh(v) *  cos(2 * std::numbers::pi * param.x());
+            result.x() = a * cosh(v) * cos(2 * std::numbers::pi * param.x());
             result.y() = -b * sinh(v);
             result.z() = a * cosh(v) * sin(2 * std::numbers::pi * param.x());
 
@@ -32,8 +32,8 @@ struct ExplicitSurfaceConstructor {
             auto u = 2 * std::numbers::pi * param.x();
             auto v = 2 * std::numbers::pi * (param.y() - 0.5) * 2;
             result.x() = (R + r * (1 + 0.5 * sin(2 * u)) * cos(v)) * cos(u);
-            result.y() = -r* (1 + 0.5 * sin(2 * u)) * sin(v);
-            result.z() = (R + r* (1 + 0.5 * sin(2 * u)) * cos(v)) * sin(u);
+            result.y() = -r * (1 + 0.5 * sin(2 * u)) * sin(v);
+            result.z() = (R + r * (1 + 0.5 * sin(2 * u)) * cos(v)) * sin(u);
 
             return result;
         };
@@ -41,4 +41,4 @@ struct ExplicitSurfaceConstructor {
         return GraphicsLab::Geometry::ExplicitSurface(f);
     }
 };
-}
+} // namespace GraphicsLab::Geometry

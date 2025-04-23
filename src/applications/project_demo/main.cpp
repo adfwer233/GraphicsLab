@@ -19,9 +19,7 @@ int main(int argc, char *argv[]) {
 
     GraphicsLabApplication app{};
 
-    app.projectFactory = []() {
-        return new VisualizationProject();
-    };
+    app.projectFactory = []() { return new VisualizationProject(); };
 
     if (args.is_used("--input")) {
         app.appOption.load_obj_path = args.get<std::string>("--input");

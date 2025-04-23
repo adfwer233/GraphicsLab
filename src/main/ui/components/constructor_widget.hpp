@@ -82,8 +82,8 @@ class ConstructorWidget : public UIComponent {
 
             PointCloud3D point_cloud;
 
-            for (auto& trace: result.traces) {
-                for (auto& p: trace) {
+            for (auto &trace : result.traces) {
+                for (auto &p : trace) {
                     point_cloud.vertices.emplace_back(p.position);
                 }
             }

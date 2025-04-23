@@ -10,8 +10,8 @@ GraphicsLab::Geometry::ExplicitSurface ExplicitSurfaceExample::createDeformedTor
         auto u = 2 * std::numbers::pi * param.x();
         auto v = 2 * std::numbers::pi * (param.y() - 0.5) * 2;
         result.x() = (R + r * (1 + 0.3 * cos(4 * u)) * cos(v)) * cos(u);
-        result.y() = -r* (1 + 0.3 * cos(4 * u)) * sin(v);
-        result.z() = (R + r* (1 + 0.3 * cos(4 * u)) * cos(v)) * sin(u);
+        result.y() = -r * (1 + 0.3 * cos(4 * u)) * sin(v);
+        result.z() = (R + r * (1 + 0.3 * cos(4 * u)) * cos(v)) * sin(u);
 
         return result;
     };

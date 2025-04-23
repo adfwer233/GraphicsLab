@@ -195,7 +195,7 @@ struct SurfaceSurfaceIntersector {
 
             float min_dis_pos = 1;
 
-            for (auto& t: curve_kd_trees) {
+            for (auto &t : curve_kd_trees) {
                 auto pos1 = surf1.evaluate(refine_param1);
                 auto dist = t.nearestNeighbor(t.root, pos1).distance_to(pos1);
                 auto dist_pos = glm::distance(pos1, surf2.evaluate(refine_param2));
@@ -208,8 +208,8 @@ struct SurfaceSurfaceIntersector {
                 }
             }
 
-
-            if (traced) continue;
+            if (traced)
+                continue;
             spdlog::info("min dis {}", min_dis_pos);
 
             auto trace = trace_pcurve(surf1, surf2, refine_param1, refine_param2);
@@ -217,7 +217,7 @@ struct SurfaceSurfaceIntersector {
                 result.traces.push_back(trace);
 
                 std::vector<KDTree::PointPrimitive<3>> points;
-                for (auto info: trace) {
+                for (auto info : trace) {
                     points.emplace_back(surf1.evaluate(info.param1));
                 }
                 curve_kd_trees.emplace_back(points);
@@ -226,7 +226,7 @@ struct SurfaceSurfaceIntersector {
 
         spdlog::info("components num {}", result.traces.size());
 
-        for (auto& trace: result.traces) {
+        for (auto &trace : result.traces) {
             spdlog::info("size {}", trace.size());
         }
 

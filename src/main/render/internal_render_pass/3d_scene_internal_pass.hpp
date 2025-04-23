@@ -103,8 +103,7 @@ struct InternalSceneRenderPass : public RenderPass {
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/point_cloud_3d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_cloud_3d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}
-            });
+                {std::format("{}/point_cloud_3d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         directional_filed_render_system = std::make_unique<PointCloud3DRenderSystem>(
             device_, vkl_render_pass->renderPass,
@@ -324,8 +323,9 @@ struct InternalSceneRenderPass : public RenderPass {
                  * render point cloud
                  */
                 auto point_cloud_buffer = SceneTree::VklNodeMeshBuffer<PointCloud3D>::instance();
-                for (auto [point_cloud_node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<PointCloud3D>()) {
-                    if (not point_cloud_node->visible) continue;
+                for (auto [point_cloud_node, trans] : sceneTree_.traverse_geometry_nodes_with_trans<PointCloud3D>()) {
+                    if (not point_cloud_node->visible)
+                        continue;
 
                     ubo.model = trans;
                     auto mesh = point_cloud_buffer->getGeometryModel(device_, point_cloud_node);

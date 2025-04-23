@@ -1,7 +1,7 @@
 #pragma once
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <vector>
 
@@ -9,29 +9,31 @@
 
 namespace GraphicsLab::Geometry::KDTree {
 
-template<typename T, size_t dim>
-concept KDTreePrimitive = requires (T t, glm::vec<dim, float> p) {
-    {t.min_pos()} -> std::convertible_to<glm::vec<dim, float>>;
-    {t.max_pos()} -> std::convertible_to<glm::vec<dim, float>>;
-    {t.distance_to(p)} -> std::convertible_to<float>;
+template <typename T, size_t dim>
+concept KDTreePrimitive = requires(T t, glm::vec<dim, float> p) {
+    { t.min_pos() } -> std::convertible_to<glm::vec<dim, float>>;
+    { t.max_pos() } -> std::convertible_to<glm::vec<dim, float>>;
+    { t.distance_to(p) } -> std::convertible_to<float>;
 };
 
-template<size_t dim>
-struct PointPrimitive {
-    using PointType= glm::vec<dim, float>;
+template <size_t dim> struct PointPrimitive {
+    using PointType = glm::vec<dim, float>;
     PointType position;
 
-    PointType min_pos() const { return position; }
-    PointType max_pos() const { return position; }
+    PointType min_pos() const {
+        return position;
+    }
+    PointType max_pos() const {
+        return position;
+    }
 
     float distance_to(PointType p) const {
         return glm::distance(p, position);
     }
 };
 
-template<size_t dim>
-struct LineSegmentPrimitive {
-    using PointType= glm::vec<dim, float>;
+template <size_t dim> struct LineSegmentPrimitive {
+    using PointType = glm::vec<dim, float>;
     PointType start, end;
 
     PointType min_pos() const {
@@ -48,10 +50,12 @@ struct LineSegmentPrimitive {
         PointType w = p - start;
 
         float c1 = glm::dot(w, v);
-        if (c1 <= 0.0f) return glm::length(p - start);
+        if (c1 <= 0.0f)
+            return glm::length(p - start);
 
         float c2 = glm::dot(v, v);
-        if (c2 <= c1) return glm::length(p - end);
+        if (c2 <= c1)
+            return glm::length(p - end);
 
         float b = c1 / c2;
         PointType proj = start + b * v;
@@ -59,26 +63,25 @@ struct LineSegmentPrimitive {
     }
 };
 
-template<size_t dim, KDTreePrimitive<dim> T>
-struct KDTreeNode {
+template <size_t dim, KDTreePrimitive<dim> T> struct KDTreeNode {
     std::vector<T> data;
     T median;
-    KDTreeNode* left = nullptr;
-    KDTreeNode* right = nullptr;
+    KDTreeNode *left = nullptr;
+    KDTreeNode *right = nullptr;
 };
 
-template<size_t dim, KDTreePrimitive<dim> T>
-struct KDTree {
+template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
     std::vector<T> primitives;
-    KDTreeNode<dim, T>* root = nullptr;
+    KDTreeNode<dim, T> *root = nullptr;
 
-    KDTree(const std::vector<T>& t_primitives) : primitives(t_primitives) {
+    KDTree(const std::vector<T> &t_primitives) : primitives(t_primitives) {
         root = build(primitives, 0);
     }
 
     // Recursively build the KDTree
-    KDTreeNode<dim, T>* build(std::vector<T>& primitives, size_t depth) {
-        if (primitives.empty()) return nullptr;
+    KDTreeNode<dim, T> *build(std::vector<T> &primitives, size_t depth) {
+        if (primitives.empty())
+            return nullptr;
 
         size_t axis = depth % dim;
         size_t median = primitives.size() / 2;
@@ -89,13 +92,12 @@ struct KDTree {
         //     if (p.max_pos()[axis])
         // }
         // Sort the primitives based on the current axis
-        std::sort(primitives.begin(), primitives.end(), [axis](const T& a, const T& b) {
-            return a.min_pos()[axis] < b.min_pos()[axis];
-        });
+        std::sort(primitives.begin(), primitives.end(),
+                  [axis](const T &a, const T &b) { return a.min_pos()[axis] < b.min_pos()[axis]; });
 
         auto mid_pos = (primitives[median].max_pos() + primitives[median].min_pos()) / 2.0f;
 
-        for (auto& p: primitives) {
+        for (auto &p : primitives) {
             if (p.max_pos()[axis] < mid_pos[axis]) {
                 left.push_back(p);
             } else if (p.min_pos()[axis] > mid_pos[axis]) {
@@ -105,7 +107,7 @@ struct KDTree {
             }
         }
 
-        KDTreeNode<dim, T>* node = new KDTreeNode<dim, T>{overlapping, mid_pos};
+        KDTreeNode<dim, T> *node = new KDTreeNode<dim, T>{overlapping, mid_pos};
 
         node->left = build(left, depth + 1);
         node->right = build(right, depth + 1);
@@ -114,15 +116,16 @@ struct KDTree {
     }
 
     // Nearest neighbor search
-    T nearestNeighbor(KDTreeNode<dim, T>* node, const glm::vec<dim, float>& queryPoint, size_t depth = 0) {
-        if (!node) return T{};  // Return default object of type T
+    T nearestNeighbor(KDTreeNode<dim, T> *node, const glm::vec<dim, float> &queryPoint, size_t depth = 0) {
+        if (!node)
+            return T{}; // Return default object of type T
 
         size_t axis = depth % dim;
 
         T best = node->median;
         float bestDist = std::numeric_limits<float>::max();
 
-        for (auto p: node->data) {
+        for (auto p : node->data) {
             if (p.distance_to(queryPoint) < bestDist) {
                 bestDist = p.distance_to(queryPoint);
                 best = p;
@@ -130,8 +133,8 @@ struct KDTree {
         }
 
         // Determine which side of the tree to search first
-        KDTreeNode<dim, T>* first = nullptr;
-        KDTreeNode<dim, T>* second = nullptr;
+        KDTreeNode<dim, T> *first = nullptr;
+        KDTreeNode<dim, T> *second = nullptr;
 
         float mid_value = ((node->median.max_pos() + node->median.min_pos()) / 2.0f)[axis];
 
@@ -162,4 +165,4 @@ struct KDTree {
         return best;
     }
 };
-}
+} // namespace GraphicsLab::Geometry::KDTree
