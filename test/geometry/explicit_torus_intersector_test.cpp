@@ -32,5 +32,7 @@ TEST(ExplicitTorusIntersection, Intersect1) {
 
     spdlog::info(test.size());
 
-    GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(torus, surf);
+    auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(torus, surf);
+
+    EXPECT_EQ(result.traces.size(), 2);
 }

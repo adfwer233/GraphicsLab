@@ -6,6 +6,8 @@
 
 #include "geometry/parametric/parametric_surface.hpp"
 
+#include <geometry/spatial_datastructure/kd_tree.hpp>
+
 namespace GraphicsLab::Geometry {
 
 struct SurfaceSurfaceIntersector {
@@ -121,8 +123,9 @@ struct SurfaceSurfaceIntersector {
 
         for (auto [pos, param] : surf1_sample) {
             auto [proj, proj_param] = surf2.project(pos);
-            if (glm::distance(proj, pos) < distance_threshold) {
-                result.emplace_back(param, proj_param);
+            auto [refine1, refine2] = refine_with_newton(surf1, surf2, param, proj_param);
+            if (glm::distance(surf1.evaluate(refine1), surf2.evaluate(refine2)) < distance_threshold) {
+                result.push_back({refine1, refine2});
             }
         }
 
@@ -194,6 +197,46 @@ struct SurfaceSurfaceIntersector {
         auto inital = find_all_possible_initial_guess(surf1, surf2);
 
         spdlog::info("initial size {}", inital.size());
+
+        IntersectionResult result;
+
+        std::vector<KDTree::KDTree<3, KDTree::PointPrimitive<3>>> curve_kd_trees;
+
+        for (auto [begin_param1, begin_param2] : inital) {
+            auto [refine_param1, refine_param2] = refine_with_newton(surf1, surf2, begin_param1, begin_param2);
+            bool traced = false;
+            for (auto& t: curve_kd_trees) {
+                auto pos1 = surf1.evaluate(refine_param1);
+                auto dist = t.nearestNeighbor(t.root, pos1).distance_to(pos1);
+                auto dist_pos = glm::distance(pos1, surf2.evaluate(refine_param2));
+                // spdlog::info("dist {}, dist pos {}", dist, dist_pos);
+                if (dist < 1e-2 and dist_pos < 1e-4) {
+                    traced = true;
+                    break;
+                }
+            }
+
+            if (traced) continue;
+
+            auto trace = trace_pcurve(surf1, surf2, refine_param1, refine_param2);
+            if (trace.size() > 0) {
+                result.traces.push_back(trace);
+
+                std::vector<KDTree::PointPrimitive<3>> points;
+                for (auto info: trace) {
+                    points.emplace_back(surf1.evaluate(info.param1));
+                }
+                curve_kd_trees.emplace_back(points);
+            }
+        }
+
+        spdlog::info("components num {}", result.traces.size());
+
+        for (auto& trace: result.traces) {
+            spdlog::info("size {}", trace.size());
+        }
+
+        return result;
     }
 };
 
