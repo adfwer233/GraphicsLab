@@ -32,13 +32,13 @@ struct SurfaceSurfaceIntersector {
             auto [du1, dv1] = surf1.derivative(param1);
             auto [du2, dv2] = surf2.derivative(param2);
 
-            Eigen::Matrix<double, 3, 4> J;
+            Eigen::MatrixXd J(3, 4);
             J.col(0) = Eigen::Vector3d(du1.x, du1.y, du1.z);
             J.col(1) = Eigen::Vector3d(dv1.x, dv1.y, dv1.z);
             J.col(2) = -Eigen::Vector3d(du2.x, du2.y, du2.z);
             J.col(3) = -Eigen::Vector3d(dv2.x, dv2.y, dv2.z);
 
-            Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(J, Eigen::ComputeThinU | Eigen::ComputeThinV);
+            Eigen::JacobiSVD svd(J, Eigen::ComputeThinU | Eigen::ComputeThinV);
             Eigen::Vector3d b(F.x, F.y, F.z);
             Eigen::Vector4d delta = svd.solve(b);
 

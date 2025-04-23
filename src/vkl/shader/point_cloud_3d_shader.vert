@@ -25,6 +25,7 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
 } ubo;
 
 void main() {
+    gl_PointSize = 5.0;
     vec4 positionWorld = ubo.model * vec4(inPosition, 1.0);
     gl_Position = ubo.proj * ubo.view * positionWorld;
 
