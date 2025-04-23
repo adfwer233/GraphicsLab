@@ -3,6 +3,8 @@
 #include "spdlog/spdlog.h"
 #include "graphics_lab/project.hpp"
 
+#include "explicit_surface_examples.hpp"
+
 #include <geometry/constructor/explicit_surface_constructors.hpp>
 #include <geometry/parametric/tessellator.hpp>
 #include <geometry/parametric_intersector/surface_surface_intersector.hpp>
@@ -43,10 +45,38 @@ struct VisualizationProject: IGraphicsLabProject {
         context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), "point cloud");
     }
 
+    void visualize_deformed_torus() {
+        auto surf = ExplicitSurfaceExample::createDeformedTorus();
+        GraphicsLab::Geometry::Tessellator::tessellate(surf, 64, 64);
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test explicit");
+    }
+
+    void intersection_demo2() {
+        auto surf = ExplicitSurfaceExample::createDeformedTorus();
+        GraphicsLab::Geometry::Tessellator::tessellate(surf, 64, 64);
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test torus");
+
+        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid();
+        GraphicsLab::Geometry::Tessellator::tessellate(surf2);
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf2), "test hyperboloid");
+
+        auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(surf, surf2);
+        for (int i = 0; auto& trace: result.traces) {
+            PointCloud3D point_cloud;
+            for (auto& p: trace) {
+                point_cloud.vertices.emplace_back(p.position);
+            }
+            context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), std::format("curve {}", i));
+            i++;
+        }
+    }
+
     ReflectDataType reflect() override {
         auto result = IGraphicsLabProject::reflect();
         result.emplace("tick", TypeErasedValue(&VisualizationProject::tick, this));
         result.emplace("visualize_intersection", TypeErasedValue(&VisualizationProject::visualize_intersection, this));
+        result.emplace("visualize_deformed_torus", TypeErasedValue(&VisualizationProject::visualize_deformed_torus, this));
+        result.emplace("intersection_demo2", TypeErasedValue(&VisualizationProject::intersection_demo2, this) );
         return result;
     }
 };

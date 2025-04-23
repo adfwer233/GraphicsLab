@@ -133,7 +133,7 @@ struct SurfaceSurfaceIntersector {
                      begin_param2.y);
         spdlog::info("initial distance: {}", glm::distance(surf1.evaluate(begin_param1), surf2.evaluate(begin_param2)));
 
-        constexpr int max_iter = 1000;
+        constexpr int max_iter = 2000;
         constexpr double length_iter = 0.0001;
         constexpr double step_length = 0.02;
 
@@ -192,18 +192,25 @@ struct SurfaceSurfaceIntersector {
         for (auto [begin_param1, begin_param2] : inital) {
             auto [refine_param1, refine_param2] = refine_with_newton(surf1, surf2, begin_param1, begin_param2);
             bool traced = false;
+
+            float min_dis_pos = 1;
+
             for (auto& t: curve_kd_trees) {
                 auto pos1 = surf1.evaluate(refine_param1);
                 auto dist = t.nearestNeighbor(t.root, pos1).distance_to(pos1);
                 auto dist_pos = glm::distance(pos1, surf2.evaluate(refine_param2));
                 // spdlog::info("dist {}, dist pos {}", dist, dist_pos);
-                if (dist < 1e-2 and dist_pos < 1e-4) {
+
+                min_dis_pos = std::min(min_dis_pos, dist);
+                if (dist < 5 * 1e-2 and dist_pos < 1e-3) {
                     traced = true;
                     break;
                 }
             }
 
+
             if (traced) continue;
+            spdlog::info("min dis {}", min_dis_pos);
 
             auto trace = trace_pcurve(surf1, surf2, refine_param1, refine_param2);
             if (trace.size() > 0) {

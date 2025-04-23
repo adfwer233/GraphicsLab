@@ -2,7 +2,7 @@ project(GraphicsLab_ProjectDemo VERSION 1.0 DESCRIPTION "Parametric Geometry Int
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SRC_FILE main.cpp)
+set(SRC_FILE main.cpp explicit_surface_examples.cpp)
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
