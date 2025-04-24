@@ -21,6 +21,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Install Dependency
       run: sudo apt install libwayland-dev libxkbcommon-dev xorg-dev ninja-build
