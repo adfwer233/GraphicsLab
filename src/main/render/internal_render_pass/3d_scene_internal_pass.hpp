@@ -346,15 +346,17 @@ struct InternalSceneRenderPass : public RenderPass {
                 }
 
                 // draw box for the picked object
-                if (sceneTree_.activeNode != nullptr) {
-                    glm::mat4 mvp = sceneTree_.active_camera->camera.get_proj_transformation() *
-                                    sceneTree_.active_camera->camera.get_view_transformation();
-                    glm::vec4 min_pos(uiState_.box.min_pos, 0.0f);
-                    glm::vec4 max_pos(uiState_.box.max_pos, 0.0f);
-                    Box3DRenderSystemPushConstantData push_constant_data{mvp, min_pos, max_pos};
-                    VklPushConstantInfoList<Box3DRenderSystemPushConstantData> push_constant_data_list;
-                    push_constant_data_list.data[0] = push_constant_data;
-                    box_render_system->renderPipeline(commandBuffer, push_constant_data_list);
+                if (uiState_.showBox) {
+                    if (sceneTree_.activeNode != nullptr) {
+                        glm::mat4 mvp = sceneTree_.active_camera->camera.get_proj_transformation() *
+                                        sceneTree_.active_camera->camera.get_view_transformation();
+                        glm::vec4 min_pos(uiState_.box.min_pos, 0.0f);
+                        glm::vec4 max_pos(uiState_.box.max_pos, 0.0f);
+                        Box3DRenderSystemPushConstantData push_constant_data{mvp, min_pos, max_pos};
+                        VklPushConstantInfoList<Box3DRenderSystemPushConstantData> push_constant_data_list;
+                        push_constant_data_list.data[0] = push_constant_data;
+                        box_render_system->renderPipeline(commandBuffer, push_constant_data_list);
+                    }
                 }
 
                 if (uiState_.showAxis) {

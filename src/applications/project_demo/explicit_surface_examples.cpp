@@ -1,5 +1,7 @@
 #include "explicit_surface_examples.hpp"
 
+#include <numbers>
+
 GraphicsLab::Geometry::ExplicitSurface ExplicitSurfaceExample::createDeformedTorus() {
     auto f = [](GraphicsLab::Geometry::autodiff_vec2 param) -> GraphicsLab::Geometry::autodiff_vec3 {
         GraphicsLab::Geometry::autodiff_vec3 result;

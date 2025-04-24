@@ -2,6 +2,8 @@
 
 #include "geometry/parametric/explicit_surface.hpp"
 
+#include <numbers>
+
 namespace GraphicsLab::Geometry {
 struct ExplicitSurfaceConstructor {
     static GraphicsLab::Geometry::ExplicitSurface createHyperboloid() {

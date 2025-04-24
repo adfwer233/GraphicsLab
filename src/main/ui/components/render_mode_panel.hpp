@@ -47,6 +47,8 @@ class RenderModelPanel : public UIComponent {
         ImGui::Checkbox("Show Normal", &uiState_.showNormal);
         ImGui::SameLine();
         ImGui::Checkbox("Show Axis", &uiState_.showAxis);
+        ImGui::SameLine();
+        ImGui::Checkbox("Show Box", &uiState_.showBox);
 
         if (ImGui::Button("Reset Path Tracing GPU BVH")) {
             uiState_.reset_gpu_bvh = true;

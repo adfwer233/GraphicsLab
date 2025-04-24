@@ -81,6 +81,7 @@ struct UIState : Reflectable {
 
     AABB3D box;
     bool boxMeshRecreated = false;
+    bool showBox = false;
 
     /**
      * Python scripts supporting
