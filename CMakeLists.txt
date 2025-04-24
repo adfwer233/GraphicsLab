@@ -85,6 +85,7 @@ include(fetch-pybind11)
 include(fetch-argparse)
 include(fetch-vma)
 include(fetch-tinycolormap)
+#include(fetch-cdt)
 
 cmake_policy(SET CMP0077 NEW)
 # assimp importer, we only use obj format
@@ -127,6 +128,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4)
 endif()
+
+add_subdirectory(3rd_party/CDT/CDT CDT)
 
 add_subdirectory(src/vkl)
 #add_subdirectory(src/demo)

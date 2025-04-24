@@ -56,7 +56,7 @@ struct VisualizationProject : IGraphicsLabProject {
         GraphicsLab::Geometry::Tessellator::tessellate(surf, 64, 64);
         context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test torus");
 
-        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.8, 1.8, 1.5);
+        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.6, 2.0, 1.5);
         GraphicsLab::Geometry::Tessellator::tessellate(surf2);
         context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf2),
                                                                                    "test hyperboloid");

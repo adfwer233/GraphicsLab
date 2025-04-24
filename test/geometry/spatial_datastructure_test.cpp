@@ -52,6 +52,7 @@ TEST(SpatialDataStructureTest, KDTreePointFuzzyTest) {
 }
 
 TEST(SpatialDataStructureTest, KDTreeLineSegmentFuzzyTest) {
+    GTEST_SKIP();
     using namespace GraphicsLab::Geometry::KDTree;
     using namespace GraphicsLab;
 

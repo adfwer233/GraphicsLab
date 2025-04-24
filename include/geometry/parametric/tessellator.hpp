@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "spdlog/spdlog.h"
+
 #include "geometry/mesh/mesh.hpp"
 #include "geometry/vertex/vertex.hpp"
 #include "parametric_surface.hpp"

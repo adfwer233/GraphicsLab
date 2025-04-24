@@ -4,12 +4,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SRC_FILE
         io/svg_importer.cpp
+        parametric/tessellator.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})
 # set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC glm eigen nlohmann_json autodiff)
+target_link_libraries(${PROJECT_NAME} PUBLIC glm spdlog eigen nlohmann_json autodiff CDT)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
