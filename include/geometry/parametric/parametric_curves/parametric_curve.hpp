@@ -33,10 +33,10 @@ struct ParamCurve2D {
             return discretizationCache->points;
         }
     }
-protected:
+
+  protected:
     std::unique_ptr<DiscretizationCache> discretizationCache = nullptr;
 };
 
-template<size_t dim>
-using ParamCurveBase = std::conditional_t<dim == 3, ParamCurve3D, ParamCurve2D>;
+template <size_t dim> using ParamCurveBase = std::conditional_t<dim == 3, ParamCurve3D, ParamCurve2D>;
 } // namespace GraphicsLab::Geometry

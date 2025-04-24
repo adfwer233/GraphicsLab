@@ -2,8 +2,8 @@
 
 #include "brep_coedge.hpp"
 #include "brep_loop.hpp"
-#include "geometry/parametric/parametric_surface.hpp"
 #include "geometry/parametric/parametric_curves/parametric_curve.hpp"
+#include "geometry/parametric/parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
 
@@ -12,9 +12,9 @@ struct BRepFace {
     using ParamType = ParamSurface::ParamType;
     using PointType = ParamSurface::PointType;
 
-    ParamSurface* surface;
+    ParamSurface *surface;
 
-    std::vector<BRepLoop*> boundary;
+    std::vector<BRepLoop *> boundary;
 
     bool trim_flag = true;
 
@@ -22,9 +22,10 @@ struct BRepFace {
         double wn = 0;
 
         int u_repeat = 0;
-        if (surface->u_periodic) u_repeat = 8;
+        if (surface->u_periodic)
+            u_repeat = 8;
         for (auto loop : boundary) {
-            for (auto coedge: loop->coedges) {
+            for (auto coedge : loop->coedges) {
                 double pcurve_wn = 0;
 
                 auto pcurve = coedge->geometry->discretize();
@@ -44,7 +45,8 @@ struct BRepFace {
                     }
                 }
 
-                if (coedge->orientation == BRepCoedge::Orientation::BACKWARD) pcurve_wn *= -1;
+                if (coedge->orientation == BRepCoedge::Orientation::BACKWARD)
+                    pcurve_wn *= -1;
                 wn += pcurve_wn;
             }
         }
@@ -58,4 +60,4 @@ struct BRepFace {
     std::unique_ptr<Mesh3D> mesh = nullptr;
     std::unique_ptr<Mesh2D> mesh2d = nullptr;
 };
-}
+} // namespace GraphicsLab::Geometry

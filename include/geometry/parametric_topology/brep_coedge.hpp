@@ -14,11 +14,10 @@ struct BRepCoedge {
         BACKWARD,
     };
 
-
     Orientation orientation;
-    BRepEdge* edge;
-    BRepFace* face;
-    ParamCurve2D* geometry;
+    BRepEdge *edge;
+    BRepFace *face;
+    ParamCurve2D *geometry;
 };
 
-}
+} // namespace GraphicsLab::Geometry

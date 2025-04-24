@@ -1,8 +1,8 @@
 #pragma once
 
+#include "curve_type_list.hpp"
 #include "sphere.hpp"
 #include "surface_type_list.hpp"
-#include "curve_type_list.hpp"
 #include "torus.hpp"
 
 #include "language/meta_programming/type_list.hpp"

@@ -11,4 +11,4 @@ namespace GraphicsLab::Geometry {
 
 using ParametricCurve2DTypeList = MetaProgramming::TypeList<BezierCurve2D, BSplineCurve2D>;
 using ParametricCurve3DTypeList = MetaProgramming::TypeList<BezierCurve3D, BSplineCurve3D>;
-}
+} // namespace GraphicsLab::Geometry

@@ -7,8 +7,7 @@
 
 namespace GraphicsLab::Geometry {
 
-template<size_t dim>
-struct BSplineCurveBase : ParamCurveBase<dim> {
+template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
     using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
 
@@ -20,14 +19,14 @@ struct BSplineCurveBase : ParamCurveBase<dim> {
         : control_points_(std::move(control_points)), knots_(std::move(knots)), degree_(degree) {
     }
 
-    BSplineCurveBase(const BSplineCurveBase<dim>& other) {
+    BSplineCurveBase(const BSplineCurveBase<dim> &other) {
         degree_ = other.degree_;
         control_points_ = other.control_points_;
         knots_ = other.knots_;
         // this->mesh = std::make_unique<MeshType>(*other.mesh);
     }
 
-    BSplineCurveBase(BSplineCurveBase<dim> && other) noexcept {
+    BSplineCurveBase(BSplineCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
         knots_ = std::move(other.knots_);
         degree_ = other.degree_;
@@ -173,7 +172,7 @@ struct BSplineCurveBase : ParamCurveBase<dim> {
         // 6. Construct control points
         std::vector<PointType> control_points;
         for (int i = 0; i < num_ctrl_points; ++i) {
-            if constexpr(dim == 2) {
+            if constexpr (dim == 2) {
                 control_points.emplace_back(P(i, 0), P(i, 1));
             } else {
                 control_points.emplace_back(P(i, 0), P(i, 1), P(i, 2));
@@ -202,4 +201,4 @@ struct BSplineCurveBase : ParamCurveBase<dim> {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

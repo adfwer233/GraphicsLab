@@ -1,6 +1,6 @@
 #pragma once
-#include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
 #include <vkl/system/render_system/param_line_render_system.hpp>
+#include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
 #include <vkl/system/render_system/pure_shader_render_system.hpp>
 
 namespace GraphicsLab::RenderGraph {
@@ -11,9 +11,9 @@ struct Ubo2D {
     float offset_y;
 };
 
-struct InternalScene2DRenderPass: public RenderPass {
+struct InternalScene2DRenderPass : public RenderPass {
     explicit InternalScene2DRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState,
-                                     RenderResources &renderResources)
+                                       RenderResources &renderResources)
         : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree), uiState_(uiState),
           renderResources_(renderResources) {
     }
@@ -31,10 +31,11 @@ struct InternalScene2DRenderPass: public RenderPass {
     }
 
     void post_compile(RenderContext *render_context) override {
-        tessellation2d_wireframe_render_system = std::make_unique<SimpleWireFrameRenderSystem<>>(device_, vkl_render_pass->renderPass, std::vector<VklShaderModuleInfo>{
+        tessellation2d_wireframe_render_system = std::make_unique<SimpleWireFrameRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
                 {std::format("{}/simple_shader_2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/simple_shader_2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}
-        });
+                {std::format("{}/simple_shader_2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         point_cloud_2d_render_system = std::make_unique<PointCloud2DRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
@@ -81,7 +82,7 @@ struct InternalScene2DRenderPass: public RenderPass {
          */
         auto pointcloudKey = point_cloud_2d_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto point_cloud_buffer = SceneTree::VklNodeMeshBuffer<PointCloud2D>::instance();
-        for (auto [point_cloud_node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<PointCloud2D>()) {
+        for (auto [point_cloud_node, trans] : sceneTree_.traverse_geometry_nodes_with_trans<PointCloud2D>()) {
             if (not point_cloud_node->visible)
                 continue;
 
@@ -151,7 +152,8 @@ struct InternalScene2DRenderPass: public RenderPass {
                 node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->flush();
             }
 
-            static_assert(std::same_as<SceneTree::VklMesh<Vertex2D, TriangleIndex, VklBox2D>, std::decay_t<decltype(*node_mesh)>::render_type>);
+            static_assert(std::same_as<SceneTree::VklMesh<Vertex2D, TriangleIndex, VklBox2D>,
+                                       std::decay_t<decltype(*node_mesh)>::render_type>);
 
             FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
                 .frameIndex = static_cast<int>(frameIndex) % 2,
@@ -162,7 +164,6 @@ struct InternalScene2DRenderPass: public RenderPass {
 
             tessellation2d_wireframe_render_system->renderObject(frameInfo);
         }
-
 
         PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
         VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
@@ -182,4 +183,4 @@ struct InternalScene2DRenderPass: public RenderPass {
     RenderResources &renderResources_;
 };
 
-}
+} // namespace GraphicsLab::RenderGraph

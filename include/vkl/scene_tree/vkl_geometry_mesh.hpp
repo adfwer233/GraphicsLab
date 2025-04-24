@@ -54,7 +54,8 @@ template <typename T> class VklNodeMeshBuffer {
     // VklGeometryModelBuffer<T>() = default;
 };
 
-template <VklVertexType VertexType, VklIndexType IndexType, size_t dimension> class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
+template <VklVertexType VertexType, VklIndexType IndexType, size_t dimension>
+class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
     using box_type = std::conditional_t<dimension == 3, VklBox3D, VklBox2D>;
     SceneTree::GeometryNode<MeshGeometry<VertexType, IndexType, dimension>> *node_;
 
@@ -128,7 +129,7 @@ template <GraphicsLab::Geometry::IsParametricCurve2D T> class VklNodeMesh<T> {
         mesh = std::make_unique<render_type>(device_, builder);
     }
 
-public:
+  public:
     using render_type = VklCurveMesh2D;
     std::unique_ptr<render_type> mesh;
 
@@ -155,7 +156,7 @@ template <GraphicsLab::Geometry::IsParametricCurve3D T> class VklNodeMesh<T> {
         mesh = std::make_unique<render_type>(device_, builder);
     }
 
-public:
+  public:
     using render_type = VklCurveMesh3D;
     std::unique_ptr<render_type> mesh;
 

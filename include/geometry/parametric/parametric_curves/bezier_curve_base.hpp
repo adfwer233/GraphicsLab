@@ -1,14 +1,13 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "parametric_curve.hpp"
 #include "language/reflection/static_reflector.hpp"
+#include "parametric_curve.hpp"
 #include <vector>
 
 namespace GraphicsLab::Geometry {
 
-template<size_t dim>
-struct BezierCurveBase : ParamCurveBase<dim> {
+template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     struct SceneTreeGeometryTypeTrait {};
 
     using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
@@ -19,7 +18,7 @@ struct BezierCurveBase : ParamCurveBase<dim> {
     REFLECT(Property{"control_points", &BezierCurveBase::control_points_})
 
     BezierCurveBase(const BezierCurveBase<dim> &) = default;
-    BezierCurveBase(BezierCurveBase<dim> && other) noexcept {
+    BezierCurveBase(BezierCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
         derivative_bound = other.derivative_bound;
         this->mesh = std::move(other.mesh);

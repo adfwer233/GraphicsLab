@@ -14,9 +14,9 @@ struct BRepEdge {
         BACKWARD,
     };
 
-    std::vector<BRepCoedge*> coedges;
+    std::vector<BRepCoedge *> coedges;
     Orientation orientation;
-    ParamCurve3D* geometry;
+    ParamCurve3D *geometry;
 };
 
-}
+} // namespace GraphicsLab::Geometry

@@ -12,8 +12,8 @@
 
 #include "vkl/core/vkl_window.hpp"
 
-#include "render/internal_render_pass/3d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/2d_scene_internal_pass.hpp"
+#include "render/internal_render_pass/3d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/internal_imgui_pass.hpp"
 
 GraphicsLabApplication::~GraphicsLabApplication() {
@@ -55,7 +55,8 @@ void GraphicsLabApplication::run() {
     InternalSceneRenderPass internalSceneRenderPass(appContext.device_, *appContext.sceneTree, state,
                                                     uiManager.renderResources);
     InternalImguiPass internalImguiPass(appContext.device_, uiManager);
-    InternalScene2DRenderPass internalScene2DRenderPass(appContext.device_, *appContext.sceneTree, state, uiManager.renderResources);
+    InternalScene2DRenderPass internalScene2DRenderPass(appContext.device_, *appContext.sceneTree, state,
+                                                        uiManager.renderResources);
 
     internalSceneRenderPass.set_extent(2048, 2048);
     internalImguiPass.set_extent(WIDTH, HEIGHT);

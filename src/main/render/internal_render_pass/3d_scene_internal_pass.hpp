@@ -18,8 +18,8 @@
 #include "vkl/system/compute_system/scene_tree_path_tracing_compute_model.hpp"
 #include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"
 
-#include <geometry/parametric/surface_type_list.hpp>
 #include <geometry/parametric/curve_type_list.hpp>
+#include <geometry/parametric/surface_type_list.hpp>
 #include <ui/render_resources.hpp>
 
 namespace GraphicsLab::RenderGraph {
@@ -276,7 +276,8 @@ struct InternalSceneRenderPass : public RenderPass {
                             continue;
                         ubo.model = trans;
                         auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
-                        static_assert(std::same_as<typename std::decay_t<decltype(*node_mesh)>::render_type, SceneTree::VklMesh<Vertex3D, LineIndex>>);
+                        static_assert(std::same_as<typename std::decay_t<decltype(*node_mesh)>::render_type,
+                                                   SceneTree::VklMesh<Vertex3D, LineIndex>>);
                         if (node_mesh->mesh->uniformBuffers.contains(lineKey)) {
                             node_mesh->mesh->uniformBuffers[lineKey][frame_index]->writeToBuffer(&ubo);
                             node_mesh->mesh->uniformBuffers[lineKey][frame_index]->flush();

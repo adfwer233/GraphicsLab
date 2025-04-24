@@ -46,7 +46,7 @@ struct Tessellator {
     static void tessellate(ParamCurve3D &curve, const int n = 50);
     static void tessellate(ParamCurve2D &curve, const int n = 50);
 
-    static void tessellate(BRepFace* face);
+    static void tessellate(BRepFace *face);
 };
 
 } // namespace GraphicsLab::Geometry

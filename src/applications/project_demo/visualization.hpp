@@ -8,9 +8,9 @@
 #include <geometry/constructor/explicit_surface_constructors.hpp>
 #include <geometry/parametric/tessellator.hpp>
 #include <geometry/parametric_intersector/surface_surface_intersector.hpp>
-#include <geometry/parametric_topology/brep_face.hpp>
-#include <geometry/parametric_topology/brep_edge.hpp>
 #include <geometry/parametric_topology/brep_coedge.hpp>
+#include <geometry/parametric_topology/brep_edge.hpp>
+#include <geometry/parametric_topology/brep_face.hpp>
 #include <geometry/parametric_topology/brep_loop.hpp>
 
 struct VisualizationProject : IGraphicsLabProject {
@@ -68,7 +68,8 @@ struct VisualizationProject : IGraphicsLabProject {
         auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(surf, surf2);
 
         auto surface1 = new GraphicsLab::Geometry::ExplicitSurface(ExplicitSurfaceExample::createDeformedTorus());
-        auto surface2 = new GraphicsLab::Geometry::ExplicitSurface(GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.6, 2.0, 1.5));
+        auto surface2 = new GraphicsLab::Geometry::ExplicitSurface(
+            GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.6, 2.0, 1.5));
         auto face1 = new GraphicsLab::Geometry::BRepFace();
         auto face2 = new GraphicsLab::Geometry::BRepFace();
 
@@ -110,18 +111,22 @@ struct VisualizationProject : IGraphicsLabProject {
 
             auto start_pos = result.curve_list[i].evaluate(0);
             auto end_pos = result.curve_list[i].evaluate(1);
-            spdlog::info("distance {}, {}", glm::distance(start_pos, end_pos), glm::distance(point_cloud.vertices.front().position, point_cloud.vertices.back().position));
+            spdlog::info("distance {}, {}", glm::distance(start_pos, end_pos),
+                         glm::distance(point_cloud.vertices.front().position, point_cloud.vertices.back().position));
 
             std::scoped_lock lock(context.sceneTree->sceneTreeMutex);
 
             GraphicsLab::Geometry::Tessellator::tessellate(result.curve_list[i], 1280);
-            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve3D>(std::move(result.curve_list[i]), std::format("curve bs {}", i));
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve3D>(std::move(result.curve_list[i]),
+                                                                                      std::format("curve bs {}", i));
 
             GraphicsLab::Geometry::Tessellator::tessellate(result.pcurve_list1[i], 1280);
-            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(result.pcurve_list1[i]), std::format("pcurve1 bs {}", i));
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(result.pcurve_list1[i]),
+                                                                                      std::format("pcurve1 bs {}", i));
 
             GraphicsLab::Geometry::Tessellator::tessellate(result.pcurve_list2[i], 1280);
-            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(result.pcurve_list2[i]), std::format("pcurve2 bs {}", i));
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(result.pcurve_list2[i]),
+                                                                                      std::format("pcurve2 bs {}", i));
 
             // context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), std::format("curve {}", i));
             // context.sceneTree->addGeometryNode<PointCloud2D>(std::move(pcurve1), std::format("pcurve {}", i));

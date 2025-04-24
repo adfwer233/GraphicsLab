@@ -245,21 +245,19 @@ struct SurfaceSurfaceIntersector {
             }
 
             // fit the 3d curve with BSpline curve
-            auto&& curve = BSplineCurve3D::fit(points, 5, 50);
+            auto &&curve = BSplineCurve3D::fit(points, 5, 50);
             result.curve_list.push_back(std::move(curve));
 
             // fit the pcurves with BSpline curves
-            auto&& pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
+            auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
             result.pcurve_list1.push_back(std::move(pcurve1));
 
-            auto&& pcurve2 = BSplineCurve2D::fit(params2, 3, 50);
+            auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, 50);
             result.pcurve_list2.push_back(std::move(pcurve2));
         }
 
         return result;
     }
-
-
 };
 
 } // namespace GraphicsLab::Geometry

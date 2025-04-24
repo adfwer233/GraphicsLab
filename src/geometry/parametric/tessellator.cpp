@@ -1,8 +1,8 @@
 #include "geometry/parametric/tessellator.hpp"
 
+#include <geometry/parametric_topology/brep_coedge.hpp>
 #include <geometry/parametric_topology/brep_face.hpp>
 #include <geometry/parametric_topology/brep_loop.hpp>
-#include <geometry/parametric_topology/brep_coedge.hpp>
 
 #include "CDT.h"
 
@@ -50,12 +50,12 @@ void Tessellator::tessellate(BRepFace *face) {
     std::vector<PointType> points;
     std::vector<std::pair<size_t, size_t>> edges;
 
-    auto is_in_domain = [](const PointType& point) -> bool {
+    auto is_in_domain = [](const PointType &point) -> bool {
         double eps = 1e-8;
         return point.x >= -eps && point.y >= -eps && point.x <= 1 + eps && point.y <= 1 + eps;
     };
 
-    for (int i = 0 ; i <= n; i++) {
+    for (int i = 0; i <= n; i++) {
         for (int j = 0; j <= m; j++) {
             double param = static_cast<double>(i) / static_cast<double>(n);
             double param2 = static_cast<double>(j) / static_cast<double>(m);
@@ -67,12 +67,13 @@ void Tessellator::tessellate(BRepFace *face) {
     int curve_sample_num = 128;
 
     int u_repeat = 0;
-    if (face->surface->u_periodic) u_repeat = 1;
+    if (face->surface->u_periodic)
+        u_repeat = 1;
 
     for (int u = -u_repeat; u <= u_repeat; u++) {
         PointType offset{u, 0};
-        for (auto loop: face->boundary) {
-            for (auto coedge: loop->coedges) {
+        for (auto loop : face->boundary) {
+            for (auto coedge : loop->coedges) {
                 auto param_curve = coedge->geometry;
 
                 for (int i = 0; i <= curve_sample_num; i++) {
@@ -90,17 +91,20 @@ void Tessellator::tessellate(BRepFace *face) {
     spdlog::info("CDT begin, points num {}, edge num {}", points.size(), edges.size());
     // CDT::Triangulation<double> cdt;
     CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Auto, CDT::IntersectingConstraintEdges::DontCheck, 1e-8);
-    cdt.insertVertices(points.begin(), points.end(), [](const auto& p){ return p.x; }, [](const auto& p){ return p.y; });
-    cdt.insertEdges(edges.begin(), edges.end(), [](const auto& e){ return e.first; }, [](const auto& e){ return e.second; });
+    cdt.insertVertices(
+        points.begin(), points.end(), [](const auto &p) { return p.x; }, [](const auto &p) { return p.y; });
+    cdt.insertEdges(
+        edges.begin(), edges.end(), [](const auto &e) { return e.first; }, [](const auto &e) { return e.second; });
     spdlog::info("CDT start culling");
     cdt.eraseSuperTriangle();
     spdlog::info("CDT end");
 
     std::vector<TriangleIndex> triangles;
     spdlog::info("Winding Number Culling begin");
-    for (auto& tri: cdt.triangles) {
+    for (auto &tri : cdt.triangles) {
         auto barycenter = (points[tri.vertices[0]] + points[tri.vertices[1]] + points[tri.vertices[2]]) / 3.0;
-        if (is_in_domain(barycenter) and is_in_domain(points[tri.vertices[0]]) and is_in_domain(points[tri.vertices[1]]) and is_in_domain(points[tri.vertices[2]]) ) {
+        if (is_in_domain(barycenter) and is_in_domain(points[tri.vertices[0]]) and
+            is_in_domain(points[tri.vertices[1]]) and is_in_domain(points[tri.vertices[2]])) {
             if (face->contain(barycenter)) {
                 triangles.emplace_back(tri.vertices[0], tri.vertices[1], tri.vertices[2]);
             }
@@ -113,7 +117,7 @@ void Tessellator::tessellate(BRepFace *face) {
     face->mesh2d = std::make_unique<Mesh2D>();
     face->mesh2d->indices = triangles;
 
-    for (auto &p: points) {
+    for (auto &p : points) {
         Vertex3D vertex;
         vertex.position = face->surface->evaluate(p);
         vertex.normal = face->surface->normal(p);
