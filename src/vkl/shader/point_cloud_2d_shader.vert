@@ -15,9 +15,9 @@ layout(push_constant) uniform PushConstants {
 
 void main() {
 
-    gl_PointSize = 50.0;
+    gl_PointSize = 5.0;
     gl_Position = vec4((inPosition.x - 0.5 + pushConstants.shift_x) * 2 * pushConstants.zoom,
                        (inPosition.y - 0.5 + pushConstants.shift_y) * 2 * pushConstants.zoom,
                        0.0, 1.0);
-    fragColor = inColor.rgb;
+    fragColor = vec3(1.0, 0.0, 0.0);
 }

@@ -12,7 +12,9 @@
 
 namespace SceneTree {
 
-template <typename T> class VklNodeMesh {};
+template <typename T> class VklNodeMesh {
+    using type = T;
+};
 
 template <typename T> class VklNodeMeshBuffer {
   public:
@@ -52,8 +54,9 @@ template <typename T> class VklNodeMeshBuffer {
     // VklGeometryModelBuffer<T>() = default;
 };
 
-template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<MeshGeometry<VertexType, IndexType>> {
-    SceneTree::GeometryNode<MeshGeometry<VertexType, IndexType>> *node_;
+template <VklVertexType VertexType, VklIndexType IndexType, size_t dimension> class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
+    using box_type = std::conditional_t<dimension == 3, VklBox3D, VklBox2D>;
+    SceneTree::GeometryNode<MeshGeometry<VertexType, IndexType, dimension>> *node_;
 
     VklDevice &device_;
 
@@ -72,7 +75,7 @@ template <VklVertexType VertexType, VklIndexType IndexType> class VklNodeMesh<Me
     }
 
   public:
-    using render_type = VklMesh<VertexType, IndexType>;
+    using render_type = VklMesh<VertexType, IndexType, box_type>;
     std::unique_ptr<render_type> mesh;
 
     void recreateMeshes() {

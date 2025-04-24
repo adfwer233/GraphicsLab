@@ -56,7 +56,7 @@ struct VisualizationProject : IGraphicsLabProject {
         GraphicsLab::Geometry::Tessellator::tessellate(surf, 64, 64);
         context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test torus");
 
-        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid();
+        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.8, 1.8, 1.5);
         GraphicsLab::Geometry::Tessellator::tessellate(surf2);
         context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf2),
                                                                                    "test hyperboloid");
@@ -64,10 +64,15 @@ struct VisualizationProject : IGraphicsLabProject {
         auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(surf, surf2);
         for (int i = 0; auto &trace : result.traces) {
             PointCloud3D point_cloud;
+            PointCloud2D pcurve1;
+
             for (auto &p : trace) {
                 point_cloud.vertices.emplace_back(p.position);
+                pcurve1.vertices.emplace_back(p.param1);
             }
+
             context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), std::format("curve {}", i));
+            context.sceneTree->addGeometryNode<PointCloud2D>(std::move(pcurve1), std::format("pcurve {}", i));
             i++;
         }
     }
