@@ -1,6 +1,7 @@
 #pragma once
 #include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
 #include <vkl/system/render_system/param_line_render_system.hpp>
+#include <vkl/system/render_system/pure_shader_render_system.hpp>
 
 namespace GraphicsLab::RenderGraph {
 
@@ -36,6 +37,13 @@ struct InternalScene2DRenderPass: public RenderPass {
                 {std::format("{}/param_curve_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/param_curve_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
+        rectangle_line_render_system = std::make_unique<PureShaderRenderSystem>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/rectangle.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/rectangle.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT},
+                {std::format("{}/rectangle.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+            });
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
@@ -80,6 +88,9 @@ struct InternalScene2DRenderPass: public RenderPass {
             point_cloud_2d_render_system->renderObject(frameInfo, list);
         }
 
+        /**
+         * Render Curves in 2D
+         */
         MetaProgramming::ForEachType(Geometry::ParametricCurve2DTypeList{}, [&]<typename T>() {
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
             for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
@@ -107,9 +118,10 @@ struct InternalScene2DRenderPass: public RenderPass {
             }
         });
 
-        /**
-         * Render Curves in 2D
-         */
+        PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
+        VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
+        push_constant_data_list.data[0] = push_constant_data;
+        rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
         end_render_pass(commandBuffer);
     }
 
@@ -118,6 +130,7 @@ struct InternalScene2DRenderPass: public RenderPass {
 
     std::unique_ptr<PointCloud2DRenderSystem<>> point_cloud_2d_render_system = nullptr;
     std::unique_ptr<ParamLineRenderSystem<>> line_render_system = nullptr;
+    std::unique_ptr<PureShaderRenderSystem> rectangle_line_render_system = nullptr;
 
     RenderResources &renderResources_;
 };
