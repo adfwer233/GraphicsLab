@@ -147,7 +147,6 @@ struct SurfaceSurfaceIntersector {
 
         for (int step = 0; step < max_iter; step++) {
             // spdlog::info("current param: ({}, {}), ({}, {})", param1.x, param1.y, param2.x, param2.y);
-
             auto F = surf1.evaluate(param1) - surf2.evaluate(param2);
 
             if (glm::length(F) > length_iter) {
@@ -164,8 +163,11 @@ struct SurfaceSurfaceIntersector {
             param1 = param1 + step_length * param1_tangent;
             param2 = param2 + step_length * param2_tangent;
 
-            if (glm::distance(surf1.move_param_to_std_domain(param1), begin_param1) < 1e-3 and
+            if (glm::distance(surf1.move_param_to_std_domain(param1), begin_param1) < 1e-3 or
                 glm::distance(surf2.move_param_to_std_domain(param2), begin_param2) < 1e-3) {
+                auto offset1 = begin_param1 - surf1.move_param_to_std_domain(param1);
+                auto offset2 = begin_param2 - surf2.move_param_to_std_domain(param2);
+                intersections.emplace_back(param1 + offset1, param2 + offset2, surf1.evaluate(begin_param1));
                 break;
             }
         }
@@ -237,9 +239,8 @@ struct SurfaceSurfaceIntersector {
             std::vector<PointType> points;
             std::vector<ParamType> params1;
             for (auto [param1, param2, pos] : trace) {
-                if (points.size() < 200)
-                    points.emplace_back(pos);
-                params1.emplace_back(param1);
+                points.push_back(pos);
+                params1.push_back(param1);
             }
 
             // fit the 3d curve with BSpline curve
