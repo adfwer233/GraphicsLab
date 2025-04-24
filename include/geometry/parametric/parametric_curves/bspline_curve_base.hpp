@@ -24,8 +24,7 @@ struct BSplineCurveBase : ParamCurveBase<dim> {
         degree_ = other.degree_;
         control_points_ = other.control_points_;
         knots_ = other.knots_;
-        this->mesh = std::make_unique<MeshType>();
-        *this->mesh = *other.mesh;
+        // this->mesh = std::make_unique<MeshType>(*other.mesh);
     }
 
     BSplineCurveBase(BSplineCurveBase<dim> && other) noexcept {
