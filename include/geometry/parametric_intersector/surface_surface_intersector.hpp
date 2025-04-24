@@ -237,10 +237,11 @@ struct SurfaceSurfaceIntersector {
         for (auto &trace : result.traces) {
             spdlog::info("size {}", trace.size());
             std::vector<PointType> points;
-            std::vector<ParamType> params1;
+            std::vector<ParamType> params1, params2;
             for (auto [param1, param2, pos] : trace) {
                 points.push_back(pos);
                 params1.push_back(param1);
+                params2.push_back(param2);
             }
 
             // fit the 3d curve with BSpline curve
@@ -250,6 +251,9 @@ struct SurfaceSurfaceIntersector {
             // fit the pcurves with BSpline curves
             auto&& pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
             result.pcurve_list1.push_back(std::move(pcurve1));
+
+            auto&& pcurve2 = BSplineCurve2D::fit(params2, 3, 50);
+            result.pcurve_list2.push_back(std::move(pcurve2));
         }
 
         return result;

@@ -101,7 +101,9 @@ void Tessellator::tessellate(BRepFace *face) {
     for (auto& tri: cdt.triangles) {
         auto barycenter = (points[tri.vertices[0]] + points[tri.vertices[1]] + points[tri.vertices[2]]) / 3.0;
         if (is_in_domain(barycenter) and is_in_domain(points[tri.vertices[0]]) and is_in_domain(points[tri.vertices[1]]) and is_in_domain(points[tri.vertices[2]]) ) {
-            triangles.emplace_back(tri.vertices[0], tri.vertices[1], tri.vertices[2]);
+            if (face->contain(barycenter)) {
+                triangles.emplace_back(tri.vertices[0], tri.vertices[1], tri.vertices[2]);
+            }
         }
     }
     spdlog::info("Winding Number Culling end");
