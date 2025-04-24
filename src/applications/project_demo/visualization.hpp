@@ -57,8 +57,8 @@ struct VisualizationProject : IGraphicsLabProject {
 
     void intersection_demo2() {
         auto surf = ExplicitSurfaceExample::createDeformedTorus();
-        GraphicsLab::Geometry::Tessellator::tessellate(surf, 64, 64);
-        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test torus");
+        // GraphicsLab::Geometry::Tessellator::tessellate(surf, 64, 64);
+        // context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf), "test torus");
 
         auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.6, 2.0, 1.5);
         GraphicsLab::Geometry::Tessellator::tessellate(surf2);
@@ -111,6 +111,15 @@ struct VisualizationProject : IGraphicsLabProject {
             // context.sceneTree->addGeometryNode<PointCloud2D>(std::move(pcurve1), std::format("pcurve {}", i));
             i++;
         }
+
+        GraphicsLab::Geometry::Tessellator::tessellate(face1);
+        auto mesh2d_data = *face1->mesh2d;
+        auto mesh_data = *face1->mesh;
+        spdlog::info("test {}", mesh2d_data.vertices.size());
+
+        context.sceneTree->addGeometryNode<Mesh3D>(std::move(mesh_data), "face 1");
+        context.sceneTree->addGeometryNode<Mesh2D>(std::move(mesh2d_data), "param space");
+        spdlog::info("tessellation finish");
     }
 
     ReflectDataType reflect() override {

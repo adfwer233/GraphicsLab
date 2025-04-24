@@ -5,6 +5,12 @@
 
 namespace GraphicsLab::RenderGraph {
 
+struct Ubo2D {
+    float zoom;
+    float offset_x;
+    float offset_y;
+};
+
 struct InternalScene2DRenderPass: public RenderPass {
     explicit InternalScene2DRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState,
                                      RenderResources &renderResources)
@@ -25,6 +31,11 @@ struct InternalScene2DRenderPass: public RenderPass {
     }
 
     void post_compile(RenderContext *render_context) override {
+        tessellation2d_wireframe_render_system = std::make_unique<SimpleWireFrameRenderSystem<>>(device_, vkl_render_pass->renderPass, std::vector<VklShaderModuleInfo>{
+                {std::format("{}/simple_shader_2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/simple_shader_2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}
+        });
+
         point_cloud_2d_render_system = std::make_unique<PointCloud2DRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
@@ -55,7 +66,15 @@ struct InternalScene2DRenderPass: public RenderPass {
         begin_render_pass(commandBuffer);
 
         GlobalUbo ubo{};
+
+        Ubo2D ubo2D{};
+
+        ubo2D.zoom = 0.5f;
+        ubo2D.offset_x = 0.0f;
+        ubo2D.offset_y = 0.0f;
+
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto meshKey = tessellation2d_wireframe_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
         /**
          * Render point cloud in 2d
@@ -118,6 +137,33 @@ struct InternalScene2DRenderPass: public RenderPass {
             }
         });
 
+        /**
+         * Render Mesh in 2D
+         */
+        auto mesh2d_buffer = SceneTree::VklNodeMeshBuffer<Mesh2D>::instance();
+        for (auto [mesh2d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh2D>()) {
+            if (not mesh2d_nodes->visible)
+                continue;
+            auto node_mesh = mesh2d_buffer->getGeometryModel(device_, mesh2d_nodes);
+
+            if (node_mesh->mesh->uniformBuffers.contains(meshKey)) {
+                node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->writeToBuffer(&ubo2D);
+                node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->flush();
+            }
+
+            static_assert(std::same_as<SceneTree::VklMesh<Vertex2D, TriangleIndex, VklBox2D>, std::decay_t<decltype(*node_mesh)>::render_type>);
+
+            FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                .frameIndex = static_cast<int>(frameIndex) % 2,
+                .frameTime = 0,
+                .commandBuffer = commandBuffer,
+                .model = *node_mesh->mesh,
+            };
+
+            tessellation2d_wireframe_render_system->renderObject(frameInfo);
+        }
+
+
         PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
         VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
         push_constant_data_list.data[0] = push_constant_data;
@@ -131,6 +177,7 @@ struct InternalScene2DRenderPass: public RenderPass {
     std::unique_ptr<PointCloud2DRenderSystem<>> point_cloud_2d_render_system = nullptr;
     std::unique_ptr<ParamLineRenderSystem<>> line_render_system = nullptr;
     std::unique_ptr<PureShaderRenderSystem> rectangle_line_render_system = nullptr;
+    std::unique_ptr<SimpleWireFrameRenderSystem<>> tessellation2d_wireframe_render_system = nullptr;
 
     RenderResources &renderResources_;
 };

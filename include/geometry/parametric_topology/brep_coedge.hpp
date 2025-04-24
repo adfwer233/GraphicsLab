@@ -2,11 +2,11 @@
 
 #include "geometry/parametric/parametric_curves/parametric_curve.hpp"
 
+namespace GraphicsLab::Geometry {
+
 struct BRepFace;
 struct BRepEdge;
 struct ParamCurve2D;
-
-namespace GraphicsLab::Geometry {
 
 struct BRepCoedge {
     enum class Orientation {

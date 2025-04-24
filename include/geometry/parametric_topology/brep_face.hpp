@@ -14,12 +14,7 @@ struct BRepFace {
 
     std::vector<BRepLoop*> boundary;
 
-    bool containment(ParamType param) const {
-        return true;
-    }
-
-    Mesh3D tessllate(int n, int m) {
-        return Mesh3D();
-    }
+    std::unique_ptr<Mesh3D> mesh = nullptr;
+    std::unique_ptr<Mesh2D> mesh2d = nullptr;
 };
 }

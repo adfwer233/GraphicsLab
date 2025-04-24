@@ -10,6 +10,7 @@
 #include "parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
+struct BRepFace;
 struct Tessellator {
     static void tessellate(ParamSurface &surface, const int n = 32, const int m = 32) {
         surface.mesh = std::make_unique<Mesh3D>();
@@ -44,6 +45,8 @@ struct Tessellator {
 
     static void tessellate(ParamCurve3D &curve, const int n = 50);
     static void tessellate(ParamCurve2D &curve, const int n = 50);
+
+    static void tessellate(BRepFace* face);
 };
 
 } // namespace GraphicsLab::Geometry
