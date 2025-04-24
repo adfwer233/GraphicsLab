@@ -1,5 +1,6 @@
 #pragma once
 #include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
+#include <vkl/system/render_system/param_line_render_system.hpp>
 
 namespace GraphicsLab::RenderGraph {
 
@@ -28,6 +29,13 @@ struct InternalScene2DRenderPass: public RenderPass {
             std::vector<VklShaderModuleInfo>{
                 {std::format("{}/point_cloud_2d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
                 {std::format("{}/point_cloud_2d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
+        line_render_system = std::make_unique<ParamLineRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {std::format("{}/param_curve_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
+                {std::format("{}/param_curve_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
@@ -39,9 +47,12 @@ struct InternalScene2DRenderPass: public RenderPass {
         begin_render_pass(commandBuffer);
 
         GlobalUbo ubo{};
+        auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
+        /**
+         * Render point cloud in 2d
+         */
         auto pointcloudKey = point_cloud_2d_render_system->descriptorSetLayout->descriptorSetLayoutKey;
-
         auto point_cloud_buffer = SceneTree::VklNodeMeshBuffer<PointCloud2D>::instance();
         for (auto [point_cloud_node, trans]: sceneTree_.traverse_geometry_nodes_with_trans<PointCloud2D>()) {
             if (not point_cloud_node->visible)
@@ -69,7 +80,36 @@ struct InternalScene2DRenderPass: public RenderPass {
             point_cloud_2d_render_system->renderObject(frameInfo, list);
         }
 
+        MetaProgramming::ForEachType(Geometry::ParametricCurve2DTypeList{}, [&]<typename T>() {
+            auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
+            for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
+                if (not mesh3d_nodes->visible)
+                    continue;
+                ubo.model = trans;
+                auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
+                if (node_mesh->mesh->uniformBuffers.contains(lineKey)) {
+                    node_mesh->mesh->uniformBuffers[lineKey][frameIndex]->writeToBuffer(&ubo);
+                    node_mesh->mesh->uniformBuffers[lineKey][frameIndex]->flush();
+                }
 
+                FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                    .frameIndex = static_cast<int>(frameIndex) % 2,
+                    .frameTime = 0,
+                    .commandBuffer = commandBuffer,
+                    .model = *node_mesh->mesh,
+                };
+
+                ParamLineRenderSystemPushConstantData paramLineRenderSystemPushConstantData{};
+                paramLineRenderSystemPushConstantData.zoom = 0.5;
+                ParamLineRenderSystemPushConstantList list;
+                list.data[0] = paramLineRenderSystemPushConstantData;
+                line_render_system->renderObject(frameInfo, list);
+            }
+        });
+
+        /**
+         * Render Curves in 2D
+         */
         end_render_pass(commandBuffer);
     }
 
@@ -77,6 +117,7 @@ struct InternalScene2DRenderPass: public RenderPass {
     UIState &uiState_;
 
     std::unique_ptr<PointCloud2DRenderSystem<>> point_cloud_2d_render_system = nullptr;
+    std::unique_ptr<ParamLineRenderSystem<>> line_render_system = nullptr;
 
     RenderResources &renderResources_;
 };

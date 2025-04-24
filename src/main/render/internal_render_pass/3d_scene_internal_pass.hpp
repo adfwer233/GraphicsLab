@@ -19,7 +19,7 @@
 #include "vkl/system/ray_tracing_system/simple_ray_tracing_system.hpp"
 
 #include <geometry/parametric/surface_type_list.hpp>
-#include <geometry/parametric/torus.hpp>
+#include <geometry/parametric/curve_type_list.hpp>
 #include <ui/render_resources.hpp>
 
 namespace GraphicsLab::RenderGraph {
@@ -266,6 +266,30 @@ struct InternalSceneRenderPass : public RenderPass {
                             list.data[0] = normalRenderSystemPushConstantData;
                             normal_render_system->renderObject(frameInfo, list);
                         }
+                    }
+                });
+
+                MetaProgramming::ForEachType(Geometry::ParametricCurve3DTypeList{}, [&]<typename T>() {
+                    auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
+                    for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
+                        if (not mesh3d_nodes->visible)
+                            continue;
+                        ubo.model = trans;
+                        auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
+                        static_assert(std::same_as<typename std::decay_t<decltype(*node_mesh)>::render_type, SceneTree::VklMesh<Vertex3D, LineIndex>>);
+                        if (node_mesh->mesh->uniformBuffers.contains(lineKey)) {
+                            node_mesh->mesh->uniformBuffers[lineKey][frame_index]->writeToBuffer(&ubo);
+                            node_mesh->mesh->uniformBuffers[lineKey][frame_index]->flush();
+                        }
+
+                        FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                            .frameIndex = static_cast<int>(frame_index) % 2,
+                            .frameTime = 0,
+                            .commandBuffer = commandBuffer,
+                            .model = *node_mesh->mesh,
+                        };
+
+                        line_render_system->renderObject(frameInfo);
                     }
                 });
 

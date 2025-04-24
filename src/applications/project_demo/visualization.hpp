@@ -71,6 +71,12 @@ struct VisualizationProject : IGraphicsLabProject {
                 pcurve1.vertices.emplace_back(p.param1);
             }
 
+            GraphicsLab::Geometry::Tessellator::tessellate(result.curve_list[i], 1280);
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve3D>(std::move(result.curve_list[i]), std::format("curve bs {}", i));
+
+            GraphicsLab::Geometry::Tessellator::tessellate(result.pcurve_list1[i], 1280);
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(result.pcurve_list1[i]), std::format("pcurve bs {}", i));
+
             context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), std::format("curve {}", i));
             context.sceneTree->addGeometryNode<PointCloud2D>(std::move(pcurve1), std::format("pcurve {}", i));
             i++;

@@ -6,6 +6,7 @@
 
 #include "geometry/mesh/mesh.hpp"
 #include "geometry/vertex/vertex.hpp"
+#include "parametric_curves/parametric_curve.hpp"
 #include "parametric_surface.hpp"
 
 namespace GraphicsLab::Geometry {
@@ -40,6 +41,9 @@ struct Tessellator {
 
         spdlog::info("Tessellator tessellate() finish");
     }
+
+    static void tessellate(ParamCurve3D &curve, const int n = 50);
+    static void tessellate(ParamCurve2D &curve, const int n = 50);
 };
 
 } // namespace GraphicsLab::Geometry

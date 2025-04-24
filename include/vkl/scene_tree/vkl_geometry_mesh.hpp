@@ -95,20 +95,68 @@ template <GraphicsLab::Geometry::IsParametricSurface T> class VklNodeMesh<T> {
     void createMesh() {
         typename render_type::Builder builder;
 
-        // use tessellator
         builder.vertices = node_->data.mesh->vertices;
         builder.indices = node_->data.mesh->indices;
-
-        // if (node_->material_index.has_value()) {
-        //     auto material = node_->scene->materials[node_->material_index.value()];
-        //     std::ranges::copy(material.textures, std::back_inserter(builder.textures));
-        // }
 
         mesh = std::make_unique<render_type>(device_, builder);
     }
 
   public:
     using render_type = VklMesh<Vertex3D, TriangleIndex>;
+    std::unique_ptr<render_type> mesh;
+
+    void recreateMeshes() {
+        createMesh();
+    }
+
+    VklNodeMesh(VklDevice &device, decltype(node_) node) : node_(node), device_(device) {
+        createMesh();
+    }
+};
+
+template <GraphicsLab::Geometry::IsParametricCurve2D T> class VklNodeMesh<T> {
+    SceneTree::GeometryNode<T> *node_;
+
+    VklDevice &device_;
+
+    void createMesh() {
+        typename render_type::Builder builder;
+
+        builder.vertices = node_->data.mesh->vertices;
+        builder.indices = node_->data.mesh->indices;
+
+        mesh = std::make_unique<render_type>(device_, builder);
+    }
+
+public:
+    using render_type = VklCurveMesh2D;
+    std::unique_ptr<render_type> mesh;
+
+    void recreateMeshes() {
+        createMesh();
+    }
+
+    VklNodeMesh(VklDevice &device, decltype(node_) node) : node_(node), device_(device) {
+        createMesh();
+    }
+};
+
+template <GraphicsLab::Geometry::IsParametricCurve3D T> class VklNodeMesh<T> {
+    SceneTree::GeometryNode<T> *node_;
+
+    VklDevice &device_;
+
+    void createMesh() {
+        typename render_type::Builder builder;
+
+        builder.vertices = node_->data.mesh->vertices;
+        builder.indices = node_->data.mesh->indices;
+
+        mesh = std::make_unique<render_type>(device_, builder);
+    }
+
+public:
+    using render_type = VklCurveMesh3D;
     std::unique_ptr<render_type> mesh;
 
     void recreateMeshes() {

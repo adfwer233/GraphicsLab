@@ -5,5 +5,5 @@
 #include <vector>
 
 namespace GraphicsLab::Geometry {
-using BezierCurve2D = BezierCurveBase<2>;
+using BezierCurve3D = BezierCurveBase<3>;
 } // namespace GraphicsLab::Geometry

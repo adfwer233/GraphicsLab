@@ -19,7 +19,7 @@
 
 #include "graphics_lab/geo_flow/geo_flow.hpp"
 
-#include <geometry/parametric/bezier_curve_2d.hpp>
+#include <geometry/parametric/curve_type_list.hpp>
 #include <geometry/parametric/torus.hpp>
 
 struct Material;
@@ -36,7 +36,8 @@ struct PointLightSource {};
 struct AreaLightSource {};
 
 using GeometryTypes = MetaProgramming::TypeList<Mesh3D, CurveMesh3D, Wire3D, DirectionalField3D, PointCloud3D,
-                                                PointCloud2D, GraphicsLab::Geometry::BezierCurve2D>;
+                                                PointCloud2D, GraphicsLab::Geometry::BezierCurve2D, GraphicsLab::Geometry::BezierCurve3D,
+                                                GraphicsLab::Geometry::BSplineCurve2D, GraphicsLab::Geometry::BSplineCurve3D>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 
 template <typename T>

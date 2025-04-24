@@ -6,6 +6,8 @@
 
 #include "geometry/parametric/parametric_surface.hpp"
 
+#include <geometry/parametric/bspline_curve_2d.hpp>
+#include <geometry/parametric/bspline_curve_3d.hpp>
 #include <geometry/spatial_datastructure/kd_tree.hpp>
 
 namespace GraphicsLab::Geometry {
@@ -173,6 +175,10 @@ struct SurfaceSurfaceIntersector {
 
     struct IntersectionResult {
         std::vector<std::vector<IntersectionInfo>> traces;
+
+        std::vector<BSplineCurve3D> curve_list;
+        std::vector<BSplineCurve2D> pcurve_list1;
+        std::vector<BSplineCurve2D> pcurve_list2;
     };
 
     static std::vector<IntersectionInfo> intersect(const ParamSurface &surf1, const ParamSurface &surf2) {
@@ -228,10 +234,27 @@ struct SurfaceSurfaceIntersector {
 
         for (auto &trace : result.traces) {
             spdlog::info("size {}", trace.size());
+            std::vector<PointType> points;
+            std::vector<ParamType> params1;
+            for (auto [param1, param2, pos] : trace) {
+                if (points.size() < 200)
+                    points.emplace_back(pos);
+                params1.emplace_back(param1);
+            }
+
+            // fit the 3d curve with BSpline curve
+            auto&& curve = BSplineCurve3D::fit(points, 5, 50);
+            result.curve_list.push_back(std::move(curve));
+
+            // fit the pcurves with BSpline curves
+            auto&& pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
+            result.pcurve_list1.push_back(std::move(pcurve1));
         }
 
         return result;
     }
+
+
 };
 
 } // namespace GraphicsLab::Geometry
