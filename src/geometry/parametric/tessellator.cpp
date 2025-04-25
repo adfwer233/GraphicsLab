@@ -90,7 +90,7 @@ void Tessellator::tessellate(BRepFace *face) {
         }
     }
 
-    auto areClose = [](const PointType& a, const PointType& b, double epsilon) {
+    auto areClose = [](const PointType &a, const PointType &b, double epsilon) {
         return std::fabs(a.x - b.x) < epsilon && std::fabs(a.y - b.y) < epsilon;
     };
 
@@ -100,7 +100,8 @@ void Tessellator::tessellate(BRepFace *face) {
 
     // Sort points by x and y for efficient deduplication
     std::vector<size_t> sortedIndices(points.size());
-    for (size_t i = 0; i < points.size(); ++i) sortedIndices[i] = i;
+    for (size_t i = 0; i < points.size(); ++i)
+        sortedIndices[i] = i;
 
     std::ranges::sort(sortedIndices, [&](size_t i, size_t j) {
         return (points[i].x < points[j].x) || (points[i].x == points[j].x && points[i].y < points[j].y);
@@ -121,7 +122,7 @@ void Tessellator::tessellate(BRepFace *face) {
     points = std::move(uniquePoints);
 
     // Update the edges to use the new indices
-    for (auto& edge : edges) {
+    for (auto &edge : edges) {
         edge.first = indexMap[edge.first];
         edge.second = indexMap[edge.second];
     }
