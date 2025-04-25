@@ -3,6 +3,11 @@
 #include <vkl/system/render_system/point_cloud_2d_render_system.hpp>
 #include <vkl/system/render_system/pure_shader_render_system.hpp>
 
+#include <controller/ui_states.hpp>
+#include <ui/render_resources.hpp>
+#include <vkl/scene_tree/vkl_geometry_mesh.hpp>
+#include <vkl/system/render_system/simple_wireframe_render_system.hpp>
+
 namespace GraphicsLab::RenderGraph {
 
 struct Ubo2D {
