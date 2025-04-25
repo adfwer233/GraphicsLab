@@ -78,14 +78,52 @@ void Tessellator::tessellate(BRepFace *face) {
 
                 for (int i = 0; i <= curve_sample_num; i++) {
                     double param = static_cast<double>(i) / static_cast<double>(curve_sample_num);
-                    points.emplace_back(param_curve->evaluate(param) + offset);
+                    auto par_pos = param_curve->evaluate(param) + offset;
 
+                    par_pos = glm::clamp(par_pos, 0.0, 1.0);
+                    points.push_back(par_pos);
                     if (i > 0) {
                         edges.emplace_back(points.size() - 2, points.size() - 1);
                     }
                 }
             }
         }
+    }
+
+    auto areClose = [](const PointType& a, const PointType& b, double epsilon) {
+        return std::fabs(a.x - b.x) < epsilon && std::fabs(a.y - b.y) < epsilon;
+    };
+
+    double epsilon = 1e-8;
+    std::vector<PointType> uniquePoints;
+    std::unordered_map<size_t, size_t> indexMap;
+
+    // Sort points by x and y for efficient deduplication
+    std::vector<size_t> sortedIndices(points.size());
+    for (size_t i = 0; i < points.size(); ++i) sortedIndices[i] = i;
+
+    std::ranges::sort(sortedIndices, [&](size_t i, size_t j) {
+        return (points[i].x < points[j].x) || (points[i].x == points[j].x && points[i].y < points[j].y);
+    });
+
+    // Deduplicate points and create the index map
+    for (size_t i = 0; i < sortedIndices.size(); ++i) {
+        size_t idx = sortedIndices[i];
+        if (uniquePoints.empty() || !areClose(uniquePoints.back(), points[idx], epsilon)) {
+            uniquePoints.push_back(points[idx]);
+            indexMap[idx] = uniquePoints.size() - 1; // Map old index to new index
+        } else {
+            indexMap[idx] = indexMap[sortedIndices[i - 1]]; // Map to already existing unique point
+        }
+    }
+
+    // Update the points vector with unique points
+    points = std::move(uniquePoints);
+
+    // Update the edges to use the new indices
+    for (auto& edge : edges) {
+        edge.first = indexMap[edge.first];
+        edge.second = indexMap[edge.second];
     }
 
     spdlog::info("CDT begin, points num {}, edge num {}", points.size(), edges.size());
