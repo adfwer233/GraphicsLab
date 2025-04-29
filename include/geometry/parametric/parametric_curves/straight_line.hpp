@@ -18,6 +18,11 @@ struct StraightLineBase: ParamCurveBase<dim> {
     PointType derivative(double t) const override {
         return glm::normalize(end_point - start_point);
     }
+
+    PointType normal(double t) const requires (dim == 2) {
+        auto derivative = derivative(t);
+        return {-derivative.y, derivative.x};
+    }
 };
 
 using StraightLine2D = StraightLineBase<2>;

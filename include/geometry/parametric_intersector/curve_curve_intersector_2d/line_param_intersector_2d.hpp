@@ -7,7 +7,7 @@ namespace GraphicsLab::Geometry {
 
 struct LineParamIntersector2D {
     static CurveCurveIntersectionResult2D intersect(StraightLine2D &line, ParamCurve2D &curve) {
-
+        return {};
     }
 };
 
