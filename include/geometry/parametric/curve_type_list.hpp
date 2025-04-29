@@ -7,6 +7,9 @@
 #include "bspline_curve_2d.hpp"
 #include "bspline_curve_3d.hpp"
 
+#include "parametric_curves/straight_line.hpp"
+
+
 namespace GraphicsLab::Geometry {
 
 using ParametricCurve2DTypeList = MetaProgramming::TypeList<BezierCurve2D, BSplineCurve2D>;

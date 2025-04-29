@@ -6,7 +6,6 @@ namespace GraphicsLab::Geometry {
 
 struct BRepFace;
 struct BRepEdge;
-struct ParamCurve2D;
 
 struct BRepCoedge {
     enum class Orientation {

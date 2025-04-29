@@ -38,7 +38,6 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
         const int n = static_cast<int>(control_points_.size()) - 1;
         const int k = degree_;
-        const int m = static_cast<int>(knots_.size()) - 1;
 
         // Clamp u to [0,1]
         u = std::clamp(u, 0.0, 1.0);

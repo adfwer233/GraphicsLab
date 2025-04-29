@@ -4,25 +4,22 @@
 #include <glm/glm.hpp>
 
 namespace GraphicsLab::Geometry {
-struct ParamCurve3D {
-    virtual ~ParamCurve3D() = default;
 
-    virtual glm::dvec3 evaluate(double t) const = 0;
+template <size_t dim>
+struct ParamCurveBase {
+    using PointType = std::conditional_t<dim == 3, glm::dvec3, glm::dvec2>;
+    using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
 
-    std::unique_ptr<CurveMesh3D> mesh = nullptr;
-};
-
-struct ParamCurve2D {
     struct DiscretizationCache {
-        std::vector<glm::dvec2> points;
+        std::vector<PointType> points;
     };
-    virtual ~ParamCurve2D() = default;
+    virtual ~ParamCurveBase() = default;
 
-    virtual glm::dvec2 evaluate(double t) const = 0;
+    virtual PointType evaluate(double t) const = 0;
 
-    std::unique_ptr<CurveMesh2D> mesh = nullptr;
+    std::unique_ptr<MeshType> mesh = nullptr;
 
-    std::vector<glm::dvec2> discretize() {
+    std::vector<PointType> discretize() {
         if (discretizationCache) {
             return discretizationCache->points;
         } else {
@@ -35,9 +32,11 @@ struct ParamCurve2D {
         }
     }
 
-  protected:
+protected:
     std::unique_ptr<DiscretizationCache> discretizationCache = nullptr;
 };
 
-template <size_t dim> using ParamCurveBase = std::conditional_t<dim == 3, ParamCurve3D, ParamCurve2D>;
+using ParamCurve2D = ParamCurveBase<2>;
+using ParamCurve3D = ParamCurveBase<3>;
+
 } // namespace GraphicsLab::Geometry
