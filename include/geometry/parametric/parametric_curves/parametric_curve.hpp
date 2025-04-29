@@ -1,5 +1,6 @@
 #pragma once
 
+#include <geometry/mesh/mesh.hpp>
 #include <glm/glm.hpp>
 
 namespace GraphicsLab::Geometry {
