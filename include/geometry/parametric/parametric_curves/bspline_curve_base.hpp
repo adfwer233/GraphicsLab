@@ -32,9 +32,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
             if (denom == 0.0)
                 derivative_control_points_.push_back(PointType(0.0));
             else
-                derivative_control_points_.push_back(
-                    static_cast<double>(degree_) * (control_points_[i + 1] - control_points_[i]) / denom
-                );
+                derivative_control_points_.push_back(static_cast<double>(degree_) *
+                                                     (control_points_[i + 1] - control_points_[i]) / denom);
         }
 
         // Remove first and last knot to match the reduced degree
@@ -187,8 +186,9 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         return term1 + term2;
     }
 
-private:
-    static PointType bspline_evaluate(double u, const std::vector<PointType>& ctrl_pts, std::vector<double> knots, int degree) {
+  private:
+    static PointType bspline_evaluate(double u, const std::vector<PointType> &ctrl_pts, std::vector<double> knots,
+                                      int degree) {
         using namespace glm;
 
         const int n = static_cast<int>(ctrl_pts.size()) - 1;

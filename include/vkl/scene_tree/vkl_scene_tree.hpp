@@ -1,8 +1,8 @@
 #pragma once
 
+#include "language/coroutine/generator.hpp"
 #include "language/meta_programming/type_list.hpp"
 #include "language/reflection/reflectors.hpp"
-#include "language/coroutine/generator.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

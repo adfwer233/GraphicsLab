@@ -151,13 +151,13 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return control_points_.size() - 1;
     }
 
-private:
+  private:
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
      * @param param
      * @return
      */
-    PointType evaluate_linear(double param, const std::vector<PointType>& ctrl_pts) const {
+    PointType evaluate_linear(double param, const std::vector<PointType> &ctrl_pts) const {
         double h = 1.0;
         PointType result = ctrl_pts[0];
         double t = param;

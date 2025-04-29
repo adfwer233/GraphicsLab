@@ -5,8 +5,7 @@
 
 namespace GraphicsLab::Geometry {
 
-template<size_t dim>
-struct StraightLineBase: ParamCurveBase<dim> {
+template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
 
     PointType start_point, end_point;
@@ -19,7 +18,9 @@ struct StraightLineBase: ParamCurveBase<dim> {
         return glm::normalize(end_point - start_point);
     }
 
-    PointType normal(double t) const requires (dim == 2) {
+    PointType normal(double t) const
+        requires(dim == 2)
+    {
         auto derivative = derivative(t);
         return {-derivative.y, derivative.x};
     }
@@ -28,4 +29,4 @@ struct StraightLineBase: ParamCurveBase<dim> {
 using StraightLine2D = StraightLineBase<2>;
 using StraightLine3D = StraightLineBase<3>;
 
-}
+} // namespace GraphicsLab::Geometry

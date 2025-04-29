@@ -5,8 +5,7 @@
 
 namespace GraphicsLab::Geometry {
 
-template <size_t dim>
-struct ParamCurveBase {
+template <size_t dim> struct ParamCurveBase {
     using PointType = std::conditional_t<dim == 3, glm::dvec3, glm::dvec2>;
     using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
 
@@ -33,7 +32,7 @@ struct ParamCurveBase {
         }
     }
 
-protected:
+  protected:
     std::unique_ptr<DiscretizationCache> discretizationCache = nullptr;
 };
 

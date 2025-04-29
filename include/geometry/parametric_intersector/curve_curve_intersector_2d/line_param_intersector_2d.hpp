@@ -11,4 +11,4 @@ struct LineParamIntersector2D {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

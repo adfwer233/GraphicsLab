@@ -187,7 +187,6 @@ struct VisualizationProject : IGraphicsLabProject {
         context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf2), "torus2");
     }
 
-
     ReflectDataType reflect() override {
         auto result = IGraphicsLabProject::reflect();
         result.emplace("tick", TypeErasedValue(&VisualizationProject::tick, this));

@@ -12,4 +12,4 @@ struct CurveCurveIntersectionResult2D {
     std::vector<double> curve2_param;
 };
 
-}
+} // namespace GraphicsLab::Geometry

@@ -10,10 +10,11 @@ namespace GraphicsLab {
 namespace RenderGraph {
 
 class RenderGraphCompiler {
-private:
+  private:
     VklDevice &device_;
     RenderGraph &render_graph_;
-public:
+
+  public:
     std::unique_ptr<RenderGraphInstance> compile(RenderContext *context) {
         auto render_graph_instance = std::make_unique<RenderGraphInstance>();
 
@@ -44,8 +45,7 @@ public:
         : render_graph_(render_graph), device_(device) {
     }
 
-private:
-
+  private:
     /**
      * create resources with the information provided in render graph description.
      */
