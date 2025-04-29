@@ -12,6 +12,7 @@
 #include <geometry/parametric_topology/brep_edge.hpp>
 #include <geometry/parametric_topology/brep_face.hpp>
 #include <geometry/parametric_topology/brep_loop.hpp>
+#include <utils/sampler.hpp>
 
 struct VisualizationProject : IGraphicsLabProject {
     void tick() override {
@@ -146,7 +147,45 @@ struct VisualizationProject : IGraphicsLabProject {
         context.sceneTree->addGeometryNode<Mesh3D>(std::move(mesh_data2), "face 2");
         context.sceneTree->addGeometryNode<Mesh2D>(std::move(mesh2d_data), "param space");
         spdlog::info("tessellation finish");
+
+        int sample_on_face1 = 5000;
+        int sample_on_face2 = 5000;
+
+        PointCloud3D point_cloud1;
+        for (int i = 0; i < sample_on_face1; i++) {
+            glm::dvec2 param{GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform()};
+            auto pos = face1->surface->evaluate(param);
+            glm::vec3 color{0.0, 1.0, 0.0};
+            if (face1->contain(param)) {
+                color = glm::vec3{1.0, 0.0, 0.0};
+            }
+            point_cloud1.vertices.emplace_back(pos, color);
+        }
+
+        PointCloud3D point_cloud2;
+        for (int i = 0; i < sample_on_face2; i++) {
+            glm::dvec2 param{GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform()};
+            auto pos = face2->surface->evaluate(param);
+            glm::vec3 color{0.0, 1.0, 0.0};
+            if (face2->contain(param)) {
+                color = glm::vec3{1.0, 0.0, 0.0};
+            }
+            point_cloud2.vertices.emplace_back(pos, color);
+        }
+
+        context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud1), "pc 1");
+        context.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud2), "pc 2");
     }
+
+    void intersection_demo3() {
+        auto surf1 = ExplicitSurfaceExample::createDeformedTorus2();
+        auto surf2 = ExplicitSurfaceExample::createDeformedTorus2({4.5, 0.0, 0.0}, {std::numbers::pi, 0.0});
+        GraphicsLab::Geometry::Tessellator::tessellate(surf1, 64, 64);
+        GraphicsLab::Geometry::Tessellator::tessellate(surf2, 64, 64);
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf1), "torus1");
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf2), "torus2");
+    }
+
 
     ReflectDataType reflect() override {
         auto result = IGraphicsLabProject::reflect();
@@ -155,6 +194,7 @@ struct VisualizationProject : IGraphicsLabProject {
         result.emplace("visualize_deformed_torus",
                        TypeErasedValue(&VisualizationProject::visualize_deformed_torus, this));
         result.emplace("intersection_demo2", TypeErasedValue(&VisualizationProject::intersection_demo2, this));
+        result.emplace("intersection_demo3", TypeErasedValue(&VisualizationProject::intersection_demo3, this));
         return result;
     }
 };
