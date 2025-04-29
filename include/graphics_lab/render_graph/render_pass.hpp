@@ -10,6 +10,8 @@
 #include "render_context.hpp"
 #include "render_pass_reflection.hpp"
 
+#include <vkl/core/vkl_descriptor.hpp>
+
 namespace GraphicsLab {
 namespace RenderGraph {
 

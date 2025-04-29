@@ -114,9 +114,6 @@ struct Torus : public ParamSurface {
         // Vector from the minor circle center to the point
         VecType to_point = point - circle_center;
 
-        // Remove any component along base_normal
-        VecType radial = to_point - glm::dot(to_point, base_normal) * base_normal;
-
         // Get angle v around the minor circle
         VecType ortho1 = glm::normalize(base_normal);
         VecType ortho2 = glm::normalize(circle_center - center); // normal to both

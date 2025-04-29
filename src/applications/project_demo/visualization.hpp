@@ -7,6 +7,7 @@
 
 #include <geometry/constructor/explicit_surface_constructors.hpp>
 #include <geometry/parametric/tessellator.hpp>
+#include <geometry/parametric/torus.hpp>
 #include <geometry/parametric_intersector/surface_surface_intersector.hpp>
 #include <geometry/parametric_topology/brep_coedge.hpp>
 #include <geometry/parametric_topology/brep_edge.hpp>

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "language/meta_programming/type_list.hpp"
-
 #include "language/reflection/reflectors.hpp"
+#include "language/coroutine/generator.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <spdlog/spdlog.h>
 
 #include "vkl_camera.hpp"
 #include "vkl_texture_manager.hpp"
@@ -20,7 +21,6 @@
 #include "graphics_lab/geo_flow/geo_flow.hpp"
 
 #include <geometry/parametric/curve_type_list.hpp>
-#include <geometry/parametric/torus.hpp>
 
 struct Material;
 
@@ -409,7 +409,7 @@ class AssimpImporter {
     static std::unique_ptr<GeometryNode<Mesh3D>> convertMeshToGeometryNode(aiMesh *mesh) {
         Mesh3D mesh_converted;
 
-        for (auto i = 0; i < mesh->mNumVertices; i++) {
+        for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             decltype(mesh_converted.vertices)::value_type vertex;
             vertex.position = {mesh->mVertices[i].x, -mesh->mVertices[i].y, mesh->mVertices[i].z};
             if (mesh->HasNormals())
@@ -421,7 +421,7 @@ class AssimpImporter {
 
         spdlog::info("normal {}", mesh->HasNormals());
 
-        for (auto i = 0; i < mesh->mNumFaces; i++) {
+        for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];
             mesh_converted.indices.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
         }
@@ -431,7 +431,7 @@ class AssimpImporter {
 
         mesh_node->material_index = mesh->mMaterialIndex;
 
-        return std::move(mesh_node);
+        return mesh_node;
     }
 };
 

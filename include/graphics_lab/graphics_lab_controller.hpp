@@ -14,13 +14,13 @@ struct IGraphicsLabProjectController {
 };
 
 struct EmptyGraphicsLabController : IGraphicsLabProjectController {
-    void process_keyboard_input(GLFWwindow *window, float deltaTime) override {
+    void process_keyboard_input(GLFWwindow *, float) override {
     }
-    void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) override {
+    void scroll_callback(GLFWwindow *, double, double) override {
     }
-    void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) override {
+    void mouse_button_callback(GLFWwindow *, int, int, int) override {
     }
-    void mouse_callback(GLFWwindow *window, double xpos, double ypos) override {
+    void mouse_callback(GLFWwindow *, double, double) override {
     }
 };
 

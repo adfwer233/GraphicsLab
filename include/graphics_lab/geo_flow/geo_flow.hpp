@@ -28,8 +28,6 @@ struct GeoFlowPerVertexMap {
         Eigen::MatrixXd result = Executor::run(mesh, args...);
         int n = result.rows();
 
-        using vertex_type = typename MeshType::vertex_type;
-
         for (int i = 0; i < n; i++) {
             glm::vec3 vec{result(i, 0), result(i, 1), result(i, 2)};
             StaticReflect::set_property(mesh->vertices[i], targetFieldName, vec);

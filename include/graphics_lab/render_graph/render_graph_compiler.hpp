@@ -9,7 +9,11 @@
 namespace GraphicsLab {
 namespace RenderGraph {
 
-struct RenderGraphCompiler {
+class RenderGraphCompiler {
+private:
+    VklDevice &device_;
+    RenderGraph &render_graph_;
+public:
     std::unique_ptr<RenderGraphInstance> compile(RenderContext *context) {
         auto render_graph_instance = std::make_unique<RenderGraphInstance>();
 
@@ -33,16 +37,14 @@ struct RenderGraphCompiler {
             render_graph_instance->executionSequence_.push_back({pass->name_, pass});
         }
 
-        return std::move(render_graph_instance);
+        return render_graph_instance;
     }
 
     explicit RenderGraphCompiler(RenderGraph &render_graph, VklDevice &device)
         : render_graph_(render_graph), device_(device) {
     }
 
-  private:
-    VklDevice &device_;
-    RenderGraph &render_graph_;
+private:
 
     /**
      * create resources with the information provided in render graph description.
