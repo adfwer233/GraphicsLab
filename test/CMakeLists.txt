@@ -13,6 +13,7 @@ set(SRC_FILE
         geometry/explicit_torus_intersector_test.cpp
         geometry/spatial_datastructure_test.cpp
         geometry/brep_face_test.cpp
+        geometry/line_param_2d_intersector.cpp
 )
 
 enable_testing()

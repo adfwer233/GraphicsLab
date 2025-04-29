@@ -16,6 +16,7 @@ struct ParamCurveBase {
     virtual ~ParamCurveBase() = default;
 
     virtual PointType evaluate(double t) const = 0;
+    virtual PointType derivative(double t) const = 0;
 
     std::unique_ptr<MeshType> mesh = nullptr;
 

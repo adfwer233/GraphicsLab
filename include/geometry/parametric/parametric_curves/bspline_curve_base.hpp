@@ -13,10 +13,32 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
     std::vector<PointType> control_points_;
     std::vector<double> knots_;
+
+    std::vector<PointType> derivative_control_points_;
+    std::vector<double> derivative_knots_;
+
     int degree_;
 
     BSplineCurveBase(std::vector<PointType> control_points, std::vector<double> knots, int degree)
         : control_points_(std::move(control_points)), knots_(std::move(knots)), degree_(degree) {
+
+        /**
+         * Create derivative data for derivative evaluation
+         */
+        const int n = static_cast<int>(control_points_.size()) - 1;
+
+        for (int i = 0; i < n; ++i) {
+            double denom = knots_[i + degree_ + 1] - knots_[i + 1];
+            if (denom == 0.0)
+                derivative_control_points_.push_back(PointType(0.0));
+            else
+                derivative_control_points_.push_back(
+                    static_cast<double>(degree_) * (control_points_[i + 1] - control_points_[i]) / denom
+                );
+        }
+
+        // Remove first and last knot to match the reduced degree
+        std::vector<double> derivative_knots(knots_.begin() + 1, knots_.end() - 1);
     }
 
     BSplineCurveBase(const BSplineCurveBase<dim> &other) {
@@ -34,45 +56,11 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
     }
 
     PointType evaluate(double u) const override {
-        using namespace glm;
+        return bspline_evaluate(u, control_points_, knots_, degree_);
+    }
 
-        const int n = static_cast<int>(control_points_.size()) - 1;
-        const int k = degree_;
-
-        // Clamp u to [0,1]
-        u = std::clamp(u, 0.0, 1.0);
-
-        // Find knot span index s such that knots_[s] <= u < knots_[s+1]
-        int s = -1;
-        if (u == 1.0) {
-            s = n; // Special case at the end
-        } else {
-            for (int i = k; i <= n; ++i) {
-                if (u >= knots_[i] && u < knots_[i + 1]) {
-                    s = i;
-                    break;
-                }
-            }
-        }
-        if (s == -1)
-            return control_points_.back(); // fallback
-
-        // Initialize d[j] = control point at i = s - k + j
-        std::vector<PointType> d(k + 1);
-        for (int j = 0; j <= k; ++j) {
-            d[j] = control_points_[s - k + j];
-        }
-
-        // De Boor recursion
-        for (int r = 1; r <= k; ++r) {
-            for (int j = k; j >= r; --j) {
-                int i = s - k + j;
-                double alpha = (u - knots_[i]) / (knots_[i + k - r + 1] - knots_[i]);
-                d[j] = (1.0 - alpha) * d[j - 1] + alpha * d[j];
-            }
-        }
-
-        return d[k];
+    PointType derivative(double param) const override {
+        return bspline_evaluate(param, derivative_control_points_, derivative_knots_, degree_ - 1);
     }
 
     std::vector<BezierCurveBase<dim>> convert_to_bezier() const {
@@ -197,6 +185,49 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         if (denom2 > 1e-8)
             term2 = (knots[i + k + 1] - u) / denom2 * basis_function(i + 1, k - 1, u, knots);
         return term1 + term2;
+    }
+
+private:
+    static PointType bspline_evaluate(double u, const std::vector<PointType>& ctrl_pts, std::vector<double> knots, int degree) {
+        using namespace glm;
+
+        const int n = static_cast<int>(ctrl_pts.size()) - 1;
+        const int k = degree;
+
+        // Clamp u to [0,1]
+        u = std::clamp(u, 0.0, 1.0);
+
+        // Find knot span index s such that knots_[s] <= u < knots_[s+1]
+        int s = -1;
+        if (u == 1.0) {
+            s = n; // Special case at the end
+        } else {
+            for (int i = k; i <= n; ++i) {
+                if (u >= knots[i] && u < knots[i + 1]) {
+                    s = i;
+                    break;
+                }
+            }
+        }
+        if (s == -1)
+            return ctrl_pts.back(); // fallback
+
+        // Initialize d[j] = control point at i = s - k + j
+        std::vector<PointType> d(k + 1);
+        for (int j = 0; j <= k; ++j) {
+            d[j] = ctrl_pts[s - k + j];
+        }
+
+        // De Boor recursion
+        for (int r = 1; r <= k; ++r) {
+            for (int j = k; j >= r; --j) {
+                int i = s - k + j;
+                double alpha = (u - knots[i]) / (knots[i + k - r + 1] - knots[i]);
+                d[j] = (1.0 - alpha) * d[j - 1] + alpha * d[j];
+            }
+        }
+
+        return d[k];
     }
 };
 

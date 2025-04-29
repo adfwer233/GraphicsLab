@@ -13,6 +13,8 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
     using PointType = glm::vec<dim, double>;
     std::vector<PointType> control_points_;
+    std::vector<PointType> derivative_points_;
+
     double derivative_bound = -1.0;
 
     REFLECT(Property{"control_points", &BezierCurveBase::control_points_})
@@ -30,39 +32,11 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
      * @return
      */
     PointType evaluate(double param) const override {
-        return evaluate_linear(param);
+        return evaluate_linear(param, control_points_);
     }
 
-    /**
-     * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
-     * @param param
-     * @return
-     */
-    PointType evaluate_linear(double param) const {
-        double h = 1.0;
-        PointType result = control_points_[0];
-        double t = param;
-        double u = 1 - t;
-        uint32_t n = control_points_.size() - 1;
-        uint32_t n1 = n + 1;
-        if (param <= 0.5) {
-            u = t / u;
-            for (int k = 1; k <= n; k++) {
-                h = h * u * (n1 - k);
-                h = h / (k + h);
-                double h1 = 1 - h;
-                result = result * h1 + control_points_[k] * h;
-            }
-        } else {
-            u = u / t;
-            for (int k = 1; k <= n; k++) {
-                h = h * (n1 - k);
-                h = h / (k * u + h);
-                double h1 = 1 - h;
-                result = result * h1 + control_points_[k] * h;
-            }
-        }
-        return result;
+    PointType derivative(double param) const override {
+        return evaluate_derivative(param, derivative_points_);
     }
 
     double min_x = 100, min_y = 100, max_x = -100, max_y = -100;
@@ -84,6 +58,10 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
     explicit BezierCurveBase(decltype(control_points_) &&control_points) : control_points_(control_points) {
+        int n = control_points_.size() - 1;
+        for (int i = 1; i < control_points_.size(); i++) {
+            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * n);
+        }
         update_bounds();
     }
 
@@ -171,6 +149,39 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     size_t degree() const {
         return control_points_.size() - 1;
+    }
+
+private:
+    /**
+     * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
+     * @param param
+     * @return
+     */
+    PointType evaluate_linear(double param, const std::vector<PointType>& ctrl_pts) const {
+        double h = 1.0;
+        PointType result = ctrl_pts[0];
+        double t = param;
+        double u = 1 - t;
+        uint32_t n = ctrl_pts.size() - 1;
+        uint32_t n1 = n + 1;
+        if (param <= 0.5) {
+            u = t / u;
+            for (int k = 1; k <= n; k++) {
+                h = h * u * (n1 - k);
+                h = h / (k + h);
+                double h1 = 1 - h;
+                result = result * h1 + ctrl_pts[k] * h;
+            }
+        } else {
+            u = u / t;
+            for (int k = 1; k <= n; k++) {
+                h = h * (n1 - k);
+                h = h / (k * u + h);
+                double h1 = 1 - h;
+                result = result * h1 + ctrl_pts[k] * h;
+            }
+        }
+        return result;
     }
 };
 

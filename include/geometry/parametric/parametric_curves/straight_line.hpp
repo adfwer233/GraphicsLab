@@ -14,6 +14,13 @@ struct StraightLineBase: ParamCurveBase<dim> {
     PointType evaluate(double t) const override {
         return glm::mix(start_point, end_point, t);
     }
+
+    PointType derivative(double t) const override {
+        return glm::normalize(end_point - start_point);
+    }
 };
+
+using StraightLine2D = StraightLineBase<2>;
+using StraightLine3D = StraightLineBase<3>;
 
 }
