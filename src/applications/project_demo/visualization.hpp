@@ -187,6 +187,23 @@ struct VisualizationProject : IGraphicsLabProject {
         context.sceneTree->addGeometryNode<GraphicsLab::Geometry::ExplicitSurface>(std::move(surf2), "torus2");
     }
 
+    void convert_bezier_demo() {
+        auto surf = ExplicitSurfaceExample::createDeformedTorus();
+        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.6, 2.0, 1.5);
+        auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(surf, surf2);
+
+        auto curve = result.pcurve_list1.front();
+        GraphicsLab::Geometry::Tessellator::tessellate(curve, 100);
+        auto bezier_curves = curve.convert_to_bezier();
+        for (int i = 0; i < bezier_curves.size(); i++) {
+            GraphicsLab::Geometry::Tessellator::tessellate(bezier_curves[i], 100);
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BezierCurve2D>(std::move(bezier_curves[i]), std::format("curve bezier {}", i));
+        }
+
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(curve), std::format("curve bspline"));
+
+    }
+
     ReflectDataType reflect() override {
         auto result = IGraphicsLabProject::reflect();
         result.emplace("tick", TypeErasedValue(&VisualizationProject::tick, this));
@@ -195,6 +212,7 @@ struct VisualizationProject : IGraphicsLabProject {
                        TypeErasedValue(&VisualizationProject::visualize_deformed_torus, this));
         result.emplace("intersection_demo2", TypeErasedValue(&VisualizationProject::intersection_demo2, this));
         result.emplace("intersection_demo3", TypeErasedValue(&VisualizationProject::intersection_demo3, this));
+        result.emplace("convert_bezier_demo", TypeErasedValue(&VisualizationProject::convert_bezier_demo, this));
         return result;
     }
 };

@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "language/reflection/static_reflector.hpp"
 #include "parametric_curve.hpp"
+#include <geometry/parametric/bezier_curve_2d.hpp>
 #include <vector>
 
 namespace GraphicsLab::Geometry {
@@ -24,7 +25,15 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         control_points_ = std::move(other.control_points_);
         derivative_bound = other.derivative_bound;
         this->mesh = std::move(other.mesh);
-    };
+    }
+
+    explicit BezierCurveBase(decltype(control_points_) &&control_points) : control_points_(control_points) {
+        int n = control_points_.size() - 1;
+        for (int i = 1; i < control_points_.size(); i++) {
+            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
+        }
+        update_bounds();
+    }
 
     /**
      * evaluate the Bézier curve with de casteljau algorithm
@@ -36,7 +45,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
     PointType derivative(double param) const override {
-        return evaluate_derivative(param, derivative_points_);
+        return evaluate_linear(param, derivative_points_);
     }
 
     double min_x = 100, min_y = 100, max_x = -100, max_y = -100;
@@ -55,14 +64,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
             min_y = std::min(min_y, pt.y);
             max_y = std::max(max_y, pt.y);
         }
-    }
-
-    explicit BezierCurveBase(decltype(control_points_) &&control_points) : control_points_(control_points) {
-        int n = control_points_.size() - 1;
-        for (int i = 1; i < control_points_.size(); i++) {
-            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * n);
-        }
-        update_bounds();
     }
 
     /**

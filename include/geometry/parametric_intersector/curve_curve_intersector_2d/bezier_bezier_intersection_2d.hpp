@@ -1,39 +1,31 @@
 #pragma once
 
-#include "bezier_clipping.hpp"
-#include "geometry/parametric/bezier_curve_2d.hpp"
+#include "curve_curve_inter_result.hpp"
+
+#include <geometry/parametric/bezier_curve_2d.hpp>
 
 namespace GraphicsLab::Geometry {
 
-[[deprecated]] struct Bezier2DIntersector {
-    using PointType = glm::vec<2, double>;
-    using CurveType = BezierCurve2D;
-
-    static bool self_intersection(const CurveType &curve1) {
-        auto points = curve1.sample(100);
-
-        int n = points.size();
-        for (int i = 0; i < n - 1; ++i) {
-            for (int j = i + 2; j < n - 1; ++j) {
-                if (std::abs(i - j) <= 1)
-                    continue;
-                if (segments_intersect(points[i], points[i + 1], points[j], points[j + 1])) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    static std::vector<std::pair<double, double>> intersect(const CurveType &curve1, const CurveType &curve2) {
+struct BezierBezierIntersector2D {
+    static CurveCurveIntersectionResult2D intersect(const BezierCurve2D& curve1, const BezierCurve2D& curve2) {
+        CurveCurveIntersectionResult2D result;
         std::vector<std::pair<double, double>> intersections;
 
         intersect_recursive(curve1, curve2, 0.0, 1.0, 0.0, 1.0, intersections);
 
-        return intersections;
+        for (auto [p1, p2] : intersections) {
+            auto pos1 = curve1.evaluate(p1);
+            auto pos2 = curve2.evaluate(p2);
+
+            result.curve1_param.push_back(p1);
+            result.curve2_param.push_back(p2);
+            result.inter_points.push_back((pos1 + pos2) / 2.0);
+        }
+
+        return result;
     }
 
-  private:
+private:
     static bool bbox_overlap(const BezierCurve2D &a, const BezierCurve2D &b) {
         auto [minA, maxA] = a.boundingBox();
         auto [minB, maxB] = b.boundingBox();
@@ -87,4 +79,4 @@ namespace GraphicsLab::Geometry {
     }
 };
 
-} // namespace GraphicsLab::Geometry
+}
