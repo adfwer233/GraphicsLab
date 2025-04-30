@@ -14,7 +14,7 @@ struct LineParamIntersector2D {
 };
 
 struct LineBSplineParamIntersector2D {
-    static CurveCurveIntersectionResult2D intersect(const StraightLine2D &line, const BSplineCurve2D & curve) {
+    static CurveCurveIntersectionResult2D intersect(const StraightLine2D &line, const BSplineCurve2D &curve) {
         CurveCurveIntersectionResult2D result;
         auto bezier_curves = curve.convert_to_bezier();
 

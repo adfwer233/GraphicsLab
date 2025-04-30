@@ -7,7 +7,7 @@
 namespace GraphicsLab::Geometry {
 
 struct BezierBezierIntersector2D {
-    static CurveCurveIntersectionResult2D intersect(const BezierCurve2D& curve1, const BezierCurve2D& curve2) {
+    static CurveCurveIntersectionResult2D intersect(const BezierCurve2D &curve1, const BezierCurve2D &curve2) {
         CurveCurveIntersectionResult2D result;
         std::vector<std::pair<double, double>> intersections;
 
@@ -25,7 +25,7 @@ struct BezierBezierIntersector2D {
         return result;
     }
 
-private:
+  private:
     static bool bbox_overlap(const BezierCurve2D &a, const BezierCurve2D &b) {
         auto [minA, maxA] = a.boundingBox();
         auto [minB, maxB] = b.boundingBox();
@@ -79,4 +79,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

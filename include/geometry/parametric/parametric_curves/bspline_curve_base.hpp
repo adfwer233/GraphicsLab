@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cmath>
 #include <Eigen/Eigen>
+#include <cmath>
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 
@@ -117,19 +117,23 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         // Check start multiplicity
         double start = knots_.front();
         int start_mult = count_multiplicity(start);
-        if (start_mult != d + 1) return false;
+        if (start_mult != d + 1)
+            return false;
 
         // Check end multiplicity
         double end = knots_.back();
         int end_mult = count_multiplicity(end);
-        if (end_mult != d + 1) return false;
+        if (end_mult != d + 1)
+            return false;
 
         // Check internal knot multiplicities
         for (int i = start_mult; i < m + 1 - end_mult;) {
             double u = knots_[i];
             int mult = 1;
-            while (i + mult < m + 1 - end_mult && std::abs(u - knots_[i + mult]) < 1e-8) ++mult;
-            if (mult != d) return false;
+            while (i + mult < m + 1 - end_mult && std::abs(u - knots_[i + mult]) < 1e-8)
+                ++mult;
+            if (mult != d)
+                return false;
             i += mult;
         }
         return true;
@@ -138,7 +142,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
     void insert_all_knots_to_bezier_form() {
         const int d = degree_;
         const int m = static_cast<int>(knots_.size()) - 1;
-        if (is_in_bezier_form()) return;
+        if (is_in_bezier_form())
+            return;
 
         // Gather unique internal knots and their multiplicities
         double start = knots_.front();
@@ -151,7 +156,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         }
 
         // Insert knots until each internal knot has multiplicity == degree
-        for (const auto& [u, mult] : multiplicity) {
+        for (const auto &[u, mult] : multiplicity) {
             int to_insert = d - mult;
             for (int i = 0; i < to_insert; ++i)
                 insert_knot(u);
@@ -207,7 +212,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         knots_.insert(knots_.begin() + s + 1, u);
         control_points_ = std::move(new_ctrl_pts);
 
-        // spdlog::info("knot {}, ctrl_pts: {}, size diff {}", knots_.size(), control_points_.size(), knots_.size() - control_points_.size());
+        // spdlog::info("knot {}, ctrl_pts: {}, size diff {}", knots_.size(), control_points_.size(), knots_.size() -
+        // control_points_.size());
     }
 
     static BSplineCurveBase fit(const std::vector<PointType> &points, int degree, int num_ctrl_points) {
@@ -295,9 +301,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
     }
 
     int count_multiplicity(double u, double epsilon = 1e-8) const {
-        return std::count_if(knots_.begin(), knots_.end(), [u, epsilon](double v) {
-            return std::abs(v - u) < epsilon;
-        });
+        return std::count_if(knots_.begin(), knots_.end(),
+                             [u, epsilon](double v) { return std::abs(v - u) < epsilon; });
     }
 
     static PointType bspline_evaluate(double u, const std::vector<PointType> &ctrl_pts, std::vector<double> knots,

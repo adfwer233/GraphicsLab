@@ -202,11 +202,12 @@ struct VisualizationProject : IGraphicsLabProject {
         auto bezier_curves = curve.convert_to_bezier();
         for (int i = 0; i < bezier_curves.size(); i++) {
             GraphicsLab::Geometry::Tessellator::tessellate(bezier_curves[i], 100);
-            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BezierCurve2D>(std::move(bezier_curves[i]), std::format("curve bezier {}", i));
+            context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BezierCurve2D>(std::move(bezier_curves[i]),
+                                                                                     std::format("curve bezier {}", i));
         }
 
-        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(curve), std::format("curve bspline"));
-
+        context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BSplineCurve2D>(std::move(curve),
+                                                                                  std::format("curve bspline"));
     }
 
     ReflectDataType reflect() override {
