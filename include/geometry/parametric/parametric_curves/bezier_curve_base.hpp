@@ -3,7 +3,6 @@
 #include "glm/glm.hpp"
 #include "language/reflection/static_reflector.hpp"
 #include "parametric_curve.hpp"
-#include <geometry/parametric/bezier_curve_2d.hpp>
 #include <vector>
 
 namespace GraphicsLab::Geometry {

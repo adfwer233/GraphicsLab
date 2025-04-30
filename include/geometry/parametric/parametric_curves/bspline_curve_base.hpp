@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <Eigen/Eigen>
 #include <glm/glm.hpp>
 
 #include "bezier_curve_base.hpp"
