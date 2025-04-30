@@ -3,6 +3,7 @@
 #include <cmath>
 #include <Eigen/Eigen>
 #include <glm/glm.hpp>
+#include <spdlog/spdlog.h>
 
 #include "bezier_curve_base.hpp"
 
@@ -65,20 +66,21 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
     std::vector<BezierCurveBase<dim>> convert_to_bezier() const {
         std::vector<BezierCurveBase<dim>> result;
-        int n = static_cast<int>(control_points_.size()) - 1;
-        int m = static_cast<int>(knots_.size()) - 1;
-        int k = degree_;
 
-        // Assumes the curve is clamped and can be represented as a set of Bezier segments
-        int num_segments = m - 2 * k;
-        for (int seg = 0; seg < num_segments; ++seg) {
-            std::vector<PointType> bezier_pts;
-            for (int i = 0; i <= k; ++i) {
-                int ctrl_index = seg + i;
-                bezier_pts.push_back(control_points_[ctrl_index]);
+        const int d = degree_;
+        const int num_control_points = static_cast<int>(control_points_.size());
+
+        // Each Bézier segment has (d + 1) control points
+        const int num_segments = (num_control_points - 1) / d;
+
+        for (int i = 0; i < num_segments; ++i) {
+            std::vector<PointType> bezier_ctrl_pts;
+            for (int j = 0; j <= d; ++j) {
+                bezier_ctrl_pts.push_back(control_points_[i * d + j]);
             }
-            result.emplace_back(std::move(bezier_pts));
+            result.emplace_back(std::move(bezier_ctrl_pts));
         }
+
         return result;
     }
 
@@ -106,6 +108,106 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
             pt -= offset;
         }
         return new_curve;
+    }
+
+    bool is_in_bezier_form() const {
+        const int d = degree_;
+        const int m = static_cast<int>(knots_.size()) - 1;
+
+        // Check start multiplicity
+        double start = knots_.front();
+        int start_mult = count_multiplicity(start);
+        if (start_mult != d + 1) return false;
+
+        // Check end multiplicity
+        double end = knots_.back();
+        int end_mult = count_multiplicity(end);
+        if (end_mult != d + 1) return false;
+
+        // Check internal knot multiplicities
+        for (int i = start_mult; i < m + 1 - end_mult;) {
+            double u = knots_[i];
+            int mult = 1;
+            while (i + mult < m + 1 - end_mult && std::abs(u - knots_[i + mult]) < 1e-8) ++mult;
+            if (mult != d) return false;
+            i += mult;
+        }
+        return true;
+    }
+
+    void insert_all_knots_to_bezier_form() {
+        const int d = degree_;
+        const int m = static_cast<int>(knots_.size()) - 1;
+        if (is_in_bezier_form()) return;
+
+        // Gather unique internal knots and their multiplicities
+        double start = knots_.front();
+        double end = knots_.back();
+        std::map<double, int> multiplicity;
+
+        for (double u : knots_) {
+            if (u != start && u != end)
+                multiplicity[u]++;
+        }
+
+        // Insert knots until each internal knot has multiplicity == degree
+        for (const auto& [u, mult] : multiplicity) {
+            int to_insert = d - mult;
+            for (int i = 0; i < to_insert; ++i)
+                insert_knot(u);
+        }
+    }
+
+    void insert_knot(double u) {
+        const int d = degree_;
+        int n = static_cast<int>(control_points_.size()) - 1;
+        int m = static_cast<int>(knots_.size()) - 1;
+
+        // Find the span index s where u is to be inserted: knots_[s] <= u < knots_[s+1]
+        int s = -1;
+        for (int i = 0; i < m; ++i) {
+            if (knots_[i] - 1e-8 <= u && u < knots_[i + 1]) {
+                s = i;
+                break;
+            }
+        }
+        // Special case: if u == knots_[m], set s = m - 1
+        if (s == -1 && same_knot(u, knots_[m])) {
+            s = m - 1;
+        }
+        if (s == -1) {
+            throw std::runtime_error("Invalid knot value to insert.");
+        }
+
+        // Count how many times u already exists in the knot vector
+        int u_multiplicity = count_multiplicity(u);
+        if (u_multiplicity > d) {
+            throw std::runtime_error("Knot multiplicity exceeds degree; cannot insert.");
+        }
+
+        // Compute new control points
+        std::vector<PointType> new_ctrl_pts;
+        for (int i = 0; i <= s - d + 1; ++i) {
+            new_ctrl_pts.push_back(control_points_[i]);
+        }
+
+        for (int i = s - d + 2; i <= s; ++i) {
+            double alpha = (u - knots_[i]) / (knots_[i + d] - knots_[i]);
+            PointType pt = (1.0 - alpha) * control_points_[i - 1] + alpha * control_points_[i];
+            new_ctrl_pts.push_back(pt);
+        }
+
+        for (int i = s + 1; i <= n + 1; ++i) {
+            new_ctrl_pts.push_back(control_points_[i - 1]);
+        }
+
+        // spdlog::info("n {}, {}", n, new_ctrl_pts.size());
+
+        // Insert the knot into the knot vector
+        knots_.insert(knots_.begin() + s + 1, u);
+        control_points_ = std::move(new_ctrl_pts);
+
+        // spdlog::info("knot {}, ctrl_pts: {}, size diff {}", knots_.size(), control_points_.size(), knots_.size() - control_points_.size());
     }
 
     static BSplineCurveBase fit(const std::vector<PointType> &points, int degree, int num_ctrl_points) {
@@ -188,6 +290,16 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
     }
 
   private:
+    bool same_knot(double u, double v) {
+        return std::abs(u - v) < 1e-8;
+    }
+
+    int count_multiplicity(double u, double epsilon = 1e-8) const {
+        return std::count_if(knots_.begin(), knots_.end(), [u, epsilon](double v) {
+            return std::abs(v - u) < epsilon;
+        });
+    }
+
     static PointType bspline_evaluate(double u, const std::vector<PointType> &ctrl_pts, std::vector<double> knots,
                                       int degree) {
         using namespace glm;

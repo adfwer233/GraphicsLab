@@ -194,6 +194,11 @@ struct VisualizationProject : IGraphicsLabProject {
 
         auto curve = result.pcurve_list1.front();
         GraphicsLab::Geometry::Tessellator::tessellate(curve, 100);
+
+        bool res1 = curve.is_in_bezier_form();
+        curve.insert_all_knots_to_bezier_form();
+        bool res2 = curve.is_in_bezier_form();
+
         auto bezier_curves = curve.convert_to_bezier();
         for (int i = 0; i < bezier_curves.size(); i++) {
             GraphicsLab::Geometry::Tessellator::tessellate(bezier_curves[i], 100);

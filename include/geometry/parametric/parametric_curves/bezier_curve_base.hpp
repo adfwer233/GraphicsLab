@@ -166,7 +166,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         uint32_t n1 = n + 1;
         if (param <= 0.5) {
             u = t / u;
-            for (int k = 1; k <= n; k++) {
+            for (uint32_t k = 1; k <= n; k++) {
                 h = h * u * (n1 - k);
                 h = h / (k + h);
                 double h1 = 1 - h;
@@ -174,7 +174,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
             }
         } else {
             u = u / t;
-            for (int k = 1; k <= n; k++) {
+            for (uint32_t k = 1; k <= n; k++) {
                 h = h * (n1 - k);
                 h = h / (k * u + h);
                 double h1 = 1 - h;
