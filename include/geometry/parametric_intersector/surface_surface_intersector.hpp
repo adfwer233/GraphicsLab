@@ -40,7 +40,7 @@ struct SurfaceSurfaceIntersector {
             J.col(2) = -Eigen::Vector3d(du2.x, du2.y, du2.z);
             J.col(3) = -Eigen::Vector3d(dv2.x, dv2.y, dv2.z);
 
-            Eigen::JacobiSVD svd(J, Eigen::ComputeThinU | Eigen::ComputeThinV);
+            Eigen::JacobiSVD<Eigen::MatrixXd> svd(J, Eigen::ComputeThinU | Eigen::ComputeThinV);
             Eigen::Vector3d b(F.x, F.y, F.z);
             Eigen::Vector4d delta = svd.solve(b);
 

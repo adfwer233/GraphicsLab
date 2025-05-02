@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "spdlog/spdlog.h"
+
 namespace GraphicsLab {
 
 template <typename NodeAttachmentType, typename EdgeAttachmentType> struct DirectedGraph {
@@ -38,6 +40,22 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
     void add_bidirectional_edge(size_t from, size_t to, EdgeAttachmentType data) {
         add_directed_edge(from, to, data);
         add_directed_edge(to, from, data);
+    }
+
+    void print_graph_info() const {
+
+        if constexpr (IsStaticReflectedType<NodeAttachmentType>) {
+            for (int i = 0; i < nodes.size(); i++) {
+                spdlog::info("Node {}: {}", i, StaticReflect::serialization(nodes[i].data).dump());
+            }
+        }
+
+        for (int i = 0; i < nodes.size(); i++) {
+            for (int j = 0; j < G[i].size(); j++) {
+                auto e = G[i][j];
+                spdlog::info("{} -> {}", e.from, e.to);
+            }
+        }
     }
 
     // Topological sort function
@@ -97,7 +115,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
      */
     std::vector<std::vector<Edge>> find_all_simple_circuits() {
         std::vector<std::vector<Edge>> result;
-        std::vector<bool> blocked(G.size(), false);
+        std::vector<bool> blocked(nodes.size(), false);
         std::unordered_map<size_t, std::vector<size_t>> block_map;
         std::stack<size_t> stack;
         std::vector<size_t> stack_vec;
@@ -207,9 +225,9 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
         };
 
         size_t start_index = 0;
-        while(start_index < G.size()) {
-            std::vector<std::vector<Edge>> subgraph(G.size());
-            for(size_t i = start_index; i < G.size(); ++i) {
+        while(start_index < nodes.size()) {
+            std::vector<std::vector<Edge>> subgraph(nodes.size());
+            for(size_t i = start_index; i < nodes.size(); ++i) {
                 for(const auto& edge: G[i]) {
                     if(edge.to >= start_index) {
                         subgraph[i].push_back(edge);

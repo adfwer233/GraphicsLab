@@ -16,16 +16,23 @@ struct BoundaryCutting {
     struct EdgeAttachment {
         ParamCurve2D* curve;
         double start_param, end_param;
+
+        REFLECT(Property{"start_param", &EdgeAttachment::start_param},
+                Property{"end_param", &EdgeAttachment::end_param});
     };
 
     struct GraphNodeAttachment {
         glm::dvec2 position;
+
+        REFLECT(Property{"position", &GraphNodeAttachment::position});
     };
     struct VertexAttachment {
         size_t node_id;
     };
 
     DirectedGraph<GraphNodeAttachment, EdgeAttachment> graph;
+
+    std::vector<std::vector<decltype(graph)::Edge>> simple_loops;
 
     StraightLine2D left_line{{0.0, 1.0}, {0.0, 0.0}};
     StraightLine2D right_line{{1.0, 0.0}, {1.0, 1.0}};
@@ -48,7 +55,7 @@ struct BoundaryCutting {
             return attachment.node_id;
         };
 
-        auto update_graph_with_info = [&](BSplineCurve2D* pcurve, CurveCurveIntersectionResult2D& inter) {
+        auto update_graph_with_info = [&](BSplineCurve2D* pcurve, CurveCurveIntersectionResult2D& inter, bool reverse) {
             std::vector<std::pair<double, glm::dvec2>> split_points;
             split_points.emplace_back(0.0, pcurve->evaluate(0.0));
             for (size_t j = 0; j < inter.inter_points.size(); j++)
@@ -75,7 +82,11 @@ struct BoundaryCutting {
                 auto start = start_pos + offset;
                 auto end = end_pos + offset;
 
-                graph.add_directed_edge(start_node_id, end_node_id, attachment);
+                if (not reverse) {
+                    graph.add_directed_edge(start_node_id, end_node_id, attachment);
+                } else {
+                    graph.add_directed_edge(end_node_id, start_node_id, attachment);
+                }
             }
         };
 
@@ -117,7 +128,7 @@ struct BoundaryCutting {
                         }
                     }
 
-                    update_graph_with_info(pcurve, inter_all);
+                    update_graph_with_info(pcurve, inter_all, coedge->orientation == BRepCoedge::Orientation::BACKWARD);
                 }
             }
         }
@@ -140,10 +151,13 @@ struct BoundaryCutting {
 
         auto handle_edges = [](std::vector<double>& vec) {
             if (not vec.empty()) {
-                if (vec.front() < 1e-4)
+                if (vec.front() > 1e-4)
                     vec.insert(vec.begin(), 0.0);
-                if (vec.front() > 1 - 1e-4)
+                if (vec.front() < 1 - 1e-4)
                     vec.push_back(1.0);
+            } else {
+                vec.push_back(0.0);
+                vec.push_back(1.0);
             }
         };
 
@@ -188,8 +202,8 @@ struct BoundaryCutting {
         insert_boundary_to_graph(top_params, top_nodes, &top_line);
         insert_boundary_to_graph(bottom_params, bottom_nodes, &bottom_line);
 
-        auto simple_loops = graph.find_all_simple_circuits();
-
+        graph.print_graph_info();
+        simple_loops = graph.find_all_simple_circuits();
     }
 
 private:
