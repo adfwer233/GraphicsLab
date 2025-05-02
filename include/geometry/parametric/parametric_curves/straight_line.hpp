@@ -24,6 +24,12 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
         auto derivative = derivative(t);
         return {-derivative.y, derivative.x};
     }
+    StraightLineBase() = default;
+
+    StraightLineBase(const PointType& start, const PointType& end) {
+        start_point = start;
+        end_point = end;
+    }
 };
 
 using StraightLine2D = StraightLineBase<2>;

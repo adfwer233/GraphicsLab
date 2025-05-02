@@ -8,6 +8,7 @@
 #include <geometry/constructor/explicit_surface_constructors.hpp>
 #include <geometry/parametric/tessellator.hpp>
 #include <geometry/parametric/torus.hpp>
+#include <geometry/parametric_intersector/curve_curve_intersector_2d/line_param_intersector_2d.hpp>
 #include <geometry/parametric_intersector/surface_surface_intersector.hpp>
 #include <geometry/parametric_topology/brep_coedge.hpp>
 #include <geometry/parametric_topology/brep_edge.hpp>
@@ -200,6 +201,8 @@ struct VisualizationProject : IGraphicsLabProject {
         bool res2 = curve.is_in_bezier_form();
 
         auto bezier_curves = curve.convert_to_bezier();
+
+        std::scoped_lock lock(context.sceneTree->sceneTreeMutex);
         for (int i = 0; i < bezier_curves.size(); i++) {
             GraphicsLab::Geometry::Tessellator::tessellate(bezier_curves[i], 100);
             context.sceneTree->addGeometryNode<GraphicsLab::Geometry::BezierCurve2D>(std::move(bezier_curves[i]),
@@ -210,6 +213,22 @@ struct VisualizationProject : IGraphicsLabProject {
                                                                                   std::format("curve bspline"));
     }
 
+    void boundary_cutting_example() {
+        using namespace GraphicsLab::Geometry;
+        auto surf = ExplicitSurfaceExample::createDeformedTorus();
+        auto surf2 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid(1.6, 2.0, 1.5);
+        auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(surf, surf2);
+
+        StraightLine2D straight_line{glm::dvec2{0.0, 0.0}, glm::dvec2{0.0, 1.0}};
+        for (size_t i = 0; i < result.pcurve_list1.size(); i++) {
+            auto inter_result = LineBSplineParamIntersector2D::intersect(straight_line, result.pcurve_list1[i]);
+            for (auto pos : inter_result.inter_points) {
+                spdlog::info("{} {}", pos.x, pos.y);
+            }
+        }
+    }
+
+
     ReflectDataType reflect() override {
         auto result = IGraphicsLabProject::reflect();
         result.emplace("tick", TypeErasedValue(&VisualizationProject::tick, this));
@@ -219,6 +238,7 @@ struct VisualizationProject : IGraphicsLabProject {
         result.emplace("intersection_demo2", TypeErasedValue(&VisualizationProject::intersection_demo2, this));
         result.emplace("intersection_demo3", TypeErasedValue(&VisualizationProject::intersection_demo3, this));
         result.emplace("convert_bezier_demo", TypeErasedValue(&VisualizationProject::convert_bezier_demo, this));
+        result.emplace("boundary_cutting_example", TypeErasedValue(&VisualizationProject::boundary_cutting_example, this));
         return result;
     }
 };
