@@ -4,8 +4,7 @@
 
 namespace GraphicsLab::Geometry {
 
-template<size_t dim, typename T>
-struct Box {
+template <size_t dim, typename T> struct Box {
     using point_type = glm::vec<dim, T>;
     point_type min, max;
 
@@ -23,4 +22,4 @@ using Box3D = Box<3, float>;
 using ParamBox2D = Box<2, double>;
 using ParamBox3D = Box<3, double>;
 
-}
+} // namespace GraphicsLab::Geometry

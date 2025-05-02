@@ -233,7 +233,6 @@ struct VisualizationProject : IGraphicsLabProject {
         }
     }
 
-
     ReflectDataType reflect() override {
         auto result = IGraphicsLabProject::reflect();
         result.emplace("tick", TypeErasedValue(&VisualizationProject::tick, this));
@@ -243,7 +242,8 @@ struct VisualizationProject : IGraphicsLabProject {
         result.emplace("intersection_demo2", TypeErasedValue(&VisualizationProject::intersection_demo2, this));
         result.emplace("intersection_demo3", TypeErasedValue(&VisualizationProject::intersection_demo3, this));
         result.emplace("convert_bezier_demo", TypeErasedValue(&VisualizationProject::convert_bezier_demo, this));
-        result.emplace("boundary_cutting_example", TypeErasedValue(&VisualizationProject::boundary_cutting_example, this));
+        result.emplace("boundary_cutting_example",
+                       TypeErasedValue(&VisualizationProject::boundary_cutting_example, this));
         return result;
     }
 };

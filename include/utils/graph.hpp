@@ -122,10 +122,10 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
 
         std::function<void(size_t)> unblock = [&](size_t node) {
             blocked[node] = false;
-            while(!block_map[node].empty()) {
+            while (!block_map[node].empty()) {
                 size_t w = block_map[node].back();
                 block_map[node].pop_back();
-                if(blocked[w]) {
+                if (blocked[w]) {
                     unblock(w);
                 }
             }
@@ -137,18 +137,18 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             blocked[v] = true;
             stack_vec.push_back(v);
 
-            for(const auto& edge: G[v]) {
+            for (const auto &edge : G[v]) {
                 size_t w = edge.to;
-                if(w == start) {
+                if (w == start) {
                     std::vector<Edge> cycle;
 
                     /**
                      * @todo: use map here
                      */
-                    for(size_t i = 0; i < stack_vec.size(); ++i) {
+                    for (size_t i = 0; i < stack_vec.size(); ++i) {
                         size_t next = stack_vec[(i + 1) % stack_vec.size()];
-                        for(auto ed: G[stack_vec[i]]) {
-                            if(ed.to == next) {
+                        for (auto ed : G[stack_vec[i]]) {
+                            if (ed.to == next) {
                                 cycle.push_back(ed);
                                 break;
                             }
@@ -156,19 +156,19 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                     }
                     result.push_back(cycle);
                     found_cycle = true;
-                } else if(!blocked[w]) {
-                    if(circuit(w, start)) {
+                } else if (!blocked[w]) {
+                    if (circuit(w, start)) {
                         found_cycle = true;
                     }
                 }
             }
 
-            if(found_cycle) {
+            if (found_cycle) {
                 unblock(v);
             } else {
-                for(const auto& edge: G[v]) {
+                for (const auto &edge : G[v]) {
                     size_t w = edge.to;
-                    if(std::find(block_map[w].begin(), block_map[w].end(), v) == block_map[w].end()) {
+                    if (std::find(block_map[w].begin(), block_map[w].end(), v) == block_map[w].end()) {
                         block_map[w].push_back(v);
                     }
                 }
@@ -179,7 +179,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             return found_cycle;
         };
 
-        auto tarjan_scc = [&](const std::vector<std::vector<Edge>>& graph) -> std::vector<std::vector<size_t>> {
+        auto tarjan_scc = [&](const std::vector<std::vector<Edge>> &graph) -> std::vector<std::vector<size_t>> {
             std::vector<std::vector<size_t>> sccs;
             std::vector<size_t> index(graph.size(), -1);
             std::vector<size_t> lowlink(graph.size(), -1);
@@ -192,17 +192,17 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                 tarjan_stack.push(v);
                 on_stack[v] = true;
 
-                for(const auto& edge: graph[v]) {
+                for (const auto &edge : graph[v]) {
                     size_t w = edge.to;
-                    if(index[w] == -1) {
+                    if (index[w] == -1) {
                         strong_connect(w);
                         lowlink[v] = std::min(lowlink[v], lowlink[w]);
-                    } else if(on_stack[w]) {
+                    } else if (on_stack[w]) {
                         lowlink[v] = std::min(lowlink[v], index[w]);
                     }
                 }
 
-                if(lowlink[v] == index[v]) {
+                if (lowlink[v] == index[v]) {
                     std::vector<size_t> scc;
                     size_t w;
                     do {
@@ -210,13 +210,13 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                         tarjan_stack.pop();
                         on_stack[w] = false;
                         scc.push_back(w);
-                    } while(v != w);
+                    } while (v != w);
                     sccs.push_back(scc);
                 }
             };
 
-            for(size_t i = 0; i < graph.size(); ++i) {
-                if(index[i] == -1) {
+            for (size_t i = 0; i < graph.size(); ++i) {
+                if (index[i] == -1) {
                     strong_connect(i);
                 }
             }
@@ -225,33 +225,33 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
         };
 
         size_t start_index = 0;
-        while(start_index < nodes.size()) {
+        while (start_index < nodes.size()) {
             std::vector<std::vector<Edge>> subgraph(nodes.size());
-            for(size_t i = start_index; i < nodes.size(); ++i) {
-                for(const auto& edge: G[i]) {
-                    if(edge.to >= start_index) {
+            for (size_t i = start_index; i < nodes.size(); ++i) {
+                for (const auto &edge : G[i]) {
+                    if (edge.to >= start_index) {
                         subgraph[i].push_back(edge);
                     }
                 }
             }
 
             auto sccs = tarjan_scc(subgraph);
-            if(sccs.empty()) {
+            if (sccs.empty()) {
                 break;
             }
 
-            for(const auto& scc: sccs) {
-                if(scc.size() > 1) {
+            for (const auto &scc : sccs) {
+                if (scc.size() > 1) {
                     start_index = *std::min_element(scc.begin(), scc.end());
                     break;
                 }
             }
 
-            if(sccs.front().size() == 1) {
+            if (sccs.front().size() == 1) {
                 start_index++;
             } else {
                 size_t s = sccs.front().front();
-                for(const auto& node: sccs.front()) {
+                for (const auto &node : sccs.front()) {
                     blocked[node] = false;
                     block_map[node].clear();
                 }

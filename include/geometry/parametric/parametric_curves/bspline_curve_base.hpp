@@ -41,7 +41,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         // Remove first and last knot to match the reduced degree
         derivative_knots_ = std::vector(knots_.begin() + 1, knots_.end() - 1);
 
-        for (auto pts: control_points_) {
+        for (auto pts : control_points_) {
             this->box.max = glm::max(this->box.max, pts);
             this->box.min = glm::min(this->box.min, pts);
         }

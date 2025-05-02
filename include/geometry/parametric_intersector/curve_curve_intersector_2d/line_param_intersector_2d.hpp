@@ -1,7 +1,7 @@
 #pragma once
 
-#include "curve_curve_inter_result.hpp"
 #include "bezier_bezier_intersection_2d.hpp"
+#include "curve_curve_inter_result.hpp"
 
 #include <geometry/parametric/bspline_curve_2d.hpp>
 #include <geometry/parametric/parametric_curves/straight_line.hpp>
@@ -22,7 +22,7 @@ struct LineBezierParamIntersector2D {
 };
 
 struct LineBSplineParamIntersector2D {
-    static CurveCurveIntersectionResult2D intersect(const StraightLine2D &line, BSplineCurve2D & curve) {
+    static CurveCurveIntersectionResult2D intersect(const StraightLine2D &line, BSplineCurve2D &curve) {
         CurveCurveIntersectionResult2D result;
 
         curve.insert_all_knots_to_bezier_form();
@@ -44,8 +44,9 @@ struct LineBSplineParamIntersector2D {
                 // spdlog::info("knot: {} {}, param: {}", knot_begin, knot_end, final_param);
                 // auto pos = curve.evaluate(final_param);
                 // auto dis = glm::distance(pos, line_bezier_result.inter_points[j]);
-                // auto dis2 = glm::distance(bezier_curves[i].evaluate(curve2_param), line_bezier_result.inter_points[j]);
-                // spdlog::info("Curve curve intersection distance {} {}", dis, dis2);
+                // auto dis2 = glm::distance(bezier_curves[i].evaluate(curve2_param),
+                // line_bezier_result.inter_points[j]); spdlog::info("Curve curve intersection distance {} {}", dis,
+                // dis2);
             }
         }
         return result;

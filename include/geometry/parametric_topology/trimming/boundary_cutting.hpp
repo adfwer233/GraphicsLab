@@ -1,20 +1,21 @@
 #pragma once
 
-#include "utils/graph.hpp"
 #include "geometry/parametric_topology/brep_face.hpp"
 #include "geometry/spatial_datastructure/kd_tree.hpp"
 #include "geometry/spatial_datastructure/rtree.hpp"
+#include "utils/graph.hpp"
 
 namespace GraphicsLab::Geometry {
 
 struct BoundaryCutting {
 
-    BRepFace* face;
+    BRepFace *face;
 
-    explicit BoundaryCutting(BRepFace* _face) : face(_face), graph(1000) {}
+    explicit BoundaryCutting(BRepFace *_face) : face(_face), graph(1000) {
+    }
 
     struct EdgeAttachment {
-        ParamCurve2D* curve;
+        ParamCurve2D *curve;
         double start_param, end_param;
 
         REFLECT(Property{"start_param", &EdgeAttachment::start_param},
@@ -55,7 +56,7 @@ struct BoundaryCutting {
             return attachment.node_id;
         };
 
-        auto update_graph_with_info = [&](BSplineCurve2D* pcurve, CurveCurveIntersectionResult2D& inter, bool reverse) {
+        auto update_graph_with_info = [&](BSplineCurve2D *pcurve, CurveCurveIntersectionResult2D &inter, bool reverse) {
             std::vector<std::pair<double, glm::dvec2>> split_points;
             split_points.emplace_back(0.0, pcurve->evaluate(0.0));
             for (size_t j = 0; j < inter.inter_points.size(); j++)
@@ -90,8 +91,8 @@ struct BoundaryCutting {
             }
         };
 
-        for (auto loop: face->boundary) {
-            for (auto coedge: loop->coedges) {
+        for (auto loop : face->boundary) {
+            for (auto coedge : loop->coedges) {
                 auto box = coedge->geometry->get_box();
 
                 int x_floor = std::floor(box.min.x);
@@ -99,13 +100,14 @@ struct BoundaryCutting {
                 int x_ceil = std::ceil(box.max.x);
                 int y_ceil = std::ceil(box.max.y);
 
-                if (auto pcurve  = dynamic_cast<BSplineCurve2D*>(coedge->geometry)) {
+                if (auto pcurve = dynamic_cast<BSplineCurve2D *>(coedge->geometry)) {
                     pcurve->insert_all_knots_to_bezier_form();
 
                     CurveCurveIntersectionResult2D inter_all;
                     for (int i = x_floor; i <= x_ceil; i++) {
                         double x_param = i;
-                        StraightLine2D line = {{x_param, static_cast<double>(y_floor)}, {x_param, static_cast<double>(y_ceil)} };
+                        StraightLine2D line = {{x_param, static_cast<double>(y_floor)},
+                                               {x_param, static_cast<double>(y_ceil)}};
 
                         auto inter = LineBSplineParamIntersector2D::intersect(line, *pcurve);
 
@@ -133,15 +135,17 @@ struct BoundaryCutting {
             }
         }
 
-
         for (int i = 0; i < graph.nodes.size(); i++) {
             auto pos = graph.nodes[i].data.position;
             if (pos.x < 1e-4) {
                 left_params.push_back(pos.y);
             }
-            if (pos.y < 1e-4) bottom_params.push_back(pos.x);
-            if (pos.x > 1 - 1e-4) right_params.push_back(pos.y);
-            if (pos.y > 1 - 1e-4) top_params.push_back(pos.x);
+            if (pos.y < 1e-4)
+                bottom_params.push_back(pos.x);
+            if (pos.x > 1 - 1e-4)
+                right_params.push_back(pos.y);
+            if (pos.y > 1 - 1e-4)
+                top_params.push_back(pos.x);
         }
 
         std::ranges::sort(left_params);
@@ -149,7 +153,7 @@ struct BoundaryCutting {
         std::ranges::sort(top_params);
         std::ranges::sort(bottom_params);
 
-        auto handle_edges = [](std::vector<double>& vec) {
+        auto handle_edges = [](std::vector<double> &vec) {
             if (not vec.empty()) {
                 if (vec.front() > 1e-4)
                     vec.insert(vec.begin(), 0.0);
@@ -189,11 +193,14 @@ struct BoundaryCutting {
             bottom_nodes.push_back(get_node_ids(pos));
         }
 
-        auto insert_boundary_to_graph = [&](const std::vector<double>& param, const std::vector<size_t>& node_ids, ParamCurve2D* pcurve) {
+        auto insert_boundary_to_graph = [&](const std::vector<double> &param, const std::vector<size_t> &node_ids,
+                                            ParamCurve2D *pcurve) {
             for (int i = 1; i < param.size(); i++) {
                 auto last_node = node_ids[i - 1];
                 auto node = node_ids[i];
-                graph.add_directed_edge(last_node, node, EdgeAttachment{.curve = pcurve, .start_param = param[i - 1], .end_param = param[i]});
+                graph.add_directed_edge(
+                    last_node, node,
+                    EdgeAttachment{.curve = pcurve, .start_param = param[i - 1], .end_param = param[i]});
             }
         };
 
@@ -206,10 +213,10 @@ struct BoundaryCutting {
         simple_loops = graph.find_all_simple_circuits();
     }
 
-private:
+  private:
     glm::dvec2 move_to_original_param(glm::dvec2 param) {
         return {param.x - std::floor(param.x), param.y - std::floor(param.y)};
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

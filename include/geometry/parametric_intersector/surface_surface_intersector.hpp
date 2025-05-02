@@ -168,7 +168,8 @@ struct SurfaceSurfaceIntersector {
                 auto offset1 = begin_param1 - surf1.move_param_to_std_domain(param1);
                 auto offset2 = begin_param2 - surf2.move_param_to_std_domain(param2);
                 intersections.emplace_back(param1 + offset1, param2 + offset2, surf1.evaluate(begin_param1));
-                spdlog::info("start end distance {}", glm::distance(surf1.move_param_to_std_domain(param1 + offset1), begin_param1));
+                spdlog::info("start end distance {}",
+                             glm::distance(surf1.move_param_to_std_domain(param1 + offset1), begin_param1));
                 break;
             }
         }

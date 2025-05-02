@@ -26,7 +26,7 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
     }
     StraightLineBase() = default;
 
-    StraightLineBase(const PointType& start, const PointType& end) {
+    StraightLineBase(const PointType &start, const PointType &end) {
         start_point = start;
         end_point = end;
 

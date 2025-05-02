@@ -1,7 +1,7 @@
 #pragma once
 
-#include <geometry/mesh/mesh.hpp>
 #include <geometry/box/box.hpp>
+#include <geometry/mesh/mesh.hpp>
 #include <glm/glm.hpp>
 
 namespace GraphicsLab::Geometry {
