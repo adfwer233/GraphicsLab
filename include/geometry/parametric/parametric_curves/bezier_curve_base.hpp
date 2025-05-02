@@ -63,6 +63,9 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
             min_y = std::min(min_y, pt.y);
             max_y = std::max(max_y, pt.y);
         }
+
+        this->box.max = {max_x, max_y};
+        this->box.min = {min_x, min_y};
     }
 
     /**

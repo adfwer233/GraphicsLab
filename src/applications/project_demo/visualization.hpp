@@ -16,6 +16,8 @@
 #include <geometry/parametric_topology/brep_loop.hpp>
 #include <utils/sampler.hpp>
 
+#include "geometry/parametric_topology/trimming/boundary_cutting.hpp"
+
 struct VisualizationProject : IGraphicsLabProject {
     void tick() override {
         spdlog::info("tick in visualization project");

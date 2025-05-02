@@ -39,13 +39,19 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         }
 
         // Remove first and last knot to match the reduced degree
-        std::vector<double> derivative_knots(knots_.begin() + 1, knots_.end() - 1);
+        derivative_knots_ = std::vector(knots_.begin() + 1, knots_.end() - 1);
+
+        for (auto pts: control_points_) {
+            this->box.max = glm::max(this->box.max, pts);
+            this->box.min = glm::min(this->box.min, pts);
+        }
     }
 
     BSplineCurveBase(const BSplineCurveBase<dim> &other) {
         degree_ = other.degree_;
         control_points_ = other.control_points_;
         knots_ = other.knots_;
+        this->box = other.box;
         // this->mesh = std::make_unique<MeshType>(*other.mesh);
     }
 
@@ -53,6 +59,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         control_points_ = std::move(other.control_points_);
         knots_ = std::move(other.knots_);
         degree_ = other.degree_;
+        this->box = other.box;
         this->mesh = std::move(other.mesh);
     }
 

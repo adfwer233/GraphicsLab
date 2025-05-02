@@ -29,6 +29,9 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
     StraightLineBase(const PointType& start, const PointType& end) {
         start_point = start;
         end_point = end;
+
+        this->box.max = glm::max(end_point, start_point);
+        this->box.min = glm::min(end_point, start_point);
     }
 };
 

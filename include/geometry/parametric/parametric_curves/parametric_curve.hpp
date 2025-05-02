@@ -1,6 +1,7 @@
 #pragma once
 
 #include <geometry/mesh/mesh.hpp>
+#include <geometry/box/box.hpp>
 #include <glm/glm.hpp>
 
 namespace GraphicsLab::Geometry {
@@ -8,6 +9,7 @@ namespace GraphicsLab::Geometry {
 template <size_t dim> struct ParamCurveBase {
     using PointType = std::conditional_t<dim == 3, glm::dvec3, glm::dvec2>;
     using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
+    using BoxType = Box<dim, double>;
 
     struct DiscretizationCache {
         std::vector<PointType> points;
@@ -16,6 +18,10 @@ template <size_t dim> struct ParamCurveBase {
 
     virtual PointType evaluate(double t) const = 0;
     virtual PointType derivative(double t) const = 0;
+
+    BoxType get_box() {
+        return box;
+    }
 
     std::unique_ptr<MeshType> mesh = nullptr;
 
@@ -34,6 +40,7 @@ template <size_t dim> struct ParamCurveBase {
 
   protected:
     std::unique_ptr<DiscretizationCache> discretizationCache = nullptr;
+    BoxType box;
 };
 
 using ParamCurve2D = ParamCurveBase<2>;

@@ -42,7 +42,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "graph/graph.hpp"
+#include "utils/graph.hpp"
 #include "render_pass.hpp"
 
 #include "language/coroutine/generator.hpp"
