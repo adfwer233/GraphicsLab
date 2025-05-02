@@ -36,8 +36,8 @@ struct BezierBezierIntersector2D {
                                     double t2a, double t2b, std::vector<std::pair<double, double>> &intersections,
                                     int depth = 0) {
 
-        constexpr int MAX_DEPTH = 20;
-        constexpr double EPSILON = 1e-4;
+        constexpr int MAX_DEPTH = 30;
+        constexpr double EPSILON = 1e-6;
         if (depth > MAX_DEPTH || !bbox_overlap(c1, c2))
             return;
 

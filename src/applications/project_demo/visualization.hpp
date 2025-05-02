@@ -138,6 +138,9 @@ struct VisualizationProject : IGraphicsLabProject {
             i++;
         }
 
+        GraphicsLab::Geometry::BoundaryCutting boundary_cutting(face1);
+        boundary_cutting.cut_boundary();
+
         face2->trim_flag = false;
         GraphicsLab::Geometry::Tessellator::tessellate(face1);
         GraphicsLab::Geometry::Tessellator::tessellate(face2);

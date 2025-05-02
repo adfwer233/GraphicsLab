@@ -168,6 +168,7 @@ struct SurfaceSurfaceIntersector {
                 auto offset1 = begin_param1 - surf1.move_param_to_std_domain(param1);
                 auto offset2 = begin_param2 - surf2.move_param_to_std_domain(param2);
                 intersections.emplace_back(param1 + offset1, param2 + offset2, surf1.evaluate(begin_param1));
+                spdlog::info("start end distance {}", glm::distance(surf1.move_param_to_std_domain(param1 + offset1), begin_param1));
                 break;
             }
         }
@@ -250,9 +251,13 @@ struct SurfaceSurfaceIntersector {
 
             // fit the pcurves with BSpline curves
             auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
+            pcurve1.control_points_.front() = params1.front();
+            pcurve1.control_points_.back() = params1.back();
             result.pcurve_list1.push_back(std::move(pcurve1));
 
             auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, 50);
+            pcurve2.control_points_.front() = params2.front();
+            pcurve2.control_points_.back() = params2.back();
             result.pcurve_list2.push_back(std::move(pcurve2));
         }
 

@@ -37,7 +37,7 @@ struct LineBSplineParamIntersector2D {
             for (size_t j = 0; j < line_bezier_result.curve1_param.size(); j++) {
                 result.curve1_param.push_back(line_bezier_result.curve1_param[j]);
                 double curve2_param = line_bezier_result.curve2_param[j];
-                result.curve1_param.push_back(knot_begin * (1 - curve2_param) + knot_end * curve2_param);
+                result.curve2_param.push_back(knot_begin * (1 - curve2_param) + knot_end * curve2_param);
                 result.inter_points.push_back(line_bezier_result.inter_points[j]);
 
                 // double final_param = knot_begin * (1 - curve2_param) + knot_end * curve2_param;
