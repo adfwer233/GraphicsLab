@@ -27,13 +27,13 @@ GraphicsLab::Geometry::ExplicitSurface ExplicitSurfaceExample::createDeformedTor
         GraphicsLab::Geometry::autodiff_vec3 result;
 
         double R = 2;
-        double r = 0.7;
+        double r = 1.0;
 
         auto u = 2 * std::numbers::pi * param.x();
         auto v = 2 * std::numbers::pi * (param.y() - 0.5) + param_offset.y;
-        result.x() = (R + r * (1 + 0.5 * cos(u + param_offset.x)) * cos(v)) * cos(u) + offset.x;
-        result.y() = -r * (1 + 0.5 * cos(u + param_offset.x)) * sin(v) + offset.y;
-        result.z() = (R + r * (1 + 0.5 * cos(u + param_offset.x)) * cos(v)) * sin(u) + offset.z;
+        result.x() = (R + r * (1 + 0.25 * cos(u + param_offset.x)) * cos(v)) * cos(u) + offset.x;
+        result.y() = -r * (1 + 0 * cos(u + param_offset.x)) * sin(v) + offset.y;
+        result.z() = (R + r * (1 + 0.25 * cos(u + param_offset.x)) * cos(v)) * sin(u) + offset.z;
 
         return result;
     };
