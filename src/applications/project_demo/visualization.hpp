@@ -192,8 +192,8 @@ struct VisualizationProject : IGraphicsLabProject {
 
         auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(surf1, surf2);
 
-        auto surface1 = new GraphicsLab::Geometry::ExplicitSurface(
-            ExplicitSurfaceExample::createDeformedTorus2({0.0, 0.0, 0.0}));
+        auto surface1 =
+            new GraphicsLab::Geometry::ExplicitSurface(ExplicitSurfaceExample::createDeformedTorus2({0.0, 0.0, 0.0}));
         auto surface2 = new GraphicsLab::Geometry::ExplicitSurface(
             ExplicitSurfaceExample::createDeformedTorus2({4.2, 0.0, 0.0}, {std::numbers::pi, 0.0}));
         auto face1 = new GraphicsLab::Geometry::BRepFace();
