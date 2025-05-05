@@ -75,16 +75,10 @@ class Camera {
 
     float theta, phi;
 
-    REFLECT(
-        Property{"position", &Camera::position},
-        Property{"camera_target", &Camera::camera_target},
-        Property{"camera_up_axis", &Camera::camera_up_axis},
-        Property{"camera_right_axis", &Camera::camera_right_axis},
-        Property{"camera_front", &Camera::camera_front},
-        Property{"world_up", &Camera::world_up},
-        Property{"theta", &Camera::theta},
-        Property{"phi", &Camera::phi}
-    )
+    REFLECT(Property{"position", &Camera::position}, Property{"camera_target", &Camera::camera_target},
+            Property{"camera_up_axis", &Camera::camera_up_axis},
+            Property{"camera_right_axis", &Camera::camera_right_axis}, Property{"camera_front", &Camera::camera_front},
+            Property{"world_up", &Camera::world_up}, Property{"theta", &Camera::theta}, Property{"phi", &Camera::phi})
 
     Camera(glm::vec3 pos, glm::vec3 up, glm::vec3 target = glm::vec3(0.0f))
         : zoom(45), move_speed(2.5), mouse_sensitivity(0.1f) {

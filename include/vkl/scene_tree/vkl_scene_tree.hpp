@@ -292,8 +292,7 @@ struct CameraNode : public TreeNode {
             throw std::runtime_error("Failed to open camera.json for reading");
         }
 
-        std::string data((std::istreambuf_iterator<char>(file)),
-                          std::istreambuf_iterator<char>());
+        std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
         StaticReflect::deserialization(camera, json::parse(data));
     }
