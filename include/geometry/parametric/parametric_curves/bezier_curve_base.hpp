@@ -24,6 +24,11 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         control_points_ = std::move(other.control_points_);
         derivative_bound = other.derivative_bound;
         this->mesh = std::move(other.mesh);
+
+        this->min_x = other.min_x;
+        this->max_x = other.max_x;
+        this->min_y = other.min_y;
+        this->max_y = other.max_y;
     }
 
     explicit BezierCurveBase(decltype(control_points_) &&control_points) : control_points_(control_points) {
