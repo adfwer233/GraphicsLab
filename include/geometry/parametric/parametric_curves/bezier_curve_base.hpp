@@ -19,7 +19,17 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     REFLECT(Property{"control_points", &BezierCurveBase::control_points_})
 
-    BezierCurveBase(const BezierCurveBase<dim> &) = default;
+    BezierCurveBase(const BezierCurveBase<dim> &other) noexcept {
+        control_points_ = other.control_points_;
+        derivative_bound = other.derivative_bound;
+        this->mesh = nullptr;
+
+        this->min_x = other.min_x;
+        this->max_x = other.max_x;
+        this->min_y = other.min_y;
+        this->max_y = other.max_y;
+    }
+
     BezierCurveBase(BezierCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
         derivative_bound = other.derivative_bound;
