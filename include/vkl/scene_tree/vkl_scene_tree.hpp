@@ -20,6 +20,7 @@
 
 #include "graphics_lab/geo_flow/geo_flow.hpp"
 
+#include <fstream>
 #include <geometry/parametric/curve_type_list.hpp>
 
 struct Material;
@@ -276,10 +277,33 @@ struct CameraNode : public TreeNode {
         camera.position += glm::vec3{0, 0, 10};
     }
 
+    void serialization() {
+        auto data = StaticReflect::serialization(camera).dump(4); // Pretty print with indent = 4
+        std::ofstream file("camera.json");
+        if (!file) {
+            throw std::runtime_error("Failed to open camera.json for writing");
+        }
+        file << data;
+    }
+
+    void deserialization() {
+        std::ifstream file("camera.json");
+        if (!file) {
+            throw std::runtime_error("Failed to open camera.json for reading");
+        }
+
+        std::string data((std::istreambuf_iterator<char>(file)),
+                          std::istreambuf_iterator<char>());
+
+        StaticReflect::deserialization(camera, json::parse(data));
+    }
+
     ReflectDataType reflect() override {
         auto base_reflect = TreeNode::reflect();
         base_reflect.emplace("position", TypeErasedValue(&camera.position));
         base_reflect.emplace("move", TypeErasedValue(&CameraNode::move, this));
+        base_reflect.emplace("serialization", TypeErasedValue(&CameraNode::serialization, this));
+        base_reflect.emplace("deserialization", TypeErasedValue(&CameraNode::deserialization, this));
         return base_reflect;
     }
 };

@@ -2,6 +2,7 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "language/reflection/static_reflector.hpp"
 
 constexpr float default_pitch = 0.0f;
 constexpr float default_yaw = -90.0f;
@@ -73,6 +74,17 @@ class Camera {
     float ratio = 1.0;
 
     float theta, phi;
+
+    REFLECT(
+        Property{"position", &Camera::position},
+        Property{"camera_target", &Camera::camera_target},
+        Property{"camera_up_axis", &Camera::camera_up_axis},
+        Property{"camera_right_axis", &Camera::camera_right_axis},
+        Property{"camera_front", &Camera::camera_front},
+        Property{"world_up", &Camera::world_up},
+        Property{"theta", &Camera::theta},
+        Property{"phi", &Camera::phi}
+    )
 
     Camera(glm::vec3 pos, glm::vec3 up, glm::vec3 target = glm::vec3(0.0f))
         : zoom(45), move_speed(2.5), mouse_sensitivity(0.1f) {
