@@ -19,7 +19,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     void afterLoad() override {
         spdlog::info("project loaded");
 
-        hyperbolic_disk_render_pass = std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree);
+        hyperbolic_disk_render_pass =
+            std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree);
         {
             std::scoped_lock renderGraphLock(context.applicationContext->renderGraphMutex);
 
@@ -40,8 +41,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         // tessellation.create_initial_polygon();
         tessellation.create_polygon_tessellation(2);
 
-        for (auto poly: tessellation.polygons) {
-            for (auto vert: poly.vertices) {
+        for (auto poly : tessellation.polygons) {
+            for (auto vert : poly.vertices) {
                 pc.vertices.push_back({{vert.real(), vert.imag()}});
             }
             // pc.vertices.push_back({{poly.center.real(), poly.center.imag()}});
@@ -67,18 +68,17 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         Mesh3D mesh;
         PointCloud3D pc;
 
-        for (auto v: vertices) {
+        for (auto v : vertices) {
             mesh.vertices.push_back({v, {1.0, 0.0, 0.0}, v});
             pc.vertices.push_back({v, {1.0, 0.0, 0.0}});
         }
 
-        pc.vertices.back().color = {0.0, 1.0 ,0.0};
+        pc.vertices.back().color = {0.0, 1.0, 0.0};
 
         mesh.indices = indices;
 
         context.sceneTree->addGeometryNode(std::move(mesh), "convex hull");
         context.sceneTree->addGeometryNode(std::move(pc), "test points");
-
     }
 
     std::unique_ptr<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass> hyperbolic_disk_render_pass = nullptr;

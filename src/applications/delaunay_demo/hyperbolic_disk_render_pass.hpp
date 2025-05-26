@@ -10,11 +10,9 @@ namespace GraphicsLab::RenderGraph {
 /**
  * Hyperbolic GBO, save data for Mobius transformation
  */
-struct HyperbolicGBO {
+struct HyperbolicGBO {};
 
-};
-
-struct HyperbolicDiskRenderPass: public RenderPass {
+struct HyperbolicDiskRenderPass : public RenderPass {
     explicit HyperbolicDiskRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree)
         : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree) {
     }
@@ -49,4 +47,4 @@ struct HyperbolicDiskRenderPass: public RenderPass {
     std::unique_ptr<ParamLineRenderSystem<>> line_render_system = nullptr;
 };
 
-}
+} // namespace GraphicsLab::RenderGraph

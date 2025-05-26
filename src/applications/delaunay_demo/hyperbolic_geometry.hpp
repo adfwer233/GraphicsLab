@@ -18,8 +18,8 @@ struct HyperbolicLineSegment {
     float angle_end_;
     float radius_;
 
-    explicit HyperbolicLineSegment(PointType start, PointType end): start_(start), end_(end) {
-        if (std::norm(start- end) < 1e-3) {
+    explicit HyperbolicLineSegment(PointType start, PointType end) : start_(start), end_(end) {
+        if (std::norm(start - end) < 1e-3) {
             straight = true;
         }
 
@@ -31,11 +31,12 @@ struct HyperbolicLineSegment {
         auto a = start;
         auto b = end;
         if (not cross) {
-            center_ = (a * (1.0f - std::norm(b) * std::norm(b)) - b * (1.0f - std::norm(a) * std::norm(a))) / (a * std::conj(b) - std::conj(a) * b);
+            center_ = (a * (1.0f - std::norm(b) * std::norm(b)) - b * (1.0f - std::norm(a) * std::norm(a))) /
+                      (a * std::conj(b) - std::conj(a) * b);
         }
     }
 
     bool straight = false;
 };
 
-}
+} // namespace GraphicsLab::Geometry

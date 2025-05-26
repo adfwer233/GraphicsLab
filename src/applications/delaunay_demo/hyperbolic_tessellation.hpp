@@ -18,20 +18,13 @@ struct Mobius {
 
     Mobius inverse() const {
         // Inverse of a Möbius transformation
-        return {
-            d, -b,
-            -c, a
-        };
+        return {d, -b, -c, a};
     }
 
     // Compose with another: this ∘ other
-    Mobius compose(const Mobius& other) const {
-        return {
-            a * other.a + b * other.c,
-            a * other.b + b * other.d,
-            c * other.a + d * other.c,
-            c * other.b + d * other.d
-        };
+    Mobius compose(const Mobius &other) const {
+        return {a * other.a + b * other.c, a * other.b + b * other.d, c * other.a + d * other.c,
+                c * other.b + d * other.d};
     }
 };
 
@@ -60,7 +53,7 @@ struct MobiusConstructor {
     }
 
     static Mobius rotate(double angle) {
-        PointType r = std::polar(1.0, angle);  // e^(i*angle)
+        PointType r = std::polar(1.0, angle); // e^(i*angle)
         Mobius result;
         result.a = r;
         result.b = 0.0;
@@ -78,10 +71,8 @@ struct HyperbolicPolygon {
     std::vector<PointType> vertices;
 
     auto hash() const -> hash_type {
-        return {
-            static_cast<int>(std::round(center.real() * 10000)),
-            static_cast<int>(std::round(center.imag() * 10000))
-        };
+        return {static_cast<int>(std::round(center.real() * 10000)),
+                static_cast<int>(std::round(center.imag() * 10000))};
     }
 };
 
@@ -92,14 +83,15 @@ struct HyperbolicTessellation {
     std::vector<HyperbolicPolygon> polygons;
     std::set<HyperbolicPolygon::hash_type> polygon_hash_set;
 
-    explicit HyperbolicTessellation(int p, int q) : p(p), q(q) {}
+    explicit HyperbolicTessellation(int p, int q) : p(p), q(q) {
+    }
 
     void create_initial_polygon() {
         double d = std::acosh((std::cos(std::numbers::pi / q)) / (std::sin(std::numbers::pi / p)));
         double r = std::tanh(d / 2.0);
 
         double pi = std::numbers::pi;
-        r  = std::sqrt((std::tan(pi / 2 - pi / q) - std::tan(pi / p)) / (std::tan(pi / 2 - pi / q) + std::tan(pi / p)));
+        r = std::sqrt((std::tan(pi / 2 - pi / q) - std::tan(pi / p)) / (std::tan(pi / 2 - pi / q) + std::tan(pi / p)));
 
         spdlog::critical("radius r {}", r);
 
@@ -121,10 +113,10 @@ struct HyperbolicTessellation {
         spdlog::info("polygon count {}", polygons.size());
     }
 
-private:
-
+  private:
     void recurse(const HyperbolicPolygon polygon, int depth) {
-        if (depth == 0) return;
+        if (depth == 0)
+            return;
 
         auto reflection_mobius = [&](PointType a, PointType b) {
             // translate a to the origin
@@ -135,24 +127,25 @@ private:
             return m2.compose(m1);
         };
 
-        auto reflection_trans = [&](const PointType& z, Mobius& m) -> PointType {
+        auto reflection_trans = [&](const PointType &z, Mobius &m) -> PointType {
             return m.inverse()(std::conj(m(z)));
         };
 
         for (int i = 0; i < polygon.vertices.size(); ++i) {
-            const auto& a = polygon.vertices[i];
-            const auto& b = polygon.vertices[(i + 1) % polygon.vertices.size()];
+            const auto &a = polygon.vertices[i];
+            const auto &b = polygon.vertices[(i + 1) % polygon.vertices.size()];
 
             auto mob = reflection_mobius(a, b);
             PointType new_center = reflection_trans(polygon.center, mob);
 
             // auto mid = (a + b) / 2.0;
-            // spdlog::info("{} {} {} {} {} {}", polygon.center.real(), polygon.center.imag(), mid.real(), mid.imag(), new_center.real(), new_center.imag());
-            // spdlog::info("{} {}", new_center.real() / mid.real(), new_center.imag() / mid.imag());
+            // spdlog::info("{} {} {} {} {} {}", polygon.center.real(), polygon.center.imag(), mid.real(), mid.imag(),
+            // new_center.real(), new_center.imag()); spdlog::info("{} {}", new_center.real() / mid.real(),
+            // new_center.imag() / mid.imag());
             HyperbolicPolygon new_polygon;
             new_polygon.center = new_center;
 
-            for (const auto& v : polygon.vertices) {
+            for (const auto &v : polygon.vertices) {
                 PointType reflected = reflection_trans(v, mob);
                 new_polygon.vertices.emplace_back(reflected);
             }
