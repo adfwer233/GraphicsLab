@@ -19,8 +19,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     void afterLoad() override {
         spdlog::info("project loaded");
 
-        hyperbolic_disk_render_pass =
-            std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree);
+        hyperbolic_disk_render_pass = std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree);
         {
             std::scoped_lock renderGraphLock(context.applicationContext->renderGraphMutex);
 
@@ -41,8 +40,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         // tessellation.create_initial_polygon();
         tessellation.create_polygon_tessellation(2);
 
-        for (auto poly : tessellation.polygons) {
-            for (auto vert : poly.vertices) {
+        for (auto poly: tessellation.polygons) {
+            for (auto vert: poly.vertices) {
                 pc.vertices.push_back({{vert.real(), vert.imag()}});
             }
             // pc.vertices.push_back({{poly.center.real(), poly.center.imag()}});
@@ -68,17 +67,41 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         Mesh3D mesh;
         PointCloud3D pc;
 
-        for (auto v : vertices) {
+        for (auto v: vertices) {
             mesh.vertices.push_back({v, {1.0, 0.0, 0.0}, v});
             pc.vertices.push_back({v, {1.0, 0.0, 0.0}});
         }
 
-        pc.vertices.back().color = {0.0, 1.0, 0.0};
+        for (auto& f: convex_hull.faces) {
+            pc2.vertices.push_back({(f->compute_circumcenter()), {0.0, 1.0, 0.0}});
+        }
+
+        CurveMesh3D voronoi_mesh;
+
+        for (auto& e: convex_hull.halfedges) {
+            int n = 10;
+            auto a = e->face->compute_circumcenter();
+            if (e->twin == nullptr) continue;
+            auto b = e->twin->face->compute_circumcenter();
+            for (int i = 0; i <= n; i++) {
+                float param = 1.0f * i / n;
+                auto pos = glm::mix(a, b, param);
+
+                voronoi_mesh.vertices.push_back({glm::normalize(pos), {0.0, 0.0, 1.0}});
+                if (i > 0) {
+                    voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2, voronoi_mesh.vertices.size() - 1);
+                }
+            }
+        }
+
+        // pc.vertices.back().color = {0.0, 1.0 ,0.0};
 
         mesh.indices = indices;
 
         context.sceneTree->addGeometryNode(std::move(mesh), "convex hull");
+        context.sceneTree->addGeometryNode(std::move(voronoi_mesh), "voronoi");
         context.sceneTree->addGeometryNode(std::move(pc), "test points");
+        context.sceneTree->addGeometryNode(std::move(pc2), "pc 2");
     }
 
     std::unique_ptr<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass> hyperbolic_disk_render_pass = nullptr;
