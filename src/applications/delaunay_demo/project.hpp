@@ -1,8 +1,9 @@
 #pragma once
 
 #include "graphics_lab/project.hpp"
-#include "spdlog/spdlog.h"
 #include "hyperbolic_disk_render_pass.hpp"
+#include "hyperbolic_tessellation.hpp"
+#include "spdlog/spdlog.h"
 
 struct DelaunayDemoProject : IGraphicsLabProject {
     void tick() override {
@@ -28,6 +29,24 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         }
 
         spdlog::info("after load finished");
+    }
+
+    void visualize_hyperbolic_tessellation() {
+        PointCloud2D pc;
+
+        HyperbolicTessellation tessellation(7, 3);
+        // tessellation.create_initial_polygon();
+        tessellation.create_polygon_tessellation(2);
+
+        for (auto poly: tessellation.polygons) {
+            for (auto vert: poly.vertices) {
+                pc.vertices.push_back({{vert.real(), vert.imag()}});
+            }
+            // pc.vertices.push_back({{poly.center.real(), poly.center.imag()}});
+        }
+
+        std::scoped_lock lock(context.sceneTree->sceneTreeMutex);
+        context.sceneTree->addGeometryNode(std::move(pc), "Vert");
     }
 
     std::unique_ptr<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass> hyperbolic_disk_render_pass = nullptr;
