@@ -117,12 +117,12 @@ struct InternalScene2DRenderPass : public RenderPass {
          * Render Curves in 2D
          */
         MetaProgramming::ForEachType(Geometry::ParametricCurve2DTypeList::append<CurveMesh2D>{}, [&]<typename T>() {
-            auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
+            auto mesh_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
             for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
                 if (not mesh3d_nodes->visible)
                     continue;
                 ubo.model = trans;
-                auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
+                auto node_mesh = mesh_buffer->getGeometryModel(device_, mesh3d_nodes);
                 if (node_mesh->mesh->uniformBuffers.contains(lineKey)) {
                     node_mesh->mesh->uniformBuffers[lineKey][frameIndex]->writeToBuffer(&ubo);
                     node_mesh->mesh->uniformBuffers[lineKey][frameIndex]->flush();
