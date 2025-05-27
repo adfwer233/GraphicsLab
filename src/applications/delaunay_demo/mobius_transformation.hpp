@@ -22,21 +22,18 @@ struct Mobius {
     }
 };
 
-// Construct Möbius transform that maps (z1, z2) → (-1, 1)
-inline Mobius mobius_map_to_real_axis(Mobius::PointType z1, Mobius::PointType z2) {
-    Mobius::PointType m = (z1 + z2) / (1.0f + std::conj(z1) * z2);
-
-    Mobius M;
-    M.a = 1.0;
-    M.b = -m;
-    M.c = std::conj(m);
-    M.d = 1.0 - std::norm(m);
-
-    return M;
-}
-
 struct MobiusConstructor {
     using PointType = std::complex<double>;
+
+    static Mobius identity() {
+        Mobius result;
+        result.a = 1.0;
+        result.b = 0.0;
+        result.c = 0.0;
+        result.d = 1.0;
+        return result;
+    }
+
     static Mobius move_to_origin(PointType z) {
         Mobius result;
         result.a = 1.0;

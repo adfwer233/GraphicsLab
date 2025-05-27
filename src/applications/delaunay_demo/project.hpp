@@ -5,7 +5,10 @@
 #include "hyperbolic_disk_render_pass.hpp"
 #include "hyperbolic_tessellation.hpp"
 #include "spdlog/spdlog.h"
+#include "ui/custom_controller.hpp"
 #include "utils/sampler.hpp"
+
+#include "ui/uistate.hpp"
 
 struct DelaunayDemoProject : IGraphicsLabProject {
     void tick() override {
@@ -16,10 +19,14 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         return "Visualization";
     }
 
+    GraphicsLab::IGraphicsLabProjectController *getController() override {
+        return controller.get();
+    }
+
     void afterLoad() override {
         spdlog::info("project loaded");
 
-        hyperbolic_disk_render_pass = std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree);
+        hyperbolic_disk_render_pass = std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree, ui_state);
         {
             std::scoped_lock renderGraphLock(context.applicationContext->renderGraphMutex);
 
@@ -29,6 +36,9 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             std::scoped_lock renderGraphInstanceLock(context.applicationContext->renderGraphInstanceMutex);
             context.applicationContext->compileRenderGraph();
         }
+
+        ui_state.trans = MobiusConstructor::identity();
+        controller = std::make_unique<CustomController>(ui_state);
 
         spdlog::info("after load finished");
     }
@@ -124,5 +134,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     }
 
     std::unique_ptr<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass> hyperbolic_disk_render_pass = nullptr;
+    ProjectUIState ui_state;
+    std::unique_ptr<CustomController> controller = nullptr;
+
     ReflectDataType reflect() override;
 };

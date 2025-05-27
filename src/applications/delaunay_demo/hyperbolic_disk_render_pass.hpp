@@ -2,6 +2,7 @@
 
 #include "graphics_lab/render_graph/render_pass.hpp"
 #include "render_system/poincare_disk_render_system.hpp"
+#include "ui/uistate.hpp"
 #include "vkl/scene_tree/vkl_geometry_mesh.hpp"
 #include "vkl/scene_tree/vkl_scene_tree.hpp"
 #include "vkl/system/render_system/param_line_render_system.hpp"
@@ -9,8 +10,8 @@
 namespace GraphicsLab::RenderGraph {
 
 struct HyperbolicDiskRenderPass : public RenderPass {
-    explicit HyperbolicDiskRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree)
-        : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree) {
+    explicit HyperbolicDiskRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, ProjectUIState& ui_state)
+        : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree), ui_state_(ui_state) {
     }
 
     RenderPassReflection render_pass_reflect() override {
@@ -46,7 +47,7 @@ struct HyperbolicDiskRenderPass : public RenderPass {
 
             auto node_mesh = mesh_buffer->getGeometryModel(device_, mesh_nodes);
 
-            FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+            FrameInfo frameInfo{
                 .frameIndex = static_cast<int>(frameIndex) % 2,
                 .frameTime = 0,
                 .commandBuffer = commandBuffer,
@@ -54,10 +55,10 @@ struct HyperbolicDiskRenderPass : public RenderPass {
             };
 
             PoincareDiskRenderSystemPushConstantData poincareDiskRenderSystemPushConstantData{};
-            poincareDiskRenderSystemPushConstantData.a = {1.0, 0.0};
-            poincareDiskRenderSystemPushConstantData.b = {0.0, 0.0};
-            poincareDiskRenderSystemPushConstantData.c = {0.0, 0.0};
-            poincareDiskRenderSystemPushConstantData.d = {1.0, 0.0};
+            poincareDiskRenderSystemPushConstantData.a = complex_to_glm(ui_state_.trans.a);
+            poincareDiskRenderSystemPushConstantData.b = complex_to_glm(ui_state_.trans.b);
+            poincareDiskRenderSystemPushConstantData.c = complex_to_glm(ui_state_.trans.c);
+            poincareDiskRenderSystemPushConstantData.d = complex_to_glm(ui_state_.trans.d);
             PoincareDiskRenderSystemPushConstantList list;
             list.data[0] = poincareDiskRenderSystemPushConstantData;
             line_render_system->renderObject(frameInfo, list);
@@ -67,10 +68,14 @@ struct HyperbolicDiskRenderPass : public RenderPass {
     }
 
     SceneTree::VklSceneTree &sceneTree_;
-    // UIState &uiState_;
+    ProjectUIState &ui_state_;
 
     std::unique_ptr<PoincareDiskRenderSystem<>> line_render_system = nullptr;
 
+private:
+    auto complex_to_glm(std::complex<float> z) -> glm::vec2 {
+        return {z.real(), z.imag()};
+    }
 };
 
 } // namespace GraphicsLab::RenderGraph
