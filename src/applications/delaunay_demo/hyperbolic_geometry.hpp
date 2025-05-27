@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include "mobius_transformation.hpp"
 
 namespace GraphicsLab::Geometry {
 
@@ -14,9 +15,6 @@ struct HyperbolicLineSegment {
     PointType end_;
 
     PointType center_;
-    float angle_start_;
-    float angle_end_;
-    float radius_;
 
     explicit HyperbolicLineSegment(PointType start, PointType end) : start_(start), end_(end) {
         if (std::norm(start - end) < 1e-3) {
@@ -28,15 +26,23 @@ struct HyperbolicLineSegment {
             straight = true;
         }
 
-        auto a = start;
-        auto b = end;
-        if (not cross) {
-            center_ = (a * (1.0f - std::norm(b) * std::norm(b)) - b * (1.0f - std::norm(a) * std::norm(a))) /
-                      (a * std::conj(b) - std::conj(a) * b);
-        }
+        auto m1 = MobiusConstructor::move_to_origin(start);
+        auto m2 = MobiusConstructor::rotate(-std::arg(m1(end)));
+        transformation_ = m2.compose(m1);
+        transformation_inverse_ = transformation_.inverse();
+        end_transformed_ = transformation_(end_);
     }
 
     bool straight = false;
+
+    PointType evaluate(float t) {
+        auto res = end_transformed_ * t;
+        return transformation_inverse_(res);
+    }
+
+private:
+    Mobius transformation_, transformation_inverse_;
+    PointType end_transformed_;
 };
 
 } // namespace GraphicsLab::Geometry

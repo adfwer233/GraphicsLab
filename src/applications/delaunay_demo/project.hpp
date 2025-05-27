@@ -38,17 +38,20 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         HyperbolicTessellation tessellation(7, 3);
         // tessellation.create_initial_polygon();
-        tessellation.create_polygon_tessellation(2);
+        tessellation.create_polygon_tessellation(3);
 
         for (auto poly: tessellation.polygons) {
             for (auto vert: poly.vertices) {
                 pc.vertices.push_back({{vert.real(), vert.imag()}});
             }
-            // pc.vertices.push_back({{poly.center.real(), poly.center.imag()}});
+            pc.vertices.push_back({{poly.center.real(), poly.center.imag()}, {1.0, 0.0, 0.0}});
         }
+
+        auto curve_mesh = tessellation.create_curve_mesh_2d();
 
         std::scoped_lock lock(context.sceneTree->sceneTreeMutex);
         context.sceneTree->addGeometryNode(std::move(pc), "Vert");
+        context.sceneTree->addGeometryNode(std::move(curve_mesh), "tessellation");
     }
 
     void visualize_spherical_voronoi() {
@@ -94,15 +97,10 @@ struct DelaunayDemoProject : IGraphicsLabProject {
                     float param = 1.0f * i / n;
                     auto pos = glm::mix(a, b, param);
 
-                    // if (not use_long_arc) {
-                        voronoi_mesh.vertices.push_back({glm::normalize(pos), {0.0, 0.0, 1.0}});
-                        if (i > 0) {
-                            voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2, voronoi_mesh.vertices.size() - 1);
-                        }
-                    // } else {
-                    //
-                    // }
-
+                    voronoi_mesh.vertices.push_back({glm::normalize(pos), {0.0, 0.0, 1.0}});
+                    if (i > 0) {
+                        voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2, voronoi_mesh.vertices.size() - 1);
+                    }
 
                     auto delaunay_pos = glm::mix(e->origin->position, e->next->origin->position, param);
                     delaunay_mesh.vertices.push_back({glm::normalize(delaunay_pos), {1.0, 0.0, 0.0}});

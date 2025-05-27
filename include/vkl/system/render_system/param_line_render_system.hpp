@@ -4,7 +4,7 @@
 
 struct ParamLinePipelineModifier {
     static void modifyPipeline(PipelineConfigInfo &configInfo) {
-        configInfo.inputAssemblyInfo.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        configInfo.inputAssemblyInfo.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
     }
 };
 

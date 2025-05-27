@@ -1,87 +1,38 @@
 #pragma once
 
 #include "hyperbolic_geometry.hpp"
+#include "mobius_transformation.hpp"
+#include "utils/sampler.hpp"
 
 #include <cmath>
 #include <complex>
 #include <numbers>
+#include <queue>
 #include <set>
 #include <vector>
 
-struct Mobius {
-    using PointType = std::complex<double>;
-    std::complex<double> a, b, c, d;
-
-    PointType operator()(PointType z) const {
-        return (a * z + b) / (c * z + d);
-    }
-
-    Mobius inverse() const {
-        // Inverse of a Möbius transformation
-        return {d, -b, -c, a};
-    }
-
-    // Compose with another: this ∘ other
-    Mobius compose(const Mobius &other) const {
-        return {a * other.a + b * other.c, a * other.b + b * other.d, c * other.a + d * other.c,
-                c * other.b + d * other.d};
-    }
-};
-
-// Construct Möbius transform that maps (z1, z2) → (-1, 1)
-inline Mobius mobius_map_to_real_axis(Mobius::PointType z1, Mobius::PointType z2) {
-    Mobius::PointType m = (z1 + z2) / (1.0 + std::conj(z1) * z2);
-
-    Mobius M;
-    M.a = 1.0;
-    M.b = -m;
-    M.c = std::conj(m);
-    M.d = 1.0 - std::norm(m);
-
-    return M;
-}
-
-struct MobiusConstructor {
-    using PointType = std::complex<double>;
-    static Mobius move_to_origin(PointType z) {
-        Mobius result;
-        result.a = 1.0;
-        result.b = -z;
-        result.c = -std::conj(z);
-        result.d = 1.0;
-        return result;
-    }
-
-    static Mobius rotate(double angle) {
-        PointType r = std::polar(1.0, angle); // e^(i*angle)
-        Mobius result;
-        result.a = r;
-        result.b = 0.0;
-        result.c = 0.0;
-        result.d = 1.0;
-        return result;
-    }
-};
-
 struct HyperbolicPolygon {
-    using PointType = std::complex<double>;
-    using hash_type = std::pair<int, int>;
+    using PointType = std::complex<float>;
+    using hash_type = std::size_t;
 
     PointType center;
     std::vector<PointType> vertices;
 
     auto hash() const -> hash_type {
-        return {static_cast<int>(std::round(center.real() * 10000)),
-                static_cast<int>(std::round(center.imag() * 10000))};
+        auto x = static_cast<int>(std::round(center.real() * 10000));
+        auto y = static_cast<int>(std::round(center.imag() * 10000));
+        std::size_t h1 = std::hash<int>{}(x);
+        std::size_t h2 = std::hash<int>{}(y);
+        return h1 ^ (h2 << 1);
     }
 };
 
 struct HyperbolicTessellation {
-    using PointType = std::complex<double>;
+    using PointType = std::complex<float>;
 
     int p, q;
     std::vector<HyperbolicPolygon> polygons;
-    std::set<HyperbolicPolygon::hash_type> polygon_hash_set;
+    std::unordered_set<HyperbolicPolygon::hash_type> polygon_hash_set;
 
     explicit HyperbolicTessellation(int p, int q) : p(p), q(q) {
     }
@@ -113,10 +64,40 @@ struct HyperbolicTessellation {
         spdlog::info("polygon count {}", polygons.size());
     }
 
+    CurveMesh2D create_curve_mesh_2d() const {
+        CurveMesh2D curve_mesh;
+        for (int id = 0; auto &poly : polygons) {
+            glm::vec3 c = {GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform()};
+            spdlog::critical("curve mesh {}", poly.vertices.size());
+            for (int i = 0; i < poly.vertices.size(); ++i) {
+                int j = (i + 1) % poly.vertices.size();
+                auto start = poly.vertices[i];
+                auto end = poly.vertices[j];
+
+                GraphicsLab::Geometry::HyperbolicLineSegment edge(start, end);
+
+                int n = 3;
+
+                for (int k = 0; k <= n; k++) {
+                    float param = 1.0f * k / n;
+                    auto complex_pos = edge.evaluate(param);
+                    curve_mesh.vertices.push_back({{complex_pos.real(), complex_pos.imag()}, c});
+
+                    if (k > 0) {
+                        curve_mesh.indices.emplace_back(curve_mesh.vertices.size() - 2, curve_mesh.vertices.size() - 1);
+                    }
+                }
+            }
+
+            spdlog::critical("curve mesh vertice {}, indices {}", curve_mesh.vertices.size(), curve_mesh.indices.size());
+
+            id ++;
+        }
+        return curve_mesh;
+    }
   private:
-    void recurse(const HyperbolicPolygon polygon, int depth) {
-        if (depth == 0)
-            return;
+    void recurse(const HyperbolicPolygon start_polygon, int depth) {
+        std::queue<std::pair<HyperbolicPolygon, int>> que;
 
         auto reflection_mobius = [&](PointType a, PointType b) {
             // translate a to the origin
@@ -131,33 +112,37 @@ struct HyperbolicTessellation {
             return m.inverse()(std::conj(m(z)));
         };
 
-        for (int i = 0; i < polygon.vertices.size(); ++i) {
-            const auto &a = polygon.vertices[i];
-            const auto &b = polygon.vertices[(i + 1) % polygon.vertices.size()];
+        que.push({start_polygon, 0});
 
-            auto mob = reflection_mobius(a, b);
-            PointType new_center = reflection_trans(polygon.center, mob);
+        while (not que.empty()) {
+            auto [polygon, d] = que.front();
+            que.pop();
+            if (d >= depth) continue;
+            for (int i = 0; i < polygon.vertices.size(); ++i) {
+                const auto &a = polygon.vertices[i];
+                const auto &b = polygon.vertices[(i + 1) % polygon.vertices.size()];
 
-            // auto mid = (a + b) / 2.0;
-            // spdlog::info("{} {} {} {} {} {}", polygon.center.real(), polygon.center.imag(), mid.real(), mid.imag(),
-            // new_center.real(), new_center.imag()); spdlog::info("{} {}", new_center.real() / mid.real(),
-            // new_center.imag() / mid.imag());
-            HyperbolicPolygon new_polygon;
-            new_polygon.center = new_center;
+                auto mob = reflection_mobius(a, b);
+                PointType new_center = reflection_trans(polygon.center, mob);
 
-            for (const auto &v : polygon.vertices) {
-                PointType reflected = reflection_trans(v, mob);
-                new_polygon.vertices.emplace_back(reflected);
+                HyperbolicPolygon new_polygon;
+                new_polygon.center = new_center;
+
+                for (const auto &v : polygon.vertices) {
+                    PointType reflected = reflection_trans(v, mob);
+                    new_polygon.vertices.emplace_back(reflected);
+                }
+
+                auto hash = new_polygon.hash();
+                if (polygon_hash_set.contains(hash)) {
+                    continue;
+                }
+
+                polygons.emplace_back(new_polygon);
+                polygon_hash_set.insert(hash);
+
+                que.push({new_polygon, d + 1});
             }
-
-            auto hash = new_polygon.hash();
-            if (polygon_hash_set.contains(hash)) {
-                spdlog::info("hash {} {}", hash.first, hash.second);
-            }
-
-            polygons.emplace_back(new_polygon);
-            polygon_hash_set.insert(hash);
-            recurse(new_polygon, depth - 1);
         }
     }
 };
