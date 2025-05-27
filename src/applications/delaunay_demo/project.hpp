@@ -55,7 +55,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         std::vector<glm::vec3> vertices;
         int n = 0;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 16; i++) {
             vertices.push_back(GraphicsLab::Sampler::sampleUnitSphere<3>());
         }
 
@@ -66,6 +66,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         Mesh3D mesh;
         PointCloud3D pc;
+        PointCloud3D pc2;
 
         for (auto v: vertices) {
             mesh.vertices.push_back({v, {1.0, 0.0, 0.0}, v});
@@ -73,25 +74,44 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         }
 
         for (auto& f: convex_hull.faces) {
-            pc2.vertices.push_back({(f->compute_circumcenter()), {0.0, 1.0, 0.0}});
+            pc2.vertices.push_back({glm::normalize(f->spherical_circumcenter()), {0.0, 1.0, 0.0}});
         }
 
         CurveMesh3D voronoi_mesh;
+        CurveMesh3D delaunay_mesh;
 
-        for (auto& e: convex_hull.halfedges) {
-            int n = 10;
-            auto a = e->face->compute_circumcenter();
-            if (e->twin == nullptr) continue;
-            auto b = e->twin->face->compute_circumcenter();
-            for (int i = 0; i <= n; i++) {
-                float param = 1.0f * i / n;
-                auto pos = glm::mix(a, b, param);
+        for (auto& f: convex_hull.faces) {
+            auto e = f->edge;
+            do {
+                int n = 100;
+                auto a = e->face->spherical_circumcenter();
+                if (e->twin == nullptr) continue;
+                auto b = e->twin->face->spherical_circumcenter();
 
-                voronoi_mesh.vertices.push_back({glm::normalize(pos), {0.0, 0.0, 1.0}});
-                if (i > 0) {
-                    voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2, voronoi_mesh.vertices.size() - 1);
+                bool use_long_arc = e->face->is_visible({0, 0, 0});
+
+                for (int i = 0; i <= n; i++) {
+                    float param = 1.0f * i / n;
+                    auto pos = glm::mix(a, b, param);
+
+                    // if (not use_long_arc) {
+                        voronoi_mesh.vertices.push_back({glm::normalize(pos), {0.0, 0.0, 1.0}});
+                        if (i > 0) {
+                            voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2, voronoi_mesh.vertices.size() - 1);
+                        }
+                    // } else {
+                    //
+                    // }
+
+
+                    auto delaunay_pos = glm::mix(e->origin->position, e->next->origin->position, param);
+                    delaunay_mesh.vertices.push_back({glm::normalize(delaunay_pos), {1.0, 0.0, 0.0}});
+                    if (i > 0) {
+                        delaunay_mesh.indices.emplace_back(delaunay_mesh.vertices.size() - 2, delaunay_mesh.vertices.size() - 1);
+                    }
                 }
-            }
+                e = e->next;
+            } while (e != f->edge);
         }
 
         // pc.vertices.back().color = {0.0, 1.0 ,0.0};
@@ -100,6 +120,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         context.sceneTree->addGeometryNode(std::move(mesh), "convex hull");
         context.sceneTree->addGeometryNode(std::move(voronoi_mesh), "voronoi");
+        context.sceneTree->addGeometryNode(std::move(delaunay_mesh), "delaunay");
         context.sceneTree->addGeometryNode(std::move(pc), "test points");
         context.sceneTree->addGeometryNode(std::move(pc2), "pc 2");
     }

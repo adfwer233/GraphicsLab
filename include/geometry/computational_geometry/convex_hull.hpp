@@ -46,6 +46,37 @@ struct ConvexHull3D {
             PointType a = edge->origin->position;
             return glm::dot(p - a, normal) > 1e-6;
         }
+
+        PointType spherical_circumcenter() {
+            return glm::normalize(normal);
+        }
+
+        PointType compute_circumcenter() {
+            auto a = edge->origin->position;
+            auto b = edge->next->origin->position;
+            auto c = edge->next->next->origin->position;
+
+            glm::vec3 ba = b - a;
+            glm::vec3 ca = c - a;
+            glm::vec3 n = glm::cross(ba, ca);
+            float n2 = glm::dot(n, n);  // Squared length of normal
+
+            // Avoid division by zero for degenerate triangle
+            if (n2 < 1e-10f) {
+                return a; // fallback: triangle is degenerate
+            }
+
+            float ba2 = glm::dot(ba, ba);
+            float ca2 = glm::dot(ca, ca);
+
+            glm::vec3 numerator = ba2 * glm::cross(ca, n) + ca2 * glm::cross(n, ba);
+            glm::vec3 center = a + numerator / (2.0f * n2);
+
+            // center -= glm::dot(glm::normalize(n), center - a) * glm::normalize(n);
+
+            spdlog::info("dist {} {} {} {}", glm::dot(n, center - a), glm::distance(center, a), glm::distance(center, b), glm::distance(center, c));
+            return center;
+        }
     };
 
     /**
