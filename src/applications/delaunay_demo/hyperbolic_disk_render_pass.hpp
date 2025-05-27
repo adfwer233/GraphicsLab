@@ -10,7 +10,7 @@
 namespace GraphicsLab::RenderGraph {
 
 struct HyperbolicDiskRenderPass : public RenderPass {
-    explicit HyperbolicDiskRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, ProjectUIState& ui_state)
+    explicit HyperbolicDiskRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, ProjectUIState &ui_state)
         : RenderPass(device, {0.0f, 0.0f, 0.0f, 0.0f}), sceneTree_(sceneTree), ui_state_(ui_state) {
     }
 
@@ -72,7 +72,7 @@ struct HyperbolicDiskRenderPass : public RenderPass {
 
     std::unique_ptr<PoincareDiskRenderSystem<>> line_render_system = nullptr;
 
-private:
+  private:
     auto complex_to_glm(std::complex<float> z) -> glm::vec2 {
         return {z.real(), z.imag()};
     }

@@ -37,8 +37,8 @@ struct PointLightSource {};
 struct AreaLightSource {};
 
 using GeometryTypes =
-    MetaProgramming::TypeList<Mesh2D, Mesh3D, CurveMesh2D, CurveMesh3D, Wire3D, DirectionalField3D, PointCloud3D, PointCloud2D,
-                              GraphicsLab::Geometry::BezierCurve2D, GraphicsLab::Geometry::BezierCurve3D,
+    MetaProgramming::TypeList<Mesh2D, Mesh3D, CurveMesh2D, CurveMesh3D, Wire3D, DirectionalField3D, PointCloud3D,
+                              PointCloud2D, GraphicsLab::Geometry::BezierCurve2D, GraphicsLab::Geometry::BezierCurve3D,
                               GraphicsLab::Geometry::BSplineCurve2D, GraphicsLab::Geometry::BSplineCurve3D>;
 using LightTypes = MetaProgramming::TypeList<PointLightSource, AreaLightSource>;
 

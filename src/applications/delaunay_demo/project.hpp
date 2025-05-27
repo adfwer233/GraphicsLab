@@ -26,7 +26,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     void afterLoad() override {
         spdlog::info("project loaded");
 
-        hyperbolic_disk_render_pass = std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(*context.device, *context.sceneTree, ui_state);
+        hyperbolic_disk_render_pass = std::make_unique<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass>(
+            *context.device, *context.sceneTree, ui_state);
         {
             std::scoped_lock renderGraphLock(context.applicationContext->renderGraphMutex);
 
@@ -50,8 +51,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         // tessellation.create_initial_polygon();
         tessellation.create_polygon_tessellation(3);
 
-        for (auto poly: tessellation.polygons) {
-            for (auto vert: poly.vertices) {
+        for (auto poly : tessellation.polygons) {
+            for (auto vert : poly.vertices) {
                 pc.vertices.push_back({{vert.real(), vert.imag()}});
             }
             pc.vertices.push_back({{poly.center.real(), poly.center.imag()}, {1.0, 0.0, 0.0}});
@@ -81,24 +82,25 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         PointCloud3D pc;
         PointCloud3D pc2;
 
-        for (auto v: vertices) {
+        for (auto v : vertices) {
             mesh.vertices.push_back({v, {1.0, 0.0, 0.0}, v});
             pc.vertices.push_back({v, {1.0, 0.0, 0.0}});
         }
 
-        for (auto& f: convex_hull.faces) {
+        for (auto &f : convex_hull.faces) {
             pc2.vertices.push_back({glm::normalize(f->spherical_circumcenter()), {0.0, 1.0, 0.0}});
         }
 
         CurveMesh3D voronoi_mesh;
         CurveMesh3D delaunay_mesh;
 
-        for (auto& f: convex_hull.faces) {
+        for (auto &f : convex_hull.faces) {
             auto e = f->edge;
             do {
                 int n = 100;
                 auto a = e->face->spherical_circumcenter();
-                if (e->twin == nullptr) continue;
+                if (e->twin == nullptr)
+                    continue;
                 auto b = e->twin->face->spherical_circumcenter();
 
                 bool use_long_arc = e->face->is_visible({0, 0, 0});
@@ -109,13 +111,15 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
                     voronoi_mesh.vertices.push_back({glm::normalize(pos), {0.0, 0.0, 1.0}});
                     if (i > 0) {
-                        voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2, voronoi_mesh.vertices.size() - 1);
+                        voronoi_mesh.indices.emplace_back(voronoi_mesh.vertices.size() - 2,
+                                                          voronoi_mesh.vertices.size() - 1);
                     }
 
                     auto delaunay_pos = glm::mix(e->origin->position, e->next->origin->position, param);
                     delaunay_mesh.vertices.push_back({glm::normalize(delaunay_pos), {1.0, 0.0, 0.0}});
                     if (i > 0) {
-                        delaunay_mesh.indices.emplace_back(delaunay_mesh.vertices.size() - 2, delaunay_mesh.vertices.size() - 1);
+                        delaunay_mesh.indices.emplace_back(delaunay_mesh.vertices.size() - 2,
+                                                           delaunay_mesh.vertices.size() - 1);
                     }
                 }
                 e = e->next;

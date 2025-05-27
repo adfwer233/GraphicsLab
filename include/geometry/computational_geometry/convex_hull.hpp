@@ -20,18 +20,18 @@ struct ConvexHull3D {
     struct Vertex {
         int id;
         PointType position;
-        HalfEdge* edge = nullptr;
+        HalfEdge *edge = nullptr;
     };
 
     struct HalfEdge {
-        Vertex* origin = nullptr;
-        HalfEdge* twin = nullptr;
-        HalfEdge* next = nullptr;
-        Face* face = nullptr;
+        Vertex *origin = nullptr;
+        HalfEdge *twin = nullptr;
+        HalfEdge *next = nullptr;
+        Face *face = nullptr;
     };
 
     struct Face {
-        HalfEdge* edge = nullptr;
+        HalfEdge *edge = nullptr;
         PointType normal;
 
         void compute_normal() {
@@ -42,7 +42,7 @@ struct ConvexHull3D {
             normal = glm::normalize(normal);
         }
 
-        bool is_visible(const PointType& p) {
+        bool is_visible(const PointType &p) {
             PointType a = edge->origin->position;
             return glm::dot(p - a, normal) > 1e-6;
         }
@@ -59,7 +59,7 @@ struct ConvexHull3D {
             glm::vec3 ba = b - a;
             glm::vec3 ca = c - a;
             glm::vec3 n = glm::cross(ba, ca);
-            float n2 = glm::dot(n, n);  // Squared length of normal
+            float n2 = glm::dot(n, n); // Squared length of normal
 
             // Avoid division by zero for degenerate triangle
             if (n2 < 1e-10f) {
@@ -74,7 +74,8 @@ struct ConvexHull3D {
 
             // center -= glm::dot(glm::normalize(n), center - a) * glm::normalize(n);
 
-            spdlog::info("dist {} {} {} {}", glm::dot(n, center - a), glm::distance(center, a), glm::distance(center, b), glm::distance(center, c));
+            spdlog::info("dist {} {} {} {}", glm::dot(n, center - a), glm::distance(center, a),
+                         glm::distance(center, b), glm::distance(center, c));
             return center;
         }
     };
@@ -91,21 +92,22 @@ struct ConvexHull3D {
 
     std::vector<TriangleIndex> make_indices() const {
         std::vector<TriangleIndex> indices;
-        for (auto& f: faces) {
+        for (auto &f : faces) {
             int i = f.get()->edge->origin->id;
             int j = f.get()->edge->next->origin->id;
             int k = f.get()->edge->next->next->origin->id;
             indices.emplace_back(i, j, k);
 
-            if (i == j or j ==k or k == i) {
+            if (i == j or j == k or k == i) {
                 int x = 0;
             }
         }
         return indices;
     }
 
-    void build(const std::vector<PointType>& points) {
-        if (points.size() < 4) return;
+    void build(const std::vector<PointType> &points) {
+        if (points.size() < 4)
+            return;
 
         used.resize(points.size(), false);
         create_initial_tet(points);
@@ -121,11 +123,9 @@ struct ConvexHull3D {
         }
     }
 
-private:
-
+  private:
     struct pair_hash {
-        template <class T1, class T2>
-        std::size_t operator()(const std::pair<T1, T2>& p) const {
+        template <class T1, class T2> std::size_t operator()(const std::pair<T1, T2> &p) const {
             auto h1 = std::hash<T1>()(p.first);
             auto h2 = std::hash<T2>()(p.second);
             return h1 ^ (h2 << 1);
@@ -133,7 +133,7 @@ private:
     };
 
     void make_face(int a, int b, int c) {
-        Vertex* va = vertices[a].get(), *vb = vertices[b].get(), *vc = vertices[c].get();
+        Vertex *va = vertices[a].get(), *vb = vertices[b].get(), *vc = vertices[c].get();
 
         auto e1 = std::make_unique<HalfEdge>();
         auto e2 = std::make_unique<HalfEdge>();
@@ -162,7 +162,7 @@ private:
         faces.push_back(std::move(f));
     }
 
-    void create_initial_tet(const std::vector<PointType>& points) {
+    void create_initial_tet(const std::vector<PointType> &points) {
         int i = 0, j = 1, k = 2, l = 3;
 
         for (int u = 0; u < 4; u++) {
@@ -173,14 +173,13 @@ private:
             vertices.push_back(std::move(v));
         }
 
-        Vertex* v0 = vertices[0].get();
-        Vertex* v1 = vertices[1].get();
-        Vertex* v2 = vertices[2].get();
-        Vertex* v3 = vertices[3].get();
+        Vertex *v0 = vertices[0].get();
+        Vertex *v1 = vertices[1].get();
+        Vertex *v2 = vertices[2].get();
+        Vertex *v3 = vertices[3].get();
 
         // Ensure positive orientation
-        if (glm::dot(glm::cross(v1->position - v0->position,
-                                v2->position - v0->position),
+        if (glm::dot(glm::cross(v1->position - v0->position, v2->position - v0->position),
                      v3->position - v0->position) > 0) {
             std::swap(v1->position, v2->position);
             std::swap(v1->id, v2->id);
@@ -188,24 +187,19 @@ private:
 
         // Create 4 faces: (v0,v1,v2), (v0,v3,v1), (v0,v2,v3), (v1,v3,v2)
         struct FaceInfo {
-            Vertex* a;
-            Vertex* b;
-            Vertex* c;
+            Vertex *a;
+            Vertex *b;
+            Vertex *c;
         };
 
-        std::vector<FaceInfo> faceInfos = {
-            {v0, v1, v2},
-            {v0, v3, v1},
-            {v0, v2, v3},
-            {v1, v3, v2}
-        };
+        std::vector<FaceInfo> faceInfos = {{v0, v1, v2}, {v0, v3, v1}, {v0, v2, v3}, {v1, v3, v2}};
 
         // Each face has 3 half-edges, stored in a flat list
-        std::vector<HalfEdge*> edgeTable;
+        std::vector<HalfEdge *> edgeTable;
         edgeTable.reserve(12); // 4 faces × 3 edges
 
-        std::vector<HalfEdge*> localEdges;
-        for (const auto& info : faceInfos) {
+        std::vector<HalfEdge *> localEdges;
+        for (const auto &info : faceInfos) {
             auto e1 = std::make_unique<HalfEdge>();
             auto e2 = std::make_unique<HalfEdge>();
             auto e3 = std::make_unique<HalfEdge>();
@@ -239,17 +233,17 @@ private:
         spdlog::info("dir {}", faces[3]->is_visible(v0->position));
 
         // Create a map from (origin, dest) to edge for twin linking
-        std::unordered_map<std::pair<Vertex*, Vertex*>, HalfEdge*, pair_hash> edgeMap;
-        for (HalfEdge* e : edgeTable) {
-            Vertex* from = e->origin;
-            Vertex* to = e->next->origin;
+        std::unordered_map<std::pair<Vertex *, Vertex *>, HalfEdge *, pair_hash> edgeMap;
+        for (HalfEdge *e : edgeTable) {
+            Vertex *from = e->origin;
+            Vertex *to = e->next->origin;
             edgeMap[{from, to}] = e;
         }
 
         // Assign twins
-        for (auto& [key, e] : edgeMap) {
-            Vertex* from = key.first;
-            Vertex* to = key.second;
+        for (auto &[key, e] : edgeMap) {
+            Vertex *from = key.first;
+            Vertex *to = key.second;
             auto it = edgeMap.find({to, from});
             if (it != edgeMap.end()) {
                 e->twin = it->second;
@@ -258,16 +252,16 @@ private:
     }
 
     void fix_twin() {
-        std::unordered_map<std::pair<Vertex*, Vertex*>, HalfEdge*, pair_hash> edgeMap;
-        for (auto& e : halfedges) {
-            Vertex* from = e->origin;
-            Vertex* to = e->next->origin;
+        std::unordered_map<std::pair<Vertex *, Vertex *>, HalfEdge *, pair_hash> edgeMap;
+        for (auto &e : halfedges) {
+            Vertex *from = e->origin;
+            Vertex *to = e->next->origin;
             edgeMap[{from, to}] = e.get();
         }
 
-        for (auto& [key, e] : edgeMap) {
-            Vertex* from = key.first;
-            Vertex* to = key.second;
+        for (auto &[key, e] : edgeMap) {
+            Vertex *from = key.first;
+            Vertex *to = key.second;
 
             if (auto it = edgeMap.find({to, from}); it != edgeMap.end()) {
                 e->twin = it->second;
@@ -275,23 +269,24 @@ private:
         }
     }
 
-    void add_point(Vertex* v) {
-        std::unordered_set<Face*> visible_faces;
+    void add_point(Vertex *v) {
+        std::unordered_set<Face *> visible_faces;
 
-        for (auto& f : faces) {
+        for (auto &f : faces) {
             if (f->is_visible(v->position)) {
                 visible_faces.insert(f.get());
             }
         }
 
-        if (visible_faces.empty()) return;
+        if (visible_faces.empty())
+            return;
 
-        std::unordered_set<HalfEdge*> silhouette_edge;
+        std::unordered_set<HalfEdge *> silhouette_edge;
 
-        for (Face* f : visible_faces) {
-            HalfEdge* e = f->edge;
+        for (Face *f : visible_faces) {
+            HalfEdge *e = f->edge;
             do {
-                HalfEdge* twin = e->twin;
+                HalfEdge *twin = e->twin;
                 if (twin and not visible_faces.contains(twin->face)) {
                     silhouette_edge.insert(twin);
                 }
@@ -299,18 +294,15 @@ private:
             } while (e != f->edge);
         }
 
-        auto isVisible = [&](const std::unique_ptr<Face>& f) {
-            return visible_faces.contains(f.get());
-        };
+        auto isVisible = [&](const std::unique_ptr<Face> &f) { return visible_faces.contains(f.get()); };
 
         spdlog::info("is visible faces {}", visible_faces.size());
         std::erase_if(faces, isVisible);
 
-
         // Stitch new faces
-        for (HalfEdge* boundary : silhouette_edge) {
-            Vertex* a = boundary->next->origin;
-            Vertex* b = boundary->origin;
+        for (HalfEdge *boundary : silhouette_edge) {
+            Vertex *a = boundary->next->origin;
+            Vertex *b = boundary->origin;
 
             auto he1 = std::make_unique<HalfEdge>();
             auto he2 = std::make_unique<HalfEdge>();
@@ -349,4 +341,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry

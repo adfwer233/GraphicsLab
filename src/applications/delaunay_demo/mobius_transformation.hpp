@@ -53,4 +53,3 @@ struct MobiusConstructor {
         return result;
     }
 };
-

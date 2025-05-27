@@ -1,10 +1,11 @@
 #pragma once
-#include "uistate.hpp"
 #include "GLFW/glfw3.h"
 #include "graphics_lab/graphics_lab_controller.hpp"
+#include "uistate.hpp"
 
-struct CustomController: GraphicsLab::IGraphicsLabProjectController {
-    explicit CustomController(ProjectUIState& ui_state): ui_state_(ui_state) {}
+struct CustomController : GraphicsLab::IGraphicsLabProjectController {
+    explicit CustomController(ProjectUIState &ui_state) : ui_state_(ui_state) {
+    }
 
     void scroll_callback(GLFWwindow *, double x_offset, double y_offset) override {
         // update the mobius trans in ui_state_.trans
@@ -51,5 +52,5 @@ struct CustomController: GraphicsLab::IGraphicsLabProjectController {
     float last_mouse_x_pos, last_mouse_y_pos;
     bool mouse_flag = false;
     bool is_mouse_left_pressing = false;
-    ProjectUIState& ui_state_;
+    ProjectUIState &ui_state_;
 };

@@ -40,7 +40,7 @@ struct HyperbolicLineSegment {
         return transformation_inverse_(res);
     }
 
-private:
+  private:
     Mobius transformation_, transformation_inverse_;
     PointType end_transformed_;
 };

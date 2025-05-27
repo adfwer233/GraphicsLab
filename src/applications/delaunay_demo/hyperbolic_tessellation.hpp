@@ -67,7 +67,8 @@ struct HyperbolicTessellation {
     CurveMesh2D create_curve_mesh_2d() const {
         CurveMesh2D curve_mesh;
         for (int id = 0; auto &poly : polygons) {
-            glm::vec3 c = {GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform()};
+            glm::vec3 c = {GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform(),
+                           GraphicsLab::Sampler::sampleUniform()};
             spdlog::critical("curve mesh {}", poly.vertices.size());
             for (int i = 0; i < poly.vertices.size(); ++i) {
                 int j = (i + 1) % poly.vertices.size();
@@ -89,12 +90,14 @@ struct HyperbolicTessellation {
                 }
             }
 
-            spdlog::critical("curve mesh vertice {}, indices {}", curve_mesh.vertices.size(), curve_mesh.indices.size());
+            spdlog::critical("curve mesh vertice {}, indices {}", curve_mesh.vertices.size(),
+                             curve_mesh.indices.size());
 
-            id ++;
+            id++;
         }
         return curve_mesh;
     }
+
   private:
     void recurse(const HyperbolicPolygon start_polygon, int depth) {
         std::queue<std::pair<HyperbolicPolygon, int>> que;
@@ -117,7 +120,8 @@ struct HyperbolicTessellation {
         while (not que.empty()) {
             auto [polygon, d] = que.front();
             que.pop();
-            if (d >= depth) continue;
+            if (d >= depth)
+                continue;
             for (int i = 0; i < polygon.vertices.size(); ++i) {
                 const auto &a = polygon.vertices[i];
                 const auto &b = polygon.vertices[(i + 1) % polygon.vertices.size()];

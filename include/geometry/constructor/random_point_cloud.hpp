@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utils/sampler.hpp"
 #include "geometry/mesh/mesh.hpp"
+#include "utils/sampler.hpp"
 
 namespace GraphicsLab::Geometry {
 
@@ -35,7 +35,6 @@ struct RandomPointCloud {
 
         return result;
     }
-
 };
 
-}
+} // namespace GraphicsLab::Geometry
