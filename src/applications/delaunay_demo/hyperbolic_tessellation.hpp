@@ -41,7 +41,8 @@ struct HyperbolicTessellation {
         double d = std::acosh((std::cos(std::numbers::pi / q)) / (std::sin(std::numbers::pi / p)));
 
         double pi = std::numbers::pi;
-        double r = std::sqrt((std::tan(pi / 2 - pi / q) - std::tan(pi / p)) / (std::tan(pi / 2 - pi / q) + std::tan(pi / p)));
+        double r =
+            std::sqrt((std::tan(pi / 2 - pi / q) - std::tan(pi / p)) / (std::tan(pi / 2 - pi / q) + std::tan(pi / p)));
 
         HyperbolicPolygon initial_polygon;
         initial_polygon.center = {0.0, 0.0};
