@@ -8,9 +8,6 @@ struct CustomController : GraphicsLab::IGraphicsLabProjectController {
     }
 
     void scroll_callback(GLFWwindow *, double x_offset, double y_offset) override {
-        // update the mobius trans in ui_state_.trans
-
-        // spdlog::info("scroll controller {} {}", x_offset, y_offset);
     }
 
     void process_keyboard_input(GLFWwindow *, float) override {
@@ -44,7 +41,6 @@ struct CustomController : GraphicsLab::IGraphicsLabProjectController {
         if (is_mouse_left_pressing) {
             auto vec = glm::normalize(glm::vec2{x_offset, y_offset});
             Mobius trans = MobiusConstructor::move_to_origin({-0.01 * vec.x, 0.01 * vec.y});
-            spdlog::critical(" {} {}", x_offset, y_offset);
             ui_state_.trans = trans.compose(ui_state_.trans);
         }
     }

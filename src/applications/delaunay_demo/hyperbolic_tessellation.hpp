@@ -39,12 +39,9 @@ struct HyperbolicTessellation {
 
     void create_initial_polygon() {
         double d = std::acosh((std::cos(std::numbers::pi / q)) / (std::sin(std::numbers::pi / p)));
-        double r = std::tanh(d / 2.0);
 
         double pi = std::numbers::pi;
-        r = std::sqrt((std::tan(pi / 2 - pi / q) - std::tan(pi / p)) / (std::tan(pi / 2 - pi / q) + std::tan(pi / p)));
-
-        spdlog::critical("radius r {}", r);
+        double r = std::sqrt((std::tan(pi / 2 - pi / q) - std::tan(pi / p)) / (std::tan(pi / 2 - pi / q) + std::tan(pi / p)));
 
         HyperbolicPolygon initial_polygon;
         initial_polygon.center = {0.0, 0.0};
@@ -69,7 +66,6 @@ struct HyperbolicTessellation {
         for (int id = 0; auto &poly : polygons) {
             glm::vec3 c = {GraphicsLab::Sampler::sampleUniform(), GraphicsLab::Sampler::sampleUniform(),
                            GraphicsLab::Sampler::sampleUniform()};
-            spdlog::critical("curve mesh {}", poly.vertices.size());
             for (int i = 0; i < poly.vertices.size(); ++i) {
                 int j = (i + 1) % poly.vertices.size();
                 auto start = poly.vertices[i];
@@ -89,9 +85,6 @@ struct HyperbolicTessellation {
                     }
                 }
             }
-
-            spdlog::critical("curve mesh vertice {}, indices {}", curve_mesh.vertices.size(),
-                             curve_mesh.indices.size());
 
             id++;
         }
@@ -145,7 +138,7 @@ struct HyperbolicTessellation {
                 polygons.emplace_back(new_polygon);
                 polygon_hash_set.insert(hash);
 
-                que.push({new_polygon, d + 1});
+                que.emplace(new_polygon, d + 1);
             }
         }
     }
