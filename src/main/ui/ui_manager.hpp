@@ -9,7 +9,6 @@
 #include "components/logger_widget.hpp"
 #include "components/project_render_widgets.hpp"
 #include "components/project_widgets.hpp"
-#include "components/python_scripts_explorer.hpp"
 #include "components/python_terminal.hpp"
 #include "components/render_mode_panel.hpp"
 #include "components/scene_tree.hpp"

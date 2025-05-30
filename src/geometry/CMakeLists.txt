@@ -3,7 +3,6 @@ project(LAB_geometry VERSION 1.0 DESCRIPTION "Geometry Kernel" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SRC_FILE
-        io/svg_importer.cpp
         parametric/tessellator.cpp
 )
 
