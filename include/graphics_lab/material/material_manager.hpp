@@ -1,5 +1,3 @@
 #pragma once
 
-namespace GraphicsLab::Material {
-
-}
+namespace GraphicsLab::Material {}

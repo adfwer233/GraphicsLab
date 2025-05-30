@@ -25,7 +25,7 @@ struct GraphicsLabApplication {
     GraphicsLabApplication(const GraphicsLabApplication &) = delete;
     GraphicsLabApplication &operator=(const GraphicsLabApplication &) = delete;
 
-    explicit GraphicsLabApplication(argparse::ArgumentParser& args) : appContext(WIDTH, HEIGHT) {
+    explicit GraphicsLabApplication(argparse::ArgumentParser &args) : appContext(WIDTH, HEIGHT) {
         if (args.is_used("--input")) {
             appOption.load_obj_path = args.get<std::string>("--input");
         }

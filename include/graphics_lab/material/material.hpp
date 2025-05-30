@@ -24,4 +24,4 @@ struct Material {
     float subsurface;
 };
 
-}
+} // namespace GraphicsLab::Material
