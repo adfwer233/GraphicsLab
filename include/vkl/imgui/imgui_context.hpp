@@ -42,8 +42,14 @@ class ImguiContext {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 
         // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        // ImGui::StyleColorsLight();
+
+        if (style == "Light") {
+            ImGui::StyleColorsLight();
+        } else if (style == "Dark") {
+            ImGui::StyleColorsDark();
+        } else {
+            ImGui::StyleColorsClassic();
+        }
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForVulkan(window, true);
@@ -65,6 +71,7 @@ class ImguiContext {
 
   public:
     static inline bool set_font = true;
+    static inline std::string style = "Light";
 
     void cleanContext() {
         ImGui_ImplVulkan_Shutdown();

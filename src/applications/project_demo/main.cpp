@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser args;
-    args.add_argument("-i", "--input").default_value(std::string("path"));
+    GraphicsLabApplication::set_args(args);
 
     try {
         args.parse_args(argc, argv);
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
-    GraphicsLabApplication app{};
+    GraphicsLabApplication app(args);
 
     app.projectFactory = []() { return new VisualizationProject(); };
 

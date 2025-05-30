@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser args;
-    args.add_argument("-i", "--input").default_value(std::string("path"));
+    GraphicsLabApplication::set_args(args);
 
     try {
         args.parse_args(argc, argv);
@@ -15,11 +15,7 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
-    GraphicsLabApplication app{};
-
-    if (args.is_used("--input")) {
-        app.appOption.load_obj_path = args.get<std::string>("--input");
-    }
+    GraphicsLabApplication app(args);
 
     try {
         app.run();
