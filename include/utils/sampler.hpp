@@ -18,6 +18,11 @@ struct Sampler {
         return dist(rng());
     }
 
+    static glm::vec3 sampleUniformVec3(float min = 0.0, float max = 1.0) {
+        thread_local std::uniform_real_distribution<float> dist(min, max);
+        return {dist(rng()), dist(rng()), dist(rng())};
+    }
+
     template <size_t dim> static glm::vec<dim, float> sampleUnitSphere() {
         static_assert(dim == 2 || dim == 3, "Only 2D or 3D sampling is supported.");
 

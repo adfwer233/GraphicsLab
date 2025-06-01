@@ -69,7 +69,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         std::vector<glm::vec3> vertices;
         int n = 0;
 
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 1000; i++) {
             vertices.push_back(GraphicsLab::Sampler::sampleUnitSphere<3>());
         }
 
@@ -83,8 +83,99 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         PointCloud3D pc2;
 
         for (auto v : vertices) {
-            mesh.vertices.push_back({v, {1.0, 0.0, 0.0}, v});
             pc.vertices.push_back({v, {1.0, 0.0, 0.0}});
+        }
+
+        auto barycentric_point = [](const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, int i, int j, int N) -> glm::vec3 {
+            float u = float(i) / N;
+            float v = float(j) / N;
+            float w = 1.0f - u - v;
+            return a * w + b * u + c * v;
+        };
+
+        auto tessellate_triangle_and_add_to_mesh = [&](const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3 &color, int N, Mesh3D& target_mesh) {
+            std::vector<std::vector<uint32_t>> vertex_indices(N + 1);
+            auto normal = glm::normalize(glm::cross(b - a, c - a));
+
+            for (int i = 0; i <= N; ++i) {
+                vertex_indices[i].resize(N - i + 1);
+                for (int j = 0; j <= N - i; ++j) {
+                    glm::vec3 p = barycentric_point(a, b, c, i, j, N);
+                    uint32_t index = static_cast<uint32_t>(target_mesh.vertices.size());
+                    target_mesh.vertices.push_back({p, color, normal});
+                    vertex_indices[i][j] = index;
+                }
+            }
+
+            // Create triangles
+            for (int i = 0; i < N; ++i) {
+                for (int j = 0; j < N - i; ++j) {
+                    uint32_t v0 = vertex_indices[i][j];
+                    uint32_t v1 = vertex_indices[i + 1][j];
+                    uint32_t v2 = vertex_indices[i][j + 1];
+                    target_mesh.indices.emplace_back(v0, v1, v2);
+
+                    if (j < N - i - 1) {
+                        uint32_t v3 = vertex_indices[i + 1][j];
+                        uint32_t v4 = vertex_indices[i + 1][j + 1];
+                        uint32_t v5 = vertex_indices[i][j + 1];
+                        target_mesh.indices.emplace_back(v3, v4, v5);
+                    }
+                }
+            }
+        };
+
+        for (auto& f : convex_hull.faces) {
+            auto a = f->edge->origin->position;
+            auto b = f->edge->next->origin->position;
+            auto c = f->edge->next->next->origin->position;
+
+            int N = 10;  // Subdivision level
+
+            glm::vec3 color = GraphicsLab::Sampler::sampleUniformVec3();
+
+            tessellate_triangle_and_add_to_mesh(a, b, c, color, N, mesh);
+        }
+
+        using VoronoiEdge = std::pair<GraphicsLab::Geometry::ConvexHull3D::Face*, GraphicsLab::Geometry::ConvexHull3D::Face*>;
+        std::map<GraphicsLab::Geometry::ConvexHull3D::Vertex*, std::vector<VoronoiEdge>> voronoi_cells;
+
+        for (auto& f: convex_hull.faces) {
+            auto e1 = f->edge;
+            auto e2 = f->edge->next;
+            auto e3 = f->edge->next->next;
+
+            for (auto e: {e1, e2, e3}) {
+                voronoi_cells[e->origin].push_back({e->face, e->twin->face});
+                voronoi_cells[e->twin->origin].push_back({e->twin->face, e->face});
+            }
+        }
+
+        Mesh3D voronoi_spherical_mesh;
+
+        for (auto& [f, edges]: voronoi_cells) {
+            decltype(edges) sorted_edges;
+
+            sorted_edges.push_back(edges.front());
+
+            while (edges.size() > sorted_edges.size()) {
+                for (auto e: edges) {
+                    if (e.first == sorted_edges.back().second) {
+                        sorted_edges.push_back(e);
+                        break;
+                    }
+                }
+            }
+
+            glm::vec3 color = GraphicsLab::Sampler::sampleUniformVec3();
+
+            for (int i = 2; i < sorted_edges.size(); ++i) {
+                auto a = sorted_edges[0].first->spherical_circumcenter();
+                auto b = sorted_edges[i - 1].first->spherical_circumcenter();
+                auto c = sorted_edges[i].first->spherical_circumcenter();
+
+                tessellate_triangle_and_add_to_mesh(a, b, c, color, 10, voronoi_spherical_mesh);
+            }
         }
 
         for (auto &f : convex_hull.faces) {
@@ -128,13 +219,30 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         // pc.vertices.back().color = {0.0, 1.0 ,0.0};
 
-        mesh.indices = indices;
+        Mesh3D spherical_mesh;
+        spherical_mesh.vertices = mesh.vertices;
+        spherical_mesh.indices = mesh.indices;
+
+        for (auto& vert: spherical_mesh.vertices) {
+            vert.position = glm::normalize(vert.position);
+            vert.normal = vert.position;
+        }
+
+        for (auto& vert: voronoi_spherical_mesh.vertices) {
+            vert.position = glm::normalize(vert.position);
+            vert.normal = vert.position;
+        }
 
         context.sceneTree->addGeometryNode(std::move(mesh), "convex hull");
+        context.sceneTree->addGeometryNode(std::move(spherical_mesh), "delaunay result");
+        context.sceneTree->addGeometryNode(std::move(voronoi_spherical_mesh), "voronoi result");
         context.sceneTree->addGeometryNode(std::move(voronoi_mesh), "voronoi");
         context.sceneTree->addGeometryNode(std::move(delaunay_mesh), "delaunay");
         context.sceneTree->addGeometryNode(std::move(pc), "test points");
         context.sceneTree->addGeometryNode(std::move(pc2), "pc 2");
+
+        auto delaunay_result = context.sceneTree->get_geometry_node<Mesh3D>("delaunay result");
+        delaunay_result->visible = false;
     }
 
     std::unique_ptr<GraphicsLab::RenderGraph::HyperbolicDiskRenderPass> hyperbolic_disk_render_pass = nullptr;
