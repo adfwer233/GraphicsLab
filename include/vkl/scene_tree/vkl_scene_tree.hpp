@@ -11,7 +11,6 @@
 
 #include "vkl_camera.hpp"
 #include "vkl_texture_manager.hpp"
-// #include "vkl_material.hpp"
 
 #include "glm/gtc/quaternion.hpp"
 
@@ -19,6 +18,7 @@
 #include <vkl/bvh/vkl_bvh_gpu.hpp>
 
 #include "graphics_lab/geo_flow/geo_flow.hpp"
+#include "material/material_manager.hpp"
 
 #include <fstream>
 #include <geometry/parametric/curve_type_list.hpp>
@@ -462,6 +462,8 @@ struct VklSceneTree {
     VklDevice &device_;
     std::unique_ptr<SceneTree::TreeNode> root;
     std::vector<VklBVHGPUModel::Material> materials;
+
+    MaterialManager material_manager;
 
     CameraNode *active_camera = nullptr;
     TreeNode *activeNode = nullptr;
