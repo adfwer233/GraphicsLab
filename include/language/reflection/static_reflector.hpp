@@ -17,6 +17,7 @@ concept IsStaticReflectedType = requires { typename T::IsStaticReflected; };
 // Helper type for member reflection
 template <typename T, typename Class> struct Property {
     using value_type = T;
+    using PropertyTrait = void;
 
     std::string_view name;
     T Class::*member_ptr;
@@ -31,6 +32,32 @@ template <typename T, typename Class> struct Property {
         obj.*member_ptr = value;
     }
 };
+
+template <typename Ret, typename Class, typename... Args> struct Method {
+    using return_type = Ret;
+    using args_type = std::tuple<Args...>;
+    using method_type = Ret (Class::*)(Args...);
+    using const_method_type = Ret (Class::*)(Args...) const;
+
+    using MethodTrait = void;
+
+    std::string_view name;
+    std::variant<method_type, const_method_type> method_ptr;
+
+    // Call (non-const or const overload)
+    template <typename... CallArgs>
+    Ret call(Class &obj, CallArgs &&...args) const {
+        return std::visit([&](auto ptr) {
+            return (obj.*ptr)(std::forward<CallArgs>(args)...);
+        }, method_ptr);
+    }
+};
+
+template <typename T> concept IsProperty = requires { typename T::PropertyTrait; };
+template <typename T> concept IsMethod = requires { typename T::MethodTrait; };
+
+#define PROPERTY(name, ptr) Property{#name, ptr}
+#define METHOD(name, ptr) Method{#name, ptr}
 
 // Reflection macro for defining properties
 #define REFLECT(...)                                                                                                   \
@@ -66,12 +93,51 @@ struct StaticReflect {
         return std::apply([](auto &&...props) { return ((props.name == Name.value) || ...); }, properties);
     }
 
+    template <typename T, typename... Args>
+    static std::optional<std::any> call(T &obj, std::string_view method_name, Args&&... args) {
+        constexpr auto members = T::staticReflect();
+
+        std::optional<std::any> result = std::nullopt;
+
+        bool found = false;
+
+        std::apply([&](auto &&...member) {
+            (..., ([&] {
+                using MemberType = std::decay_t<decltype(member)>;
+                if constexpr (IsMethod<MemberType>) {
+                    if (member.name == method_name && !found) {
+                        if constexpr(not std::same_as<typename MemberType::return_type, void>) {
+                            result = member.call(obj, std::forward<Args>(args)...);
+                        } else {
+                            member.call(obj, std::forward<Args>(args)...);
+                        }
+                        found = true;
+                    }
+                }
+            }()));
+        }, members);
+
+        if (!found) {
+            throw std::runtime_error("Method not found: " + std::string(method_name));
+        }
+
+        return result;
+    }
+
     // Serialize
     template <typename T> static nlohmann::json serialization(const T &obj) {
         constexpr auto properties = T::staticReflect();
         nlohmann::json json;
 
-        std::apply([&](auto &&...props) { (..., (json[props.name] = serialize_field(props.get(obj)))); }, properties);
+        std::apply([&](auto &&...props) {
+            (..., (
+                [&] {
+                    if constexpr (IsProperty<std::decay_t<decltype(props)>>) {
+                        json[props.name] = serialize_field(props.get(obj));
+                    }
+                }()
+            ));
+        }, properties);
 
         return json;
     }
@@ -84,9 +150,11 @@ struct StaticReflect {
             [&](auto &&...props) {
                 (..., (
                           [&] {
-                              if (json.contains(props.name)) {
-                                  props.set(obj, deserialize_field<typename std::decay_t<decltype(props)>::value_type>(
-                                                     json[props.name]));
+                              if constexpr (IsProperty<std::decay_t<decltype(props)>>) {
+                                  if (json.contains(props.name)) {
+                                      props.set(obj, deserialize_field<typename std::decay_t<decltype(props)>::value_type>(
+                                                         json[props.name]));
+                                  }
                               }
                           }(),
                           void()));

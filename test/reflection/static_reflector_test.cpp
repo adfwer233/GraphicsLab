@@ -162,3 +162,25 @@ TEST(ReflectionTest, TestNestedDeserialization) {
 
     EXPECT_EQ(deserialization_result.data.size(), reflectionStruct.data.size());
 }
+
+TEST(ReflectionTest, TestReflectedFunction) {
+    struct A {
+        int a = 1;
+        void update() { a = 2; }
+
+        REFLECT(
+            PROPERTY(a, &A::a),
+            Method<void, A>{"update", &A::update}
+        )
+    } a;
+
+    auto tmp = StaticReflect::serialization(a);
+    spdlog::info(tmp.dump());
+
+    a.a = 2;
+    StaticReflect::deserialization(a, tmp);
+    EXPECT_EQ(a.a, 1);
+
+    StaticReflect::call(a, "update");
+    EXPECT_EQ(a.a, 2);
+}
