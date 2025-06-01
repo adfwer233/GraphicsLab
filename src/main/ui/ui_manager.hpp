@@ -14,6 +14,7 @@
 #include "components/scene_tree.hpp"
 #include "components/scene_widgets.hpp"
 #include "components/texture_manager.hpp"
+#include "components/material_manager.hpp"
 
 #include "graphics_lab/graphics_lab_context.hpp"
 

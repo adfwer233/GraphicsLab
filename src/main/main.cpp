@@ -16,11 +16,11 @@ int main(int argc, char *argv[]) {
     }
 
     GraphicsLabApplication app(args);
+    app.run();
 
     try {
-        app.run();
     } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        spdlog::error("application run failed: {}", e.what());
         return EXIT_FAILURE;
     }
 
