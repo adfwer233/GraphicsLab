@@ -11,6 +11,41 @@ struct ImGuiReflection {
     GraphicsLabReflection::GraphicsLabFunctionMeta function_meta;
     std::function<void(std::vector<std::any> &)> function_to_call;
 
+    template<IsStaticReflectedType T>
+    void render_static_reflected_propoerties(T& obj) {
+        auto members = obj.staticReflect();
+        std::apply([&](auto &&... props) {
+            ([&] {
+                using PropertyType = std::decay_t<decltype(props)>;
+                if constexpr (IsProperty<PropertyType>) {
+                    using FieldType = typename PropertyType::value_type;
+
+                    if constexpr (std::same_as<FieldType, glm::vec3>) {
+                        ImGui::InputFloat3(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr).x);
+                    } else if constexpr (std::same_as<FieldType, float>) {
+                        ImGui::InputFloat(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr));
+                    } else if constexpr (IsStaticReflectedType<FieldType>) {
+                        if (ImGui::TreeNode(std::format("{}", props.name).c_str())) {
+                            render_static_reflected_propoerties(obj.*props.member_ptr);
+                            ImGui::TreePop();
+                        }
+                    } else if constexpr (StdVector<FieldType>) {
+                        if (ImGui::TreeNode(std::format("{}", props.name).c_str())) {
+                            for (int i = 0; auto& item: obj.*props.member_ptr) {
+                                if (ImGui::TreeNode(std::format("{}[{}]", props.name, i).c_str())) {
+                                    render_static_reflected_propoerties(item);
+                                    ImGui::TreePop();
+                                }
+                                i++;
+                            }
+                            ImGui::TreePop();
+                        }
+                    }
+                }
+            }(), ...);
+        }, members);
+    }
+
     void render_functions(Reflectable* reflectable) {
         for (auto& [name, erased]: reflectable->reflect()) {
             if (erased.call_func != nullptr) {

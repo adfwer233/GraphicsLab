@@ -10,6 +10,11 @@ struct MaterialManager: Reflectable {
     void test() {
         spdlog::info("test called");
     }
+
+    REFLECT(
+        PROPERTY(materials, &MaterialManager::materials)
+    )
+
     void create_material(const std::string& name) {
         materials.emplace_back();
         materials.back().meta.name = name;

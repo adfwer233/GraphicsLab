@@ -11,17 +11,17 @@ namespace SceneTree {
  * c.f. https://disneyanimation.com/publications/physically-based-shading-at-disney/
  */
 struct MaterialData {
-    glm::vec3 base_color;
-    float metallic;
-    float roughness;
-    float specular;
-    float specularTint;
-    float anisotropic;
-    float sheen;
-    float sheenTint;
-    float clearcoat;
-    float clearcoatGloss;
-    float subsurface;
+    glm::vec3 base_color = glm::vec3(1.0f);
+    float metallic = 0.0f;
+    float roughness = 0.5f;
+    float specular = 0.5f;
+    float specularTint = 0.0f;
+    float anisotropic = 0.0f;
+    float sheen = 0.0f;
+    float sheenTint = 0.5f;
+    float clearcoat = 0.0f;
+    float clearcoatGloss = 1.0f;
+    float subsurface = 0.0f;
 
     REFLECT(
         Property{"base_color", &MaterialData::base_color},

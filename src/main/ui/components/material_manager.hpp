@@ -14,6 +14,8 @@ class MaterialManagerWidget : public UIComponent {
 
         ImGui::Begin("Material Manager");
             imgui_reflection_render.render_functions(&this->context_.sceneTree->material_manager);
+
+            imgui_reflection_render.render_static_reflected_propoerties(this->context_.sceneTree->material_manager);
         ImGui::End();
     }
 
