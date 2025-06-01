@@ -90,3 +90,20 @@ TEST(DynamicReflectionTest, TestAddField) {
 
     EXPECT_EQ(res, 10);
 }
+
+TEST(DynamicReflectionTest, RegressionTest) {
+    struct TestStruct: public Reflectable {
+        int a = 0;
+
+        void print(const std::string& info) {}
+
+        ReflectDataType reflect() override {
+            return {
+                    {"a", TypeErasedValue(&a)},
+                    {"print", TypeErasedValue(&TestStruct::print, this, {"test"}, {"print"})}
+            };
+        }
+    } a;
+
+    a.reflect();
+}

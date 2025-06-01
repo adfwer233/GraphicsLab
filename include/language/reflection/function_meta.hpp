@@ -36,7 +36,7 @@ struct GraphicsLabFunction {
 struct MemberFunctionReflection {
     template <typename C, typename R, typename... args>
     static GraphicsLabFunctionMeta createDefaultFunctionMeta(R (C::*)(args...),
-                                                             std::tuple<args...> default_value_tuple) {
+                                                             std::tuple<std::decay_t<args>...> default_value_tuple) {
         GraphicsLabFunctionMeta result;
         int param_index = 0;
         auto default_values = convertTupleToVectorOfAny(default_value_tuple);
@@ -49,7 +49,7 @@ struct MemberFunctionReflection {
 
     template <typename C, typename R, typename... args>
     static GraphicsLabFunctionMeta createFunctionMetaWithName(R (C::*func)(args...),
-                                                              std::tuple<args...> default_value_tuple,
+                                                              std::tuple<std::decay_t<args>...> default_value_tuple,
                                                               std::vector<std::string> names) {
         if (sizeof...(args) != names.size()) {
             return createDefaultFunctionMeta(func, default_value_tuple);
