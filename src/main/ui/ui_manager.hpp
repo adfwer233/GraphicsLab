@@ -20,10 +20,10 @@
 
 using ComponentTypeList = META_GET_REGISTERED_TYPES(MainComponentRegisterTag);
 
-using ScenePanelRenderOrder = MetaProgramming::TypeList<TextureManager, SceneWidgetComponent>;
+using ScenePanelRenderOrder = MetaProgramming::TypeList<TextureManager, MaterialManagerWidget, SceneWidgetComponent>;
 
 namespace UIManagerImpl {
-using RenderOrder = MetaProgramming::TypeList<TextureManager, SceneWidgetComponent>;
+using RenderOrder = MetaProgramming::TypeList<>::append_list_t<ScenePanelRenderOrder>;
 }
 
 class UIManager {
@@ -44,11 +44,7 @@ class UIManager {
         for (int i = 0; i < component_ptrs.size(); ++i) {
             component_map[i] = i;
         }
-        using PreviousType = typename MetaProgramming::TypeListFunctions::KthOf<UIManagerImpl::RenderOrder, 0>::type;
-        constexpr int TypeIndex1 =
-            MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, SceneWidgetComponent>::value;
-        constexpr int PreviousTypeIndex2 =
-            MetaProgramming::TypeListFunctions::IndexOf<ComponentTypeList, PreviousType>::value;
+
         MetaProgramming::ForEachTypeWithIndices(UIManagerImpl::RenderOrder{}, [&]<typename T, size_t i>() {
             if constexpr (i > 0) {
                 using PreviousType =

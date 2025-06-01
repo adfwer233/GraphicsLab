@@ -12,7 +12,7 @@ struct ImGuiReflection {
     std::function<void(std::vector<std::any> &)> function_to_call;
 
     template<IsStaticReflectedType T>
-    void render_static_reflected_propoerties(T& obj) {
+    void render_static_reflected_properties(T& obj) {
         auto members = obj.staticReflect();
         std::apply([&](auto &&... props) {
             ([&] {
@@ -22,24 +22,42 @@ struct ImGuiReflection {
 
                     if constexpr (std::same_as<FieldType, glm::vec3>) {
                         ImGui::InputFloat3(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr).x);
+                    } else if constexpr (std::same_as<FieldType, glm::vec2>) {
+                        ImGui::InputFloat2(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr).x);
+                    } else if constexpr (std::same_as<FieldType, glm::vec4>) {
+                        ImGui::InputFloat4(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr).x);
                     } else if constexpr (std::same_as<FieldType, float>) {
                         ImGui::InputFloat(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr));
+                    } else if constexpr (std::same_as<FieldType, int>) {
+                        ImGui::InputInt(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr));
+                    } else if constexpr (std::same_as<FieldType, bool>) {
+                        ImGui::Checkbox(std::format("{}", props.name).c_str(), &(obj.*props.member_ptr));
+                    } else if constexpr (std::same_as<FieldType, std::string>) {
+                        static char buffer[256]; // adjust size as needed
+                        auto& str = obj.*props.member_ptr;
+                        std::strncpy(buffer, str.c_str(), sizeof(buffer));
+                        if (ImGui::InputText(std::format("{}", props.name).c_str(), buffer, sizeof(buffer))) {
+                            str = buffer;
+                        }
                     } else if constexpr (IsStaticReflectedType<FieldType>) {
                         if (ImGui::TreeNode(std::format("{}", props.name).c_str())) {
-                            render_static_reflected_propoerties(obj.*props.member_ptr);
+                            render_static_reflected_properties(obj.*props.member_ptr);
                             ImGui::TreePop();
                         }
                     } else if constexpr (StdVector<FieldType>) {
                         if (ImGui::TreeNode(std::format("{}", props.name).c_str())) {
                             for (int i = 0; auto& item: obj.*props.member_ptr) {
                                 if (ImGui::TreeNode(std::format("{}[{}]", props.name, i).c_str())) {
-                                    render_static_reflected_propoerties(item);
+                                    render_static_reflected_properties(item);
                                     ImGui::TreePop();
                                 }
                                 i++;
                             }
                             ImGui::TreePop();
                         }
+                    } else {
+                        // fallback or unsupported type
+                        ImGui::Text("%s: (unsupported type)", props.name);
                     }
                 }
             }(), ...);
