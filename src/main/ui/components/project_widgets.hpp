@@ -11,6 +11,7 @@
 #include "ui/render_resources.hpp"
 
 #include "graphics_lab/render_passes/simple_pass.hpp"
+#include "vkl/imgui/imgui_reflection.hpp"
 
 struct mystruct : public Reflectable {
     glm::vec3 pos;
@@ -24,10 +25,6 @@ class ProjectWidgetComponent : public UIComponent {
     UIState &uiState_;
     std::future<void> projectFunctionResult;
 
-    bool showFunctionCallDialog = false;
-    std::function<void(std::vector<std::any> &)> functionWithParamPack;
-    GraphicsLabReflection::GraphicsLabFunctionMeta functionWithParamPackMeta;
-    std::vector<std::any> functionCallParameters;
     std::set<std::string> bindClassNames;
 
   public:
@@ -148,97 +145,17 @@ class ProjectWidgetComponent : public UIComponent {
 
                         pybind11::globals()["proj"] = uiState_.project;
                     }
-
-                    for (auto [name, erased] : uiState_.project->reflect()) {
-                        if (not erased.get() and erased.call_func != nullptr) {
-                            if (ImGui::Button(name.c_str())) {
-                                // erased.call();
-                                auto temp = erased.call_func; // Capturing a structured binding is not yet
-                                                              // supported in OpenMP
-                                projectFunctionResult = std::async(std::launch::async, [temp]() { temp(); });
-                            }
-                        }
-
-                        if (erased.call_func_with_param) {
-                            if (ImGui::Button(name.c_str())) {
-                                functionCallParameters.clear();
-                                for (auto &arg : erased.call_func_with_param_meta->arguments) {
-                                    functionCallParameters.push_back(arg.default_value);
-                                    spdlog::info(arg.name);
-                                }
-
-                                for (int i = 0; i < functionCallParameters.size(); i++) {
-                                    if (functionCallParameters[i].type() == typeid(int)) {
-                                        spdlog::info("has type");
-                                    }
-                                }
-
-                                showFunctionCallDialog = true;
-
-                                functionWithParamPack = erased.call_func_with_param;
-                                // erased.call();
-                                // projectFunctionResult = std::async(std::launch::async, [erased]() { erased.call();
-                                // });
-                            }
-                        }
-                    }
                 }
 
-                if (showFunctionCallDialog) {
-                    functionCallDialogRender();
-                }
+                render_reflection_functions.render_functions(uiState_.project);
             }
         }
         ImGui::End();
     }
 
-    void functionCallDialogRender() {
-        // Center the window
-        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-        ImGui::Begin("Input Dialog", &showFunctionCallDialog,
-                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
-
-        ImGui::Text("Enter your arguments:");
-
-        for (int i = 0; auto &arg : functionWithParamPackMeta.arguments) {
-            std::any parameter;
-
-            if (arg.type_info_func() == typeid(float)) {
-                float &val = std::any_cast<float &>(functionCallParameters[i]);
-                ImGui::InputFloat(std::format("Param: {} (Float)", arg.name).c_str(), &val);
-                parameter = val;
-            }
-
-            if (arg.type_info_func() == typeid(int)) {
-                int &val = std::any_cast<int &>(functionCallParameters[i]);
-                ImGui::InputInt(std::format("Param: {} (Int)", arg.name).c_str(), &val);
-                parameter = val;
-            }
-
-            functionCallParameters.push_back(parameter);
-            i++;
-        }
-
-        if (ImGui::Button("OK")) {
-            showFunctionCallDialog = false;
-
-            projectFunctionResult =
-                std::async(std::launch::async, [this]() { functionWithParamPack(this->functionCallParameters); });
-
-            spdlog::info("called");
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::Button("Cancel")) {
-            // Close the dialog
-            showFunctionCallDialog = false;
-        }
-
-        ImGui::End();
-    }
+private:
+    vkl::ImGuiReflection render_reflection_functions;
 };
 
 META_REGISTER_TYPE(MainComponentRegisterTag, ProjectWidgetComponent)

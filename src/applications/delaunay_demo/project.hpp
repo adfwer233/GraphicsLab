@@ -44,12 +44,12 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         spdlog::info("after load finished");
     }
 
-    void visualize_hyperbolic_tessellation() {
+    void visualize_hyperbolic_tessellation(int p, int q, int depth) {
         PointCloud2D pc;
 
-        HyperbolicTessellation tessellation(7, 3);
+        HyperbolicTessellation tessellation(p, q);
         // tessellation.create_initial_polygon();
-        tessellation.create_polygon_tessellation(3);
+        tessellation.create_polygon_tessellation(depth);
 
         for (auto poly : tessellation.polygons) {
             for (auto vert : poly.vertices) {
@@ -65,11 +65,11 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         context.sceneTree->addGeometryNode(std::move(curve_mesh), "tessellation");
     }
 
-    void visualize_spherical_voronoi() {
+    void visualize_spherical_voronoi(int vert_num, int tessellation_num) {
         std::vector<glm::vec3> vertices;
         int n = 0;
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < vert_num; i++) {
             vertices.push_back(GraphicsLab::Sampler::sampleUnitSphere<3>());
         }
 
@@ -130,11 +130,9 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             auto b = f->edge->next->origin->position;
             auto c = f->edge->next->next->origin->position;
 
-            int N = 10;  // Subdivision level
-
             glm::vec3 color = GraphicsLab::Sampler::sampleUniformVec3();
 
-            tessellate_triangle_and_add_to_mesh(a, b, c, color, N, mesh);
+            tessellate_triangle_and_add_to_mesh(a, b, c, color, tessellation_num, mesh);
         }
 
         using VoronoiEdge = std::pair<GraphicsLab::Geometry::ConvexHull3D::Face*, GraphicsLab::Geometry::ConvexHull3D::Face*>;
@@ -174,7 +172,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
                 auto b = sorted_edges[i - 1].first->spherical_circumcenter();
                 auto c = sorted_edges[i].first->spherical_circumcenter();
 
-                tessellate_triangle_and_add_to_mesh(a, b, c, color, 10, voronoi_spherical_mesh);
+                tessellate_triangle_and_add_to_mesh(a, b, c, color, tessellation_num, voronoi_spherical_mesh);
             }
         }
 
