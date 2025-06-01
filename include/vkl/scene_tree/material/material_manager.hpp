@@ -4,18 +4,16 @@
 
 namespace SceneTree {
 
-struct MaterialManager: Reflectable {
+struct MaterialManager : Reflectable {
     std::vector<Material> materials;
 
     void test() {
         spdlog::info("test called");
     }
 
-    REFLECT(
-        PROPERTY(materials, &MaterialManager::materials)
-    )
+    REFLECT(PROPERTY(materials, &MaterialManager::materials))
 
-    void create_material(const std::string& name) {
+    void create_material(const std::string &name) {
         materials.emplace_back();
         materials.back().meta.name = name;
     }
@@ -23,9 +21,8 @@ struct MaterialManager: Reflectable {
     ReflectDataType reflect() override {
         return {
             {"test", TypeErasedValue(&MaterialManager::test, this)},
-            {"create_material", TypeErasedValue(&MaterialManager::create_material, this, {"default name"}, {"name"})}
-        };
+            {"create_material", TypeErasedValue(&MaterialManager::create_material, this, {"default name"}, {"name"})}};
     }
 };
 
-}
+} // namespace SceneTree

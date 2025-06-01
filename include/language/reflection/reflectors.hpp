@@ -76,7 +76,8 @@ struct TypeErasedValue {
     }
 
     template <typename R, typename C, typename... Args>
-    TypeErasedValue(R (C::*func)(Args...), C *obj, std::tuple<std::decay_t<Args>...> default_values, std::vector<std::string> names) {
+    TypeErasedValue(R (C::*func)(Args...), C *obj, std::tuple<std::decay_t<Args>...> default_values,
+                    std::vector<std::string> names) {
         type_info_func = [func]() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = nullptr;

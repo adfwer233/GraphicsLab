@@ -153,8 +153,7 @@ class ProjectWidgetComponent : public UIComponent {
         ImGui::End();
     }
 
-
-private:
+  private:
     vkl::ImGuiReflection render_reflection_functions;
 };
 

@@ -45,19 +45,24 @@ template <typename Ret, typename Class, typename... Args> struct Method {
     std::variant<method_type, const_method_type> method_ptr;
 
     // Call (non-const or const overload)
-    template <typename... CallArgs>
-    Ret call(Class &obj, CallArgs &&...args) const {
-        return std::visit([&](auto ptr) {
-            return (obj.*ptr)(std::forward<CallArgs>(args)...);
-        }, method_ptr);
+    template <typename... CallArgs> Ret call(Class &obj, CallArgs &&...args) const {
+        return std::visit([&](auto ptr) { return (obj.*ptr)(std::forward<CallArgs>(args)...); }, method_ptr);
     }
 };
 
-template <typename T> concept IsProperty = requires { typename T::PropertyTrait; };
-template <typename T> concept IsMethod = requires { typename T::MethodTrait; };
+template <typename T>
+concept IsProperty = requires { typename T::PropertyTrait; };
+template <typename T>
+concept IsMethod = requires { typename T::MethodTrait; };
 
-#define PROPERTY(name, ptr) Property{#name, ptr}
-#define METHOD(name, ptr) Method{#name, ptr}
+#define PROPERTY(name, ptr)                                                                                            \
+    Property {                                                                                                         \
+        #name, ptr                                                                                                     \
+    }
+#define METHOD(name, ptr)                                                                                              \
+    Method {                                                                                                           \
+        #name, ptr                                                                                                     \
+    }
 
 // Reflection macro for defining properties
 #define REFLECT(...)                                                                                                   \
@@ -94,28 +99,30 @@ struct StaticReflect {
     }
 
     template <typename T, typename... Args>
-    static std::optional<std::any> call(T &obj, std::string_view method_name, Args&&... args) {
+    static std::optional<std::any> call(T &obj, std::string_view method_name, Args &&...args) {
         constexpr auto members = T::staticReflect();
 
         std::optional<std::any> result = std::nullopt;
 
         bool found = false;
 
-        std::apply([&](auto &&...member) {
-            (..., ([&] {
-                using MemberType = std::decay_t<decltype(member)>;
-                if constexpr (IsMethod<MemberType>) {
-                    if (member.name == method_name && !found) {
-                        if constexpr(not std::same_as<typename MemberType::return_type, void>) {
-                            result = member.call(obj, std::forward<Args>(args)...);
-                        } else {
-                            member.call(obj, std::forward<Args>(args)...);
-                        }
-                        found = true;
-                    }
-                }
-            }()));
-        }, members);
+        std::apply(
+            [&](auto &&...member) {
+                (..., ([&] {
+                     using MemberType = std::decay_t<decltype(member)>;
+                     if constexpr (IsMethod<MemberType>) {
+                         if (member.name == method_name && !found) {
+                             if constexpr (not std::same_as<typename MemberType::return_type, void>) {
+                                 result = member.call(obj, std::forward<Args>(args)...);
+                             } else {
+                                 member.call(obj, std::forward<Args>(args)...);
+                             }
+                             found = true;
+                         }
+                     }
+                 }()));
+            },
+            members);
 
         if (!found) {
             throw std::runtime_error("Method not found: " + std::string(method_name));
@@ -129,15 +136,15 @@ struct StaticReflect {
         constexpr auto properties = T::staticReflect();
         nlohmann::json json;
 
-        std::apply([&](auto &&...props) {
-            (..., (
-                [&] {
-                    if constexpr (IsProperty<std::decay_t<decltype(props)>>) {
-                        json[props.name] = serialize_field(props.get(obj));
-                    }
-                }()
-            ));
-        }, properties);
+        std::apply(
+            [&](auto &&...props) {
+                (..., ([&] {
+                     if constexpr (IsProperty<std::decay_t<decltype(props)>>) {
+                         json[props.name] = serialize_field(props.get(obj));
+                     }
+                 }()));
+            },
+            properties);
 
         return json;
     }
@@ -152,8 +159,9 @@ struct StaticReflect {
                           [&] {
                               if constexpr (IsProperty<std::decay_t<decltype(props)>>) {
                                   if (json.contains(props.name)) {
-                                      props.set(obj, deserialize_field<typename std::decay_t<decltype(props)>::value_type>(
-                                                         json[props.name]));
+                                      props.set(obj,
+                                                deserialize_field<typename std::decay_t<decltype(props)>::value_type>(
+                                                    json[props.name]));
                                   }
                               }
                           }(),

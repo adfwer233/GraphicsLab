@@ -86,14 +86,16 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             pc.vertices.push_back({v, {1.0, 0.0, 0.0}});
         }
 
-        auto barycentric_point = [](const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, int i, int j, int N) -> glm::vec3 {
+        auto barycentric_point = [](const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c, int i, int j,
+                                    int N) -> glm::vec3 {
             float u = float(i) / N;
             float v = float(j) / N;
             float w = 1.0f - u - v;
             return a * w + b * u + c * v;
         };
 
-        auto tessellate_triangle_and_add_to_mesh = [&](const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3 &color, int N, Mesh3D& target_mesh) {
+        auto tessellate_triangle_and_add_to_mesh = [&](const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c,
+                                                       const glm::vec3 &color, int N, Mesh3D &target_mesh) {
             std::vector<std::vector<uint32_t>> vertex_indices(N + 1);
             auto normal = glm::normalize(glm::cross(b - a, c - a));
 
@@ -125,7 +127,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             }
         };
 
-        for (auto& f : convex_hull.faces) {
+        for (auto &f : convex_hull.faces) {
             auto a = f->edge->origin->position;
             auto b = f->edge->next->origin->position;
             auto c = f->edge->next->next->origin->position;
@@ -135,15 +137,16 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             tessellate_triangle_and_add_to_mesh(a, b, c, color, tessellation_num, mesh);
         }
 
-        using VoronoiEdge = std::pair<GraphicsLab::Geometry::ConvexHull3D::Face*, GraphicsLab::Geometry::ConvexHull3D::Face*>;
-        std::map<GraphicsLab::Geometry::ConvexHull3D::Vertex*, std::vector<VoronoiEdge>> voronoi_cells;
+        using VoronoiEdge =
+            std::pair<GraphicsLab::Geometry::ConvexHull3D::Face *, GraphicsLab::Geometry::ConvexHull3D::Face *>;
+        std::map<GraphicsLab::Geometry::ConvexHull3D::Vertex *, std::vector<VoronoiEdge>> voronoi_cells;
 
-        for (auto& f: convex_hull.faces) {
+        for (auto &f : convex_hull.faces) {
             auto e1 = f->edge;
             auto e2 = f->edge->next;
             auto e3 = f->edge->next->next;
 
-            for (auto e: {e1, e2, e3}) {
+            for (auto e : {e1, e2, e3}) {
                 voronoi_cells[e->origin].push_back({e->face, e->twin->face});
                 voronoi_cells[e->twin->origin].push_back({e->twin->face, e->face});
             }
@@ -151,13 +154,13 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         Mesh3D voronoi_spherical_mesh;
 
-        for (auto& [f, edges]: voronoi_cells) {
+        for (auto &[f, edges] : voronoi_cells) {
             decltype(edges) sorted_edges;
 
             sorted_edges.push_back(edges.front());
 
             while (edges.size() > sorted_edges.size()) {
-                for (auto e: edges) {
+                for (auto e : edges) {
                     if (e.first == sorted_edges.back().second) {
                         sorted_edges.push_back(e);
                         break;
@@ -221,12 +224,12 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         spherical_mesh.vertices = mesh.vertices;
         spherical_mesh.indices = mesh.indices;
 
-        for (auto& vert: spherical_mesh.vertices) {
+        for (auto &vert : spherical_mesh.vertices) {
             vert.position = glm::normalize(vert.position);
             vert.normal = vert.position;
         }
 
-        for (auto& vert: voronoi_spherical_mesh.vertices) {
+        for (auto &vert : voronoi_spherical_mesh.vertices) {
             vert.position = glm::normalize(vert.position);
             vert.normal = vert.position;
         }

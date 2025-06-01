@@ -23,17 +23,14 @@ template <typename... Ts> struct TypeList {
 
     template <template <typename...> typename T> using monad = TypeList<T<Ts>...>;
 
-    template <typename Other>
-    struct append_list;
+    template <typename Other> struct append_list;
 
-    template <typename... Us>
-    struct append_list<TypeList<Us...>> {
+    template <typename... Us> struct append_list<TypeList<Us...>> {
         using type = TypeList<Ts..., Us...>;
     };
 
     // helper alias
-    template <typename Other>
-    using append_list_t = typename append_list<Other>::type;
+    template <typename Other> using append_list_t = typename append_list<Other>::type;
 };
 
 template <typename... Ts, typename Func> void ForEachType(TypeList<Ts...>, Func &&func) {
