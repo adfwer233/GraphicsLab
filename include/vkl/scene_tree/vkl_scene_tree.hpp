@@ -458,7 +458,7 @@ class AssimpImporter {
     }
 };
 
-struct VklSceneTree {
+struct VklSceneTree: Reflectable {
     VklDevice &device_;
     std::unique_ptr<SceneTree::TreeNode> root;
     std::vector<VklBVHGPUModel::Material> materials;
@@ -532,11 +532,15 @@ struct VklSceneTree {
     }
 
     void cleanSceneTree() {
-        active_camera = nullptr;
-        activeNode = nullptr;
-
-        materials.clear();
-        root.reset();
+        std::thread([&]() {
+            std::lock_guard<std::mutex> lock(sceneTreeMutex);
+            activeNode = nullptr;
+            materials.clear();
+            for (auto& child : root->children) {
+                child.reset();
+            }
+            root->children.clear();
+        }).detach();
     }
 
     template <SupportedGeometryType GeometryType> GeometryNode<GeometryType> *get_geometry_node(std::string_view name) {
@@ -612,6 +616,12 @@ struct VklSceneTree {
         for (auto &child : node->children) {
             set_scene_to_nodes(child.get());
         }
+    }
+
+    ReflectDataType reflect() override {
+        return {
+            {"Clean Scene Tree", TypeErasedValue(&VklSceneTree::cleanSceneTree, this)}
+        };
     }
 };
 

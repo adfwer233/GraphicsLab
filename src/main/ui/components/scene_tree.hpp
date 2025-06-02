@@ -33,6 +33,13 @@ class SceneTreeComponent : public UIComponent {
                 vkDeviceWaitIdle(context_.sceneTree->device_.device());
             }
 
+            ImGui::Text("Scene Tree Functions");
+
+            imgui_reflection_render.render_functions(context_.sceneTree.get());
+
+            ImGui::Separator();
+
+            ImGui::Text("Scene Tree Data");
             RenderTreeNode(context_.sceneTree->root.get());
         }
 
@@ -45,6 +52,7 @@ class SceneTreeComponent : public UIComponent {
     bool show_call_function_dialog = false;
     std::optional<TypeErasedValue> function_to_call = std::nullopt;
     std::vector<std::any> args;
+    vkl::ImGuiReflection imgui_reflection_render;
 
     void render_call_function_dialog() {
         if (show_call_function_dialog) {

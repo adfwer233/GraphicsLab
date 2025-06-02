@@ -37,7 +37,7 @@ struct HyperbolicDiskRenderPass : public RenderPass {
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {
         auto commandBuffer = render_context->get_current_command_buffer();
         uint32_t frameIndex = render_context->get_current_frame_index();
-
+        std::scoped_lock sceneTreeLock(sceneTree_.sceneTreeMutex);
         begin_render_pass(commandBuffer);
 
         auto mesh_buffer = SceneTree::VklNodeMeshBuffer<CurveMesh2D>::instance();
