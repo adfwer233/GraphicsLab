@@ -74,8 +74,8 @@ struct ConvexHull3D {
 
             // center -= glm::dot(glm::normalize(n), center - a) * glm::normalize(n);
 
-            spdlog::info("dist {} {} {} {}", glm::dot(n, center - a), glm::distance(center, a),
-                         glm::distance(center, b), glm::distance(center, c));
+            // spdlog::info("dist {} {} {} {}", glm::dot(n, center - a), glm::distance(center, a),
+                         // glm::distance(center, b), glm::distance(center, c));
             return center;
         }
     };
@@ -227,10 +227,10 @@ struct ConvexHull3D {
             faces.push_back(std::move(f));
         }
 
-        spdlog::info("dir {}", faces[0]->is_visible(v3->position));
-        spdlog::info("dir {}", faces[1]->is_visible(v2->position));
-        spdlog::info("dir {}", faces[2]->is_visible(v1->position));
-        spdlog::info("dir {}", faces[3]->is_visible(v0->position));
+        // spdlog::info("dir {}", faces[0]->is_visible(v3->position));
+        // spdlog::info("dir {}", faces[1]->is_visible(v2->position));
+        // spdlog::info("dir {}", faces[2]->is_visible(v1->position));
+        // spdlog::info("dir {}", faces[3]->is_visible(v0->position));
 
         // Create a map from (origin, dest) to edge for twin linking
         std::unordered_map<std::pair<Vertex *, Vertex *>, HalfEdge *, pair_hash> edgeMap;
@@ -296,7 +296,7 @@ struct ConvexHull3D {
 
         auto isVisible = [&](const std::unique_ptr<Face> &f) { return visible_faces.contains(f.get()); };
 
-        spdlog::info("is visible faces {}", visible_faces.size());
+        // spdlog::info("is visible faces {}", visible_faces.size());
         std::erase_if(faces, isVisible);
 
         // Stitch new faces

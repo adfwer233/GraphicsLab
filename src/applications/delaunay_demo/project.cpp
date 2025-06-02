@@ -2,7 +2,7 @@
 
 ReflectDataType DelaunayDemoProject::reflect() {
     auto result = IGraphicsLabProject::reflect();
-    result.emplace("tick", TypeErasedValue(&DelaunayDemoProject::tick, this));
+    result.clear();
     result.emplace(
         "visualize_hyperbolic_tessellation",
         TypeErasedValue(&DelaunayDemoProject::visualize_hyperbolic_tessellation, this, {7, 3, 3}, {"p", "q", "depth"}));

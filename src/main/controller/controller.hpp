@@ -155,11 +155,12 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
         }
 
         if (button == GLFW_MOUSE_BUTTON_LEFT and state == GLFW_PRESS) {
-            rayPicking(uiState.mouseXPos - uiState.scope_min["scene_render_result"].x,
-                       uiState.mouseYPos - uiState.scope_min["scene_render_result"].y,
-                       uiState.scope_max["scene_render_result"].x - uiState.scope_min["scene_render_result"].x,
-                       uiState.scope_max["scene_render_result"].y - uiState.scope_min["scene_render_result"].y);
-
+            if (uiState.showBox) {
+                rayPicking(uiState.mouseXPos - uiState.scope_min["scene_render_result"].x,
+                           uiState.mouseYPos - uiState.scope_min["scene_render_result"].y,
+                           uiState.scope_max["scene_render_result"].x - uiState.scope_min["scene_render_result"].x,
+                           uiState.scope_max["scene_render_result"].y - uiState.scope_min["scene_render_result"].y);
+            }
             uiState.isMouseLeftPressing = true;
         }
 

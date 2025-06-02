@@ -39,6 +39,14 @@ class SceneTreeComponent : public UIComponent {
 
             ImGui::Separator();
 
+            ImGui::Text("Geometry Objects");
+
+            for (auto node: context_.sceneTree->traverse_all_type_geometry_nodes()) {
+                ImGui::Checkbox(node->name.c_str(), &node->visible);
+            }
+
+            ImGui::Separator();
+
             ImGui::Text("Scene Tree Data");
             RenderTreeNode(context_.sceneTree->root.get());
         }

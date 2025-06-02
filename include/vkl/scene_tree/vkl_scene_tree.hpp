@@ -154,15 +154,33 @@ struct InternalNode : public TreeNode {
     GraphicsTransformation transformation;
 };
 
-template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeNode {
+struct GeometryNodeBase: public TreeNode {
     NodeType type() override {
         return NodeType::GeometryNode;
     }
+
+    bool visible = true;
+    GraphicsTransformation transformation;
+
+    std::optional<size_t> material_index = std::nullopt;
+
+    // sync objects
+    bool updated = false;
+    bool boxUpdated = false;
 
     ReflectDataType reflect() override {
         auto result = TreeNode::reflect();
         result.emplace("transformation", TypeErasedValue(&transformation));
         result.emplace("visible", TypeErasedValue(&visible));
+        return result;
+    }
+};
+
+template <SupportedGeometryType GeometryType> struct GeometryNode : public GeometryNodeBase {
+
+
+    ReflectDataType reflect() override {
+        auto result = GeometryNodeBase::reflect();
         result.emplace("Apply Transformation", TypeErasedValue(&GeometryNode::applyTransformation, this));
         result.emplace("rotateX", TypeErasedValue(&GeometryNode::rotateX, this));
         result.emplace("rotateY", TypeErasedValue(&GeometryNode::rotateY, this));
@@ -171,8 +189,6 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         result.emplace("updateColor",
                        TypeErasedValue(&GeometryNode::updateColor, this,
                                        std::tuple<glm::vec3>(glm::vec3(1.0f, 1.0f, 1.0f)), {"New Color"}));
-        result.emplace("testReflectionFunction",
-                       TypeErasedValue(&GeometryNode::testReflectionFunction, this, {1, 2, 3}, {"x", "y", "z"}));
         return result;
     }
 
@@ -183,13 +199,6 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
     }
 
     GeometryType data;
-    bool visible = true;
-    std::optional<size_t> material_index = std::nullopt;
-    GraphicsTransformation transformation;
-
-    // sync objects
-    bool updated = false;
-    bool boxUpdated = false;
 
     void updateColor(glm::vec3 color) {
         if constexpr (MeshGeometryTrait<GeometryType>) {
@@ -207,10 +216,6 @@ template <SupportedGeometryType GeometryType> struct GeometryNode : public TreeN
         }
 
         updated = true;
-    }
-
-    void testReflectionFunction(int x, int y, int z) {
-        spdlog::info("x: {}, y: {}, z: {}", x, y, z);
     }
 
     void applyTransformation() {
@@ -504,12 +509,14 @@ struct VklSceneTree: Reflectable {
     }
 
     template <SupportedGeometryType GeometryType>
-    void addGeometryNode(GeometryType &&Geometry, std::optional<std::string> name = std::nullopt) {
+    GeometryNode<GeometryType>* addGeometryNode(GeometryType &&Geometry, std::optional<std::string> name = std::nullopt) {
         auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(std::forward<GeometryType>(Geometry));
         if (name.has_value()) {
             geometry_node->name = name.value();
         }
         root->children.push_back(std::move(geometry_node));
+
+        return static_cast<GeometryNode<GeometryType>*>(root->children.back().get());
     }
 
     void addCameraNode(const std::string &name, Camera camera) {
@@ -536,10 +543,16 @@ struct VklSceneTree: Reflectable {
             std::lock_guard<std::mutex> lock(sceneTreeMutex);
             activeNode = nullptr;
             materials.clear();
+            std::vector<std::unique_ptr<TreeNode>> protected_nodes;
             for (auto& child : root->children) {
+                if (dynamic_cast<CameraNode *>(child.get()) != nullptr) {
+                    protected_nodes.push_back(std::move(child));
+                    continue;
+                }
                 child.reset();
             }
             root->children.clear();
+            root->children = std::move(protected_nodes);
         }).detach();
     }
 
@@ -550,6 +563,12 @@ struct VklSceneTree: Reflectable {
             }
         }
         return nullptr;
+    }
+
+    Generator<GeometryNodeBase*> traverse_all_type_geometry_nodes() {
+        for (auto node : traverse_all_type_geometry_nodes_internel(root.get())) {
+            co_yield node;
+        }
     }
 
     template <SupportedGeometryType GeometryType> Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes() {
@@ -577,6 +596,18 @@ struct VklSceneTree: Reflectable {
     }
 
   private:
+    Generator<GeometryNodeBase*> traverse_all_type_geometry_nodes_internel(TreeNode *node) {
+        if (node->type() == NodeType::GeometryNode) {
+            co_yield static_cast<GeometryNodeBase*>(node);
+        }
+
+        for (auto &child : node->children) {
+            for (auto geometryNode : traverse_all_type_geometry_nodes_internel(child.get())) {
+                co_yield geometryNode;
+            }
+        }
+    }
+
     template <SupportedGeometryType GeometryType>
     Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes_internal(TreeNode *node) {
         if (auto geometryNode = dynamic_cast<GeometryNode<GeometryType> *>(node)) {

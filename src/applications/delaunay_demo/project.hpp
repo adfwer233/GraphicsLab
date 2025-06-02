@@ -257,7 +257,9 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             euclidean_mesh.indices.emplace_back(index.j, index.k);
             euclidean_mesh.indices.emplace_back(index.k, index.i);
         }
-        context.sceneTree->addGeometryNode(std::move(euclidean_mesh), "Euclidean Delaunay");
+
+        auto euclidean_mesh_node = context.sceneTree->addGeometryNode(std::move(euclidean_mesh), "Euclidean Delaunay");
+        euclidean_mesh_node->visible = false;
 
         /**
          * filter hyperbolic 2-simplex

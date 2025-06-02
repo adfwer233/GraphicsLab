@@ -35,14 +35,6 @@ class ProjectWidgetComponent : public UIComponent {
     void render() final {
         ImGui::Begin("Project Manager");
         {
-            if (ImGui::Button("add render pass")) {
-                auto simple_pass = new GraphicsLab::RenderGraph::SimpleRenderPass(context_.device_);
-                simple_pass->set_extent(2048, 2048);
-                context_.renderGraph->add_pass(simple_pass, "New simple pass");
-
-                context_.compileRenderGraph();
-            }
-
             if (ImGui::Button("Choose Path")) {
                 std::filesystem::path path =
                     std::filesystem::path(FileSystem::chooseDirectory()) / "GraphicsLabProject.json";
