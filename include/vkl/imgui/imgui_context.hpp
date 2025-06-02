@@ -65,11 +65,12 @@ class ImguiContext {
         ImGui_ImplVulkan_Init(&init_info);
 
         if (set_font) {
-            io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 30);
+            io.Fonts->AddFontFromFileTTF("font/segoeui.ttf", 1.0f * font_size);
         }
     }
 
   public:
+    static inline int font_size = 30;
     static inline bool set_font = true;
     static inline std::string style = "Light";
 
