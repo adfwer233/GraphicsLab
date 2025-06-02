@@ -2,6 +2,8 @@
 #include "imgui_internal.h"
 #include "language/reflection/reflectors.hpp"
 
+#include <future>
+
 namespace vkl {
 
 struct ImGuiReflection {
