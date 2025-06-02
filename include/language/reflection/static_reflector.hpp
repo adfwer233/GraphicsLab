@@ -2,6 +2,7 @@
 
 #include <string>
 #include <tuple>
+#include <variant>
 
 #include "custom_serizalization.hpp"
 #include "nlohmann/json.hpp"
