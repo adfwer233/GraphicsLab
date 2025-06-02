@@ -154,7 +154,7 @@ struct InternalNode : public TreeNode {
     GraphicsTransformation transformation;
 };
 
-struct GeometryNodeBase: public TreeNode {
+struct GeometryNodeBase : public TreeNode {
     NodeType type() override {
         return NodeType::GeometryNode;
     }
@@ -177,7 +177,6 @@ struct GeometryNodeBase: public TreeNode {
 };
 
 template <SupportedGeometryType GeometryType> struct GeometryNode : public GeometryNodeBase {
-
 
     ReflectDataType reflect() override {
         auto result = GeometryNodeBase::reflect();
@@ -463,7 +462,7 @@ class AssimpImporter {
     }
 };
 
-struct VklSceneTree: Reflectable {
+struct VklSceneTree : Reflectable {
     VklDevice &device_;
     std::unique_ptr<SceneTree::TreeNode> root;
     std::vector<VklBVHGPUModel::Material> materials;
@@ -509,14 +508,15 @@ struct VklSceneTree: Reflectable {
     }
 
     template <SupportedGeometryType GeometryType>
-    GeometryNode<GeometryType>* addGeometryNode(GeometryType &&Geometry, std::optional<std::string> name = std::nullopt) {
+    GeometryNode<GeometryType> *addGeometryNode(GeometryType &&Geometry,
+                                                std::optional<std::string> name = std::nullopt) {
         auto geometry_node = std::make_unique<GeometryNode<GeometryType>>(std::forward<GeometryType>(Geometry));
         if (name.has_value()) {
             geometry_node->name = name.value();
         }
         root->children.push_back(std::move(geometry_node));
 
-        return static_cast<GeometryNode<GeometryType>*>(root->children.back().get());
+        return static_cast<GeometryNode<GeometryType> *>(root->children.back().get());
     }
 
     void addCameraNode(const std::string &name, Camera camera) {
@@ -544,7 +544,7 @@ struct VklSceneTree: Reflectable {
             activeNode = nullptr;
             materials.clear();
             std::vector<std::unique_ptr<TreeNode>> protected_nodes;
-            for (auto& child : root->children) {
+            for (auto &child : root->children) {
                 if (dynamic_cast<CameraNode *>(child.get()) != nullptr) {
                     protected_nodes.push_back(std::move(child));
                     continue;
@@ -565,7 +565,7 @@ struct VklSceneTree: Reflectable {
         return nullptr;
     }
 
-    Generator<GeometryNodeBase*> traverse_all_type_geometry_nodes() {
+    Generator<GeometryNodeBase *> traverse_all_type_geometry_nodes() {
         for (auto node : traverse_all_type_geometry_nodes_internel(root.get())) {
             co_yield node;
         }
@@ -596,9 +596,9 @@ struct VklSceneTree: Reflectable {
     }
 
   private:
-    Generator<GeometryNodeBase*> traverse_all_type_geometry_nodes_internel(TreeNode *node) {
+    Generator<GeometryNodeBase *> traverse_all_type_geometry_nodes_internel(TreeNode *node) {
         if (node->type() == NodeType::GeometryNode) {
-            co_yield static_cast<GeometryNodeBase*>(node);
+            co_yield static_cast<GeometryNodeBase *>(node);
         }
 
         for (auto &child : node->children) {
@@ -650,9 +650,7 @@ struct VklSceneTree: Reflectable {
     }
 
     ReflectDataType reflect() override {
-        return {
-            {"Clean Scene Tree", TypeErasedValue(&VklSceneTree::cleanSceneTree, this)}
-        };
+        return {{"Clean Scene Tree", TypeErasedValue(&VklSceneTree::cleanSceneTree, this)}};
     }
 };
 

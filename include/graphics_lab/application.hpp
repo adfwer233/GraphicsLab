@@ -40,7 +40,8 @@ struct GraphicsLabApplication {
     static void set_args(argparse::ArgumentParser &args) {
         args.add_argument("-i", "--input").default_value(std::string("path"));
         args.add_argument("--style").default_value(std::string("Light"));
-        args.add_argument("--font_size").default_value(30).scan<'i', int>();;
+        args.add_argument("--font_size").default_value(30).scan<'i', int>();
+        ;
     }
 
     ApplicationOption appOption;

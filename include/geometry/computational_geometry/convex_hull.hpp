@@ -75,7 +75,7 @@ struct ConvexHull3D {
             // center -= glm::dot(glm::normalize(n), center - a) * glm::normalize(n);
 
             // spdlog::info("dist {} {} {} {}", glm::dot(n, center - a), glm::distance(center, a),
-                         // glm::distance(center, b), glm::distance(center, c));
+            // glm::distance(center, b), glm::distance(center, c));
             return center;
         }
     };

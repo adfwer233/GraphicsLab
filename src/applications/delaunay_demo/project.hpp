@@ -51,8 +51,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     };
 
     // Return nullopt if planes are parallel or coincident
-    std::optional<Line> intersectPlanes(const glm::vec3& p1, const glm::vec3& n1,
-                                        const glm::vec3& p2, const glm::vec3& n2) {
+    std::optional<Line> intersectPlanes(const glm::vec3 &p1, const glm::vec3 &n1, const glm::vec3 &p2,
+                                        const glm::vec3 &n2) {
         glm::vec3 dir = glm::cross(n1, n2);
 
         if (glm::length(dir) < 1e-6f) {
@@ -67,14 +67,13 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         glm::vec3 n1xn2 = glm::cross(n1, n2);
         glm::vec3 n1xn2_squared = n1xn2 * glm::dot(n1xn2, n1xn2);
 
-        glm::vec3 point =
-            ((glm::cross(n1xn2, n2) * d1) + (glm::cross(n1, n1xn2) * d2)) / glm::dot(n1xn2, n1xn2);
+        glm::vec3 point = ((glm::cross(n1xn2, n2) * d1) + (glm::cross(n1, n1xn2) * d2)) / glm::dot(n1xn2, n1xn2);
 
-        return Line{ point, glm::normalize(dir) };
+        return Line{point, glm::normalize(dir)};
     }
 
-    std::optional<glm::vec3> intersectLinePlane(const glm::vec3& l0, const glm::vec3& d,
-                                            const glm::vec3& p0, const glm::vec3& n) {
+    std::optional<glm::vec3> intersectLinePlane(const glm::vec3 &l0, const glm::vec3 &d, const glm::vec3 &p0,
+                                                const glm::vec3 &n) {
         float denom = glm::dot(n, d);
         if (std::abs(denom) < 1e-6f) {
             // Line is parallel to plane
@@ -85,7 +84,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         return l0 + t * d;
     }
 
-    bool segmentIntersectsUnitDisk(const glm::vec2& a, const glm::vec2& b) {
+    bool segmentIntersectsUnitDisk(const glm::vec2 &a, const glm::vec2 &b) {
         // Check if either endpoint is inside the unit disk
         if (glm::length(a) <= 1.0f || glm::length(b) <= 1.0f)
             return true;
@@ -113,8 +112,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     }
 
     // Return 0, 1, or 2 intersection points between two circles
-    std::vector<glm::vec2> intersectCircles(const glm::vec2& c0, float r0,
-                                            const glm::vec2& c1, float r1) {
+    std::vector<glm::vec2> intersectCircles(const glm::vec2 &c0, float r0, const glm::vec2 &c1, float r1) {
         glm::vec2 d = c1 - c0;
         float distSq = glm::length2(d);
         float dist = glm::sqrt(distSq);
@@ -134,7 +132,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         // Check for tangent (one solution)
         float hSq = r0 * r0 - a * a;
         if (hSq < 1e-6f) {
-            return { p }; // one intersection (tangent)
+            return {p}; // one intersection (tangent)
         }
 
         // Two intersections
@@ -144,16 +142,14 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         glm::vec2 i1 = p + h * perp;
         glm::vec2 i2 = p - h * perp;
 
-        return { i1, i2 };
+        return {i1, i2};
     }
 
     void visualize_hyperbolic_delaunay() {
 
-        auto glm_to_complex = [](glm::vec2 p) -> std::complex<float> {
-            return {p.x, p.y};
-        };
+        auto glm_to_complex = [](glm::vec2 p) -> std::complex<float> { return {p.x, p.y}; };
 
-        auto get_circumcenter = [](const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) {
+        auto get_circumcenter = [](const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c) {
             glm::vec3 ba = b - a;
             glm::vec3 ca = c - a;
             glm::vec3 n = glm::cross(ba, ca);
@@ -172,7 +168,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             return center;
         };
 
-        auto get_circumcenter_2d = [&](const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+        auto get_circumcenter_2d = [&](const glm::vec2 &a, const glm::vec2 &b, const glm::vec2 &c) {
             glm::vec3 a1{a.x, a.y, 0};
             glm::vec3 a2{b.x, b.y, 0};
             glm::vec3 a3{c.x, c.y, 0};
@@ -180,28 +176,29 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             return glm::vec2{res.x, res.y};
         };
 
-        auto pi_infinity_projection = [](const glm::vec3& p) {
+        auto pi_infinity_projection = [](const glm::vec3 &p) {
             float factor = (p.z + 1) / 2;
             static glm::vec3 phi_inf{0, 0, -1};
             return phi_inf + factor * (p - phi_inf);
         };
 
-        auto get_hyperbolic_circumcenter = [&](const glm::vec2& c, float r) {
+        auto get_hyperbolic_circumcenter = [&](const glm::vec2 &c, float r) {
             float h = glm::length(c);
             float a = h;
             float b = -(1 + h * h - r * r);
             float c0 = h;
 
-            float root = (-b - std::sqrt(b*b - 4 * a * c0))/ (2 * a);
+            float root = (-b - std::sqrt(b * b - 4 * a * c0)) / (2 * a);
 
-            float factor = (1 + root * root) / (- b);
+            float factor = (1 + root * root) / (-b);
             return factor * c;
         };
 
         /**
          * construct bisector between two points p and q
          */
-        auto construct_hyperbolic_bisector = [&](const glm::vec2& p, const glm::vec2& q) -> std::pair<glm::vec2, float> {
+        auto construct_hyperbolic_bisector = [&](const glm::vec2 &p,
+                                                 const glm::vec2 &q) -> std::pair<glm::vec2, float> {
             float op = std::pow(glm::length(p), 2);
             float oq = std::pow(glm::length(q), 2);
 
@@ -224,7 +221,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         std::vector<glm::vec3> lifted_points;
 
-        for (auto p: points) {
+        for (auto p : points) {
             lifted_points.emplace_back(p.x, p.y, p.x * p.x + p.y * p.y);
         }
 
@@ -234,7 +231,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         auto convex_hull_indices = convex_hull.make_indices();
         std::vector<TriangleIndex> euclidean_delaunay_indices;
 
-        for (auto index: convex_hull_indices) {
+        for (auto index : convex_hull_indices) {
             auto a = lifted_points[index.i];
             auto b = lifted_points[index.j];
             auto c = lifted_points[index.k];
@@ -249,10 +246,10 @@ struct DelaunayDemoProject : IGraphicsLabProject {
          * create euclidean dealunay triangulation mesh.
          */
         CurveMesh2D euclidean_mesh;
-        for (auto p: points) {
+        for (auto p : points) {
             euclidean_mesh.vertices.push_back({p, {1.0, 0.0, 0.0}});
         }
-        for (auto index: euclidean_delaunay_indices) {
+        for (auto index : euclidean_delaunay_indices) {
             euclidean_mesh.indices.emplace_back(index.i, index.j);
             euclidean_mesh.indices.emplace_back(index.j, index.k);
             euclidean_mesh.indices.emplace_back(index.k, index.i);
@@ -265,9 +262,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
          * filter hyperbolic 2-simplex
          */
         using Edge = std::pair<int, int>;
-        auto sort_edge = [](Edge a) -> Edge {
-            return {std::min(a.first, a.second), std::max(a.first, a.second)};
-        };
+        auto sort_edge = [](Edge a) -> Edge { return {std::min(a.first, a.second), std::max(a.first, a.second)}; };
 
         std::vector<TriangleIndex> hyperbolic_delaunay_triangle_indices;
         std::map<Edge, std::vector<int>> adjacent_points;
@@ -285,7 +280,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             marked_edges.insert(sort_edge({k, i}));
         };
 
-        auto parabolic_normal = [&](const glm::vec3& a) {
+        auto parabolic_normal = [&](const glm::vec3 &a) {
             glm::vec3 tmp{-2 * a.x, -2 * a.y, a.z};
             return glm::normalize(tmp);
         };
@@ -295,7 +290,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             return glm::distance(circumcenter, a) + glm::length(circumcenter) < 1.0;
         };
 
-        for (auto index: euclidean_delaunay_indices) {
+        for (auto index : euclidean_delaunay_indices) {
             auto a = lifted_points[index.i];
             auto b = lifted_points[index.j];
             auto c = lifted_points[index.k];
@@ -321,8 +316,9 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         std::vector<LineIndex> hyperbolic_delaunay_line_indices;
 
-        for (auto& [e, adj]: adjacent_points) {
-            if (marked_edges.contains(e)) continue;
+        for (auto &[e, adj] : adjacent_points) {
+            if (marked_edges.contains(e))
+                continue;
 
             if (adj.size() != 2) {
                 spdlog::info("adj size {}", adj.size());
@@ -335,7 +331,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             glm::vec3 phi_b_normal = parabolic_normal(phi_b_point);
 
             auto inter = intersectPlanes(phi_a_point, phi_a_normal, phi_b_point, phi_b_normal);
-            if (not inter.has_value()) continue;
+            if (not inter.has_value())
+                continue;
 
             auto intersect_phi_a_phi_b = inter.value();
 
@@ -344,8 +341,10 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             glm::vec3 adj1_normal = parabolic_normal(adj1_point);
             glm::vec3 adj2_normal = parabolic_normal(adj2_point);
 
-            auto inter1 = intersectLinePlane(intersect_phi_a_phi_b.point, intersect_phi_a_phi_b.direction, adj1_point, adj1_normal);
-            auto inter2 = intersectLinePlane(intersect_phi_a_phi_b.point, intersect_phi_a_phi_b.direction, adj2_point, adj2_normal);
+            auto inter1 = intersectLinePlane(intersect_phi_a_phi_b.point, intersect_phi_a_phi_b.direction, adj1_point,
+                                             adj1_normal);
+            auto inter2 = intersectLinePlane(intersect_phi_a_phi_b.point, intersect_phi_a_phi_b.direction, adj2_point,
+                                             adj2_normal);
 
             if ((not inter1.has_value()) or (not inter2.has_value())) {
                 continue;
@@ -371,7 +370,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
          */
         CurveMesh2D hyperbolic_delaunay_triangle_mesh;
 
-        auto add_segment_to_disk = [&](const glm::vec2& x, const glm::vec2& y, CurveMesh2D& target_mesh, glm::vec3 color) {
+        auto add_segment_to_disk = [&](const glm::vec2 &x, const glm::vec2 &y, CurveMesh2D &target_mesh,
+                                       glm::vec3 color) {
             GraphicsLab::Geometry::HyperbolicLineSegment geodesic(glm_to_complex(x), glm_to_complex(y));
             int n = 20;
             for (int i = 0; i <= n; i++) {
@@ -386,16 +386,16 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         };
 
         // add 2-simplex
-        for (auto index: hyperbolic_delaunay_triangle_indices) {
+        for (auto index : hyperbolic_delaunay_triangle_indices) {
             std::vector<std::pair<int, int>> edges = {{index.i, index.j}, {index.j, index.k}, {index.k, index.i}};
-            for (auto [u, v]: edges) {
+            for (auto [u, v] : edges) {
                 add_segment_to_disk(points[u], points[v], hyperbolic_delaunay_triangle_mesh, {0.0, 0.0, 1.0});
             }
         }
 
         // add 1-simplex
 
-        for (auto index: hyperbolic_delaunay_line_indices) {
+        for (auto index : hyperbolic_delaunay_line_indices) {
             add_segment_to_disk(points[index.i], points[index.j], hyperbolic_delaunay_triangle_mesh, {0.0, 0.0, 1.0});
         }
         context.sceneTree->addGeometryNode(std::move(hyperbolic_delaunay_triangle_mesh), "Hyperbolic Delaunay Complex");
@@ -406,7 +406,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         CurveMesh2D hyperbolic_voronoi_mesh;
         glm::vec3 voronoi_color{0.0, 1.0, 1.0};
 
-        auto add_bisector_free = [&](const glm::vec2& p, const glm::vec2& q) {
+        auto add_bisector_free = [&](const glm::vec2 &p, const glm::vec2 &q) {
             auto [center, radius] = construct_hyperbolic_bisector(p, q);
             auto inter = intersectCircles(center, radius, glm::vec2(0), 0.9999f);
 
@@ -418,7 +418,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             }
         };
 
-        auto add_bisector_one_endpoint = [&](const glm::vec2& p, const glm::vec2& q, const glm::vec2& r, const glm::vec2& hyperbolic_center) {
+        auto add_bisector_one_endpoint = [&](const glm::vec2 &p, const glm::vec2 &q, const glm::vec2 &r,
+                                             const glm::vec2 &hyperbolic_center) {
             auto [center, radius] = construct_hyperbolic_bisector(p, q);
             auto inter = intersectCircles(center, radius, glm::vec2(0), 0.9999f);
 
@@ -427,8 +428,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             auto cross = d1.x * d2.y - d1.y * d2.x;
 
             glm::vec2 segment_dir = d1;
-            if (cross < 0) segment_dir *= -1;
-
+            if (cross < 0)
+                segment_dir *= -1;
 
             if (inter.size() == 2) {
                 auto bisector_dir = inter.front() - hyperbolic_center;
@@ -442,19 +443,24 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             }
         };
 
-        for (auto& [edge, adj]: adjacent_points) {
-            if (not marked_edges.contains(edge)) continue;
+        for (auto &[edge, adj] : adjacent_points) {
+            if (not marked_edges.contains(edge))
+                continue;
             if (adj.size() == 2) {
-                auto euclidean_center1 = get_circumcenter_2d(points[edge.first], points[edge.second], points[adj.front()]);
+                auto euclidean_center1 =
+                    get_circumcenter_2d(points[edge.first], points[edge.second], points[adj.front()]);
                 auto r1 = glm::distance(euclidean_center1, points[edge.first]);
                 auto hyperbolic_center1 = get_hyperbolic_circumcenter(euclidean_center1, r1);
 
-                auto euclidean_center2 = get_circumcenter_2d(points[edge.first], points[edge.second], points[adj.back()]);
+                auto euclidean_center2 =
+                    get_circumcenter_2d(points[edge.first], points[edge.second], points[adj.back()]);
                 auto r2 = glm::distance(euclidean_center2, points[edge.first]);
                 auto hyperbolic_center2 = get_hyperbolic_circumcenter(euclidean_center2, r2);
 
-                bool is_hyperbolic1 = is_hyperbolic_triangle(points[edge.first], points[edge.second], points[adj.front()]);
-                bool is_hyperbolic2 = is_hyperbolic_triangle(points[edge.first], points[edge.second], points[adj.back()]);
+                bool is_hyperbolic1 =
+                    is_hyperbolic_triangle(points[edge.first], points[edge.second], points[adj.front()]);
+                bool is_hyperbolic2 =
+                    is_hyperbolic_triangle(points[edge.first], points[edge.second], points[adj.back()]);
 
                 if (not is_hyperbolic1 and not is_hyperbolic2) {
                     add_bisector_free(points[edge.first], points[edge.second]);
@@ -462,12 +468,14 @@ struct DelaunayDemoProject : IGraphicsLabProject {
                 }
 
                 if (not is_hyperbolic1) {
-                    add_bisector_one_endpoint(points[edge.first], points[edge.second], points[adj.back()], hyperbolic_center2);
+                    add_bisector_one_endpoint(points[edge.first], points[edge.second], points[adj.back()],
+                                              hyperbolic_center2);
                     continue;
                 }
 
                 if (not is_hyperbolic2) {
-                    add_bisector_one_endpoint(points[edge.first], points[edge.second], points[adj.front()], hyperbolic_center1);
+                    add_bisector_one_endpoint(points[edge.first], points[edge.second], points[adj.front()],
+                                              hyperbolic_center1);
                     continue;
                 }
 
@@ -477,14 +485,17 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
                 add_segment_to_disk(hyperbolic_center1, hyperbolic_center2, hyperbolic_voronoi_mesh, voronoi_color);
             } else if (adj.size() == 1) {
-                bool is_hyperbolic1 = is_hyperbolic_triangle(points[edge.first], points[edge.second], points[adj.front()]);
+                bool is_hyperbolic1 =
+                    is_hyperbolic_triangle(points[edge.first], points[edge.second], points[adj.front()]);
 
                 if (is_hyperbolic1) {
-                    auto euclidean_center1 = get_circumcenter_2d(points[edge.first], points[edge.second], points[adj.front()]);
+                    auto euclidean_center1 =
+                        get_circumcenter_2d(points[edge.first], points[edge.second], points[adj.front()]);
                     auto r1 = glm::distance(euclidean_center1, points[edge.first]);
                     auto hyperbolic_center1 = get_hyperbolic_circumcenter(euclidean_center1, r1);
 
-                    add_bisector_one_endpoint(points[edge.first], points[edge.second], points[adj.front()], hyperbolic_center1);
+                    add_bisector_one_endpoint(points[edge.first], points[edge.second], points[adj.front()],
+                                              hyperbolic_center1);
                 } else {
                     add_bisector_free(points[edge.first], points[edge.second]);
                 }
@@ -492,7 +503,6 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         }
 
         context.sceneTree->addGeometryNode(std::move(hyperbolic_voronoi_mesh), "Hyperbolic Voronoi Diagram");
-
     }
 
     void visualize_hyperbolic_tessellation(int p, int q, int depth) {

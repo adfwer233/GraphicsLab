@@ -9,6 +9,7 @@ ReflectDataType DelaunayDemoProject::reflect() {
     result.emplace("visualize_spherical_voronoi", TypeErasedValue(&DelaunayDemoProject::visualize_spherical_voronoi,
                                                                   this, {64, 10}, {"#Vertices", "#Tessellation"}));
 
-    result.emplace("visualize_hyperbolic_delaunay", TypeErasedValue(&DelaunayDemoProject::visualize_hyperbolic_delaunay, this));
+    result.emplace("visualize_hyperbolic_delaunay",
+                   TypeErasedValue(&DelaunayDemoProject::visualize_hyperbolic_delaunay, this));
     return result;
 }

@@ -41,7 +41,7 @@ class SceneTreeComponent : public UIComponent {
 
             ImGui::Text("Geometry Objects");
 
-            for (auto node: context_.sceneTree->traverse_all_type_geometry_nodes()) {
+            for (auto node : context_.sceneTree->traverse_all_type_geometry_nodes()) {
                 ImGui::Checkbox(node->name.c_str(), &node->visible);
             }
 
