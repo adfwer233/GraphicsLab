@@ -256,7 +256,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             euclidean_mesh.indices.emplace_back(index.k, index.i);
         }
 
-        auto euclidean_mesh_node = context.sceneTree->addGeometryNodeAsync(std::move(euclidean_mesh), "Euclidean Delaunay");
+        auto euclidean_mesh_node =
+            context.sceneTree->addGeometryNodeAsync(std::move(euclidean_mesh), "Euclidean Delaunay");
         euclidean_mesh_node->visible = false;
 
         /**
@@ -427,7 +428,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         for (auto index : hyperbolic_delaunay_line_indices) {
             add_segment_to_disk(points[index.i], points[index.j], hyperbolic_delaunay_triangle_mesh, {0.0, 0.0, 1.0});
         }
-        context.sceneTree->addGeometryNodeAsync(std::move(hyperbolic_delaunay_triangle_mesh), "Hyperbolic Delaunay Complex");
+        context.sceneTree->addGeometryNodeAsync(std::move(hyperbolic_delaunay_triangle_mesh),
+                                                "Hyperbolic Delaunay Complex");
 
         /**
          * construct voronoi diagram

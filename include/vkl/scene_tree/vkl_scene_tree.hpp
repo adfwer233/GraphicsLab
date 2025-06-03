@@ -521,7 +521,7 @@ struct VklSceneTree : Reflectable {
 
     template <SupportedGeometryType GeometryType>
     GeometryNode<GeometryType> *addGeometryNodeAsync(GeometryType &&Geometry,
-                                                std::optional<std::string> name = std::nullopt) {
+                                                     std::optional<std::string> name = std::nullopt) {
         std::scoped_lock lock(sceneTreeMutex);
         return addGeometryNode(std::forward<GeometryType>(Geometry), name);
     }

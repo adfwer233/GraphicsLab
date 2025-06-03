@@ -18,8 +18,10 @@ struct PoincareDiskPointCloudRenderSystemPushConstantData {
     };
 };
 
-using PoincareDiskPointCloudRenderSystemPushConstantList = VklPushConstantInfoList<PoincareDiskPointCloudRenderSystemPushConstantData>;
+using PoincareDiskPointCloudRenderSystemPushConstantList =
+    VklPushConstantInfoList<PoincareDiskPointCloudRenderSystemPushConstantData>;
 
 template <uint32_t Subpass = 0>
 using PoincareDiskPointCloudRenderSystem =
-    SimpleRenderSystem<Subpass, PoincareDiskPointCloudRenderSystemPushConstantList, PoincareDiskPointCloudPipelineModifier>;
+    SimpleRenderSystem<Subpass, PoincareDiskPointCloudRenderSystemPushConstantList,
+                       PoincareDiskPointCloudPipelineModifier>;
