@@ -519,6 +519,13 @@ struct VklSceneTree : Reflectable {
         return static_cast<GeometryNode<GeometryType> *>(root->children.back().get());
     }
 
+    template <SupportedGeometryType GeometryType>
+    GeometryNode<GeometryType> *addGeometryNodeAsync(GeometryType &&Geometry,
+                                                std::optional<std::string> name = std::nullopt) {
+        std::scoped_lock lock(sceneTreeMutex);
+        return addGeometryNode(std::forward<GeometryType>(Geometry), name);
+    }
+
     void addCameraNode(const std::string &name, Camera camera) {
         if (root != nullptr) {
             auto camera_node = std::make_unique<CameraNode>(camera);

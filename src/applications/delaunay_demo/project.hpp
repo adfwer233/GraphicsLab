@@ -53,23 +53,24 @@ struct DelaunayDemoProject : IGraphicsLabProject {
     // Return nullopt if planes are parallel or coincident
     std::optional<Line> intersectPlanes(const glm::vec3 &p1, const glm::vec3 &n1, const glm::vec3 &p2,
                                         const glm::vec3 &n2) {
-        glm::vec3 dir = glm::cross(n1, n2);
+        glm::vec3 direction = glm::cross(n1, n2);
 
-        if (glm::length(dir) < 1e-6f) {
+        if (glm::length(direction) < 1e-6f) {
             // Planes are parallel or coincident
             return std::nullopt;
         }
 
-        // Solve for a point on the intersection line using:
-        // (n1 x n2)·x = d1(n2) - d2(n1) x (n1 x n2)
-        float d1 = glm::dot(n1, p1);
-        float d2 = glm::dot(n2, p2);
-        glm::vec3 n1xn2 = glm::cross(n1, n2);
-        glm::vec3 n1xn2_squared = n1xn2 * glm::dot(n1xn2, n1xn2);
+        // Compute a point on the intersection line
+        float d1 = -glm::dot(n1, p1);
+        float d2 = -glm::dot(n2, p2);
+        glm::vec3 n1xn2 = direction;
 
-        glm::vec3 point = ((glm::cross(n1xn2, n2) * d1) + (glm::cross(n1, n1xn2) * d2)) / glm::dot(n1xn2, n1xn2);
+        glm::mat3 A(n1, n2, n1xn2);
+        glm::vec3 rhs = -glm::vec3(d1, d2, 0.0f);
 
-        return Line{point, glm::normalize(dir)};
+        glm::vec3 point = glm::inverse(glm::transpose(A)) * rhs;
+
+        return Line{point, glm::normalize(direction)};
     }
 
     std::optional<glm::vec3> intersectLinePlane(const glm::vec3 &l0, const glm::vec3 &d, const glm::vec3 &p0,
@@ -145,7 +146,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         return {i1, i2};
     }
 
-    void visualize_hyperbolic_delaunay() {
+    void visualize_hyperbolic_voronoi(int site_num) {
 
         auto glm_to_complex = [](glm::vec2 p) -> std::complex<float> { return {p.x, p.y}; };
 
@@ -179,7 +180,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         auto pi_infinity_projection = [](const glm::vec3 &p) {
             float factor = (p.z + 1) / 2;
             static glm::vec3 phi_inf{0, 0, -1};
-            return phi_inf + factor * (p - phi_inf);
+            return phi_inf + (p - phi_inf) / factor;
         };
 
         auto get_hyperbolic_circumcenter = [&](const glm::vec2 &c, float r) {
@@ -211,7 +212,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         std::vector<glm::vec2> points;
 
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < site_num; i++) {
             auto pt = GraphicsLab::Sampler::sampleUniformVec2(-1, 1);
             while (glm::length(pt) > 1) {
                 pt = GraphicsLab::Sampler::sampleUniformVec2(-1, 1);
@@ -255,7 +256,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             euclidean_mesh.indices.emplace_back(index.k, index.i);
         }
 
-        auto euclidean_mesh_node = context.sceneTree->addGeometryNode(std::move(euclidean_mesh), "Euclidean Delaunay");
+        auto euclidean_mesh_node = context.sceneTree->addGeometryNodeAsync(std::move(euclidean_mesh), "Euclidean Delaunay");
         euclidean_mesh_node->visible = false;
 
         /**
@@ -281,7 +282,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         };
 
         auto parabolic_normal = [&](const glm::vec3 &a) {
-            glm::vec3 tmp{-2 * a.x, -2 * a.y, a.z};
+            glm::vec3 tmp{-2 * a.x, -2 * a.y, 1};
             return glm::normalize(tmp);
         };
 
@@ -331,6 +332,16 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             glm::vec3 phi_b_normal = parabolic_normal(phi_b_point);
 
             auto inter = intersectPlanes(phi_a_point, phi_a_normal, phi_b_point, phi_b_normal);
+
+            auto dot1 = glm::dot(phi_a_normal, inter->point - phi_a_point);
+            auto dot2 = glm::dot(phi_b_normal, inter->point - phi_b_point);
+            auto dot3 = glm::dot(phi_a_normal, inter->direction);
+            auto dot4 = glm::dot(phi_b_normal, inter->direction);
+
+            glm::vec2 possible_center{inter->point.x, inter->point.y};
+            float d1 = glm::distance(possible_center, points[e.first]);
+            float d2 = glm::distance(possible_center, points[e.second]);
+
             if (not inter.has_value())
                 continue;
 
@@ -346,12 +357,27 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             auto inter2 = intersectLinePlane(intersect_phi_a_phi_b.point, intersect_phi_a_phi_b.direction, adj2_point,
                                              adj2_normal);
 
+            auto dot2_1 = glm::dot(adj1_normal, inter1.value() - adj1_point);
+            auto cross1 = glm::cross(intersect_phi_a_phi_b.direction, inter1.value() - intersect_phi_a_phi_b.point);
             if ((not inter1.has_value()) or (not inter2.has_value())) {
                 continue;
             }
 
             auto u_sigma_point1 = inter1.value();
+
+            glm::vec2 u_sigma_point1_projected{u_sigma_point1.x, u_sigma_point1.y};
+            auto D1 = glm::distance(u_sigma_point1_projected, points[e.first]);
+            auto D2 = glm::distance(u_sigma_point1_projected, points[e.second]);
+            auto D3 = glm::distance(u_sigma_point1_projected, points[adj.front()]);
+
             auto u_sigma_point2 = inter2.value();
+
+            auto u_sigma_mid = (u_sigma_point1 + u_sigma_point2) / 2.0f;
+            auto u1 = glm::dot(adj1_normal, u_sigma_mid - adj1_point);
+            auto u2 = glm::dot(adj2_normal, u_sigma_mid - adj2_point);
+
+            if (u1 < 0 or u2 < 0)
+                continue;
 
             auto proj1 = pi_infinity_projection(u_sigma_point1);
             auto proj2 = pi_infinity_projection(u_sigma_point2);
@@ -362,6 +388,9 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             if (segmentIntersectsUnitDisk(proj1_2d, proj2_2d)) {
                 hyperbolic_delaunay_line_indices.emplace_back(e.first, e.second);
                 marked_edges.insert(e);
+            } else {
+                // marked_edges.insert(e);
+                int x = 0;
             }
         }
 
@@ -398,7 +427,7 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         for (auto index : hyperbolic_delaunay_line_indices) {
             add_segment_to_disk(points[index.i], points[index.j], hyperbolic_delaunay_triangle_mesh, {0.0, 0.0, 1.0});
         }
-        context.sceneTree->addGeometryNode(std::move(hyperbolic_delaunay_triangle_mesh), "Hyperbolic Delaunay Complex");
+        context.sceneTree->addGeometryNodeAsync(std::move(hyperbolic_delaunay_triangle_mesh), "Hyperbolic Delaunay Complex");
 
         /**
          * construct voronoi diagram
@@ -433,9 +462,12 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
             if (inter.size() == 2) {
                 auto bisector_dir = inter.front() - hyperbolic_center;
-                auto cross2 = segment_dir.x * bisector_dir.y - segment_dir.y * bisector_dir.x;
+                auto cross1 = segment_dir.x * bisector_dir.y - segment_dir.y * bisector_dir.x;
 
-                if (cross2 < 0) {
+                auto bisector_dir2 = inter.back() - hyperbolic_center - segment_dir;
+                auto cross2 = segment_dir.x * bisector_dir2.y - segment_dir.y * bisector_dir2.x;
+
+                if (cross1 < cross2) {
                     add_segment_to_disk(hyperbolic_center, inter.front(), hyperbolic_voronoi_mesh, voronoi_color);
                 } else {
                     add_segment_to_disk(hyperbolic_center, inter.back(), hyperbolic_voronoi_mesh, voronoi_color);
@@ -502,13 +534,34 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             }
         }
 
-        context.sceneTree->addGeometryNode(std::move(hyperbolic_voronoi_mesh), "Hyperbolic Voronoi Diagram");
+        context.sceneTree->addGeometryNodeAsync(std::move(hyperbolic_voronoi_mesh), "Hyperbolic Voronoi Diagram");
 
         PointCloud2D pc;
         for (auto p : points) {
             pc.vertices.push_back({{p.x, p.y}, {1.0, 0.0, 0.0}, {1.0, 0.0, 1.0}});
         }
-        context.sceneTree->addGeometryNode(std::move(pc), "Site Points");
+        context.sceneTree->addGeometryNodeAsync(std::move(pc), "Site Points");
+
+        /**
+         * Visualize the disk boundary
+         */
+
+        CurveMesh2D circle;
+
+        int circle_segment_num = 100;
+        for (int i = 0; i <= circle_segment_num; i++) {
+            float param = 2 * std::numbers::pi / circle_segment_num * i;
+
+            float x = std::cos(param);
+            float y = std::sin(param);
+
+            int id = circle.vertices.size();
+            circle.vertices.push_back({{x, y}, {0.0, 0.0, 0.0}});
+            if (i > 0) {
+                circle.indices.emplace_back(id - 1, id);
+            }
+        }
+        context.sceneTree->addGeometryNodeAsync(std::move(circle), "Circle");
     }
 
     void visualize_hyperbolic_tessellation(int p, int q, int depth) {
@@ -528,8 +581,8 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         auto curve_mesh = tessellation.create_curve_mesh_2d();
 
         std::scoped_lock lock(context.sceneTree->sceneTreeMutex);
-        context.sceneTree->addGeometryNode(std::move(pc), "Vert");
-        context.sceneTree->addGeometryNode(std::move(curve_mesh), "tessellation");
+        context.sceneTree->addGeometryNodeAsync(std::move(pc), "Vert");
+        context.sceneTree->addGeometryNodeAsync(std::move(curve_mesh), "tessellation");
     }
 
     void visualize_spherical_voronoi(int vert_num, int tessellation_num) {
@@ -701,13 +754,13 @@ struct DelaunayDemoProject : IGraphicsLabProject {
             vert.normal = vert.position;
         }
 
-        context.sceneTree->addGeometryNode(std::move(mesh), "convex hull");
-        context.sceneTree->addGeometryNode(std::move(spherical_mesh), "delaunay result");
-        context.sceneTree->addGeometryNode(std::move(voronoi_spherical_mesh), "voronoi result");
-        context.sceneTree->addGeometryNode(std::move(voronoi_mesh), "voronoi");
-        context.sceneTree->addGeometryNode(std::move(delaunay_mesh), "delaunay");
-        context.sceneTree->addGeometryNode(std::move(pc), "test points");
-        context.sceneTree->addGeometryNode(std::move(pc2), "pc 2");
+        context.sceneTree->addGeometryNodeAsync(std::move(mesh), "convex hull");
+        context.sceneTree->addGeometryNodeAsync(std::move(spherical_mesh), "delaunay result");
+        context.sceneTree->addGeometryNodeAsync(std::move(voronoi_spherical_mesh), "voronoi result");
+        context.sceneTree->addGeometryNodeAsync(std::move(voronoi_mesh), "voronoi");
+        context.sceneTree->addGeometryNodeAsync(std::move(delaunay_mesh), "delaunay");
+        context.sceneTree->addGeometryNodeAsync(std::move(pc), "test points");
+        context.sceneTree->addGeometryNodeAsync(std::move(pc2), "pc 2");
 
         auto delaunay_result = context.sceneTree->get_geometry_node<Mesh3D>("delaunay result");
         delaunay_result->visible = false;
