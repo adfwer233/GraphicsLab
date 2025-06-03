@@ -503,6 +503,12 @@ struct DelaunayDemoProject : IGraphicsLabProject {
         }
 
         context.sceneTree->addGeometryNode(std::move(hyperbolic_voronoi_mesh), "Hyperbolic Voronoi Diagram");
+
+        PointCloud2D pc;
+        for (auto p : points) {
+            pc.vertices.push_back({{p.x, p.y}, {1.0, 0.0, 0.0}, {1.0, 0.0, 1.0}});
+        }
+        context.sceneTree->addGeometryNode(std::move(pc), "Site Points");
     }
 
     void visualize_hyperbolic_tessellation(int p, int q, int depth) {

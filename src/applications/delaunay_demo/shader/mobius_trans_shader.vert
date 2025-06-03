@@ -35,6 +35,7 @@ vec2 complexDiv(vec2 a, vec2 b) {
 
 void main() {
     vec2 z = inPosition;
+    gl_PointSize = 15.0;
 
     vec2 numerator = complexAdd(complexMul(pushConstants.a, z), pushConstants.b);
     vec2 denominator = complexAdd(complexMul(pushConstants.c, z), pushConstants.d);
