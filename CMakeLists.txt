@@ -62,6 +62,11 @@ set(VMA_ENABLE_INSTALL ON)
 set(SPIRV_CROSS_FORCE_PIC ON)
 set(ASSIMP_BUILD_ZLIB ON)
 
+# assimp importer, we only use obj format
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_OBJ_IMPORTER ON)
+
 include(fetch-glfw)
 include(fetch-glm)
 include(fetch-assimp)
@@ -88,10 +93,6 @@ include(fetch-tinycolormap)
 #include(fetch-cdt)
 
 cmake_policy(SET CMP0077 NEW)
-# assimp importer, we only use obj format
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 
 find_package( OpenCV )
 INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
