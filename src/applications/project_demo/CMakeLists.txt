@@ -16,7 +16,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC GraphicsLab_Lib)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/src/main/configs" $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/configs" $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
 
 add_custom_command(TARGET ${PROJECT_NAME}  POST_BUILD

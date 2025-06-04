@@ -126,6 +126,7 @@ class ProjectWidgetComponent : public UIComponent {
                 // projectFunctionResult.get();
                 // projectFunctionResult = std::future<void>();
 
+#ifdef ENABLE_PYTHON
                 if (uiState_.project != nullptr) {
 
                     if (ImGui::Button("export to python")) {
@@ -138,7 +139,7 @@ class ProjectWidgetComponent : public UIComponent {
                         pybind11::globals()["proj"] = uiState_.project;
                     }
                 }
-
+#endif
                 render_reflection_functions.render_functions(uiState_.project);
             }
         }

@@ -3,6 +3,7 @@
 #include "component.hpp"
 #include "controller/controller.hpp"
 
+#ifdef ENABLE_PYTHON
 #include <pybind11/embed.h>
 
 namespace py = pybind11;
@@ -139,3 +140,5 @@ class PythonTerminalComponent : public UIComponent {
 };
 
 META_REGISTER_TYPE(MainComponentRegisterTag, PythonTerminalComponent)
+
+#endif

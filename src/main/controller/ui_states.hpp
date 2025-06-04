@@ -6,7 +6,10 @@
 #include "../project/project_manager.hpp"
 #include "graphics_lab/graphics_lab_controller.hpp"
 #include "language/reflection/reflectors.hpp"
+
+#ifdef ENABLE_PYTHON
 #include "pybind11/embed.h"
+#endif
 
 struct UIState : Reflectable {
     enum class RenderMode {
@@ -86,9 +89,6 @@ struct UIState : Reflectable {
     /**
      * Python scripts supporting
      */
-
-    // Initialize the Python interpreter
-    pybind11::scoped_interpreter python;
 
     std::string python_interpreter_path;
 

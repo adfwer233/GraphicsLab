@@ -61,6 +61,7 @@ set(VMA_ENABLE_INSTALL ON)
 # set(SPDLOG_BUILD_SHARED ON)
 set(SPIRV_CROSS_FORCE_PIC ON)
 set(ASSIMP_BUILD_ZLIB ON)
+set(ASSIMP_BUILD_TESTS OFF)
 
 # assimp importer, we only use obj format
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
@@ -163,7 +164,7 @@ if (GRAPHICS_LAB_INSTALL)
     )
 
     # Install the library, include files, and CMake package configuration
-    install(TARGETS GraphicsLabLib LAB_vkl LAB_geometry
+    install(TARGETS GraphicsLab_main GraphicsLabLib LAB_vkl LAB_geometry
             EXPORT GraphicsLabTargets
             ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib
@@ -178,6 +179,16 @@ if (GRAPHICS_LAB_INSTALL)
             DESTINATION include)
     install(DIRECTORY ${Boost_INCLUDE_DIRS} DESTINATION include/boost)
     install(FILES ${stb_SOURCE_DIR}/stb_image.h DESTINATION include)
+
+    install(DIRECTORY configs/ DESTINATION bin/)
+
+    install(DIRECTORY shader/
+            DESTINATION bin/shader
+            FILES_MATCHING PATTERN "*.spv")
+
+    install(DIRECTORY assets/font/
+            DESTINATION bin/font
+            FILES_MATCHING PATTERN "*.ttf")
 
     # Generate a Config file for find_package()
     include(CMakePackageConfigHelpers)

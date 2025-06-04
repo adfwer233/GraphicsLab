@@ -6,7 +6,7 @@
 #include "graphics_lab_controller.hpp"
 #include "graphics_lab_imgui_component.hpp"
 
-#include "pybind11/pybind11.h"
+// #include "pybind11/pybind11.h"
 
 /**
  * Interface for Graphics Lab Application
@@ -22,8 +22,11 @@ class IGraphicsLabProject : public Reflectable {
     virtual void tick() = 0;
     virtual std::string name() = 0;
     virtual void afterLoad() = 0;
+
+#ifdef ENABLE_PYTHON
     virtual void bindPython(pybind11::module &m) {
     }
+#endif
 
     virtual GraphicsLab::IGraphicsLabProjectController *getController() {
         return new GraphicsLab::EmptyGraphicsLabController();
