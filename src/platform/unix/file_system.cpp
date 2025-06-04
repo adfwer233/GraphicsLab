@@ -39,7 +39,7 @@ std::string FileSystem::chooseFile() {
     return dir;
 }
 
-std::filesystem::path getExecutablePath() {
+std::filesystem::path FileSystem::getExecutablePath() {
     char result[1024];
     ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
     return std::filesystem::path(std::string(result, count)).parent_path();
