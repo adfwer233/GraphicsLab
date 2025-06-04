@@ -1,6 +1,5 @@
 #pragma once
 #include "geometry/mesh/mesh.hpp"
-#include "igl/edges.h"
 #include "spdlog/spdlog.h"
 
 #include <unordered_set>

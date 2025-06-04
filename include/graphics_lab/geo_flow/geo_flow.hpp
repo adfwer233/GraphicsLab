@@ -1,7 +1,7 @@
 #pragma once
 
-#define NOMINMAX
-#include "igl/per_vertex_normals.h"
+// #define NOMINMAX
+// #include "igl/per_vertex_normals.h"
 
 #include "Eigen/Eigen"
 #include "language/reflection/static_reflector.hpp"
@@ -35,34 +35,34 @@ struct GeoFlowPerVertexMap {
     }
 };
 
-struct NormalVector {
-    static Eigen::MatrixXd run(Mesh3D *mesh) {
-        Eigen::MatrixXd V;
-        Eigen::MatrixXi F;
-        Eigen::MatrixXd K;
-
-        int n = mesh->vertices.size();
-
-        V.resize(n, 3);
-        for (int i = 0; i < n; i++) {
-            V(i, 0) = mesh->vertices[i].position.x;
-            V(i, 1) = -mesh->vertices[i].position.y;
-            V(i, 2) = mesh->vertices[i].position.z;
-        }
-
-        int nf = mesh->indices.size();
-        F.resize(nf, 3);
-        for (int i = 0; i < nf; i++) {
-            F(i, 0) = mesh->indices[i].i;
-            F(i, 1) = mesh->indices[i].j;
-            F(i, 2) = mesh->indices[i].k;
-        }
-
-        igl::per_vertex_normals(V, F, K);
-
-        return K;
-    }
-};
+// struct NormalVector {
+//     static Eigen::MatrixXd run(Mesh3D *mesh) {
+//         Eigen::MatrixXd V;
+//         Eigen::MatrixXi F;
+//         Eigen::MatrixXd K;
+//
+//         int n = mesh->vertices.size();
+//
+//         V.resize(n, 3);
+//         for (int i = 0; i < n; i++) {
+//             V(i, 0) = mesh->vertices[i].position.x;
+//             V(i, 1) = -mesh->vertices[i].position.y;
+//             V(i, 2) = mesh->vertices[i].position.z;
+//         }
+//
+//         int nf = mesh->indices.size();
+//         F.resize(nf, 3);
+//         for (int i = 0; i < nf; i++) {
+//             F(i, 0) = mesh->indices[i].i;
+//             F(i, 1) = mesh->indices[i].j;
+//             F(i, 2) = mesh->indices[i].k;
+//         }
+//
+//         igl::per_vertex_normals(V, F, K);
+//
+//         return K;
+//     }
+// };
 
 template <GeoFlowMeshType MeshType> struct SetColor {
     static Eigen::MatrixXd run(MeshType *mesh, glm::vec3 color) {
@@ -77,5 +77,5 @@ template <GeoFlowMeshType MeshType> struct SetColor {
     }
 };
 
-using test = GeoFlowPerVertexMap<Mesh3D, NormalVector>;
+// using test = GeoFlowPerVertexMap<Mesh3D, NormalVector>;
 using test2 = GeoFlowPerVertexMap<Mesh3D, SetColor<Mesh3D>, glm::vec3>;
