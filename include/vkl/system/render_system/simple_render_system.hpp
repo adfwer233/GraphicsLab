@@ -13,10 +13,6 @@
 #include "vkl/core/vkl_push_constant.hpp"
 #include "vkl/templates/vkl_concept.hpp"
 
-#ifndef SHADER_DIR
-#define SHADER_DIR "./shader/"
-#endif
-
 template <typename T>
 concept VklPipelineModifierType =
     requires(PipelineConfigInfo &pipelineConfigInfo) { T::modifyPipeline(pipelineConfigInfo); };

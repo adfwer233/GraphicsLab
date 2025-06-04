@@ -9,10 +9,6 @@
 
 #include "glm/glm.hpp"
 
-#ifndef SHADER_DIR
-#define SHADER_DIR "./shader/"
-#endif
-
 struct PathTracingUniformBufferObject {
     alignas(16) glm::vec3 cameraPosition;
     alignas(16) glm::vec3 cameraUp;

@@ -51,66 +51,66 @@ struct InternalSceneRenderPass : public RenderPass {
         simple_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/simple_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "simple_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         raw_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "point_light_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         color_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/simple_color_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "simple_color_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/line_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "line_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "line_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         wireframe_render_system = std::make_unique<SimpleWireFrameRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/simple_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_light_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "point_light_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         normal_render_system = std::make_unique<NormalRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/normal_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/line_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
-                {std::format("{}/normal_generation.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+                {(DEFAULT_SHADER_PATH / "normal_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "line_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {(DEFAULT_SHADER_PATH / "normal_generation.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         box_render_system = std::make_unique<Box3DRenderSystem>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/3d_aabb_box.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/3d_aabb_box.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
-                {std::format("{}/3d_aabb_box.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+                {(DEFAULT_SHADER_PATH / "3d_aabb_box.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "3d_aabb_box.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {(DEFAULT_SHADER_PATH / "3d_aabb_box.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         axis_render_system = std::make_unique<WorldAxisRenderSystem>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/3d_world_axis.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/3d_world_axis.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
-                {std::format("{}/3d_world_axis.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+                {(DEFAULT_SHADER_PATH / "3d_world_axis.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "3d_world_axis.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {(DEFAULT_SHADER_PATH / "3d_world_axis.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         point_cloud_render_system = std::make_unique<PointCloud3DRenderSystem>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/point_cloud_3d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_cloud_3d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "point_cloud_3d_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "point_cloud_3d_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         directional_filed_render_system = std::make_unique<PointCloud3DRenderSystem>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/directional_field_3d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/directional_field_3d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
-                {std::format("{}/directional_field_3d.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT}});
+                {(DEFAULT_SHADER_PATH / "directional_field_3d.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "directional_field_3d.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {(DEFAULT_SHADER_PATH / "directional_field_3d.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
         /**
          * Initialize path tracing texture

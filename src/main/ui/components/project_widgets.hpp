@@ -5,7 +5,7 @@
 #include "component.hpp"
 #include "controller/ui_states.hpp"
 
-#include "project/file_system.hpp"
+#include "platform/file_system.hpp"
 #include "project/project_manager.hpp"
 
 #include "ui/render_resources.hpp"

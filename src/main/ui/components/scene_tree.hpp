@@ -2,11 +2,9 @@
 
 #include "component.hpp"
 
-#include "../../project/file_system.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "language/reflection/reflectors.hpp"
-#include "project/file_system.hpp"
-#include "project/project_manager.hpp"
+#include "platform/file_system.hpp"
 
 #include "geometry/constructor/rectangle3d.hpp"
 

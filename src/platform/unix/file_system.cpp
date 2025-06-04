@@ -1,7 +1,9 @@
-#include "project/file_system.hpp"
+#include "platform/file_system.hpp"
 
 #include <cstdlib>
 #include <string>
+#include <unistd.h>
+#include <limits.h>
 
 #include "spdlog/spdlog.h"
 
@@ -35,4 +37,10 @@ std::string FileSystem::chooseFile() {
     std::erase(dir, '\n');
 
     return dir;
+}
+
+std::filesystem::path getExecutablePath() {
+    char result[1024];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    return std::filesystem::path(std::string(result, count)).parent_path();
 }

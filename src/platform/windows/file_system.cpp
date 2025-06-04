@@ -1,4 +1,5 @@
-#include "project/file_system.hpp"
+#include "platform/file_system.hpp"
+
 #include "spdlog/spdlog.h"
 
 #include <ShlObj.h>
@@ -36,4 +37,10 @@ std::string FileSystem::chooseFile() {
         CoTaskMemFree(pidl); // Free memory allocated by the dialog
     }
     return {};
+}
+
+std::filesystem::path FileSystem::getExecutablePath() {
+    char path[MAX_PATH];
+    GetModuleFileNameA(NULL, path, MAX_PATH);
+    return std::filesystem::path(path).parent_path();
 }

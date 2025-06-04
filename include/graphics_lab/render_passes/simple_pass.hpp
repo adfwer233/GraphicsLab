@@ -24,8 +24,8 @@ struct SimpleRenderPass : public RenderPass {
         simple_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/first_triangle_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/first_triangle_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "first_triangle_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "first_triangle_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {

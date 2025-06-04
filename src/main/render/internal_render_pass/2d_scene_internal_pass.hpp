@@ -39,27 +39,27 @@ struct InternalScene2DRenderPass : public RenderPass {
         tessellation2d_wireframe_render_system = std::make_unique<SimpleWireFrameRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/simple_shader_2d.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/simple_shader_2d.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "simple_shader_2d.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "simple_shader_2d.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         point_cloud_2d_render_system = std::make_unique<PointCloud2DRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/point_cloud_2d_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_cloud_2d_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "point_cloud_2d_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "point_cloud_2d_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         line_render_system = std::make_unique<ParamLineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/param_curve_shader.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/param_curve_shader.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "param_curve_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "param_curve_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         rectangle_line_render_system = std::make_unique<PureShaderRenderSystem>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/rectangle.vert.spv", SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/rectangle.geom.spv", SHADER_DIR), VK_SHADER_STAGE_GEOMETRY_BIT},
-                {std::format("{}/rectangle.frag.spv", SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT},
+                {(DEFAULT_SHADER_PATH / "rectangle.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "rectangle.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT},
+                {(DEFAULT_SHADER_PATH / "rectangle.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
             });
     }
 

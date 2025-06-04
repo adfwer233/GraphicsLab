@@ -33,7 +33,6 @@ add_library(${PROJECT_NAME} ${SRC_FILE})
 
 # set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-add_definitions(-DSHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader")
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
 
 if (OpenCV_FOUND)
@@ -76,15 +75,15 @@ find_program(GLSL_VALIDATOR glslangValidator HINTS
 
 # get all .vert and .frag files in shaders directory
 file(GLOB_RECURSE GLSL_SOURCE_FILES
-        "${PROJECT_SOURCE_DIR}/shader/*.frag"
-        "${PROJECT_SOURCE_DIR}/shader/*.vert"
-        "${PROJECT_SOURCE_DIR}/shader/*.comp"
-        "${PROJECT_SOURCE_DIR}/shader/*.geom"
+        "${CMAKE_SOURCE_DIR}/shader/*.frag"
+        "${CMAKE_SOURCE_DIR}/shader/*.vert"
+        "${CMAKE_SOURCE_DIR}/shader/*.comp"
+        "${CMAKE_SOURCE_DIR}/shader/*.geom"
 )
 
 foreach(GLSL ${GLSL_SOURCE_FILES})
     get_filename_component(FILE_NAME ${GLSL} NAME)
-    set(SPIRV "${PROJECT_SOURCE_DIR}/shader/${FILE_NAME}.spv")
+    set(SPIRV "${CMAKE_SOURCE_DIR}/shader/${FILE_NAME}.spv")
     add_custom_command(
             OUTPUT ${SPIRV}
             COMMAND ${GLSL_VALIDATOR} -V ${GLSL} -o ${SPIRV}
@@ -99,7 +98,7 @@ add_custom_target(
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shader" $<TARGET_FILE_DIR:${PROJECT_NAME}>/shader
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/shader" $<TARGET_FILE_DIR:${PROJECT_NAME}>/shader
 )
 
 if (GLSL_VALIDATOR)

@@ -126,6 +126,7 @@ endif()
 
 add_subdirectory(3rd_party/CDT/CDT CDT)
 
+add_subdirectory(src/platform)
 add_subdirectory(src/vkl)
 #add_subdirectory(src/geometry_processing)
 add_subdirectory(src/geometry)

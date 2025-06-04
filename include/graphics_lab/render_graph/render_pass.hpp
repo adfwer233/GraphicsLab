@@ -11,6 +11,9 @@
 #include "render_pass_reflection.hpp"
 
 #include <vkl/core/vkl_descriptor.hpp>
+#include <platform/file_system.hpp>
+
+#define DEFAULT_SHADER_PATH (FileSystem::getExecutablePath() / "shader")
 
 namespace GraphicsLab {
 namespace RenderGraph {
