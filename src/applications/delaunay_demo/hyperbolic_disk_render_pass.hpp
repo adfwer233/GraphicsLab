@@ -31,14 +31,14 @@ struct HyperbolicDiskRenderPass : public RenderPass {
         line_render_system = std::make_unique<PoincareDiskRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/mobius_trans_shader.vert.spv", CUSTOM_SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/mobius_trans_shader.frag.spv", CUSTOM_SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(FileSystem::getExecutablePath() / "custom_shader" / "mobius_trans_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(FileSystem::getExecutablePath() / "custom_shader" / "mobius_trans_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         point_cloud_render_system = std::make_unique<PoincareDiskPointCloudRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
-                {std::format("{}/mobius_trans_shader.vert.spv", CUSTOM_SHADER_DIR), VK_SHADER_STAGE_VERTEX_BIT},
-                {std::format("{}/point_cloud_2d_shader.frag.spv", CUSTOM_SHADER_DIR), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(FileSystem::getExecutablePath() / "custom_shader" / "mobius_trans_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(FileSystem::getExecutablePath() / "custom_shader" / "point_cloud_2d_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
     }
 
     void execute(RenderContext *render_context, const RenderPassExecuteData &execute_data) override {

@@ -8,6 +8,9 @@
 #include "vkl/core/vkl_image.hpp"
 
 #include "glm/glm.hpp"
+#include "platform/file_system.hpp"
+
+#define DEFAULT_SHADER_PATH (FileSystem::getExecutablePath() / "shader")
 
 struct PathTracingUniformBufferObject {
     alignas(16) glm::vec3 cameraPosition;
@@ -36,7 +39,7 @@ class PathTracingComputeModel {
 
   public:
     static std::string get_comp_shader_path() {
-        return std::format("{}/path_tracing_compute_shader.comp.spv", SHADER_DIR);
+        return (DEFAULT_SHADER_PATH / "path_tracing_compute_shader.comp.spv").string();
     }
 
     PathTracingUniformBufferObject ubo;

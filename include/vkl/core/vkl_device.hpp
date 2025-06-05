@@ -81,7 +81,11 @@ struct SwapChainSupportDetails {
  */
 class VklDevice {
   private:
-    const bool enableValidationLayers = true;
+#ifdef NDEBUG
+    const bool enableValidationLayers = false;  // Release
+#else
+    const bool enableValidationLayers = true;   // Debug
+#endif
 
     VkInstance instance_;                     /**< Vulkan Instance */
     VkDebugUtilsMessengerEXT debugMessenger_; /** Vulkan Debug Messenger */

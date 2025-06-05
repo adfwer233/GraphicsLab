@@ -7,8 +7,6 @@ set(SRC_FILE main.cpp project.cpp)
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
-add_definitions(-DSHADER_DIR="${CMAKE_SOURCE_DIR}/src/vkl/shader")
-add_definitions(-DCUSTOM_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
@@ -32,6 +30,11 @@ add_custom_command(
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/shader" $<TARGET_FILE_DIR:${PROJECT_NAME}>/shader
+)
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shader" $<TARGET_FILE_DIR:${PROJECT_NAME}>/custom_shader
 )
 
 add_subdirectory(shader)
