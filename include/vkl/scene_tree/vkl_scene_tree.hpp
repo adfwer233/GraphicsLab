@@ -547,7 +547,7 @@ struct VklSceneTree : Reflectable {
 
     void cleanSceneTree() {
         std::thread([&]() {
-            std::lock_guard<std::mutex> lock(sceneTreeMutex);
+            std::scoped_lock lock(sceneTreeMutex);
             activeNode = nullptr;
             materials.clear();
             std::vector<std::unique_ptr<TreeNode>> protected_nodes;

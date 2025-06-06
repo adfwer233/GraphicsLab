@@ -582,7 +582,6 @@ struct DelaunayDemoProject : IGraphicsLabProject {
 
         auto curve_mesh = tessellation.create_curve_mesh_2d();
 
-        std::scoped_lock lock(context.sceneTree->sceneTreeMutex);
         context.sceneTree->addGeometryNodeAsync(std::move(pc), "Vert");
         context.sceneTree->addGeometryNodeAsync(std::move(curve_mesh), "tessellation");
     }
