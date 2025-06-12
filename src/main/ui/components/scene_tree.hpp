@@ -19,7 +19,6 @@ class SceneTreeComponent : public UIComponent {
     void render() final {
         ImGui::Begin("Scene Tree");
         {
-            std::scoped_lock lock(context_.sceneTree->sceneTreeMutex);
             if (ImGui::Button("Load Obj File")) {
                 std::string file = FileSystem::chooseFile();
                 spdlog::info("Choose Obj File: {}", file);
