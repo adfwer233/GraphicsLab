@@ -7,8 +7,18 @@ namespace SceneTree {
 struct MaterialManager : Reflectable {
     std::vector<Material> materials;
 
-    void test() {
-        spdlog::info("test called");
+    explicit MaterialManager() {
+
+        // default object material
+        Material default_material;
+        default_material.meta.name = "default";
+        materials.push_back(default_material);
+
+        // default color material
+        Material default_light_material;
+        default_light_material.meta.name = "default_light";
+        default_light_material.data.materialType = MaterialType::Light;
+        materials.push_back(default_light_material);
     }
 
     REFLECT(PROPERTY(materials, &MaterialManager::materials))
@@ -20,7 +30,6 @@ struct MaterialManager : Reflectable {
 
     ReflectDataType reflect() override {
         return {
-            {"test", TypeErasedValue(&MaterialManager::test, this)},
             {"create_material", TypeErasedValue(&MaterialManager::create_material, this, {"default name"}, {"name"})}};
     }
 };

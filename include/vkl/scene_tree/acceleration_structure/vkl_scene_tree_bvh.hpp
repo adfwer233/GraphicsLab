@@ -86,6 +86,8 @@ struct SceneTreeBvh {
     std::vector<VklBVHGPUModel::Light> lights;
     std::vector<VklBVHGPUModel::Triangle> triangles;
 
+    std::vector<SceneTree::MaterialData> materials;
+
     explicit SceneTreeBvh(SceneTree::VklSceneTree &scene) : scene_(scene) {
     }
 
@@ -120,7 +122,7 @@ struct SceneTreeBvh {
                     bvhObject.triangle = VklBVHGPUModel::Triangle{
                         trans * glm::vec4(mesh->vertices[tri_indices.i].position, 1.0f),
                         trans * glm::vec4(mesh->vertices[tri_indices.j].position, 1.0f),
-                        trans * glm::vec4(mesh->vertices[tri_indices.k].position, 1.0f), static_cast<uint32_t>(1)};
+                        trans * glm::vec4(mesh->vertices[tri_indices.k].position, 1.0f), static_cast<uint32_t>(0)};
                     objects.push_back(bvhObject);
                 }
             }
@@ -129,7 +131,7 @@ struct SceneTreeBvh {
         BVHObject bvhObject;
         bvhObject.object_index = objects.size();
         bvhObject.triangle = VklBVHGPUModel::Triangle{glm::vec4(0.0, 15.0, 5.0, 1.0f), glm::vec4(5.0, 15.0, -5.0, 1.0f),
-                                                      glm::vec4(5.0, 15.0, 5.0, 1.0f), static_cast<uint32_t>(3)};
+                                                      glm::vec4(5.0, 15.0, 5.0, 1.0f), static_cast<uint32_t>(1)};
         objects.push_back(bvhObject);
 
         std::vector<BVHNode> intermediate;
@@ -208,11 +210,15 @@ struct SceneTreeBvh {
             triangles.push_back(objects[i].triangle);
         }
 
+        for (auto material: scene_.material_manager.materials) {
+            materials.push_back(material.data);
+        }
+
         for (size_t i = 0; i < triangles.size(); i++) {
             auto t = triangles[i];
             //        if (scene_.materials[triangles[i].materialIndex].type ==
             //        VklBVHGPUModel::MaterialType::LightSource) {
-            if (scene_.materials[triangles[i].materialIndex].type == VklBVHGPUModel::MaterialType::LightSource) {
+            if (scene_.material_manager.materials[triangles[i].materialIndex].data.materialType == SceneTree::MaterialType::Light) {
                 float area = glm::length(glm::cross(t.v1 - t.v0, t.v2 - t.v0)) * 0.5f;
                 lights.emplace_back(static_cast<uint32_t>(i), area);
             }

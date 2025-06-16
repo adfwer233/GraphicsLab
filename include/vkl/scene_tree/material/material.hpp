@@ -5,6 +5,10 @@
 
 namespace SceneTree {
 
+enum class MaterialType {
+    Light, Object
+};
+
 /**
  * @brief Data of Principled BRDF
  *
@@ -22,6 +26,8 @@ struct MaterialData {
     float clearcoat = 0.0f;
     float clearcoatGloss = 1.0f;
     float subsurface = 0.0f;
+
+    MaterialType materialType = MaterialType::Object;
 
     REFLECT(Property{"base_color", &MaterialData::base_color}, Property{"metallic", &MaterialData::metallic},
             Property{"roughness", &MaterialData::roughness}, Property{"specular", &MaterialData::specular},
