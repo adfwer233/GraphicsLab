@@ -34,6 +34,11 @@ class RenderModelPanel : public UIComponent {
         ImGui::RadioButton("Path Tracing", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
                            static_cast<RenderModelType>(UIState::RenderMode::path_tracing));
 
+        ImGui::SameLine();
+
+        ImGui::RadioButton("Soft Rasterizer", reinterpret_cast<RenderModelType *>(&uiState_.renderMode),
+                           static_cast<RenderModelType>(UIState::RenderMode::soft_rasterizer));
+
         ImGui::SeparatorText("Shading Mode");
 
         using ShadeModelType = std::underlying_type_t<UIState::LightingMode>;

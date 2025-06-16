@@ -17,7 +17,8 @@ struct UIState : Reflectable {
         color,
         wireframe,
         material,
-        path_tracing
+        path_tracing,
+        soft_rasterizer
     };
 
     enum class LightingMode {

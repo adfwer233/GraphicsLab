@@ -22,6 +22,8 @@
 #include <geometry/parametric/surface_type_list.hpp>
 #include <ui/render_resources.hpp>
 
+#include "vkl/core/vkl_soft_rasterizer.hpp"
+
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
     explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState,
@@ -112,6 +114,8 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "directional_field_3d.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {(DEFAULT_SHADER_PATH / "directional_field_3d.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
+        software_rasterizer = std::make_unique<vkl::SoftwareRasterizer>(device_, 512, 512);
+
         /**
          * Initialize path tracing texture
          */
@@ -137,6 +141,23 @@ struct InternalSceneRenderPass : public RenderPass {
         if (path_tracing_texture != nullptr) {
             renderResources_.imguiImages["path_tracing_result"] =
                 vkl::ImguiUtils::getImguiTextureFromVklTexture(path_tracing_texture.get());
+        }
+
+        /**
+         * Initializing soft rasterizer textures
+         */
+
+        try {
+            software_rasterizer_texture = std::make_unique<VklTexture>(
+                device_, 512, 512, 4,
+                VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB, VK_SAMPLE_COUNT_1_BIT);
+
+            renderResources_.imguiImages["software_rasterizer"] = vkl::ImguiUtils::getImguiTextureFromVklTexture(software_rasterizer_texture.get());
+        } catch (...) {
+            spdlog::error("Failed to initialize software rasterizer");
+            software_rasterizer_texture = nullptr;
         }
     }
 
@@ -178,7 +199,15 @@ struct InternalSceneRenderPass : public RenderPass {
         using RenderableTypeList =
             MetaProgramming::TypeListFunctions::Append<Geometry::ParamSurfaceTypeList, Mesh3D>::type;
 
-        if (uiState_.renderMode == UIState::RenderMode::path_tracing and path_tracing_compute_system != nullptr) {
+        if (uiState_.renderMode == UIState::RenderMode::soft_rasterizer and software_rasterizer != nullptr) {
+            auto target = render_context->resource_manager.get_resource("soft_rasterizer_result");
+            software_rasterizer->clear();
+            for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
+                software_rasterizer->rasterize_mesh(mesh3d_nodes->data, ubo.proj * ubo.view * trans);
+            }
+            software_rasterizer->copy_result_to_image(commandBuffer, software_rasterizer_texture->image_);
+            begin_render_pass(commandBuffer);
+        } else if (uiState_.renderMode == UIState::RenderMode::path_tracing and path_tracing_compute_system != nullptr) {
             auto target = render_context->resource_manager.get_resource("scene_render_result");
 
             auto targetTexture = path_tracing_compute_model->getTargetTexture();
@@ -427,5 +456,8 @@ struct InternalSceneRenderPass : public RenderPass {
     std::unique_ptr<vkl::PathTracingComputeModel> path_tracing_compute_model = nullptr;
     std::unique_ptr<vkl::PathTracingComputeSystem> path_tracing_compute_system = nullptr;
     std::unique_ptr<VklTexture> path_tracing_texture = nullptr;
+
+    std::unique_ptr<vkl::SoftwareRasterizer> software_rasterizer = nullptr;
+    std::unique_ptr<VklTexture> software_rasterizer_texture = nullptr;
 };
 } // namespace GraphicsLab::RenderGraph
