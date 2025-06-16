@@ -210,7 +210,7 @@ struct SceneTreeBvh {
             triangles.push_back(objects[i].triangle);
         }
 
-        for (auto material: scene_.material_manager.materials) {
+        for (auto material : scene_.material_manager.materials) {
             materials.push_back(material.data);
         }
 
@@ -218,7 +218,8 @@ struct SceneTreeBvh {
             auto t = triangles[i];
             //        if (scene_.materials[triangles[i].materialIndex].type ==
             //        VklBVHGPUModel::MaterialType::LightSource) {
-            if (scene_.material_manager.materials[triangles[i].materialIndex].data.materialType == SceneTree::MaterialType::Light) {
+            if (scene_.material_manager.materials[triangles[i].materialIndex].data.materialType ==
+                SceneTree::MaterialType::Light) {
                 float area = glm::length(glm::cross(t.v1 - t.v0, t.v2 - t.v0)) * 0.5f;
                 lights.emplace_back(static_cast<uint32_t>(i), area);
             }

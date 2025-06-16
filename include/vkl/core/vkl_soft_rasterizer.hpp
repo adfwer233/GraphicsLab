@@ -7,8 +7,9 @@ namespace vkl {
 struct SoftwareRasterizer {
     using Framebuffer = std::vector<uint8_t>;
     using ZBuffer = std::vector<float>;
-    
-    explicit SoftwareRasterizer(VklDevice& device, int width, int height): device_(device), width_(width), height_(height) {
+
+    explicit SoftwareRasterizer(VklDevice &device, int width, int height)
+        : device_(device), width_(width), height_(height) {
         create_resources();
     }
 
@@ -17,7 +18,7 @@ struct SoftwareRasterizer {
         std::ranges::fill(zbuffer_, 1.0f);
     }
 
-    void create_staging_buffer(VkDeviceSize size, VkBuffer& buffer, VkDeviceMemory& memory) {
+    void create_staging_buffer(VkDeviceSize size, VkBuffer &buffer, VkDeviceMemory &memory) {
         VkBufferCreateInfo bufferInfo = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bufferInfo.size = size;
         bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -30,14 +31,13 @@ struct SoftwareRasterizer {
 
         VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
         allocInfo.allocationSize = memReqs.size;
-        allocInfo.memoryTypeIndex = device_.findMemoryType(memReqs.memoryTypeBits,
-                                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        allocInfo.memoryTypeIndex = device_.findMemoryType(
+            memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         vkAllocateMemory(device_.device(), &allocInfo, nullptr, &memory);
         vkBindBufferMemory(device_.device(), buffer, memory, 0);
     }
 
-    void rasterize_mesh(Mesh3D& mesh, glm::mat4 mvp) {
+    void rasterize_mesh(Mesh3D &mesh, glm::mat4 mvp) {
         for (auto indices : mesh.indices) {
             auto a = mesh.vertices[indices.i];
             auto b = mesh.vertices[indices.j];
@@ -55,17 +55,15 @@ struct SoftwareRasterizer {
         VkDeviceSize bufferSize = framebuffer_.size();
 
         // Copy framebuffer data to staging buffer
-        void* data;
+        void *data;
         vkMapMemory(device_.device(), stagingBufferMemory_, 0, bufferSize, 0, &data);
         std::memcpy(data, framebuffer_.data(), bufferSize);
         vkUnmapMemory(device_.device(), stagingBufferMemory_);
 
         // Insert barrier: layout to TRANSFER_DST_OPTIMAL
         VkImageMemoryBarrier resultColor2Dst = VklImageUtils::ColorToTransferDstBarrier(image);
-        vkCmdPipelineBarrier(command_buffer,
-                             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                             VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             0, 0, nullptr, 0, nullptr, 1, &resultColor2Dst);
+        vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &resultColor2Dst);
 
         // Buffer to image copy
         VkBufferImageCopy copyRegion{};
@@ -77,28 +75,18 @@ struct SoftwareRasterizer {
         copyRegion.imageSubresource.baseArrayLayer = 0;
         copyRegion.imageSubresource.layerCount = 1;
         copyRegion.imageOffset = {0, 0, 0};
-        copyRegion.imageExtent = {
-            static_cast<uint32_t>(width_),
-            static_cast<uint32_t>(height_),
-            1
-        };
+        copyRegion.imageExtent = {static_cast<uint32_t>(width_), static_cast<uint32_t>(height_), 1};
 
-        vkCmdCopyBufferToImage(command_buffer,
-                               stagingBuffer_,
-                               image,
-                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                               1, &copyRegion);
+        vkCmdCopyBufferToImage(command_buffer, stagingBuffer_, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+                               &copyRegion);
 
         // Transition back to fragment shader usage or present
         VkImageMemoryBarrier resultTranGen2Dst = VklImageUtils::transferDstToColorBarrier(image);
-        vkCmdPipelineBarrier(command_buffer,
-                             VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                             0, 0, nullptr, 0, nullptr, 1, &resultTranGen2Dst);
+        vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                             0, nullptr, 0, nullptr, 1, &resultTranGen2Dst);
     }
 
-private:
-
+  private:
     uint8_t linear_to_srgb(float x) {
         x = glm::clamp(x, 0.0f, 1.0f);
         if (x <= 0.0031308f)
@@ -111,7 +99,8 @@ private:
         framebuffer_.resize(width_ * height_ * 4);
         zbuffer_.resize(width_ * height_ * 4);
 
-        create_staging_buffer(framebuffer_.size() * sizeof(Framebuffer::value_type), stagingBuffer_, stagingBufferMemory_);
+        create_staging_buffer(framebuffer_.size() * sizeof(Framebuffer::value_type), stagingBuffer_,
+                              stagingBufferMemory_);
     }
 
     glm::vec3 barycentric(glm::vec2 p, glm::vec2 a, glm::vec2 b, glm::vec2 c) {
@@ -128,7 +117,7 @@ private:
         return glm::vec3(u, v, w);
     }
 
-    void put_pixel(Framebuffer& fb, int x, int y, glm::vec3 color) {
+    void put_pixel(Framebuffer &fb, int x, int y, glm::vec3 color) {
         int idx = 4 * (y * width_ + x);
         fb[idx + 0] = linear_to_srgb(color.r);
         fb[idx + 1] = linear_to_srgb(color.g);
@@ -140,7 +129,7 @@ private:
         return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x);
     }
 
-    void rasterize_triangle(const std::array<Vertex3D, 3>& tri, Framebuffer& fb, ZBuffer& zb, const glm::mat4& MVP) {
+    void rasterize_triangle(const std::array<Vertex3D, 3> &tri, Framebuffer &fb, ZBuffer &zb, const glm::mat4 &MVP) {
         glm::vec4 clip[3];
         for (int i = 0; i < 3; ++i)
             clip[i] = MVP * glm::vec4(tri[i].position, 1.0f);
@@ -160,12 +149,13 @@ private:
         };
 
         float area = edge(screen[0], screen[1], screen[2]);
-        if (area == 0.0f) return;
+        if (area == 0.0f)
+            return;
 
         float minX = std::floor(std::min({screen[0].x, screen[1].x, screen[2].x}));
-        float maxX = std::ceil (std::max({screen[0].x, screen[1].x, screen[2].x}));
+        float maxX = std::ceil(std::max({screen[0].x, screen[1].x, screen[2].x}));
         float minY = std::floor(std::min({screen[0].y, screen[1].y, screen[2].y}));
-        float maxY = std::ceil (std::max({screen[0].y, screen[1].y, screen[2].y}));
+        float maxY = std::ceil(std::max({screen[0].y, screen[1].y, screen[2].y}));
 
         for (int y = std::max(0, int(minY)); y < std::min(height_, int(maxY)); ++y) {
             for (int x = std::max(0, int(minX)); x < std::min(width_, int(maxX)); ++x) {
@@ -179,17 +169,14 @@ private:
                 if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
                     float invArea = 1.0f / area;
                     float alpha = w0 * invArea;
-                    float beta  = w1 * invArea;
+                    float beta = w1 * invArea;
                     float gamma = w2 * invArea;
 
                     float depth = alpha * ndc[0].z + beta * ndc[1].z + gamma * ndc[2].z;
                     int idx = y * width_ + x;
                     if (depth < zb[idx]) {
                         zb[idx] = depth;
-                        glm::vec3 color =
-                            alpha * tri[0].color +
-                            beta  * tri[1].color +
-                            gamma * tri[2].color;
+                        glm::vec3 color = alpha * tri[0].color + beta * tri[1].color + gamma * tri[2].color;
                         put_pixel(fb, x, y, color);
                     }
                 }
@@ -197,9 +184,7 @@ private:
         }
     }
 
-
-
-    VklDevice& device_;
+    VklDevice &device_;
 
     Framebuffer framebuffer_;
     ZBuffer zbuffer_;
@@ -210,4 +195,4 @@ private:
     int width_, height_;
 };
 
-}
+} // namespace vkl
