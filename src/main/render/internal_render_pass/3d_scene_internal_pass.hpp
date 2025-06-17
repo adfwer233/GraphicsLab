@@ -204,7 +204,7 @@ struct InternalSceneRenderPass : public RenderPass {
             auto target = render_context->resource_manager.get_resource("soft_rasterizer_result");
             software_rasterizer->clear();
             for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
-                software_rasterizer->rasterize_mesh(mesh3d_nodes->data, ubo.proj * ubo.view * trans);
+                software_rasterizer->rasterize_mesh(mesh3d_nodes->data, ubo.proj * ubo.view * trans, ubo.cameraPos, ubo.cameraPos);
             }
             software_rasterizer->copy_result_to_image(commandBuffer, software_rasterizer_texture->image_);
             begin_render_pass(commandBuffer);

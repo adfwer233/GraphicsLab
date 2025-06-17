@@ -9,6 +9,8 @@
 #include "geometry/constructor/rectangle3d.hpp"
 
 #include "nlohmann/json.hpp"
+
+#include <future>
 using json = nlohmann::json;
 
 class SceneTreeComponent : public UIComponent {

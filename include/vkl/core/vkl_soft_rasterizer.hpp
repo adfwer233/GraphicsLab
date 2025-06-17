@@ -37,7 +37,7 @@ struct SoftwareRasterizer {
         vkBindBufferMemory(device_.device(), buffer, memory, 0);
     }
 
-    void rasterize_mesh(Mesh3D &mesh, glm::mat4 mvp) {
+    void rasterize_mesh(Mesh3D &mesh, glm::mat4 mvp, glm::vec3 view_point, glm::vec3 light_point) {
         for (auto indices : mesh.indices) {
             auto a = mesh.vertices[indices.i];
             auto b = mesh.vertices[indices.j];
@@ -47,7 +47,7 @@ struct SoftwareRasterizer {
             b.position.y *= -1.0f;
             c.position.y *= -1.0f;
 
-            rasterize_triangle({a, b, c}, framebuffer_, zbuffer_, mvp);
+            rasterize_triangle({a, b, c}, framebuffer_, zbuffer_, mvp, light_point, view_point);
         }
     }
 
@@ -129,7 +129,24 @@ struct SoftwareRasterizer {
         return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x);
     }
 
-    void rasterize_triangle(const std::array<Vertex3D, 3> &tri, Framebuffer &fb, ZBuffer &zb, const glm::mat4 &MVP) {
+    glm::vec3 shade_blinn_phong(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& color,
+                            const glm::vec3& light_pos, const glm::vec3& view_pos, float shininess = 32.0f) {
+        glm::vec3 N = glm::normalize(normal);
+        glm::vec3 L = glm::normalize(light_pos - position);
+        glm::vec3 V = glm::normalize(view_pos - position);
+        glm::vec3 H = glm::normalize(L + V);
+
+        float diff = glm::max(glm::dot(N, L), 0.0f);
+        float spec = glm::pow(glm::max(glm::dot(N, H), 0.0f), shininess);
+
+        glm::vec3 ambient = 0.1f * color;
+        glm::vec3 diffuse = 0.6f * diff * color;
+        glm::vec3 specular = 0.3f * spec * glm::vec3(1.0f); // white specular
+
+        return ambient + diffuse + specular;
+    }
+
+    void rasterize_triangle(const std::array<Vertex3D, 3> &tri, Framebuffer &fb, ZBuffer &zb, const glm::mat4 &MVP, const glm::vec3 &light_pos, const glm::vec3 &view_pos) {
         glm::vec4 clip[3];
         for (int i = 0; i < 3; ++i)
             clip[i] = MVP * glm::vec4(tri[i].position, 1.0f);
@@ -176,8 +193,13 @@ struct SoftwareRasterizer {
                     int idx = y * width_ + x;
                     if (depth < zb[idx]) {
                         zb[idx] = depth;
+
+                        glm::vec3 position = alpha * tri[0].position + beta  * tri[1].position + gamma * tri[2].position;
+                        glm::vec3 normal = glm::normalize(alpha * tri[0].normal + beta * tri[1].normal + gamma * tri[2].normal);
                         glm::vec3 color = alpha * tri[0].color + beta * tri[1].color + gamma * tri[2].color;
-                        put_pixel(fb, x, y, color);
+                        glm::vec3 shaded = shade_blinn_phong(position, normal, color, light_pos, view_pos);
+
+                        put_pixel(fb, x, y, shaded);
                     }
                 }
             }
