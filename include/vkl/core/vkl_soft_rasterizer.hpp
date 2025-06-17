@@ -129,8 +129,8 @@ struct SoftwareRasterizer {
         return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x);
     }
 
-    glm::vec3 shade_blinn_phong(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& color,
-                            const glm::vec3& light_pos, const glm::vec3& view_pos, float shininess = 32.0f) {
+    glm::vec3 shade_blinn_phong(const glm::vec3 &position, const glm::vec3 &normal, const glm::vec3 &color,
+                                const glm::vec3 &light_pos, const glm::vec3 &view_pos, float shininess = 32.0f) {
         glm::vec3 N = glm::normalize(normal);
         glm::vec3 L = glm::normalize(light_pos - position);
         glm::vec3 V = glm::normalize(view_pos - position);
@@ -146,7 +146,8 @@ struct SoftwareRasterizer {
         return ambient + diffuse + specular;
     }
 
-    void rasterize_triangle(const std::array<Vertex3D, 3> &tri, Framebuffer &fb, ZBuffer &zb, const glm::mat4 &MVP, const glm::vec3 &light_pos, const glm::vec3 &view_pos) {
+    void rasterize_triangle(const std::array<Vertex3D, 3> &tri, Framebuffer &fb, ZBuffer &zb, const glm::mat4 &MVP,
+                            const glm::vec3 &light_pos, const glm::vec3 &view_pos) {
         glm::vec4 clip[3];
         for (int i = 0; i < 3; ++i)
             clip[i] = MVP * glm::vec4(tri[i].position, 1.0f);
@@ -194,8 +195,9 @@ struct SoftwareRasterizer {
                     if (depth < zb[idx]) {
                         zb[idx] = depth;
 
-                        glm::vec3 position = alpha * tri[0].position + beta  * tri[1].position + gamma * tri[2].position;
-                        glm::vec3 normal = glm::normalize(alpha * tri[0].normal + beta * tri[1].normal + gamma * tri[2].normal);
+                        glm::vec3 position = alpha * tri[0].position + beta * tri[1].position + gamma * tri[2].position;
+                        glm::vec3 normal =
+                            glm::normalize(alpha * tri[0].normal + beta * tri[1].normal + gamma * tri[2].normal);
                         glm::vec3 color = alpha * tri[0].color + beta * tri[1].color + gamma * tri[2].color;
                         glm::vec3 shaded = shade_blinn_phong(position, normal, color, light_pos, view_pos);
 
