@@ -5,8 +5,8 @@
 
 class ImportModelWidget : public UIComponent {
   public:
-    ImportModelWidget(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState) : UIComponent(context), uiState_(uiState) {
-
+    ImportModelWidget(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState)
+        : UIComponent(context), uiState_(uiState) {
     }
 
     void render() final {

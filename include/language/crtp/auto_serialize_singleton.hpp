@@ -8,24 +8,24 @@
 #include "platform/file_system.hpp"
 #include "spdlog/spdlog.h"
 
-template <typename Derived, StringLiteral Name>
-class AutoSerializeSingleton {
-public:
-    AutoSerializeSingleton(const AutoSerializeSingleton&) = delete;
-    AutoSerializeSingleton& operator=(const AutoSerializeSingleton&) = delete;
+template <typename Derived, StringLiteral Name> class AutoSerializeSingleton {
+  public:
+    AutoSerializeSingleton(const AutoSerializeSingleton &) = delete;
+    AutoSerializeSingleton &operator=(const AutoSerializeSingleton &) = delete;
 
-    static Derived& instance() {
+    static Derived &instance() {
         static Derived instance;
         return instance;
     }
 
-protected:
+  protected:
     explicit AutoSerializeSingleton() = default;
 
-    ~AutoSerializeSingleton() {}
+    ~AutoSerializeSingleton() {
+    }
 
     void finalize() {
-        auto serialized_json = StaticReflect::serialization(*static_cast<Derived*>(this));
+        auto serialized_json = StaticReflect::serialization(*static_cast<Derived *>(this));
         std::ofstream ofs(get_path());
         ofs << serialized_json.dump(4);
 
@@ -45,7 +45,7 @@ protected:
             spdlog::info("here");
             spdlog::info("{}", j.dump(4));
 
-            StaticReflect::deserialization(*static_cast<Derived*>(this), j);
+            StaticReflect::deserialization(*static_cast<Derived *>(this), j);
 
             spdlog::info("here 2");
         }

@@ -4,21 +4,20 @@
 #include "language/reflection/static_reflector.hpp"
 #include "platform/file_system.hpp"
 
+#include <filesystem>
 #include <future>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 namespace GraphicsLab {
 
-struct RecentModels: Reflectable {
+struct RecentModels : Reflectable {
 
     struct ModelData {
         std::string name;
         std::string path;
 
-        REFLECT(Property{"name", &ModelData::name},
-                Property{"path", &ModelData::path})
+        REFLECT(Property{"name", &ModelData::name}, Property{"path", &ModelData::path})
     };
     std::vector<ModelData> models;
 
@@ -43,4 +42,4 @@ struct RecentModels: Reflectable {
     REFLECT(Property{"models", &RecentModels::models})
 };
 
-}
+} // namespace GraphicsLab
