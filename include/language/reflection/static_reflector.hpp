@@ -172,6 +172,8 @@ struct StaticReflect {
             return field;
         } else if constexpr (StdVector<FieldType>) {
             return serialize_vector(field);
+        } else if constexpr (IsStaticReflectedType<FieldType>) {
+            return serialization(field);
         } else {
             return custom::custom_serialize(field);
         }
@@ -195,6 +197,10 @@ struct StaticReflect {
             return json.get<FieldType>();
         } else if constexpr (StdVector<FieldType>) {
             return deserialize_vector<FieldType>(json);
+        } else if constexpr (IsStaticReflectedType<FieldType>) {
+            FieldType field;
+            deserialization(field, json);
+            return field;
         } else {
             return custom::custom_deserialize(json, std::type_identity<FieldType>{});
         }

@@ -114,5 +114,7 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
         initialize();
     };
 
-    ~UIState() = default;
+    ~UIState() {
+        finalize();
+    };
 };
