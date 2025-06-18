@@ -42,7 +42,7 @@ void GraphicsLabApplication::run() {
     // auto directional_field = GraphicsLab::Geometry::SimpleDirectionalFieldConstructor::create();
     // appContext.sceneTree->addGeometryNode(std::move(directional_field), "dir");
 
-    UIState state;
+    UIState& state = AutoSerializeSingleton<UIState, "UIState">::instance();
     Controller controller(state, *appContext.sceneTree);
     ControllerCallbackHandler::internal_controller = &controller;
 

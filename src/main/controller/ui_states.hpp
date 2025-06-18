@@ -5,13 +5,15 @@
 
 #include "../project/project_manager.hpp"
 #include "graphics_lab/graphics_lab_controller.hpp"
+#include "language/crtp/auto_serialize_singleton.hpp"
 #include "language/reflection/reflectors.hpp"
+#include "storage/recent_models.hpp"
 
 #ifdef ENABLE_PYTHON
 #include "pybind11/embed.h"
 #endif
 
-struct UIState : Reflectable {
+struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
     enum class RenderMode {
         raw,
         color,
@@ -102,7 +104,15 @@ struct UIState : Reflectable {
     bool reset_camera = false;
     bool reset_gpu_bvh = false;
 
-    UIState() = default;
+    // persistent data
+
+    GraphicsLab::RecentModels recent_models;
+
+    REFLECT(Property{"recent_models", &UIState::recent_models});
+
+    explicit UIState() {
+        initialize();
+    };
 
     ~UIState() = default;
 };

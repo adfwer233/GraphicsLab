@@ -7,6 +7,8 @@
 #include "custom_serizalization.hpp"
 #include "nlohmann/json.hpp"
 
+#include "language/template/string_literal.hpp"
+
 template <typename T>
 concept Streamable = requires(std::ostream &os, T val) {
     { os << val } -> std::same_as<std::ostream &>;
@@ -71,13 +73,6 @@ concept IsMethod = requires { typename T::MethodTrait; };
     static constexpr auto staticReflect() {                                                                            \
         return std::make_tuple(__VA_ARGS__);                                                                           \
     }
-
-template <size_t N> struct StringLiteral {
-    constexpr StringLiteral(const char (&str)[N]) {
-        std::copy_n(str, N, value);
-    }
-    char value[N];
-};
 
 template <typename T>
 concept StdVector = requires {
