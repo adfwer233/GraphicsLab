@@ -77,21 +77,27 @@ layout(binding = 0) uniform UniformBufferObject {
 
 const float pi = 3.1415926535897932385;
 
-// Random number generation using pcg32i_random_t, using inc = 1. Our random state is a uint.
+// PCG32 step function: advances the RNG state.
 uint stepRNG(uint rngState) {
-    return rngState * 747796405 + 1;
+    return rngState * 747796405u + 1u;  // PCG with increment = 1
 }
 
-// Steps the RNG and returns a floating-point value between 0 and 1 inclusive.
+// PCG32 output function: generates a float in [0, 1].
 float stepAndOutputRNGFloat(inout uint rngState) {
-    // Condensed version of pcg_output_rxs_m_xs_32_32, with simple conversion to floating-point [0,1].
-    rngState  = stepRNG(rngState);
-    uint word = ((rngState >> ((rngState >> 28) + 4)) ^ rngState) * 277803737;
-    word      = (word >> 22) ^ word;
-    return float(word) * ubo.rand1 / 4294967295.0f;
+    rngState = stepRNG(rngState);
+    uint word = ((rngState >> ((rngState >> 28) + 4)) ^ rngState) * 277803737u;
+    word = (word >> 22) ^ word;
+    return float(word) / 4294967295.0;  // Normalize to [0, 1]
 }
 
-uint rngState =  (1024 * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y) * (ubo.currentSample+1);
+// Declare rngState per invocation globally or pass as parameter
+uint rngState;
+
+void initRNG() {
+    // Ensure unique RNG state per invocation and sample
+    rngState = (1024u * gl_GlobalInvocationID.x + gl_GlobalInvocationID.y) + (ubo.currentSample + 1u + int(ubo.rand2)) * 1000000;
+}
+
 float random() {
     return stepAndOutputRNGFloat(rngState);
 }
@@ -253,16 +259,12 @@ bool scatter(Ray ray, inout hitRecord rec, inout vec3 factor, inout vec3 ambient
     float materialSamplePdf;
     vec3 materialSample;
 
-    if (materials[rec.materialIndex].materialType == LAMBERTIAN_MATERIAL) {
-        materialSample = sampleLambertian(rec.normal, materialSamplePdf);
-    } else if(materials[rec.materialIndex].materialType == GLASS_MATERIAL) {
-        materialSample = sampleGlass(ray.dir, rec, materialSamplePdf);
-    } else if(materials[rec.materialIndex].materialType == METAL_MATERIAL) {
-        materialSample = sampleMetal(ray.dir, rec.normal, materialSamplePdf);
-    } else if(materials[rec.materialIndex].materialType == LIGHT_MATERIAL) {
+    if(materials[rec.materialIndex].materialType == LIGHT_MATERIAL) {
         factor = vec3(0.0);
-        ambient = vec3(1.0);
+        ambient = albedo;
         return true;
+    } else {
+        materialSample = sampleLambertian(rec.normal, materialSamplePdf);
     }
 
     float lightSamplePdf = 0.0;
@@ -270,6 +272,17 @@ bool scatter(Ray ray, inout hitRecord rec, inout vec3 factor, inout vec3 ambient
 
     finalSample = normalize(finalSample);
     scatteredRay = Ray(rec.p + 0.0001 * finalSample, finalSample);
+
+    if (random() < 0.5 && materials[rec.materialIndex].materialType != LIGHT_MATERIAL) {
+        // sample light
+        float lightCosine;
+        finalSample = sampleLight(rec.p, lightSamplePdf, lightCosine);
+
+        if(abs(lightCosine) < 0.001) {
+            finalSample = materialSample;
+            lightSamplePdf = materialSamplePdf;
+        }
+    }
 
     vec3 F0 = vec3(0.01);
     F0 = mix(F0, albedo, metallic);
@@ -295,7 +308,7 @@ bool scatter(Ray ray, inout hitRecord rec, inout vec3 factor, inout vec3 ambient
     rec.samplePdf = 0.5 * materialSamplePdf + 0.5 * lightSamplePdf;
     rec.scatterPdf = materialSamplePdf;
 
-    factor =  brdf * max(dot(N, finalSample), 0.0) / rec.scatterPdf;
+    factor =  brdf * max(dot(N, finalSample), 0.0) / rec.samplePdf;
     ambient = vec3(0.03) * albedo;
 
     return materials[rec.materialIndex].materialType == LIGHT_MATERIAL;
@@ -426,6 +439,7 @@ vec3 rayColor(Ray ray) {
 }
 
 void main() {
+    initRNG();
     vec2 imageSize = imageSize(targetTexture);
 
     float theta = ubo.cameraZoom * 3.1415926 / 180;

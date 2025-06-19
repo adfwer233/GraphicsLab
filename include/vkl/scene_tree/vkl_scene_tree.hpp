@@ -168,10 +168,16 @@ struct GeometryNodeBase : public TreeNode {
     bool updated = false;
     bool boxUpdated = false;
 
+    void updateMaterial(int id) {
+        this->material_index = id;
+    }
+
     ReflectDataType reflect() override {
         auto result = TreeNode::reflect();
         result.emplace("transformation", TypeErasedValue(&transformation));
         result.emplace("visible", TypeErasedValue(&visible));
+        result.emplace("material_index", TypeErasedValue(&material_index));
+        result.emplace("updateMaterial", TypeErasedValue(&GeometryNodeBase::updateMaterial, this, {0}, {"material index"}));
         return result;
     }
 };
@@ -357,6 +363,13 @@ class AssimpImporter {
             int count = material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
 
             Material current_material;
+
+            aiColor4D color;
+
+            material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+            current_material.data.base_color = {color.r, color.g, color.b};
+
+            current_material.meta.name = material->GetName().C_Str();
 
             for (auto type : {aiTextureType::aiTextureType_DIFFUSE}) {
                 for (int j = 0; j < material->GetTextureCount(type); j++) {

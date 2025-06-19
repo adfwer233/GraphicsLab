@@ -104,6 +104,7 @@ struct SceneTreeBvh {
         using RenderableTypeList =
             MetaProgramming::TypeList<Mesh3D, GraphicsLab::Geometry::Sphere, GraphicsLab::Geometry::Torus>;
 
+        glm::vec3 filp(1.0, -1.0, 1.0);
         MetaProgramming::ForEachType(RenderableTypeList{}, [&]<typename T>() {
             auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
             for (auto [mesh3d_nodes, trans] : scene_.traverse_geometry_nodes_with_trans<T>()) {
@@ -119,10 +120,11 @@ struct SceneTreeBvh {
                     auto tri_indices = mesh->indices[k];
                     BVHObject bvhObject;
                     bvhObject.object_index = objects.size();
+                    int material_index = mesh3d_nodes->material_index.has_value() ? mesh3d_nodes->material_index.value() : 0;
                     bvhObject.triangle = VklBVHGPUModel::Triangle{
-                        trans * glm::vec4(mesh->vertices[tri_indices.i].position, 1.0f),
-                        trans * glm::vec4(mesh->vertices[tri_indices.j].position, 1.0f),
-                        trans * glm::vec4(mesh->vertices[tri_indices.k].position, 1.0f), static_cast<uint32_t>(0)};
+                        trans * glm::vec4(mesh->vertices[tri_indices.i].position * filp, 1.0f),
+                        trans * glm::vec4(mesh->vertices[tri_indices.j].position * filp, 1.0f),
+                        trans * glm::vec4(mesh->vertices[tri_indices.k].position * filp, 1.0f), static_cast<uint32_t>(material_index)};
                     objects.push_back(bvhObject);
                 }
             }

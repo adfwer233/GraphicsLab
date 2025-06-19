@@ -5,7 +5,7 @@
 
 namespace SceneTree {
 
-enum class MaterialType {
+enum class MaterialType: int {
     Light,
     Object
 };
@@ -15,8 +15,8 @@ enum class MaterialType {
  *
  * c.f. https://disneyanimation.com/publications/physically-based-shading-at-disney/
  */
-struct MaterialData {
-    glm::vec3 base_color = glm::vec3(1.0f);
+struct alignas(16) MaterialData {
+    alignas(16) glm::vec3 base_color = glm::vec3(1.0f);
     float metallic = 0.0f;
     float roughness = 0.5f;
     float specular = 0.5f;

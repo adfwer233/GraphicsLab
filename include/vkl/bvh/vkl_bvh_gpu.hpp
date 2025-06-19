@@ -3,20 +3,6 @@
 #include "glm/glm.hpp"
 
 namespace VklBVHGPUModel {
-enum MaterialType {
-    LightSource,
-    Lambertian,
-    Metal,
-    Glass
-};
-
-struct Material {
-    alignas(4) MaterialType type;
-    alignas(4) float metallic;
-    alignas(4) float roughness;
-    alignas(4) float ao;
-    alignas(16) glm::vec3 albedo;
-};
 
 struct Triangle {
     alignas(16) glm::vec3 v0;

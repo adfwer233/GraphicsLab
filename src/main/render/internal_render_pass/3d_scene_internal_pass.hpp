@@ -24,6 +24,8 @@
 
 #include "vkl/core/vkl_soft_rasterizer.hpp"
 
+#include <utils/sampler.hpp>
+
 namespace GraphicsLab::RenderGraph {
 struct InternalSceneRenderPass : public RenderPass {
     explicit InternalSceneRenderPass(VklDevice &device, SceneTree::VklSceneTree &sceneTree, UIState &uiState,
@@ -68,7 +70,7 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
                 {(DEFAULT_SHADER_PATH / "simple_color_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-        
+
         line_render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
@@ -223,7 +225,7 @@ struct InternalSceneRenderPass : public RenderPass {
             path_tracing_compute_system->computeModel_.ubo.cameraFront = sceneTree_.active_camera->camera.camera_front;
             path_tracing_compute_system->computeModel_.ubo.currentSample += 1;
             path_tracing_compute_system->computeModel_.ubo.rand1 = sceneTree_.active_camera->camera.ratio;
-            path_tracing_compute_system->computeModel_.ubo.rand2 = 1201456;
+            path_tracing_compute_system->computeModel_.ubo.rand2 = Sampler::sampleUniform(0, 10000);
             path_tracing_compute_system->updateUniformBuffer(frame_index);
 
             if (uiState_.reset_camera == true) {

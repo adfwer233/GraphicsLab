@@ -74,6 +74,14 @@ class SceneTreeComponent : public UIComponent {
                     auto *vec = std::any_cast<glm::vec3>(&args[i]);
                     ImGui::InputFloat3(arg.name.c_str(), glm::value_ptr(*vec));
                 }
+                if (arg.default_value.type() == typeid(float)) {
+                    auto *v = std::any_cast<float>(&args[i]);
+                    ImGui::InputFloat(arg.name.c_str(), v);
+                }
+                if (arg.default_value.type() == typeid(int)) {
+                    auto *v = std::any_cast<int>(&args[i]);
+                    ImGui::InputInt(arg.name.c_str(), v);
+                }
                 i++;
             }
 
@@ -96,13 +104,17 @@ class SceneTreeComponent : public UIComponent {
                 if (value.type() == typeid(glm::vec3)) {
                     auto &vec = *reinterpret_cast<glm::vec3 *>(value.get());
                     ImGui::Text(std::format("{}: {} {} {}", key, vec.x, vec.y, vec.z).c_str());
-                }
-                if (value.type() == typeid(bool)) {
+                } else if (value.type() == typeid(bool)) {
                     auto &boolval = *reinterpret_cast<bool *>(value.get());
                     ImGui::Checkbox(key.c_str(), &boolval);
                 } else if (value.type() == typeid(glm::quat)) {
                     auto &quat = *reinterpret_cast<glm::quat *>(value.get());
                     ImGui::Text(std::format("{}: {} {} {} {}", key, quat.w, quat.x, quat.y, quat.z).c_str());
+                } else if (value.type() == typeid(std::optional<size_t>)) {
+                    auto opt = *reinterpret_cast<std::optional<size_t> *>(value.get());
+                    if (opt.has_value()) {
+                        ImGui::Text(std::format("{}: {}", key, opt.value()).c_str());
+                    }
                 }
                 if (value.isReflectable) {
                     if (ImGui::TreeNode(key.c_str())) {
