@@ -47,6 +47,10 @@ struct SoftwareRasterizer {
             b.position.y *= -1.0f;
             c.position.y *= -1.0f;
 
+            a.normal.y *= -1.0f;
+            b.normal.y *= -1.0f;
+            c.normal.y *= -1.0f;
+
             rasterize_triangle({a, b, c}, framebuffer_, zbuffer_, mvp, light_point, view_point);
         }
     }
@@ -136,8 +140,14 @@ struct SoftwareRasterizer {
         glm::vec3 V = glm::normalize(view_pos - position);
         glm::vec3 H = glm::normalize(L + V);
 
-        float diff = glm::max(glm::dot(N, L), 0.0f);
-        float spec = glm::pow(glm::max(glm::dot(N, H), 0.0f), shininess);
+        float NdotL = glm::max(glm::dot(N, L), 0.0f);
+        float NdotH = glm::dot(N, H);
+
+        float diff = NdotL;
+        float spec = 0.0f;
+        if (diff > 0.0f && NdotH > 0.0f) {
+            spec = glm::pow(glm::max(NdotH, 0.0f), shininess);
+        }
 
         glm::vec3 ambient = 0.1f * color;
         glm::vec3 diffuse = 0.6f * diff * color;

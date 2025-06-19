@@ -3,6 +3,8 @@
 #include "component.hpp"
 #include "controller/controller.hpp"
 
+#include <vkl/imgui/imgui_reflection.hpp>
+
 class ImportModelWidget : public UIComponent {
   public:
     ImportModelWidget(GraphicsLab::GraphicsLabInternalContext &context, UIState &uiState)
