@@ -177,7 +177,8 @@ struct GeometryNodeBase : public TreeNode {
         result.emplace("transformation", TypeErasedValue(&transformation));
         result.emplace("visible", TypeErasedValue(&visible));
         result.emplace("material_index", TypeErasedValue(&material_index));
-        result.emplace("updateMaterial", TypeErasedValue(&GeometryNodeBase::updateMaterial, this, {0}, {"material index"}));
+        result.emplace("updateMaterial",
+                       TypeErasedValue(&GeometryNodeBase::updateMaterial, this, {0}, {"material index"}));
         return result;
     }
 };
@@ -349,7 +350,7 @@ class AssimpImporter {
         return processNode(scene->mRootNode, scene);
     }
 
-    auto importTexture(vkl::TextureManager& texture_manager, MaterialManager& material_manager) -> void {
+    auto importTexture(vkl::TextureManager &texture_manager, MaterialManager &material_manager) -> void {
         Assimp::Importer importer;
         auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 

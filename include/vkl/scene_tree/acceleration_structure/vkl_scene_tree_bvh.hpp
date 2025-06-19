@@ -120,11 +120,13 @@ struct SceneTreeBvh {
                     auto tri_indices = mesh->indices[k];
                     BVHObject bvhObject;
                     bvhObject.object_index = objects.size();
-                    int material_index = mesh3d_nodes->material_index.has_value() ? mesh3d_nodes->material_index.value() : 0;
-                    bvhObject.triangle = VklBVHGPUModel::Triangle{
-                        trans * glm::vec4(mesh->vertices[tri_indices.i].position * filp, 1.0f),
-                        trans * glm::vec4(mesh->vertices[tri_indices.j].position * filp, 1.0f),
-                        trans * glm::vec4(mesh->vertices[tri_indices.k].position * filp, 1.0f), static_cast<uint32_t>(material_index)};
+                    int material_index =
+                        mesh3d_nodes->material_index.has_value() ? mesh3d_nodes->material_index.value() : 0;
+                    bvhObject.triangle =
+                        VklBVHGPUModel::Triangle{trans * glm::vec4(mesh->vertices[tri_indices.i].position * filp, 1.0f),
+                                                 trans * glm::vec4(mesh->vertices[tri_indices.j].position * filp, 1.0f),
+                                                 trans * glm::vec4(mesh->vertices[tri_indices.k].position * filp, 1.0f),
+                                                 static_cast<uint32_t>(material_index)};
                     objects.push_back(bvhObject);
                 }
             }

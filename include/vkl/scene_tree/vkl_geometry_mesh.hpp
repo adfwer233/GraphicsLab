@@ -69,7 +69,7 @@ class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
 
         if (node_->material_index.has_value()) {
             auto material = node_->scene->material_manager.materials[node_->material_index.value()];
-            for (auto texture: material.textures) {
+            for (auto texture : material.textures) {
                 auto vkl_texture = node_->scene->texture_manager.get_texture(texture);
                 builder.textures.emplace_back(vkl_texture);
             }

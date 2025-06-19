@@ -70,7 +70,6 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
                 {(DEFAULT_SHADER_PATH / "simple_color_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
-
         line_render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{

@@ -5,7 +5,7 @@
 
 namespace SceneTree {
 
-enum class MaterialType: int {
+enum class MaterialType : int {
     Light,
     Object
 };
