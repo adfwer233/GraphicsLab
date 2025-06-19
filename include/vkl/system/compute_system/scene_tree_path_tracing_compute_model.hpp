@@ -200,13 +200,13 @@ class PathTracingComputeModel {
 
         // create material buffer
 
-        uint32_t materialNum = static_cast<uint32_t>(scene_.materials.size());
-        VklBuffer stagingBuffer2{device_, sizeof(VklBVHGPUModel::Material), materialNum,
+        uint32_t materialNum = static_cast<uint32_t>(bvh.materials.size());
+        VklBuffer stagingBuffer2{device_, sizeof(SceneTree::MaterialData), materialNum,
                                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
 
         stagingBuffer2.map();
-        stagingBuffer2.writeToBuffer((void *)scene_.materials.data());
+        stagingBuffer2.writeToBuffer((void *)bvh.materials.data());
 
         device_.copyBuffer(stagingBuffer2.getBuffer(), storageBuffers[1]->getBuffer(),
                            sizeof(VklBVHGPUModel::Material) * materialNum);

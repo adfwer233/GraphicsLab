@@ -7,6 +7,8 @@ layout(location = 3) in vec2 fragTexCoord;
 
 layout(location = 0) out vec4 outColor;
 
+layout(binding = 1) uniform sampler2D texSampler;
+
 struct PointLight {
     vec4 position;
     vec4 color;
@@ -43,10 +45,8 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;
 
-//    outColor = vec4(fragColor, 1.0f);
-//    if (dot(norm, lightDirection) > 0)
-        outColor = vec4((ambient + diffuse + specular) * fragColor, 1.0f);
-//    else
-//        outColor = vec4(ambient, 1.0f);
+    outColor = vec4((ambient + diffuse + specular) * texture(texSampler, fragTexCoord).xyz, 1.0f);
+
+
 
 }

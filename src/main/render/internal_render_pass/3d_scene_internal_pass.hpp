@@ -68,6 +68,7 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
                 {(DEFAULT_SHADER_PATH / "simple_color_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
+        
         line_render_system = std::make_unique<LineRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
@@ -289,8 +290,8 @@ struct InternalSceneRenderPass : public RenderPass {
                         } else if (uiState_.renderMode == UIState::RenderMode::color) {
                             color_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::material) {
-                            if (node_mesh->mesh->textures_.size() >=
-                                simple_render_system->descriptorSetLayout->descriptorSetLayoutKey
+                            if (node_mesh->mesh->textures_.size() !=
+                                color_render_system->descriptorSetLayout->descriptorSetLayoutKey
                                     .sampledImageBufferDescriptors.size()) {
                                 simple_render_system->renderObject(frameInfo);
                             } else {

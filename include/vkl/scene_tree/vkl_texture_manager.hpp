@@ -24,14 +24,15 @@ struct TextureManager {
     ~TextureManager() {
     }
 
-    void load_texture(const std::string &texture_path) {
+    std::optional<std::string> load_texture(const std::string &texture_path) {
         // get the file name
-        std::string texture_name = texture_path.substr(texture_path.find_last_of('/') + 1);
-        texture_name = texture_name.substr(0, texture_name.find_last_of('.'));
+
+        std::filesystem::path path(texture_path);
+        std::string texture_name = path.filename().string();
 
         // check if the texture is already loaded
         if (textures_metadata.find(texture_name) != textures_metadata.end()) {
-            return;
+            return std::nullopt;
         }
 
         auto texture = createTextureImage(texture_path);
@@ -42,10 +43,12 @@ struct TextureManager {
         metadata.import_path = texture_path;
         metadata.texture_index = textures.size() - 1;
         textures_metadata[texture_name] = metadata;
+
+        return texture_name;
     }
 
     [[nodiscard]] auto get_texture(const std::string &texture_name) -> VklTexture * {
-        if (textures_metadata.find(texture_name) == textures_metadata.end()) {
+        if (!textures_metadata.contains(texture_name)) {
             throw std::runtime_error("texture not found");
         }
 

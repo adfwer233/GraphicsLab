@@ -48,6 +48,8 @@ struct Material {
     MaterialMetaInfo meta;
     MaterialData data;
 
+    std::vector<std::string> textures;
+
     REFLECT(Property{"meta", &Material::meta}, Property{"data", &Material::data})
 };
 

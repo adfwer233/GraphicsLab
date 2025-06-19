@@ -67,10 +67,16 @@ class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
         builder.vertices = node_->data.vertices;
         builder.indices = node_->data.indices;
 
-        // if (node_->material_index.has_value()) {
-        //     auto material = node_->scene->materials[node_->material_index.value()];
-        //     std::ranges::copy(material.textures, std::back_inserter(builder.textures));
-        // }
+        if (node_->material_index.has_value()) {
+            auto material = node_->scene->material_manager.materials[node_->material_index.value()];
+            for (auto texture: material.textures) {
+                auto vkl_texture = node_->scene->texture_manager.get_texture(texture);
+                builder.textures.emplace_back(vkl_texture);
+            }
+            // std::ranges::copy(material.textures, std::back_inserter(builder.textures));
+        } else {
+            int x = 0;
+        }
 
         mesh = std::make_unique<render_type>(device_, builder);
     }
