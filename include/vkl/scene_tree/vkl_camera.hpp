@@ -16,6 +16,11 @@ enum CameraMovement {
     UP
 };
 
+enum class CameraProjectionMode {
+    PERSPECTIVE,
+    ORTHOGRAPHIC
+};
+
 /**
  * @brief Camera class for opengl
  */
@@ -70,6 +75,8 @@ class Camera {
      * @brief mouse sensitivity
      */
     const float mouse_sensitivity;
+
+    CameraProjectionMode projection_mode = CameraProjectionMode::PERSPECTIVE;
 
     float ratio = 1.0;
 

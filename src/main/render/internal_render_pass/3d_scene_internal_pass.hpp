@@ -52,6 +52,7 @@ struct InternalSceneRenderPass : public RenderPass {
     }
 
     void post_compile(RenderContext *render_context) override {
+
         simple_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
@@ -116,7 +117,7 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "directional_field_3d.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {(DEFAULT_SHADER_PATH / "directional_field_3d.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
-        software_rasterizer = std::make_unique<vkl::SoftwareRasterizer>(device_, 512, 512);
+        software_rasterizer = std::make_unique<vkl::SoftwareRasterizer>(device_, sceneTree_.material_manager, 512, 512);
 
         /**
          * Initialize path tracing texture
@@ -207,7 +208,7 @@ struct InternalSceneRenderPass : public RenderPass {
             software_rasterizer->clear();
             for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh3D>()) {
                 software_rasterizer->rasterize_mesh(mesh3d_nodes->data, ubo.proj * ubo.view * trans, ubo.cameraPos,
-                                                    ubo.cameraPos);
+                                                    ubo.cameraPos, mesh3d_nodes->material_index.value_or(0));
             }
             software_rasterizer->copy_result_to_image(commandBuffer, software_rasterizer_texture->image_);
             begin_render_pass(commandBuffer);
@@ -289,7 +290,7 @@ struct InternalSceneRenderPass : public RenderPass {
                         } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
                             wireframe_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::color) {
-                            color_render_system->renderObject(frameInfo);
+                            simple_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::material) {
                             if (node_mesh->mesh->textures_.size() !=
                                 color_render_system->descriptorSetLayout->descriptorSetLayoutKey

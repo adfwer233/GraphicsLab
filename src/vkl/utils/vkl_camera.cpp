@@ -9,7 +9,14 @@ glm::mat4 Camera::get_view_transformation() const {
 }
 
 glm::mat4 Camera::get_proj_transformation() const {
-    return glm::perspective(glm::radians(this->zoom), ratio, 0.1f, 1000.0f);
+    if (projection_mode == CameraProjectionMode::PERSPECTIVE) {
+        return glm::perspective(glm::radians(this->zoom), ratio, 0.1f, 1000.0f);
+    } else {
+        float orthoSize = glm::distance(position + camera_front, camera_target) * std::tan(this->zoom / 2.0f);
+        float orthoHeight = orthoSize;
+        float orthoWidth = orthoHeight * ratio;
+        return glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight, 0.1f, 1000.0f);
+    }
 }
 
 void Camera::process_mouse_scroll(float offset) {

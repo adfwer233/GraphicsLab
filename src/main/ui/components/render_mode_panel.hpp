@@ -55,6 +55,15 @@ class RenderModelPanel : public UIComponent {
         ImGui::SameLine();
         ImGui::Checkbox("Show Box", &uiState_.showBox);
 
+        if (context_.sceneTree->active_camera != nullptr) {
+          ImGui::SeparatorText("Camera Projection Mode");
+          ImGui::RadioButton("Perspective", reinterpret_cast<int *>(&context_.sceneTree->active_camera->camera.projection_mode),
+             static_cast<std::underlying_type_t<CameraProjectionMode>>(CameraProjectionMode::PERSPECTIVE));
+          ImGui::SameLine();
+          ImGui::RadioButton("Orthographic", reinterpret_cast<int *>(&context_.sceneTree->active_camera->camera.projection_mode),
+                             static_cast<std::underlying_type_t<CameraProjectionMode>>(CameraProjectionMode::ORTHOGRAPHIC));
+        }
+
         if (ImGui::Button("Reset Path Tracing GPU BVH")) {
             uiState_.reset_gpu_bvh = true;
         }

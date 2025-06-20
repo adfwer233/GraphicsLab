@@ -8,8 +8,8 @@ struct SoftwareRasterizer {
     using Framebuffer = std::vector<uint8_t>;
     using ZBuffer = std::vector<float>;
 
-    explicit SoftwareRasterizer(VklDevice &device, int width, int height)
-        : device_(device), width_(width), height_(height) {
+    explicit SoftwareRasterizer(VklDevice &device, SceneTree::MaterialManager& material_manager, int width, int height)
+        : device_(device), width_(width), height_(height), materialManager_(material_manager) {
         create_resources();
     }
 
@@ -37,7 +37,7 @@ struct SoftwareRasterizer {
         vkBindBufferMemory(device_.device(), buffer, memory, 0);
     }
 
-    void rasterize_mesh(Mesh3D &mesh, glm::mat4 mvp, glm::vec3 view_point, glm::vec3 light_point) {
+    void rasterize_mesh(Mesh3D &mesh, glm::mat4 mvp, glm::vec3 view_point, glm::vec3 light_point, int material_index) {
         for (auto indices : mesh.indices) {
             auto a = mesh.vertices[indices.i];
             auto b = mesh.vertices[indices.j];
@@ -51,7 +51,7 @@ struct SoftwareRasterizer {
             b.normal.y *= -1.0f;
             c.normal.y *= -1.0f;
 
-            rasterize_triangle({a, b, c}, framebuffer_, zbuffer_, mvp, light_point, view_point);
+            rasterize_triangle({a, b, c}, framebuffer_, zbuffer_, mvp, light_point, view_point, material_index);
         }
     }
 
@@ -157,7 +157,7 @@ struct SoftwareRasterizer {
     }
 
     void rasterize_triangle(const std::array<Vertex3D, 3> &tri, Framebuffer &fb, ZBuffer &zb, const glm::mat4 &MVP,
-                            const glm::vec3 &light_pos, const glm::vec3 &view_pos) {
+                            const glm::vec3 &light_pos, const glm::vec3 &view_pos, int material_index) {
         glm::vec4 clip[3];
         for (int i = 0; i < 3; ++i)
             clip[i] = MVP * glm::vec4(tri[i].position, 1.0f);
@@ -208,7 +208,10 @@ struct SoftwareRasterizer {
                         glm::vec3 position = alpha * tri[0].position + beta * tri[1].position + gamma * tri[2].position;
                         glm::vec3 normal =
                             glm::normalize(alpha * tri[0].normal + beta * tri[1].normal + gamma * tri[2].normal);
-                        glm::vec3 color = alpha * tri[0].color + beta * tri[1].color + gamma * tri[2].color;
+                        // glm::vec3 color = alpha * tri[0].color + beta * tri[1].color + gamma * tri[2].color;
+
+                        glm::vec3 color = materialManager_.materials[material_index].data.base_color;
+
                         glm::vec3 shaded = shade_blinn_phong(position, normal, color, light_pos, view_pos);
 
                         put_pixel(fb, x, y, shaded);
@@ -219,6 +222,7 @@ struct SoftwareRasterizer {
     }
 
     VklDevice &device_;
+    SceneTree::MaterialManager &materialManager_;
 
     Framebuffer framebuffer_;
     ZBuffer zbuffer_;
