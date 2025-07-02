@@ -8,7 +8,7 @@ struct SoftwareRasterizer {
     using Framebuffer = std::vector<uint8_t>;
     using ZBuffer = std::vector<float>;
 
-    explicit SoftwareRasterizer(VklDevice &device, SceneTree::MaterialManager& material_manager, int width, int height)
+    explicit SoftwareRasterizer(VklDevice &device, SceneTree::MaterialManager &material_manager, int width, int height)
         : device_(device), width_(width), height_(height), materialManager_(material_manager) {
         create_resources();
     }
