@@ -6,15 +6,14 @@
 
 namespace GraphicsLab {
 
-
 struct BernsteinPolynomial {
     BernsteinPolynomial() = default;
 
-    BernsteinPolynomial(const std::vector<double>& coeffs)
-        : coefficients_(coeffs) {}
+    BernsteinPolynomial(const std::vector<double> &coeffs) : coefficients_(coeffs) {
+    }
 
-    BernsteinPolynomial(std::initializer_list<double> coeffs)
-        : coefficients_(coeffs) {}
+    BernsteinPolynomial(std::initializer_list<double> coeffs) : coefficients_(coeffs) {
+    }
 
     // Degree of the polynomial
     size_t degree() const {
@@ -47,15 +46,17 @@ struct BernsteinPolynomial {
         return RealPolynomial(result);
     }
 
-private:
+  private:
     /**
      * coefficient of binom(n, i)(1 - x)^{n - i} x^{i}
      */
     std::vector<double> coefficients_;
 
     static double binomial(size_t n, size_t k) {
-        if (k > n) return 0;
-        if (k == 0 || k == n) return 1;
+        if (k > n)
+            return 0;
+        if (k == 0 || k == n)
+            return 1;
         double res = 1;
         for (size_t i = 1; i <= k; ++i)
             res = res * (n - (k - i)) / i;
@@ -63,4 +64,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab

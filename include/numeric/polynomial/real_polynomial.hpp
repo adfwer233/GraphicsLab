@@ -11,15 +11,15 @@ struct RealPolynomial {
      */
     RealPolynomial() = default;
 
-    RealPolynomial(const std::vector<double>& coeffs)
-        : coefficients_(coeffs) {}
+    RealPolynomial(const std::vector<double> &coeffs) : coefficients_(coeffs) {
+    }
 
-    RealPolynomial(std::initializer_list<double> coeffs)
-        : coefficients_(coeffs) {}
+    RealPolynomial(std::initializer_list<double> coeffs) : coefficients_(coeffs) {
+    }
 
     double evaluate(double x) const {
         double result = 0.0;
-        double xn = 1.0;  // x^0
+        double xn = 1.0; // x^0
         for (double c : coefficients_) {
             result += c * xn;
             xn *= x;
@@ -44,7 +44,7 @@ struct RealPolynomial {
     }
 
     // Addition
-    RealPolynomial operator+(const RealPolynomial& other) const {
+    RealPolynomial operator+(const RealPolynomial &other) const {
         size_t n = std::max(coefficients_.size(), other.coefficients_.size());
         std::vector<double> result(n, 0.0);
         for (size_t i = 0; i < n; ++i) {
@@ -57,7 +57,7 @@ struct RealPolynomial {
     }
 
     // Subtraction
-    RealPolynomial operator-(const RealPolynomial& other) const {
+    RealPolynomial operator-(const RealPolynomial &other) const {
         size_t n = std::max(coefficients_.size(), other.coefficients_.size());
         std::vector<double> result(n, 0.0);
         for (size_t i = 0; i < n; ++i) {
@@ -70,7 +70,7 @@ struct RealPolynomial {
     }
 
     // Multiplication
-    RealPolynomial operator*(const RealPolynomial& other) const {
+    RealPolynomial operator*(const RealPolynomial &other) const {
         size_t n = coefficients_.size() + other.coefficients_.size() - 1;
         std::vector<double> result(n, 0.0);
         for (size_t i = 0; i < coefficients_.size(); ++i)
@@ -79,8 +79,8 @@ struct RealPolynomial {
         return RealPolynomial(result);
     }
 
-private:
+  private:
     std::vector<double> coefficients_;
 };
 
-}
+} // namespace GraphicsLab
