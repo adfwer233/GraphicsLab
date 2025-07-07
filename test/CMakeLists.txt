@@ -14,6 +14,7 @@ set(SRC_FILE
         geometry/spatial_datastructure_test.cpp
         geometry/brep_face_test.cpp
         geometry/line_param_2d_intersector.cpp
+        numeric/polynomial_test.cpp
         crtp/crtp_test.cpp
 )
 
@@ -21,7 +22,7 @@ enable_testing()
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw LAB_vkl LAB_geometry GTest::gtest GTest::gtest_main nlohmann_json GraphicsLab_Platform)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm glfw LAB_vkl LAB_geometry GTest::gtest GTest::gtest_main nlohmann_json GraphicsLab_Platform GraphicsLab_Numeric)
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME})

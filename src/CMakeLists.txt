@@ -1,0 +1,6 @@
+add_subdirectory(numeric)
+add_subdirectory(platform)
+add_subdirectory(vkl)
+add_subdirectory(geometry)
+add_subdirectory(main)
+add_subdirectory(applications)

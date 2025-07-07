@@ -129,12 +129,7 @@ endif()
 
 add_subdirectory(3rd_party/CDT/CDT CDT)
 
-add_subdirectory(src/platform)
-add_subdirectory(src/vkl)
-#add_subdirectory(src/geometry_processing)
-add_subdirectory(src/geometry)
-add_subdirectory(src/main)
-add_subdirectory(src/applications)
+add_subdirectory(src)
 add_subdirectory(test)
 
 #set(CMAKE_POSITION_INDEPENDENT_CODE ON)
