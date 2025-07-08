@@ -86,6 +86,7 @@ struct RealPolynomial {
     [[nodiscard]] std::vector<double> get_coefficients() const {
         return coefficients_;
     }
+
   private:
     std::vector<double> coefficients_;
 };

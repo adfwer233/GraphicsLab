@@ -49,6 +49,7 @@ struct BernsteinPolynomial {
     [[nodiscard]] std::vector<double> get_coefficients() const {
         return coefficients_;
     }
+
   private:
     /**
      * coefficient of binom(n, i)(1 - x)^{n - i} x^{i}
