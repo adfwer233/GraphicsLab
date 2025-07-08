@@ -9,19 +9,19 @@ namespace GraphicsLab {
 struct BernsteinPolynomial {
     BernsteinPolynomial() = default;
 
-    BernsteinPolynomial(const std::vector<double> &coeffs) : coefficients_(coeffs) {
+    explicit BernsteinPolynomial(const std::vector<double> &coeffs) : coefficients_(coeffs) {
     }
 
     BernsteinPolynomial(std::initializer_list<double> coeffs) : coefficients_(coeffs) {
     }
 
     // Degree of the polynomial
-    size_t degree() const {
+    [[nodiscard]] size_t degree() const {
         return coefficients_.empty() ? 0 : coefficients_.size() - 1;
     }
 
     // Evaluate using de Casteljau's algorithm
-    double evaluate(double x) const {
+    [[nodiscard]] double evaluate(double x) const {
         std::vector<double> temp = coefficients_;
         size_t n = degree();
         for (size_t k = 1; k <= n; ++k) {
@@ -33,7 +33,7 @@ struct BernsteinPolynomial {
     }
 
     // Convert to RealPolynomial (power basis)
-    RealPolynomial convert_to_power_basis() const {
+    [[nodiscard]] RealPolynomial convert_to_power_basis() const {
         size_t n = degree();
         std::vector<double> result(n + 1, 0.0);
         for (size_t i = 0; i <= n; ++i) {
@@ -46,6 +46,9 @@ struct BernsteinPolynomial {
         return RealPolynomial(result);
     }
 
+    [[nodiscard]] std::vector<double> get_coefficients() const {
+        return coefficients_;
+    }
   private:
     /**
      * coefficient of binom(n, i)(1 - x)^{n - i} x^{i}

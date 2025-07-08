@@ -11,13 +11,13 @@ struct RealPolynomial {
      */
     RealPolynomial() = default;
 
-    RealPolynomial(const std::vector<double> &coeffs) : coefficients_(coeffs) {
+    explicit RealPolynomial(const std::vector<double> &coeffs) : coefficients_(coeffs) {
     }
 
     RealPolynomial(std::initializer_list<double> coeffs) : coefficients_(coeffs) {
     }
 
-    double evaluate(double x) const {
+    [[nodiscard]] double evaluate(double x) const {
         double result = 0.0;
         double xn = 1.0; // x^0
         for (double c : coefficients_) {
@@ -30,7 +30,7 @@ struct RealPolynomial {
     /**
      * Compute the derivative of the polynomial
      */
-    RealPolynomial derivative() const {
+    [[nodiscard]] RealPolynomial derivative() const {
         if (coefficients_.size() <= 1) {
             // Derivative of a constant is zero
             return RealPolynomial({0.0});
@@ -79,6 +79,13 @@ struct RealPolynomial {
         return RealPolynomial(result);
     }
 
+    [[nodiscard]] size_t degree() const {
+        return coefficients_.empty() ? 0 : coefficients_.size() - 1;
+    }
+
+    [[nodiscard]] std::vector<double> get_coefficients() const {
+        return coefficients_;
+    }
   private:
     std::vector<double> coefficients_;
 };
