@@ -11,9 +11,7 @@ struct ThreadPool {
 
     ThreadPool(size_t thread_count) {
         for (size_t i = 0; i < thread_count; ++i) {
-            workers.emplace_back([this](std::stop_token st) {
-                this->worker_loop(st);
-            });
+            workers.emplace_back([this](std::stop_token st) { this->worker_loop(st); });
         }
     }
 
@@ -21,13 +19,12 @@ struct ThreadPool {
         stop();
     }
 
-    template<typename Func, typename... Args>
-    auto enqueue(Func&& f, Args&&... args) -> std::future<std::invoke_result_t<Func, Args...>> {
+    template <typename Func, typename... Args>
+    auto enqueue(Func &&f, Args &&...args) -> std::future<std::invoke_result_t<Func, Args...>> {
         using return_type = std::invoke_result_t<Func, Args...>;
 
         auto task = std::make_shared<std::packaged_task<return_type()>>(
-            std::bind(std::forward<Func>(f), std::forward<Args>(args)...)
-        );
+            std::bind(std::forward<Func>(f), std::forward<Args>(args)...));
 
         std::future<return_type> result = task->get_future();
 
@@ -40,7 +37,7 @@ struct ThreadPool {
         return result;
     }
 
-private:
+  private:
     std::vector<std::jthread> workers;
     std::queue<std::function<void()>> tasks;
 
@@ -52,9 +49,8 @@ private:
             std::function<void()> task;
             {
                 std::unique_lock lock(queueMutex);
-                task_available_condition.wait(lock, stoken, [this, stoken] {
-                    return !tasks.empty() or stoken.stop_requested();
-                });
+                task_available_condition.wait(lock, stoken,
+                                              [this, stoken] { return !tasks.empty() or stoken.stop_requested(); });
 
                 if (stoken.stop_requested()) {
                     all_stopped_condition.notify_one();
@@ -79,7 +75,7 @@ private:
             all_stopped_condition.wait(lock, [this] { return tasks.empty(); });
 
             if (not workers.empty()) {
-                for (auto &worker: workers) {
+                for (auto &worker : workers) {
                     worker.request_stop();
                 }
             }
