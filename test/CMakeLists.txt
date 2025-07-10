@@ -16,6 +16,7 @@ set(SRC_FILE
         geometry/line_param_2d_intersector.cpp
         numeric/polynomial_test.cpp
         crtp/crtp_test.cpp
+        parallel/thread_pool_test.cpp
 )
 
 enable_testing()
