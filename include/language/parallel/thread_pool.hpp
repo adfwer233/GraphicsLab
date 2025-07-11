@@ -9,9 +9,9 @@
 
 struct ThreadPool {
 
-    ThreadPool(size_t thread_count) {
+    explicit ThreadPool(size_t thread_count) {
         for (size_t i = 0; i < thread_count; ++i) {
-            workers.emplace_back([this](std::stop_token st) { this->worker_loop(st); });
+            workers.emplace_back([this](const std::stop_token& st) { this->worker_loop(st); });
         }
     }
 
@@ -42,23 +42,19 @@ struct ThreadPool {
     std::queue<std::function<void()>> tasks;
 
     std::mutex queueMutex;
-    std::condition_variable_any task_available_condition, all_stopped_condition;
+    std::condition_variable task_available_condition, all_stopped_condition;
 
-    void worker_loop(std::stop_token stoken) {
+    void worker_loop(const std::stop_token& stoken) {
         while (true) {
             std::function<void()> task;
             {
                 std::unique_lock lock(queueMutex);
-                task_available_condition.wait(lock, stoken,
+                task_available_condition.wait(lock,
                                               [this, stoken] { return !tasks.empty() or stoken.stop_requested(); });
 
-                if (stoken.stop_requested()) {
+                if (stoken.stop_requested() or tasks.empty()) {
                     all_stopped_condition.notify_one();
                     return;
-                }
-
-                if (tasks.empty()) {
-                    continue;
                 }
 
                 task = std::move(tasks.front());
