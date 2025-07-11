@@ -11,7 +11,7 @@ struct ThreadPool {
 
     explicit ThreadPool(size_t thread_count) {
         for (size_t i = 0; i < thread_count; ++i) {
-            workers.emplace_back([this](const std::stop_token& st) { this->worker_loop(st); });
+            workers.emplace_back([this](const std::stop_token &st) { this->worker_loop(st); });
         }
     }
 
@@ -44,7 +44,7 @@ struct ThreadPool {
     std::mutex queueMutex;
     std::condition_variable task_available_condition, all_stopped_condition;
 
-    void worker_loop(const std::stop_token& stoken) {
+    void worker_loop(const std::stop_token &stoken) {
         while (true) {
             std::function<void()> task;
             {
