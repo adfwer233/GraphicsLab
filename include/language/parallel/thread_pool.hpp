@@ -7,6 +7,7 @@
 #include <thread>
 #include <type_traits>
 
+namespace Parallel {
 struct ThreadPool {
 
     explicit ThreadPool(size_t thread_count) {
@@ -37,7 +38,7 @@ struct ThreadPool {
         return result;
     }
 
-  private:
+private:
     std::vector<std::jthread> workers;
     std::queue<std::function<void()>> tasks;
 
@@ -80,3 +81,4 @@ struct ThreadPool {
         task_available_condition.notify_all();
     }
 };
+}

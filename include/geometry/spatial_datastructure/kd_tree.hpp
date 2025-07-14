@@ -88,10 +88,6 @@ template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
 
         std::vector<T> left, right, overlapping;
 
-        // for (auto p: primitives) {
-        //     if (p.max_pos()[axis])
-        // }
-        // Sort the primitives based on the current axis
         std::sort(primitives.begin(), primitives.end(),
                   [axis](const T &a, const T &b) { return a.min_pos()[axis] < b.min_pos()[axis]; });
 
