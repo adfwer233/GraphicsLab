@@ -16,7 +16,9 @@ struct Grid {
         return i * size_y * size_z + j * size_z + k;
     }
 
-    [[nodiscard]] size_t size() const { return size_x * size_y * size_z; }
+    [[nodiscard]] size_t size() const {
+        return size_x * size_y * size_z;
+    }
 
     [[nodiscard]] auto create_indices() const -> std::vector<GridIndex> {
         std::vector<GridIndex> indices(size_x * size_y * size_z);
@@ -34,9 +36,8 @@ struct Grid {
     };
 };
 
-template<typename T>
-struct TaskRunner {
-    explicit TaskRunner(ThreadPool& pool) : pool_(pool) {
+template <typename T> struct TaskRunner {
+    explicit TaskRunner(ThreadPool &pool) : pool_(pool) {
     }
 
     /**
@@ -47,48 +48,49 @@ struct TaskRunner {
      * @param func
      * @return a vector of results
      */
-    template <typename Func> requires (not std::same_as<std::invoke_result_t<Func, T>, void>)
-    auto run_all(const std::vector<T>& items, Func&& func) -> std::vector<std::invoke_result_t<Func, T>> {
+    template <typename Func>
+        requires(not std::same_as<std::invoke_result_t<Func, T>, void>)
+    auto run_all(const std::vector<T> &items, Func &&func) -> std::vector<std::invoke_result_t<Func, T>> {
         using ReturnType = std::invoke_result_t<Func, T>;
         std::vector<std::future<ReturnType>> futures;
 
-        for (const auto& item: items) {
+        for (const auto &item : items) {
             futures.push_back(pool_.enqueue([func, item]() -> ReturnType { return func(item); }));
         }
 
         std::vector<ReturnType> results;
         results.reserve(futures.size());
 
-        for (auto& future: futures)
+        for (auto &future : futures)
             results.push_back(future.get());
 
         return results;
     }
 
     /**
-    * @brief run all tasks, implemenation of cases that the return type is void
-    *
-    * @tparam Func
-    * @param items
-    * @param func
-    * @return a vector of results
-    */
-   template <typename Func> requires (std::same_as<std::invoke_result_t<Func, T>, void>)
-   auto run_all(const std::vector<T>& items, Func&& func) -> void {
+     * @brief run all tasks, implemenation of cases that the return type is void
+     *
+     * @tparam Func
+     * @param items
+     * @param func
+     * @return a vector of results
+     */
+    template <typename Func>
+        requires(std::same_as<std::invoke_result_t<Func, T>, void>)
+    auto run_all(const std::vector<T> &items, Func &&func) -> void {
         using ReturnType = std::invoke_result_t<Func, T>;
         std::vector<std::future<ReturnType>> futures;
 
-        for (const auto& item: items) {
+        for (const auto &item : items) {
             futures.push_back(pool_.enqueue([func, item]() -> ReturnType { return func(item); }));
         }
 
-        for (auto& future: futures)
+        for (auto &future : futures)
             future.get();
     }
 
-
-private:
-    ThreadPool& pool_;
+  private:
+    ThreadPool &pool_;
 };
 
-}
+} // namespace Parallel

@@ -38,7 +38,7 @@ struct ThreadPool {
         return result;
     }
 
-private:
+  private:
     std::vector<std::jthread> workers;
     std::queue<std::function<void()>> tasks;
 
@@ -81,4 +81,4 @@ private:
         task_available_condition.notify_all();
     }
 };
-}
+} // namespace Parallel
