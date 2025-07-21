@@ -90,6 +90,7 @@ include(fetch-pybind11)
 include(fetch-argparse)
 include(fetch-vma)
 include(fetch-tinycolormap)
+include(fetch-cpptrace)
 #include(fetch-cdt)
 
 cmake_policy(SET CMP0077 NEW)

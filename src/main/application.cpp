@@ -23,6 +23,14 @@ void GraphicsLabApplication::run() {
     using namespace GraphicsLab::RenderGraph;
     using namespace std::chrono_literals;
 
+    // hook std::terminate
+
+    std::set_terminate([] {
+        spdlog::critical("Unhandled exception! Dumping stacktrace:");
+        cpptrace::print_trace();
+        std::abort();
+    });
+
     // customize the log manager
     auto &logManager = LogManager::getInstance();
 

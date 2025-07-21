@@ -24,7 +24,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC LAB_vkl LAB_geometry GraphicsLab_Platform)
-target_link_libraries(${PROJECT_NAME} PUBLIC argparse assimp glm glfw spdlog Vulkan::Vulkan spirv-cross-core spirv-cross-cpp nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PUBLIC argparse assimp glm glfw spdlog Vulkan::Vulkan spirv-cross-core spirv-cross-cpp nlohmann_json cpptrace::cpptrace)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
