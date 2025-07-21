@@ -7,4 +7,4 @@ struct Tolerance {
     static constexpr double default_tolerance = 1e-6;
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

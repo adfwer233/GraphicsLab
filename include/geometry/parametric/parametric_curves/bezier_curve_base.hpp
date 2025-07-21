@@ -53,7 +53,8 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         update_bounds();
     }
 
-    explicit BezierCurveBase(const std::vector<PointType> &control_points, const std::vector<double>& weights): control_points_(control_points), weights_(weights) {
+    explicit BezierCurveBase(const std::vector<PointType> &control_points, const std::vector<double> &weights)
+        : control_points_(control_points), weights_(weights) {
         int n = control_points_.size() - 1;
         for (int i = 1; i < control_points_.size(); i++) {
             derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
@@ -132,7 +133,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         update_bounds();
     }
 
-
     // Subdivide at t into two curves
     std::pair<BezierCurveBase, BezierCurveBase> subdivide(double t) const {
         int n = control_points_.size();
@@ -184,12 +184,9 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
             right_weights.push_back(rw);
         }
 
-        return {
-            BezierCurveBase(std::move(left_ctrls), std::move(left_weights)),
-            BezierCurveBase(std::move(right_ctrls), std::move(right_weights))
-        };
+        return {BezierCurveBase(std::move(left_ctrls), std::move(left_weights)),
+                BezierCurveBase(std::move(right_ctrls), std::move(right_weights))};
     }
-
 
     // Bounding box
     std::pair<PointType, PointType> boundingBox() const {
@@ -245,6 +242,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         }
         weights_[index] = weight;
     }
+
   private:
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]

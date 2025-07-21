@@ -41,7 +41,7 @@ struct Plane : public ParamSurface {
     [[nodiscard]] bool test_point(const PointType point) const override {
         VectorType diff = point - base_point;
         double distance = glm::dot(diff, normal_);
-        return std::abs(distance) < 1e-6;  // Accept small floating point errors
+        return std::abs(distance) < 1e-6; // Accept small floating point errors
     }
 };
 } // namespace GraphicsLab::Geometry

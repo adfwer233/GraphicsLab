@@ -14,21 +14,21 @@ struct TopologyModifiers {
      * @param edge1
      * @param edge2
      */
-    static void stitch_faces_along_edge(Face* face1, Face* face2, Edge* edge1, Edge* edge2) {
-        Coedge* ce1 = TopologyUtils::get_coedge_of_given_face(edge1, face1);
-        Coedge* ce2 = TopologyUtils::get_coedge_of_given_face(edge2, face2);
+    static void stitch_faces_along_edge(Face *face1, Face *face2, Edge *edge1, Edge *edge2) {
+        Coedge *ce1 = TopologyUtils::get_coedge_of_given_face(edge1, face1);
+        Coedge *ce2 = TopologyUtils::get_coedge_of_given_face(edge2, face2);
 
         ce2->set_edge(ce1->edge());
         ce2->set_forward(not ce1->is_forward());
     }
 
-    static void stitch_faces(Face* face1, Face* face2) {
+    static void stitch_faces(Face *face1, Face *face2) {
         auto face1_edges = TopologyUtils::get_all_edges(face1);
         auto face2_edges = TopologyUtils::get_all_edges(face2);
 
-        std::vector<std::pair<Edge*, Edge*>> edge_pairs;
-        for (auto e1: face1_edges) {
-            for (auto e2: face2_edges) {
+        std::vector<std::pair<Edge *, Edge *>> edge_pairs;
+        for (auto e1 : face1_edges) {
+            for (auto e2 : face2_edges) {
                 //@todo enhance "same edge" check
 
                 // sample midpoint from e1
@@ -47,11 +47,10 @@ struct TopologyModifiers {
             }
         }
 
-        for (auto [e1, e2]: edge_pairs) {
+        for (auto [e1, e2] : edge_pairs) {
             stitch_faces_along_edge(face1, face2, e1, e2);
         }
     }
-
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

@@ -2,8 +2,6 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-struct NaiveFaceter {
+struct NaiveFaceter {};
 
-};
-
-}
+} // namespace GraphicsLab::Geometry::BRep

@@ -13,7 +13,7 @@ namespace GraphicsLab::Geometry::BRep {
 
 struct FaceConstructors {
 
-    static Face* plane(glm::vec3 base_pos, glm::vec3 direction1, glm::vec3 direction2) {
+    static Face *plane(glm::vec3 base_pos, glm::vec3 direction1, glm::vec3 direction2) {
         auto allocator = BRepAllocator::instance();
         auto param_geo = allocator->alloc_param_surface<Plane>(base_pos, direction1, direction2);
         auto surface = allocator->alloc_surface();
@@ -26,10 +26,11 @@ struct FaceConstructors {
         return face;
     }
 
-    static Face* torus(const BRepPoint3 &center, const double major_radius, const double minor_radius,
-                   const BRepPoint3 &base_normal, const BRepPoint3 &direction1) {
+    static Face *torus(const BRepPoint3 &center, const double major_radius, const double minor_radius,
+                       const BRepPoint3 &base_normal, const BRepPoint3 &direction1) {
         auto allocator = BRepAllocator::instance();
-        auto param_geometry = allocator->alloc_param_surface<Torus>(center, major_radius, minor_radius, base_normal, direction1);
+        auto param_geometry =
+            allocator->alloc_param_surface<Torus>(center, major_radius, minor_radius, base_normal, direction1);
         auto surface = allocator->alloc_surface();
         surface->set_param_geometry(param_geometry);
 
@@ -39,7 +40,7 @@ struct FaceConstructors {
         return face;
     }
 
-    static Face* sphere(const BRepPoint3 &center, const double radius) {
+    static Face *sphere(const BRepPoint3 &center, const double radius) {
         auto allocator = BRepAllocator::instance();
 
         auto param_geometry = allocator->alloc_param_surface<Sphere>(center, radius);
@@ -52,10 +53,8 @@ struct FaceConstructors {
         return face;
     }
 
-
-
-private:
-    static void create_basic_topology(Plane* plane, Face* face) {
+  private:
+    static void create_basic_topology(Plane *plane, Face *face) {
         auto allocator = BRepAllocator::instance();
         auto v1_pos = plane->evaluate({0.0, 0.0});
         auto v2_pos = plane->evaluate({1.0, 0.0});
@@ -72,10 +71,10 @@ private:
         auto c3 = create_curve_from_param_curve(geo_c3);
         auto c4 = create_curve_from_param_curve(geo_c4);
 
-        auto pc1 = create_straight_line_pcurve({0.0, 0.0}, {1.0 ,0.0});
-        auto pc2 = create_straight_line_pcurve({1.0, 0.0}, {1.0 ,1.0});
-        auto pc3 = create_straight_line_pcurve({1.0, 1.0}, {0.0 ,1.0});
-        auto pc4 = create_straight_line_pcurve({0.0, 1.0}, {0.0 ,0.0});
+        auto pc1 = create_straight_line_pcurve({0.0, 0.0}, {1.0, 0.0});
+        auto pc2 = create_straight_line_pcurve({1.0, 0.0}, {1.0, 1.0});
+        auto pc3 = create_straight_line_pcurve({1.0, 1.0}, {0.0, 1.0});
+        auto pc4 = create_straight_line_pcurve({0.0, 1.0}, {0.0, 0.0});
 
         auto e1 = create_edge_from_curve(c1);
         auto e2 = create_edge_from_curve(c2);
@@ -102,32 +101,32 @@ private:
         ce3->set_next(ce4);
         ce4->set_next(ce1);
 
-        Loop* lp = create_loop_from_coedge(ce1);
+        Loop *lp = create_loop_from_coedge(ce1);
         lp->set_face(face);
 
         face->set_loop(lp);
     }
 
-    static void create_basic_topology(Torus* torus, Face* face) {
+    static void create_basic_topology(Torus *torus, Face *face) {
         auto allocator = BRepAllocator::instance();
         // no boundary curves needed from complete torus
     }
 
-    static Loop* create_loop_from_coedge(Coedge* coedge) {
+    static Loop *create_loop_from_coedge(Coedge *coedge) {
         auto allocator = BRepAllocator::instance();
-        Loop* loop = allocator->alloc_loop();
+        Loop *loop = allocator->alloc_loop();
         loop->set_coedge(coedge);
         return loop;
     }
 
-    static Coedge* create_coedge_from_edge(Edge* edge) {
+    static Coedge *create_coedge_from_edge(Edge *edge) {
         auto allocator = BRepAllocator::instance();
-        Coedge* coedge = allocator->alloc_coedge();
+        Coedge *coedge = allocator->alloc_coedge();
         coedge->set_edge(edge);
         return coedge;
     }
 
-    static Edge* create_edge_from_curve(Curve* curve) {
+    static Edge *create_edge_from_curve(Curve *curve) {
         auto allocator = BRepAllocator::instance();
         auto edge = allocator->alloc_edge();
         edge->set_geometry(curve);
@@ -140,7 +139,7 @@ private:
         return edge;
     }
 
-    static Curve* create_curve_from_param_curve(ParamCurve3D* param_curve) {
+    static Curve *create_curve_from_param_curve(ParamCurve3D *param_curve) {
         auto allocator = BRepAllocator::instance();
         auto curve = allocator->alloc_curve();
         curve->set_param_range(ParamRange{0.0, 1.0});
@@ -148,7 +147,7 @@ private:
         return curve;
     }
 
-    static PCurve* create_straight_line_pcurve(const glm::dvec2& start, const glm::dvec2& end) {
+    static PCurve *create_straight_line_pcurve(const glm::dvec2 &start, const glm::dvec2 &end) {
         auto allocator = BRepAllocator::instance();
         auto param_pcurve = allocator->alloc_param_pcurve<StraightLine2D>(start, end);
         auto pcurve = allocator->alloc_pcurve();
@@ -157,12 +156,12 @@ private:
         return pcurve;
     }
 
-    static Vertex* create_vertex_from_position(const BRepPoint3& position) {
+    static Vertex *create_vertex_from_position(const BRepPoint3 &position) {
         auto allocator = BRepAllocator::instance();
-        Point* point = allocator->alloc_point();
+        Point *point = allocator->alloc_point();
         point->set_position(position);
 
-        Vertex* vertex = allocator->alloc_vertex();
+        Vertex *vertex = allocator->alloc_vertex();
         vertex->set_geometry(point);
 
         return vertex;
@@ -188,14 +187,14 @@ struct BodyConstructors {
         auto v7 = v3 + dz;
         auto v8 = v4 + dz;
 
-        Face* front = FaceConstructors::plane(v2, dx, dz);
-        Face* back = FaceConstructors::plane(v1, dz, dy);
+        Face *front = FaceConstructors::plane(v2, dx, dz);
+        Face *back = FaceConstructors::plane(v1, dz, dy);
 
-        Face* left = FaceConstructors::plane(v1, dx, dz);
-        Face* right = FaceConstructors::plane(v4, dz, dx);
+        Face *left = FaceConstructors::plane(v1, dx, dz);
+        Face *right = FaceConstructors::plane(v4, dz, dx);
 
-        Face* top = FaceConstructors::plane(v5, dx, dy);
-        Face* bottom = FaceConstructors::plane(v1, dy, dx);
+        Face *top = FaceConstructors::plane(v5, dx, dy);
+        Face *bottom = FaceConstructors::plane(v1, dy, dx);
 
         TopologyModifiers::stitch_faces(front, right);
         TopologyModifiers::stitch_faces(right, back);
@@ -215,19 +214,18 @@ struct BodyConstructors {
         return create_body_from_list_of_faces({front, right, back, left, top, bottom});
     }
 
-private:
-
-    static Body* create_body_from_list_of_faces(const std::vector<Face*>& faces) {
+  private:
+    static Body *create_body_from_list_of_faces(const std::vector<Face *> &faces) {
         auto allocator = BRepAllocator::instance();
 
         for (int i = 1; i < faces.size(); i++) {
             faces[i - 1]->set_next(faces[i]);
         }
 
-        Shell* shell = allocator->alloc_shell();
+        Shell *shell = allocator->alloc_shell();
         shell->set_face(faces.front());
 
-        Body* body = allocator->alloc_body();
+        Body *body = allocator->alloc_body();
         shell->set_body(body);
 
         body->set_shell(shell);
@@ -235,4 +233,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

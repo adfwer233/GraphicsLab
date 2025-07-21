@@ -7,41 +7,62 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-    struct Point {
-        [[nodiscard]] BRepPoint3 position() const { return position_; };
-        void set_position(const BRepPoint3& position) { position_ = position; }
-    private:
-        BRepPoint3 position_ = {};
+struct Point {
+    [[nodiscard]] BRepPoint3 position() const {
+        return position_;
     };
+    void set_position(const BRepPoint3 &position) {
+        position_ = position;
+    }
 
-    struct Curve {
-        [[nodiscard]] ParamCurve3D* param_geometry() const { return geometry_;}
+  private:
+    BRepPoint3 position_ = {};
+};
 
-        [[nodiscard]] ParamRange param_range() const { return param_range_; }
-        void set_param_range(const ParamRange& range) { param_range_ = range; }
+struct Curve {
+    [[nodiscard]] ParamCurve3D *param_geometry() const {
+        return geometry_;
+    }
 
-        void set_param_geometry(ParamCurve3D* param_geometry) { geometry_ = param_geometry; }
-    private:
-        ParamRange param_range_{};
-        ParamCurve3D* geometry_ = nullptr;
-    };
+    [[nodiscard]] ParamRange param_range() const {
+        return param_range_;
+    }
+    void set_param_range(const ParamRange &range) {
+        param_range_ = range;
+    }
 
-    struct PCurve {
-        ParamCurve2D* param_geometry() {
-            return geometry_;
-        }
+    void set_param_geometry(ParamCurve3D *param_geometry) {
+        geometry_ = param_geometry;
+    }
 
-        void set_param_geometry(ParamCurve2D* param_geometry) { geometry_ = param_geometry; }
-    private:
-        ParamCurve2D* geometry_ = nullptr;
-    };
+  private:
+    ParamRange param_range_{};
+    ParamCurve3D *geometry_ = nullptr;
+};
 
-    struct Surface {
-        void set_param_geometry(ParamSurface* param_surface) { geometry_ = param_surface; }
-        [[nodiscard]] ParamSurface* param_geometry() const { return geometry_; }
+struct PCurve {
+    ParamCurve2D *param_geometry() {
+        return geometry_;
+    }
 
-    private:
-        ParamSurface* geometry_ = nullptr;
-    };
+    void set_param_geometry(ParamCurve2D *param_geometry) {
+        geometry_ = param_geometry;
+    }
 
-}
+  private:
+    ParamCurve2D *geometry_ = nullptr;
+};
+
+struct Surface {
+    void set_param_geometry(ParamSurface *param_surface) {
+        geometry_ = param_surface;
+    }
+    [[nodiscard]] ParamSurface *param_geometry() const {
+        return geometry_;
+    }
+
+  private:
+    ParamSurface *geometry_ = nullptr;
+};
+
+} // namespace GraphicsLab::Geometry::BRep

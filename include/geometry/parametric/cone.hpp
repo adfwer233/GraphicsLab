@@ -5,7 +5,7 @@
 
 namespace GraphicsLab::Geometry {
 struct Cone : public ParamSurface {
-private:
+  private:
     PointType base_point_;
     VectorType base_normal_;
     VectorType direction1_;
