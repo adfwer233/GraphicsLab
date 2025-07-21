@@ -14,7 +14,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
     std::vector<PointType> control_points_;
     std::vector<PointType> derivative_points_;
-
+    std::vector<double> weights_;
     double derivative_bound = -1.0;
 
     REFLECT(Property{"control_points", &BezierCurveBase::control_points_})
@@ -22,6 +22,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     BezierCurveBase(const BezierCurveBase<dim> &other) noexcept {
         control_points_ = other.control_points_;
         derivative_bound = other.derivative_bound;
+        weights_ = other.weights_;
         this->mesh = nullptr;
 
         this->min_x = other.min_x;
@@ -33,6 +34,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     BezierCurveBase(BezierCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
         derivative_bound = other.derivative_bound;
+        weights_ = std::move(other.weights_);
         this->mesh = std::move(other.mesh);
 
         this->min_x = other.min_x;
@@ -42,6 +44,16 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
     explicit BezierCurveBase(decltype(control_points_) &&control_points) : control_points_(control_points) {
+        int n = control_points_.size() - 1;
+        for (int i = 1; i < control_points_.size(); i++) {
+            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
+        }
+        weights_.resize(control_points_.size());
+        std::ranges::fill(weights_, 1.0);
+        update_bounds();
+    }
+
+    explicit BezierCurveBase(const std::vector<PointType> &control_points, const std::vector<double>& weights): control_points_(control_points), weights_(weights) {
         int n = control_points_.size() - 1;
         for (int i = 1; i < control_points_.size(); i++) {
             derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
@@ -72,6 +84,9 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
             derivative_bound = std::max(derivative_bound, n * glm::length(control_points_[i] - control_points_[i - 1]));
         }
 
+        auto [min_it, max_it] = std::ranges::minmax_element(weights_);
+        derivative_bound = std::pow(*max_it / *min_it, 2);
+
         for (auto &pt : control_points_) {
             min_x = std::min(min_x, pt.x);
             max_x = std::max(max_x, pt.x);
@@ -88,38 +103,93 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
      */
     void degree_elevation() {
         std::vector<PointType> new_control_points;
+        std::vector<double> new_weights;
+
+        int n = control_points_.size() - 1;
+
         new_control_points.push_back(control_points_.front());
-        for (int i = 0; i < control_points_.size() - 1; i++) {
-            double lambda = static_cast<double>(i) / control_points_.size();
-            new_control_points.push_back(control_points_[i] * lambda + control_points_[i + 1] * (1 - lambda));
+        new_weights.push_back(weights_.front());
+
+        for (int i = 1; i <= n; ++i) {
+            double alpha = static_cast<double>(i) / (n + 1);
+
+            double w1 = weights_[i - 1];
+            double w2 = weights_[i];
+            double new_weight = alpha * w1 + (1 - alpha) * w2;
+
+            PointType new_point =
+                (control_points_[i - 1] * (alpha * w1) + control_points_[i] * ((1 - alpha) * w2)) / new_weight;
+
+            new_control_points.push_back(new_point);
+            new_weights.push_back(new_weight);
         }
 
         new_control_points.push_back(control_points_.back());
-        control_points_ = new_control_points;
+        new_weights.push_back(weights_.back());
+
+        control_points_ = std::move(new_control_points);
+        weights_ = std::move(new_weights);
         update_bounds();
     }
 
+
     // Subdivide at t into two curves
     std::pair<BezierCurveBase, BezierCurveBase> subdivide(double t) const {
-        std::vector<std::vector<PointType>> triangle;
-        triangle.push_back(control_points_);
         int n = control_points_.size();
+
+        // Build triangle in homogeneous space (PointType * weight, weight)
+        std::vector<std::vector<PointType>> point_triangle;
+        std::vector<std::vector<double>> weight_triangle;
+
+        std::vector<PointType> weighted_pts;
+        for (int i = 0; i < n; ++i)
+            weighted_pts.push_back(control_points_[i] * weights_[i]);
+
+        point_triangle.push_back(weighted_pts);
+        weight_triangle.push_back(weights_);
+
         for (int k = 1; k < n; ++k) {
-            std::vector<PointType> row;
+            std::vector<PointType> next_row_pts;
+            std::vector<double> next_row_weights;
+
             for (int i = 0; i < n - k; ++i) {
-                row.push_back(glm::mix(triangle.back()[i], triangle.back()[i + 1], t));
+                double w1 = weight_triangle.back()[i];
+                double w2 = weight_triangle.back()[i + 1];
+                PointType p1 = point_triangle.back()[i];
+                PointType p2 = point_triangle.back()[i + 1];
+
+                double new_w = (1 - t) * w1 + t * w2;
+                PointType new_p = ((1 - t) * p1 + t * p2);
+
+                next_row_pts.push_back(new_p);
+                next_row_weights.push_back(new_w);
             }
-            triangle.push_back(row);
+
+            point_triangle.push_back(next_row_pts);
+            weight_triangle.push_back(next_row_weights);
         }
 
-        std::vector<PointType> left, right;
+        std::vector<PointType> left_ctrls, right_ctrls;
+        std::vector<double> left_weights, right_weights;
+
         for (int i = 0; i < n; ++i) {
-            left.push_back(triangle[i][0]);
-            right.push_back(triangle[n - i - 1][i]);
+            PointType lh = point_triangle[i][0];
+            double lw = weight_triangle[i][0];
+            left_ctrls.push_back(lh / lw);
+            left_weights.push_back(lw);
+
+            PointType rh = point_triangle[n - i - 1][i];
+            double rw = weight_triangle[n - i - 1][i];
+            right_ctrls.push_back(rh / rw);
+            right_weights.push_back(rw);
         }
 
-        return {BezierCurveBase(std::move(left)), BezierCurveBase(std::move(right))};
+        return {
+            BezierCurveBase(std::move(left_ctrls), std::move(left_weights)),
+            BezierCurveBase(std::move(right_ctrls), std::move(right_weights))
+        };
     }
+
 
     // Bounding box
     std::pair<PointType, PointType> boundingBox() const {
@@ -148,7 +218,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return new_curve;
     }
 
-    std::vector<glm::dvec2> sample(const int resolution) const {
+    [[nodiscard]] std::vector<glm::dvec2> sample(const int resolution) const {
         std::vector<glm::dvec2> pts;
         for (int i = 0; i <= resolution; ++i) {
             const double t = static_cast<double>(i) / resolution;
@@ -165,10 +235,16 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return control_points_.back();
     }
 
-    size_t degree() const {
+    [[nodiscard]] size_t degree() const {
         return control_points_.size() - 1;
     }
 
+    void set_weight(size_t index, double weight) {
+        if (weight < 0) {
+            throw std::invalid_argument("weight must be non-negative");
+        }
+        weights_[index] = weight;
+    }
   private:
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
@@ -185,16 +261,16 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         if (param <= 0.5) {
             u = t / u;
             for (uint32_t k = 1; k <= n; k++) {
-                h = h * u * (n1 - k);
-                h = h / (k + h);
+                h = h * u * (n1 - k) * weights_[k];
+                h = h / (k * weights_[k - 1] + h);
                 double h1 = 1 - h;
                 result = result * h1 + ctrl_pts[k] * h;
             }
         } else {
             u = u / t;
             for (uint32_t k = 1; k <= n; k++) {
-                h = h * (n1 - k);
-                h = h / (k * u + h);
+                h = h * (n1 - k) * weights_[k];
+                h = h / (k * u * weights_[k - 1] + h);
                 double h1 = 1 - h;
                 result = result * h1 + ctrl_pts[k] * h;
             }
