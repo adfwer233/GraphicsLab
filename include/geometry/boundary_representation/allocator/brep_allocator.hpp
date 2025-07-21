@@ -91,6 +91,18 @@ struct BRepAllocator {
         return loops.back().get();
     }
 
+    Shell* alloc_shell() {
+        auto shell = std::make_unique<Shell>();
+        shells.push_back(std::move(shell));
+        return shells.back().get();
+    }
+
+    Body* alloc_body() {
+        auto body = std::make_unique<Body>();
+        bodies.push_back(std::move(body));
+        return bodies.back().get();
+    }
+
 private:
     BRepAllocator() = default;
 
@@ -104,6 +116,8 @@ private:
     std::vector<std::unique_ptr<Coedge>> coedges;
     std::vector<std::unique_ptr<Face>> faces;
     std::vector<std::unique_ptr<Loop>> loops;
+    std::vector<std::unique_ptr<Shell>> shells;
+    std::vector<std::unique_ptr<Body>> bodies;
 
     // geometry data
     std::vector<std::unique_ptr<Point>> points;

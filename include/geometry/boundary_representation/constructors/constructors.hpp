@@ -2,8 +2,12 @@
 
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
 #include "geometry/boundary_representation/brep_definition.hpp"
+#include "geometry/boundary_representation/topology/topology_modifiers.hpp"
+#include "geometry/parametric/cone.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "geometry/parametric/plane.hpp"
+#include "geometry/parametric/sphere.hpp"
+#include "geometry/parametric/torus.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 
@@ -21,6 +25,34 @@ struct FaceConstructors {
         create_basic_topology(param_geo, face);
         return face;
     }
+
+    static Face* torus(const BRepPoint3 &center, const double major_radius, const double minor_radius,
+                   const BRepPoint3 &base_normal, const BRepPoint3 &direction1) {
+        auto allocator = BRepAllocator::instance();
+        auto param_geometry = allocator->alloc_param_surface<Torus>(center, major_radius, minor_radius, base_normal, direction1);
+        auto surface = allocator->alloc_surface();
+        surface->set_param_geometry(param_geometry);
+
+        auto face = allocator->alloc_face();
+        face->set_geometry(surface);
+
+        return face;
+    }
+
+    static Face* sphere(const BRepPoint3 &center, const double radius) {
+        auto allocator = BRepAllocator::instance();
+
+        auto param_geometry = allocator->alloc_param_surface<Sphere>(center, radius);
+        auto surface = allocator->alloc_surface();
+        surface->set_param_geometry(param_geometry);
+
+        auto face = allocator->alloc_face();
+        face->set_geometry(surface);
+
+        return face;
+    }
+
+
 
 private:
     static void create_basic_topology(Plane* plane, Face* face) {
@@ -74,6 +106,11 @@ private:
         lp->set_face(face);
 
         face->set_loop(lp);
+    }
+
+    static void create_basic_topology(Torus* torus, Face* face) {
+        auto allocator = BRepAllocator::instance();
+        // no boundary curves needed from complete torus
     }
 
     static Loop* create_loop_from_coedge(Coedge* coedge) {
@@ -134,12 +171,67 @@ private:
 
 struct BodyConstructors {
 
-    static Body *cube(glm::vec3 min_pos, glm::vec3 max_pos) {
+    static Body *cube(BRepPoint3 min_pos, BRepPoint3 max_pos) {
         auto allocator = BRepAllocator::instance();
 
-        // Plane* plane1 = allocator->alloc_surface<Plane>()
+        auto dx = (max_pos - min_pos) * BRepPoint3{1.0, 0.0, 0.0};
+        auto dy = (max_pos - min_pos) * BRepPoint3{0.0, 1.0, 0.0};
+        auto dz = (max_pos - min_pos) * BRepPoint3{0.0, 0.0, 1.0};
 
-        return nullptr;
+        auto v1 = min_pos;
+        auto v2 = v1 + dx;
+        auto v3 = v1 + dx + dy;
+        auto v4 = v1 + dy;
+
+        auto v5 = v1 + dz;
+        auto v6 = v2 + dz;
+        auto v7 = v3 + dz;
+        auto v8 = v4 + dz;
+
+        Face* front = FaceConstructors::plane(v2, dx, dz);
+        Face* back = FaceConstructors::plane(v1, dz, dy);
+
+        Face* left = FaceConstructors::plane(v1, dx, dz);
+        Face* right = FaceConstructors::plane(v4, dz, dx);
+
+        Face* top = FaceConstructors::plane(v5, dx, dy);
+        Face* bottom = FaceConstructors::plane(v1, dy, dx);
+
+        TopologyModifiers::stitch_faces(front, right);
+        TopologyModifiers::stitch_faces(right, back);
+        TopologyModifiers::stitch_faces(back, left);
+        TopologyModifiers::stitch_faces(left, top);
+
+        TopologyModifiers::stitch_faces(top, front);
+        TopologyModifiers::stitch_faces(top, right);
+        TopologyModifiers::stitch_faces(top, back);
+        TopologyModifiers::stitch_faces(top, left);
+
+        TopologyModifiers::stitch_faces(bottom, front);
+        TopologyModifiers::stitch_faces(bottom, right);
+        TopologyModifiers::stitch_faces(bottom, back);
+        TopologyModifiers::stitch_faces(bottom, left);
+
+        return create_body_from_list_of_faces({front, right, back, left, top, bottom});
+    }
+
+private:
+
+    static Body* create_body_from_list_of_faces(const std::vector<Face*>& faces) {
+        auto allocator = BRepAllocator::instance();
+
+        for (int i = 1; i < faces.size(); i++) {
+            faces[i - 1]->set_next(faces[i]);
+        }
+
+        Shell* shell = allocator->alloc_shell();
+        shell->set_face(faces.front());
+
+        Body* body = allocator->alloc_body();
+        shell->set_body(body);
+
+        body->set_shell(shell);
+        return body;
     }
 };
 

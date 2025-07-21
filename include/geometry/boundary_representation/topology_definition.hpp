@@ -11,6 +11,7 @@ struct Coedge;
 struct Loop;
 struct Face;
 struct Shell;
+struct Body;
 
 struct Vertex {
     [[nodiscard]] Point* geometry() const {return geometry_; }
@@ -33,6 +34,7 @@ struct Edge {
     void set_geometry(Curve* geometry) { geometry_ = geometry; }
     void set_coedge(Coedge* coedge) {coedge_ = coedge;}
 
+    Coedge* coedge() const { return coedge_; }
 
     [[nodiscard]] Vertex* start() const { return start_; }
     [[nodiscard]] Vertex* end() const { return end_; }
@@ -66,6 +68,7 @@ struct Coedge {
 
     [[nodiscard]] Loop* loop() const { return loop_; }
     void set_loop(Loop* loop) { loop_ = loop; }
+
 private:
     bool forward = true;
     Edge* edge_ = nullptr;
@@ -132,12 +135,29 @@ struct Face {
     Face *next_ = nullptr;
     Surface *geometry_ = nullptr;
 };
-inline Shell *Face::shell() const {
-    return shell_;
-}
 
-struct Shell {};
+struct Shell {
+    [[nodiscard]] Face* face() const { return face_; }
+    void set_face(Face* face) { face_ = face; }
 
-struct Body{};
+    [[nodiscard]] Body* body() const { return body_; }
+    void set_body(Body* body) { body_ = body; }
+
+    [[nodiscard]] Shell* next() const { return next_; }
+    void set_next(Shell* next) { next_ = next; }
+
+private:
+    Body* body_ = nullptr;
+    Face* face_ = nullptr;;
+    Shell *next_ = nullptr;
+};
+
+struct Body {
+    [[nodiscard]] Shell* shell() const { return shell_; }
+    void set_shell(Shell* shell) { shell_ = shell; }
+
+private:
+    Shell* shell_ = nullptr;
+};
 
 }
