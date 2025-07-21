@@ -1,4 +1,6 @@
 #pragma once
+#include "base/vec_def.hpp"
+#include "geometry/boundary_representation/base/param_range.hpp"
 #include "geometry/parametric/parametric_curves/parametric_curve.hpp"
 #include "geometry/parametric/parametric_surface.hpp"
 #include "glm/vec3.hpp"
@@ -6,12 +8,21 @@
 namespace GraphicsLab::Geometry::BRep {
 
     struct Point {
-        glm::vec3 position;
+        [[nodiscard]] BRepPoint3 position() const { return position_; };
+        void set_position(const BRepPoint3& position) { position_ = position; }
+    private:
+        BRepPoint3 position_ = {};
     };
 
     struct Curve {
-        ParamCurve3D* param_geometry();
+        [[nodiscard]] ParamCurve3D* param_geometry() const { return geometry_;}
+
+        [[nodiscard]] ParamRange param_range() const { return param_range_; }
+        void set_param_range(const ParamRange& range) { param_range_ = range; }
+
+        void set_param_geometry(ParamCurve3D* param_geometry) { geometry_ = param_geometry; }
     private:
+        ParamRange param_range_{};
         ParamCurve3D* geometry_ = nullptr;
     };
 
@@ -20,6 +31,7 @@ namespace GraphicsLab::Geometry::BRep {
             return geometry_;
         }
 
+        void set_param_geometry(ParamCurve2D* param_geometry) { geometry_ = param_geometry; }
     private:
         ParamCurve2D* geometry_ = nullptr;
     };
