@@ -15,6 +15,7 @@ set(SRC_FILE
         geometry/brep_face_test.cpp
         geometry/line_param_2d_intersector.cpp
         geometry/rational_curves_test.cpp
+        geometry/brep_constructor_test.cpp
         numeric/polynomial_test.cpp
         crtp/crtp_test.cpp
         parallel/thread_pool_test.cpp
