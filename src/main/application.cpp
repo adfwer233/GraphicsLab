@@ -1,6 +1,7 @@
 #include "graphics_lab/application.hpp"
 
 #include <thread>
+#include <cpptrace/cpptrace.hpp>
 
 #include "vkl/imgui/imgui_context.hpp"
 
@@ -16,6 +17,8 @@
 #include "render/internal_render_pass/3d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/internal_imgui_pass.hpp"
 
+#include <cpptrace/from_current.hpp>
+
 GraphicsLabApplication::~GraphicsLabApplication() {
 }
 
@@ -27,7 +30,7 @@ void GraphicsLabApplication::run() {
 
     std::set_terminate([] {
         spdlog::critical("Unhandled exception! Dumping stacktrace:");
-        cpptrace::print_trace();
+        cpptrace::from_current_exception().print();
         std::abort();
     });
 

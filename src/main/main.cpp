@@ -3,6 +3,8 @@
 
 #include "argparse/argparse.hpp"
 
+#include <cpptrace/from_current.hpp>
+
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser args;
     GraphicsLabApplication::set_args(args);
@@ -15,13 +17,12 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
-    GraphicsLabApplication app(args);
-    app.run();
-
-    try {
-    } catch (const std::exception &e) {
-        spdlog::error("application run failed: {}", e.what());
-        return EXIT_FAILURE;
+    CPPTRACE_TRY {
+        GraphicsLabApplication app(args);
+        app.run();
+    } CPPTRACE_CATCH(const std::exception& e) {
+        std::cerr<<"Exception: "<<e.what()<<std::endl;
+        cpptrace::from_current_exception().print();
     }
 
     return 0;

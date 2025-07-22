@@ -36,6 +36,7 @@ class ProjectWidgetComponent : public UIComponent {
         ImGui::Begin("Project Manager");
         {
             if (ImGui::Button("Choose Path")) {
+                throw cpptrace::logic_error("This wasn't supposed to happen!");
                 std::filesystem::path path =
                     std::filesystem::path(FileSystem::chooseDirectory()) / "GraphicsLabProject.json";
                 spdlog::info(path.string());
