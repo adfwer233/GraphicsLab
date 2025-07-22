@@ -3,7 +3,9 @@
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "geometry/boundary_representation/topology/topology_modifiers.hpp"
+#include "geometry/parametric/bspline_curve_3d.hpp"
 #include "geometry/parametric/cone.hpp"
+#include "geometry/parametric/explicit_surface.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "geometry/parametric/plane.hpp"
 #include "geometry/parametric/sphere.hpp"
@@ -12,6 +14,19 @@
 namespace GraphicsLab::Geometry::BRep {
 
 struct FaceConstructors {
+
+    static Face *explicit_surface(const ExplicitSurface::ExpressionType &f) {
+        auto allocator = BRepAllocator::instance();
+        auto param_geo = allocator->alloc_param_surface<ExplicitSurface>(f);
+        auto surface = allocator->alloc_surface();
+        surface->set_param_geometry(param_geo);
+
+        auto face = allocator->alloc_face();
+        face->set_geometry(surface);
+
+        create_basic_topology(param_geo, face);
+        return face;
+    }
 
     static Face *plane(glm::vec3 base_pos, glm::vec3 direction1, glm::vec3 direction2) {
         auto allocator = BRepAllocator::instance();
@@ -112,6 +127,115 @@ struct FaceConstructors {
         face->set_loop(lp);
     }
 
+    static void create_basic_topology(ParamSurface* surface, Face *face) {
+        auto allocator = BRepAllocator::instance();
+
+        bool is_u_periodic = surface->u_periodic_check();
+        bool is_v_periodic = surface->v_periodic_check();
+
+        BRepPoint2 v1_param{0.0, 0.0}, v2_param{1.0, 0.0}, v3_param{1.0, 1.0}, v4_param{0.0, 1.0};
+
+        auto v1_pos = surface->evaluate({0.0, 0.0});
+        auto v2_pos = surface->evaluate({1.0, 0.0});
+        auto v3_pos = surface->evaluate({1.0, 1.0});
+        auto v4_pos = surface->evaluate({0.0, 1.0});
+
+        ParamCurve2D* param_pcurve_left = nullptr, *param_pcurve_right = nullptr, *param_pcurve_top = nullptr, *param_pcurve_bottom = nullptr;
+        ParamCurve3D* param_curve_left = nullptr, *param_curve_right = nullptr, *param_curve_top = nullptr, *param_curve_bottom = nullptr;
+        Edge *edge_left = nullptr, *edge_right = nullptr, *edge_top = nullptr, *edge_bottom = nullptr;
+        Coedge *coedge_left = nullptr, *coedge_right = nullptr, *coedge_top = nullptr, *coedge_bottom = nullptr;
+        PCurve *pcurve_left = nullptr, *pcurve_right = nullptr, *pcurve_top = nullptr, *pcurve_bottom = nullptr;
+        Curve *curve_left = nullptr, *curve_right = nullptr, *curve_top = nullptr, *curve_bottom = nullptr;
+
+        // if the surface is not u_periodic, add boundary curves (left and right)
+        if (not is_u_periodic) {
+            param_pcurve_left = allocator->alloc_param_pcurve<StraightLine2D>(v4_param, v1_param);
+            param_pcurve_right = allocator->alloc_param_pcurve<StraightLine2D>(v2_param, v3_param);
+
+            param_curve_left = create_curve_from_pcurve(surface, param_pcurve_left);
+            param_curve_right = create_curve_from_pcurve(surface, param_pcurve_right);
+
+            pcurve_left = create_pcurve_from_param_pcurve(param_pcurve_left);
+            pcurve_right = create_pcurve_from_param_pcurve(param_pcurve_right);
+
+            curve_left = create_curve_from_param_curve(param_curve_left);
+            curve_right = create_curve_from_param_curve(param_curve_right);
+
+            edge_left = create_edge_from_curve(curve_left);
+            edge_right = create_edge_from_curve(curve_right);
+
+            coedge_left = create_coedge_from_edge(edge_left);
+            coedge_right = create_coedge_from_edge(edge_right);
+
+            pcurve_left->set_param_geometry(param_pcurve_left);
+            pcurve_right->set_param_geometry(param_pcurve_right);
+
+            edge_left->set_coedge(coedge_left);
+            edge_right->set_coedge(coedge_right);
+        }
+
+        // if the surface is not v_periodic, add boundary curves (top and bottom)
+        if (not is_v_periodic) {
+            param_pcurve_top = allocator->alloc_param_pcurve<StraightLine2D>(v3_param, v4_param);
+            param_pcurve_bottom = allocator->alloc_param_pcurve<StraightLine2D>(v1_param, v2_param);
+
+            param_curve_top = create_curve_from_pcurve(surface, param_pcurve_top);
+            param_curve_bottom = create_curve_from_pcurve(surface, param_pcurve_bottom);
+
+            pcurve_top = create_pcurve_from_param_pcurve(param_pcurve_top);
+            pcurve_bottom = create_pcurve_from_param_pcurve(param_pcurve_bottom);
+
+            curve_top = create_curve_from_param_curve(param_curve_top);
+            curve_bottom = create_curve_from_param_curve(param_curve_bottom);
+
+            edge_top = create_edge_from_curve(curve_top);
+            edge_bottom = create_edge_from_curve(curve_bottom);
+
+            coedge_top = create_coedge_from_edge(edge_top);
+            coedge_bottom = create_coedge_from_edge(edge_bottom);
+
+            pcurve_top->set_param_geometry(param_pcurve_top);
+            pcurve_bottom->set_param_geometry(param_pcurve_bottom);
+
+            edge_top->set_coedge(coedge_top);
+            edge_bottom->set_coedge(coedge_bottom);
+        }
+
+        // Now build the topology
+
+        if (not is_u_periodic and not is_v_periodic) {
+            coedge_bottom->set_next(coedge_right);
+            coedge_right->set_next(coedge_top);
+            coedge_top->set_next(coedge_left);
+            coedge_left->set_next(coedge_bottom);
+
+            Loop *lp = create_loop_from_coedge(coedge_bottom);
+            lp->set_face(face);
+            face->set_loop(lp);
+        } else if (is_u_periodic and not is_v_periodic) {
+            Loop* loop_top = create_loop_from_coedge(coedge_top);
+            Loop* loop_bottom = create_loop_from_coedge(coedge_bottom);
+
+            loop_top->set_face(face);
+            loop_bottom->set_face(face);
+
+            loop_bottom->set_next(loop_top);
+            face->set_loop(loop_bottom);
+        } else if (not is_u_periodic and is_v_periodic) {
+            Loop* loop_left = create_loop_from_coedge(coedge_left);
+            Loop* loop_right = create_loop_from_coedge(coedge_right);
+
+            loop_left->set_face(face);
+            loop_right->set_face(face);
+
+            loop_left->set_next(loop_left);
+            face->set_loop(loop_left);
+        } else {
+            // nothing to do.
+        }
+
+    }
+
     static void create_basic_topology(Torus *torus, Face *face) {
         auto allocator = BRepAllocator::instance();
         // no boundary curves needed from complete torus
@@ -152,6 +276,13 @@ struct FaceConstructors {
         return curve;
     }
 
+    static PCurve* create_pcurve_from_param_pcurve(ParamCurve2D* param_pcurve) {
+        auto allocator = BRepAllocator::instance();
+        auto pcurve = allocator->alloc_pcurve();
+        pcurve->set_param_geometry(param_pcurve);
+        return pcurve;
+    }
+
     static PCurve *create_straight_line_pcurve(const glm::dvec2 &start, const glm::dvec2 &end) {
         auto allocator = BRepAllocator::instance();
         auto param_pcurve = allocator->alloc_param_pcurve<StraightLine2D>(start, end);
@@ -170,6 +301,31 @@ struct FaceConstructors {
         vertex->set_geometry(point);
 
         return vertex;
+    }
+
+    /**
+     * @brief Create curve from pcruve. Sample some points and fit by BSplineCurve3D
+     * @param surface
+     * @param pcurve
+     * @param n
+     * @return
+     */
+    static ParamCurve3D* create_curve_from_pcurve(const ParamSurface* surface, const ParamCurve2D* pcurve, int n = 50) {
+        auto allocator = BRepAllocator::instance();
+
+        std::vector<BRepPoint3> points;
+        std::vector<BRepPoint2> param_points;
+
+        for (int i = 0; i <= n; i++) {
+            double param = 1.0 * i / (double) n;
+            auto param_point = pcurve->evaluate(param);
+            param_points.push_back(param_point);
+            points.emplace_back(surface->evaluate(param_point));
+        }
+
+        auto&& curve_temp = BSplineCurve3D::fit(points, 3, 10);
+        auto curve = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve_temp));
+        return curve;
     }
 };
 

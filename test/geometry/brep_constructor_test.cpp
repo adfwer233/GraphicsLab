@@ -9,5 +9,4 @@ TEST(BRepConstructorTests, CubeConstructorTest) {
     auto cube = BodyConstructors::cube({0.0, 0.0, 0.0},{1.0, 1.0, 1.0});
 
     // EXPECT_TRUE(RuleBasedValidator::validate(cube));
-
 }

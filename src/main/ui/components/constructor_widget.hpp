@@ -111,6 +111,34 @@ class ConstructorWidget : public UIComponent {
             }
         }
 
+        if (ImGui::Button("Add Explicit Surface")) {
+            using namespace GraphicsLab::Geometry;
+
+            auto f = [](autodiff_vec2 param) -> autodiff_vec3 {
+                autodiff_vec3 result;
+
+                double a = 2;
+                double b = 1;
+
+                auto v = (param.y() - 0.5) * 2;
+                result.x() = a * cosh(v) *  cos(2 * std::numbers::pi * param.x());
+                result.y() = -b * sinh(v);
+                result.z() = a * cosh(v) * sin(2 * std::numbers::pi * param.x());
+
+                return result;
+            };
+            BRep::Face* face = BRep::FaceConstructors::explicit_surface(f);
+
+            auto mesh = BRep::NaiveFaceter::naive_facet(face, 3, 3);
+            context_.sceneTree->addGeometryNode<Mesh3D>(std::move(mesh), std::format("Explicit_face"));
+
+            auto edges = BRep::TopologyUtils::get_all_edges(face);
+            for (int i = 0; i < edges.size(); i++) {
+                auto curve_mesh = BRep::NaiveFaceter::naive_edge_facet(edges[i], 100);
+                context_.sceneTree->addGeometryNode<CurveMesh3D>(std::move(curve_mesh), std::format("Explicit_edge_{}", i));
+            }
+        }
+
         ImGui::End();
 
         if (show_add_rectangle_dialog) {

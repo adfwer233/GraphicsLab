@@ -8,8 +8,6 @@ namespace GraphicsLab::Geometry::BRep {
 
 struct NaiveFaceter {
     static Mesh3D naive_facet(Face* face, int n, int m) {
-        Mesh3D mesh;
-
         if (face->geometry() == nullptr) {
             throw cpptrace::logic_error("Face has no geometry");
         }
@@ -21,6 +19,20 @@ struct NaiveFaceter {
         Tessellator::tessellate(*face->geometry()->param_geometry());
 
         return *face->geometry()->param_geometry()->mesh.get();
+    }
+
+    static CurveMesh3D naive_edge_facet(Edge* edge, int n) {
+        if (edge->geometry() == nullptr) {
+            throw cpptrace::logic_error("Edge has no geometry");
+        }
+
+        if (edge->geometry()->param_geometry() == nullptr) {
+            throw cpptrace::logic_error("Curve has no parametric geometry");
+        }
+
+        Tessellator::tessellate(*edge->geometry()->param_geometry());
+
+        return *edge->geometry()->param_geometry()->mesh.get();
     }
 };
 
