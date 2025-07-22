@@ -137,6 +137,12 @@ class ConstructorWidget : public UIComponent {
                 auto curve_mesh = BRep::NaiveFaceter::naive_edge_facet(edges[i], 100);
                 context_.sceneTree->addGeometryNode<CurveMesh3D>(std::move(curve_mesh), std::format("Explicit_edge_{}", i));
             }
+
+            StraightLine3D line({-1, 0, -1}, {1, 0, 1});
+            Tessellator::tessellate(line);
+
+            CurveMesh3D curve_mesh = *line.mesh.get();
+            context_.sceneTree->addGeometryNode<CurveMesh3D>(std::move(curve_mesh), std::format("Explicit_curve_intersect"));
         }
 
         ImGui::End();

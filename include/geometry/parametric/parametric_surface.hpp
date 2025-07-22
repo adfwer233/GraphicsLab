@@ -29,7 +29,7 @@ struct ParamSurface {
     /**
      * @brief Sample n * m points uniformly
      */
-    std::vector<std::pair<PointType, ParamType>> sample(int n, int m) const {
+    [[nodiscard]] std::vector<std::pair<PointType, ParamType>> sample(int n, int m) const {
         std::vector<std::pair<PointType, ParamType>> result;
 
         for (int i = 0; i < n; i++) {

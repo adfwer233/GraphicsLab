@@ -215,14 +215,14 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return new_curve;
     }
 
-    [[nodiscard]] std::vector<glm::dvec2> sample(const int resolution) const {
-        std::vector<glm::dvec2> pts;
-        for (int i = 0; i <= resolution; ++i) {
-            const double t = static_cast<double>(i) / resolution;
-            pts.push_back(evaluate_linear(t));
-        }
-        return pts;
-    }
+    // [[nodiscard]] std::vector<glm::dvec2> sample(const int resolution) const {
+    //     std::vector<glm::dvec2> pts;
+    //     for (int i = 0; i <= resolution; ++i) {
+    //         const double t = static_cast<double>(i) / resolution;
+    //         pts.push_back(evaluate_linear(t));
+    //     }
+    //     return pts;
+    // }
 
     PointType start_position() const {
         return control_points_.front();

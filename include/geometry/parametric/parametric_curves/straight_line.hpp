@@ -15,7 +15,7 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
     }
 
     PointType derivative(double t) const override {
-        return glm::normalize(end_point - start_point);
+        return end_point - start_point;
     }
 
     PointType normal(double t) const

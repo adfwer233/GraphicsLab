@@ -135,11 +135,6 @@ struct FaceConstructors {
 
         BRepPoint2 v1_param{0.0, 0.0}, v2_param{1.0, 0.0}, v3_param{1.0, 1.0}, v4_param{0.0, 1.0};
 
-        auto v1_pos = surface->evaluate({0.0, 0.0});
-        auto v2_pos = surface->evaluate({1.0, 0.0});
-        auto v3_pos = surface->evaluate({1.0, 1.0});
-        auto v4_pos = surface->evaluate({0.0, 1.0});
-
         ParamCurve2D* param_pcurve_left = nullptr, *param_pcurve_right = nullptr, *param_pcurve_top = nullptr, *param_pcurve_bottom = nullptr;
         ParamCurve3D* param_curve_left = nullptr, *param_curve_right = nullptr, *param_curve_top = nullptr, *param_curve_bottom = nullptr;
         Edge *edge_left = nullptr, *edge_right = nullptr, *edge_top = nullptr, *edge_bottom = nullptr;
