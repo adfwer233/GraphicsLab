@@ -10,4 +10,4 @@ struct PPIResult {
     BRepPoint2 inter_position;
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

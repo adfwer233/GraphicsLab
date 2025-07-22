@@ -6,8 +6,8 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-struct IntersectionTestBase: TestBase {
-    void save_ssi_results(const std::vector<SSIResult>& inter_result) {
+struct IntersectionTestBase : TestBase {
+    void save_ssi_results(const std::vector<SSIResult> &inter_result) {
         for (int i = 0; i < inter_result.size(); i++) {
             param_curve[std::format("ssi{}_curve_{}", ssi_counter, i)] = inter_result[i].inter_curve;
             param_pcurve[std::format("ssi{}_pcurve1_{}", ssi_counter, i)] = inter_result[i].pcurve1;
@@ -20,20 +20,21 @@ struct IntersectionTestBase: TestBase {
         return "IntersectionTest";
     }
 
-protected:
+  protected:
     int ssi_counter = 0;
 };
 
-struct PlaneIntersection1: IntersectionTestBase {
+struct PlaneIntersection1 : IntersectionTestBase {
     std::string test_case_name() const override {
         return "PlaneIntersection1";
     }
 
     void run_test() override {
-        Face* plane1 = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
-        Face* plane2 = FaceConstructors::plane({-1, -1, 0}, {2, 0, 0}, {0, 2, 0});
+        Face *plane1 = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
+        Face *plane2 = FaceConstructors::plane({-1, -1, 0}, {2, 0, 0}, {0, 2, 0});
 
-        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane1->geometry()->param_geometry(), plane2->geometry()->param_geometry());
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane1->geometry()->param_geometry(),
+                                                                     plane2->geometry()->param_geometry());
 
         faces["plane1"] = plane1;
         faces["plane2"] = plane2;
@@ -49,4 +50,4 @@ struct PlaneIntersection1: IntersectionTestBase {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

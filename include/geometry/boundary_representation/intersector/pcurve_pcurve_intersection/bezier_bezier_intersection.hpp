@@ -80,4 +80,4 @@ struct BezierBezierIntersector2D {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

@@ -1,7 +1,7 @@
 #include "graphics_lab/application.hpp"
 
-#include <thread>
 #include <cpptrace/cpptrace.hpp>
+#include <thread>
 
 #include "vkl/imgui/imgui_context.hpp"
 

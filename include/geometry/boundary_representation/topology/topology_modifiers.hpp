@@ -48,7 +48,8 @@ struct TopologyModifiers {
                 auto c2_mid_pos = c2->param_geometry()->evaluate(c2_mid_param);
 
                 if (glm::distance(c1_mid_pos, c2_mid_pos) < Tolerance::default_tolerance) {
-                    spdlog::debug("[Stitch Faces]: Stitch {} and {} with edge {}, mid position {} {} {}", (void*)face1, (void*)face2, (void*)e1, c1_mid_pos.x, c1_mid_pos.y, c2_mid_pos.z);
+                    spdlog::debug("[Stitch Faces]: Stitch {} and {} with edge {}, mid position {} {} {}", (void *)face1,
+                                  (void *)face2, (void *)e1, c1_mid_pos.x, c1_mid_pos.y, c2_mid_pos.z);
                     edge_pairs.emplace_back(e1, e2);
                 }
             }

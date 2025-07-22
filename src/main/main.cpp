@@ -20,8 +20,9 @@ int main(int argc, char *argv[]) {
     CPPTRACE_TRY {
         GraphicsLabApplication app(args);
         app.run();
-    } CPPTRACE_CATCH(const std::exception& e) {
-        std::cerr<<"Exception: "<<e.what()<<std::endl;
+    }
+    CPPTRACE_CATCH(const std::exception &e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
         cpptrace::from_current_exception().print();
     }
 

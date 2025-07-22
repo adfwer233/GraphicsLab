@@ -7,9 +7,9 @@ namespace GraphicsLab::Geometry::BRep {
  * @brief: Result info for surface/surface intersection
  */
 struct SSIResult {
-    ParamCurve3D* inter_curve;
-    ParamCurve2D* pcurve1;
-    ParamCurve2D* pcurve2;
+    ParamCurve3D *inter_curve;
+    ParamCurve2D *pcurve1;
+    ParamCurve2D *pcurve2;
 };
 
 struct IntersectionTraceInfo {
@@ -18,4 +18,4 @@ struct IntersectionTraceInfo {
     BRepPoint3 position;
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

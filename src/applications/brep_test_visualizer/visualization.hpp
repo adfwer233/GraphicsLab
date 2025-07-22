@@ -35,13 +35,13 @@ struct VisualizationProject : IGraphicsLabProject {
         }
 
         // show all faces
-        for (const auto& [name, face]: test_case->faces) {
+        for (const auto &[name, face] : test_case->faces) {
             auto mesh = NaiveFaceter::naive_facet(face);
             context.sceneTree->addGeometryNode<Mesh3D>(std::move(mesh), name);
         }
 
         // show all curves
-        for (const auto& [name, curve]: test_case->param_curve) {
+        for (const auto &[name, curve] : test_case->param_curve) {
             GraphicsLab::Geometry::Tessellator::tessellate(*curve);
             auto mesh = *curve->mesh;
             context.sceneTree->addGeometryNode<CurveMesh3D>(std::move(mesh), name);

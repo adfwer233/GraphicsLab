@@ -19,14 +19,13 @@ template <size_t dim> struct ParamCurveBase {
     virtual PointType evaluate(double t) const = 0;
     virtual PointType derivative(double t) const = 0;
 
-    [[nodiscard]] virtual std::vector<std::pair<PointType, double>> sample (int n) const {
+    [[nodiscard]] virtual std::vector<std::pair<PointType, double>> sample(int n) const {
         std::vector<std::pair<PointType, double>> samples;
 
         for (int i = 0; i < n; i++) {
             double param = static_cast<double>(i) / static_cast<double>(n - 1);
             auto point = this->evaluate(param);
             samples.emplace_back(point, param);
-
         }
 
         return samples;

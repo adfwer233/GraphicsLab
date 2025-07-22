@@ -127,7 +127,7 @@ struct FaceConstructors {
         face->set_loop(lp);
     }
 
-    static void create_basic_topology(ParamSurface* surface, Face *face) {
+    static void create_basic_topology(ParamSurface *surface, Face *face) {
         auto allocator = BRepAllocator::instance();
 
         bool is_u_periodic = surface->u_periodic_check();
@@ -135,8 +135,10 @@ struct FaceConstructors {
 
         BRepPoint2 v1_param{0.0, 0.0}, v2_param{1.0, 0.0}, v3_param{1.0, 1.0}, v4_param{0.0, 1.0};
 
-        ParamCurve2D* param_pcurve_left = nullptr, *param_pcurve_right = nullptr, *param_pcurve_top = nullptr, *param_pcurve_bottom = nullptr;
-        ParamCurve3D* param_curve_left = nullptr, *param_curve_right = nullptr, *param_curve_top = nullptr, *param_curve_bottom = nullptr;
+        ParamCurve2D *param_pcurve_left = nullptr, *param_pcurve_right = nullptr, *param_pcurve_top = nullptr,
+                     *param_pcurve_bottom = nullptr;
+        ParamCurve3D *param_curve_left = nullptr, *param_curve_right = nullptr, *param_curve_top = nullptr,
+                     *param_curve_bottom = nullptr;
         Edge *edge_left = nullptr, *edge_right = nullptr, *edge_top = nullptr, *edge_bottom = nullptr;
         Coedge *coedge_left = nullptr, *coedge_right = nullptr, *coedge_top = nullptr, *coedge_bottom = nullptr;
         PCurve *pcurve_left = nullptr, *pcurve_right = nullptr, *pcurve_top = nullptr, *pcurve_bottom = nullptr;
@@ -208,8 +210,8 @@ struct FaceConstructors {
             lp->set_face(face);
             face->set_loop(lp);
         } else if (is_u_periodic and not is_v_periodic) {
-            Loop* loop_top = create_loop_from_coedge(coedge_top);
-            Loop* loop_bottom = create_loop_from_coedge(coedge_bottom);
+            Loop *loop_top = create_loop_from_coedge(coedge_top);
+            Loop *loop_bottom = create_loop_from_coedge(coedge_bottom);
 
             loop_top->set_face(face);
             loop_bottom->set_face(face);
@@ -217,8 +219,8 @@ struct FaceConstructors {
             loop_bottom->set_next(loop_top);
             face->set_loop(loop_bottom);
         } else if (not is_u_periodic and is_v_periodic) {
-            Loop* loop_left = create_loop_from_coedge(coedge_left);
-            Loop* loop_right = create_loop_from_coedge(coedge_right);
+            Loop *loop_left = create_loop_from_coedge(coedge_left);
+            Loop *loop_right = create_loop_from_coedge(coedge_right);
 
             loop_left->set_face(face);
             loop_right->set_face(face);
@@ -228,7 +230,6 @@ struct FaceConstructors {
         } else {
             // nothing to do.
         }
-
     }
 
     static void create_basic_topology(Torus *torus, Face *face) {
@@ -271,7 +272,7 @@ struct FaceConstructors {
         return curve;
     }
 
-    static PCurve* create_pcurve_from_param_pcurve(ParamCurve2D* param_pcurve) {
+    static PCurve *create_pcurve_from_param_pcurve(ParamCurve2D *param_pcurve) {
         auto allocator = BRepAllocator::instance();
         auto pcurve = allocator->alloc_pcurve();
         pcurve->set_param_geometry(param_pcurve);
@@ -305,20 +306,20 @@ struct FaceConstructors {
      * @param n
      * @return
      */
-    static ParamCurve3D* create_curve_from_pcurve(const ParamSurface* surface, const ParamCurve2D* pcurve, int n = 50) {
+    static ParamCurve3D *create_curve_from_pcurve(const ParamSurface *surface, const ParamCurve2D *pcurve, int n = 50) {
         auto allocator = BRepAllocator::instance();
 
         std::vector<BRepPoint3> points;
         std::vector<BRepPoint2> param_points;
 
         for (int i = 0; i <= n; i++) {
-            double param = 1.0 * i / (double) n;
+            double param = 1.0 * i / (double)n;
             auto param_point = pcurve->evaluate(param);
             param_points.push_back(param_point);
             points.emplace_back(surface->evaluate(param_point));
         }
 
-        auto&& curve_temp = BSplineCurve3D::fit(points, 3, 10);
+        auto &&curve_temp = BSplineCurve3D::fit(points, 3, 10);
         auto curve = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve_temp));
         return curve;
     }
@@ -352,7 +353,8 @@ struct BodyConstructors {
         Face *top = FaceConstructors::plane(v5, dx, dy);
         Face *bottom = FaceConstructors::plane(v1, dy, dx);
 
-        spdlog::debug("[Cube constructor]: Top {}, Bottom {}, Front {}, Back {}, Right {}, Left {} ", (void*)top, (void*)bottom, (void*)front, (void*)back, (void*)right, (void*)left);
+        spdlog::debug("[Cube constructor]: Top {}, Bottom {}, Front {}, Back {}, Right {}, Left {} ", (void *)top,
+                      (void *)bottom, (void *)front, (void *)back, (void *)right, (void *)left);
 
         TopologyModifiers::stitch_faces(front, right);
         TopologyModifiers::stitch_faces(right, back);

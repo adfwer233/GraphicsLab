@@ -26,12 +26,13 @@ struct CSIResult;
  */
 struct GeneralCurveSurfaceIntersection {
 
-    static std::vector<CSIResult> solve(const ParamCurve3D* curve, const ParamSurface* surface) {
+    static std::vector<CSIResult> solve(const ParamCurve3D *curve, const ParamSurface *surface) {
         return intersect(curve, surface);
     }
 
-private:
-    static std::pair<BRepPoint2, double> refine_with_newton (const ParamSurface* surf, const ParamCurve3D *cur, BRepPoint2 surf_param, double curve_param) {
+  private:
+    static std::pair<BRepPoint2, double> refine_with_newton(const ParamSurface *surf, const ParamCurve3D *cur,
+                                                            BRepPoint2 surf_param, double curve_param) {
         constexpr int max_newton_iter = 10;
         constexpr double tol = Tolerance::default_tolerance;
         // spdlog::info("refine initial len {}", glm::length(surf->evaluate(surf_param) - cur->evaluate(curve_param)));
@@ -42,7 +43,8 @@ private:
 
             BRepVector3 F = p1 - p2;
 
-            if (glm::length(F) < tol) break;
+            if (glm::length(F) < tol)
+                break;
 
             auto [du, dv] = surf->derivative(surf_param);
             auto dt = cur->derivative(curve_param);
@@ -61,18 +63,20 @@ private:
             curve_param -= delta[2];
         }
 
-        // spdlog::info("refine result len {}, param1 = ({}, {}), param2 = {}", glm::length(surf->evaluate(surf_param) - cur->evaluate(curve_param)), surf_param.x, surf_param.y, curve_param);
+        // spdlog::info("refine result len {}, param1 = ({}, {}), param2 = {}", glm::length(surf->evaluate(surf_param) -
+        // cur->evaluate(curve_param)), surf_param.x, surf_param.y, curve_param);
 
         return std::make_pair(surf_param, curve_param);
     }
 
-    static std::vector<std::pair<BRepPoint2, double>> find_all_initial_guess(const ParamSurface* surface, const ParamCurve3D* curve) {
+    static std::vector<std::pair<BRepPoint2, double>> find_all_initial_guess(const ParamSurface *surface,
+                                                                             const ParamCurve3D *curve) {
         double distance_threshold = 1e-1;
         std::vector<std::pair<BRepPoint2, double>> initial_guess;
 
         auto curve_sample = curve->sample(50);
 
-        for (auto [pos, param]: curve_sample) {
+        for (auto [pos, param] : curve_sample) {
             auto [proj, proj_param] = surface->project(pos);
 
             if (glm::distance(pos, proj) > distance_threshold) {
@@ -81,7 +85,8 @@ private:
 
             auto [refine_surface, refine_curve] = refine_with_newton(surface, curve, proj_param, param);
 
-            if (glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve)) < Tolerance::default_tolerance) {
+            if (glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve)) <
+                Tolerance::default_tolerance) {
                 initial_guess.emplace_back(refine_surface, refine_curve);
             }
         }
@@ -89,7 +94,7 @@ private:
         return initial_guess;
     }
 
-    static std::vector<CSIResult> intersect(const ParamCurve3D* curve, const ParamSurface* surface) {
+    static std::vector<CSIResult> intersect(const ParamCurve3D *curve, const ParamSurface *surface) {
         auto initial = find_all_initial_guess(surface, curve);
 
         std::vector<CSIResult> result;
@@ -104,7 +109,7 @@ private:
 
             if (distance < Tolerance::default_tolerance) {
                 bool already_exists = false;
-                for (auto res: result) {
+                for (auto res : result) {
                     if (glm::distance(res.inter_position, surf_pos) < Tolerance::default_tolerance) {
                         already_exists = true;
                     }
@@ -119,4 +124,4 @@ private:
         return result;
     }
 };
-}
+} // namespace GraphicsLab::Geometry::BRep

@@ -7,7 +7,7 @@
 namespace GraphicsLab::Geometry::BRep {
 
 struct NaiveFaceter {
-    static Mesh3D naive_facet(Face* face, int n = 10, int m = 10) {
+    static Mesh3D naive_facet(Face *face, int n = 10, int m = 10) {
         if (face->geometry() == nullptr) {
             throw cpptrace::logic_error("Face has no geometry");
         }
@@ -21,7 +21,7 @@ struct NaiveFaceter {
         return *face->geometry()->param_geometry()->mesh.get();
     }
 
-    static CurveMesh3D naive_edge_facet(Edge* edge, int n) {
+    static CurveMesh3D naive_edge_facet(Edge *edge, int n) {
         if (edge->geometry() == nullptr) {
             throw cpptrace::logic_error("Edge has no geometry");
         }

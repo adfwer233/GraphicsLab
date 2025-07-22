@@ -21,16 +21,15 @@ struct TestBase {
 
     virtual ~TestBase() = default;
 
-    std::map<std::string, Edge*> edges;
-    std::map<std::string, Face*> faces;
+    std::map<std::string, Edge *> edges;
+    std::map<std::string, Face *> faces;
 
-    std::map<std::string, ParamCurve3D*> param_curve;
-    std::map<std::string, ParamCurve2D*> param_pcurve;
+    std::map<std::string, ParamCurve3D *> param_curve;
+    std::map<std::string, ParamCurve2D *> param_pcurve;
 
     virtual void run_test() = 0;
     virtual std::string test_suite_name() const = 0;
     virtual std::string test_case_name() const = 0;
 };
 
-
-}
+} // namespace GraphicsLab::Geometry::BRep

@@ -12,4 +12,4 @@ struct CSIResult {
     BRepPoint2 surface_parameter;
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

@@ -2,8 +2,6 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-struct TopologicalIntersector {
+struct TopologicalIntersector {};
 
-};
-
-}
+} // namespace GraphicsLab::Geometry::BRep

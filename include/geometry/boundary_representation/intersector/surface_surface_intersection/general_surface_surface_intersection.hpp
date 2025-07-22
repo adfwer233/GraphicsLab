@@ -26,11 +26,11 @@ namespace GraphicsLab::Geometry::BRep {
  */
 struct GeneralSurfaceSurfaceIntersection {
 
-    static std::vector<SSIResult> solve(const ParamSurface* surf1, const ParamSurface* surf2) {
+    static std::vector<SSIResult> solve(const ParamSurface *surf1, const ParamSurface *surf2) {
         return intersect_all(surf1, surf2);
     }
 
-private:
+  private:
     /**
      * @brief: Newton refinement.
      * @param surf1
@@ -47,7 +47,8 @@ private:
      *  delta = argmin (J delta + F)
      *  Then update with (u,v,s,t) <- (u,v,s,t) + delta
      */
-    static std::pair<BRepPoint2, BRepPoint2> refine_with_newton(const ParamSurface* surf1, const ParamSurface* surf2, BRepPoint2 param1, BRepPoint2 param2) {
+    static std::pair<BRepPoint2, BRepPoint2> refine_with_newton(const ParamSurface *surf1, const ParamSurface *surf2,
+                                                                BRepPoint2 param1, BRepPoint2 param2) {
         constexpr int max_newton_iter = 10;
         constexpr double tol = 1e-8;
 
@@ -90,9 +91,9 @@ private:
      * @note
      * Find the nullspace of dF = S1_u du + S1_v dv - S2_s ds - S2_t dt = 0
      */
-    static std::pair<BRepPoint2, BRepPoint2> compute_tangent_direction(const ParamSurface* surf1,
-                                                                     const ParamSurface* surf2, BRepPoint2 param1,
-                                                                     BRepPoint2 param2) {
+    static std::pair<BRepPoint2, BRepPoint2> compute_tangent_direction(const ParamSurface *surf1,
+                                                                       const ParamSurface *surf2, BRepPoint2 param1,
+                                                                       BRepPoint2 param2) {
         BRepVector3 n1 = surf1->normal(param1);
         BRepVector3 n2 = surf2->normal(param2);
         BRepVector3 tangent = glm::normalize(glm::cross(n1, n2));
@@ -125,7 +126,7 @@ private:
      *
      * Grid sample from param surfaces and find the closet pair.
      */
-    static std::pair<BRepPoint2, BRepPoint2> find_initial_guess(const ParamSurface* surf1, const ParamSurface* surf2) {
+    static std::pair<BRepPoint2, BRepPoint2> find_initial_guess(const ParamSurface *surf1, const ParamSurface *surf2) {
         // Implement the logic to find the initial guess for the intersection
 
         auto surf1_sample = surf1->sample(10, 10);
@@ -157,7 +158,7 @@ private:
      * @note Grid sample in two surfaces and report all pairs in a given threshold.
      */
     static std::vector<std::pair<BRepPoint2, BRepPoint2>> find_all_possible_initial_guess(const ParamSurface *surf1,
-                                                                                        const ParamSurface *surf2) {
+                                                                                          const ParamSurface *surf2) {
         auto surf1_sample = surf1->sample(20, 20);
 
         std::vector<std::pair<BRepPoint2, BRepPoint2>> result;
@@ -171,7 +172,8 @@ private:
             double distance_before_refine = glm::distance(surf1->evaluate(param), surf2->evaluate(proj_param));
             double distance_after_refine = glm::distance(surf1->evaluate(refine1), surf2->evaluate(refine2));
             spdlog::debug("pos {} {} {}", pos.x, pos.y, pos.z);
-            spdlog::debug("Distance before refine: {}, distance after refine {}", distance_before_refine, distance_after_refine);
+            spdlog::debug("Distance before refine: {}, distance after refine {}", distance_before_refine,
+                          distance_after_refine);
             if (glm::distance(surf1->evaluate(refine1), surf2->evaluate(refine2)) < distance_threshold) {
                 result.push_back({refine1, refine2});
             }
@@ -197,13 +199,16 @@ private:
      *
      * @todo Handle param boundary.
      */
-    static std::vector<IntersectionTraceInfo> trace_pcurve_single_direction(const ParamSurface *surf1, const ParamSurface *surf2,
-                                                      BRepPoint2 begin_param1, BRepPoint2 begin_param2, int sign) {
+    static std::vector<IntersectionTraceInfo> trace_pcurve_single_direction(const ParamSurface *surf1,
+                                                                            const ParamSurface *surf2,
+                                                                            BRepPoint2 begin_param1,
+                                                                            BRepPoint2 begin_param2, int sign) {
         std::vector<IntersectionTraceInfo> intersections;
 
         spdlog::debug("initial guess: ({}, {}), ({}, {})", begin_param1.x, begin_param1.y, begin_param2.x,
-                     begin_param2.y);
-        spdlog::debug("initial distance: {}", glm::distance(surf1->evaluate(begin_param1), surf2->evaluate(begin_param2)));
+                      begin_param2.y);
+        spdlog::debug("initial distance: {}",
+                      glm::distance(surf1->evaluate(begin_param1), surf2->evaluate(begin_param2)));
 
         constexpr int max_iter = 2000;
         constexpr double length_iter = 0.0001;
@@ -215,12 +220,14 @@ private:
         BRepPoint2 param1 = begin_param1;
         BRepPoint2 param2 = begin_param2;
 
-        auto check_out_boundary = [](const BRepPoint2& param, const ParamSurface *surf) -> bool {
+        auto check_out_boundary = [](const BRepPoint2 &param, const ParamSurface *surf) -> bool {
             if (not surf->u_periodic) {
-                if (param.x < 0 or param.x > 1) return true;
+                if (param.x < 0 or param.x > 1)
+                    return true;
             }
             if (not surf->v_periodic) {
-                if (param.y < 0 or param.y > 1) return true;
+                if (param.y < 0 or param.y > 1)
+                    return true;
             }
             return false;
         };
@@ -252,7 +259,7 @@ private:
                 auto offset2 = begin_param2 - surf2->move_param_to_std_domain(param2);
                 intersections.emplace_back(param1 + offset1, param2 + offset2, surf1->evaluate(begin_param1));
                 spdlog::debug("start end distance {}",
-                             glm::distance(surf1->move_param_to_std_domain(param1 + offset1), begin_param1));
+                              glm::distance(surf1->move_param_to_std_domain(param1 + offset1), begin_param1));
                 break;
             }
         }
@@ -261,7 +268,7 @@ private:
     }
 
     static std::vector<IntersectionTraceInfo> trace_pcurve(const ParamSurface *surf1, const ParamSurface *surf2,
-                                                      BRepPoint2 begin_param1, BRepPoint2 begin_param2) {
+                                                           BRepPoint2 begin_param1, BRepPoint2 begin_param2) {
         auto forward_trace = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, 1);
         auto backward_trace = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, -1);
 
@@ -336,14 +343,14 @@ private:
 
             // fit the 3d curve with BSpline curve
             auto &&curve = BSplineCurve3D::fit(points, 5, 50);
-            BSplineCurve3D* curve_alloc = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve));
+            BSplineCurve3D *curve_alloc = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve));
             ssi_result.inter_curve = curve_alloc;
 
             // fit the pcurves with BSpline curves
             auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
             pcurve1.control_points_.front() = params1.front();
             pcurve1.control_points_.back() = params1.back();
-            BSplineCurve2D* pcurve1_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve1));
+            BSplineCurve2D *pcurve1_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve1));
             ssi_result.pcurve1 = pcurve1_alloc;
 
             auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, 50);
@@ -359,4 +366,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

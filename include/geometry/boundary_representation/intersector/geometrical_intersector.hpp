@@ -31,4 +31,4 @@ struct GeometricalIntersector {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

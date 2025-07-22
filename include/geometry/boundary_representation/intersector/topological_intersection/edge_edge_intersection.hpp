@@ -19,20 +19,18 @@ struct EdgeEdgeIntersectionResult {
  * @note Given two edges belong to the same surface and we will find the intersection between them
  */
 struct EdgeEdgeIntersection {
-    std::vector<EdgeEdgeIntersectionResult> solve(Edge* edge1, Edge* edge2, Face* face) {
+    std::vector<EdgeEdgeIntersectionResult> solve(Edge *edge1, Edge *edge2, Face *face) {
         /**
          * Check the input conditions
          */
 
-        Coedge* coedge1 = TopologyUtils::get_coedge_of_given_face(edge1, face);
-        Coedge* coedge2 = TopologyUtils::get_coedge_of_given_face(edge2, face);
+        Coedge *coedge1 = TopologyUtils::get_coedge_of_given_face(edge1, face);
+        Coedge *coedge2 = TopologyUtils::get_coedge_of_given_face(edge2, face);
 
         if (coedge1 == nullptr or coedge2 == nullptr) {
             throw cpptrace::logic_error("Edges must belong to same face in topological intersection").
         }
     }
-
-
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep
