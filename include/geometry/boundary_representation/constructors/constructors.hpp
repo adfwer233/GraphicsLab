@@ -59,7 +59,7 @@ struct FaceConstructors {
         auto v1_pos = plane->evaluate({0.0, 0.0});
         auto v2_pos = plane->evaluate({1.0, 0.0});
         auto v3_pos = plane->evaluate({1.0, 1.0});
-        auto v4_pos = plane->evaluate({0.0, 0.0});
+        auto v4_pos = plane->evaluate({0.0, 1.0});
 
         auto geo_c1 = allocator->alloc_param_curve<StraightLine3D>(v1_pos, v2_pos);
         auto geo_c2 = allocator->alloc_param_curve<StraightLine3D>(v2_pos, v3_pos);
@@ -103,6 +103,11 @@ struct FaceConstructors {
 
         Loop *lp = create_loop_from_coedge(ce1);
         lp->set_face(face);
+
+        ce1->set_loop(lp);
+        ce2->set_loop(lp);
+        ce3->set_loop(lp);
+        ce4->set_loop(lp);
 
         face->set_loop(lp);
     }
@@ -187,7 +192,7 @@ struct BodyConstructors {
         auto v7 = v3 + dz;
         auto v8 = v4 + dz;
 
-        Face *front = FaceConstructors::plane(v2, dx, dz);
+        Face *front = FaceConstructors::plane(v2, dy, dz);
         Face *back = FaceConstructors::plane(v1, dz, dy);
 
         Face *left = FaceConstructors::plane(v1, dx, dz);
@@ -195,6 +200,8 @@ struct BodyConstructors {
 
         Face *top = FaceConstructors::plane(v5, dx, dy);
         Face *bottom = FaceConstructors::plane(v1, dy, dx);
+
+        spdlog::debug("[Cube constructor]: Top {}, Bottom {}, Front {}, Back {}, Right {}, Left {} ", (void*)top, (void*)bottom, (void*)front, (void*)back, (void*)right, (void*)left);
 
         TopologyModifiers::stitch_faces(front, right);
         TopologyModifiers::stitch_faces(right, back);

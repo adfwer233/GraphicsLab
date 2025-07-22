@@ -11,12 +11,18 @@ static Coedge *get_coedge_of_given_face(const Edge *edge, const Face *face) {
     Coedge *start_coedge = edge->coedge();
     Coedge *coedge_iter = start_coedge;
 
-    while (coedge_iter != nullptr and coedge_iter != start_coedge) {
+    while (coedge_iter != nullptr) {
         if (coedge_iter->loop()->face() == face) {
             return coedge_iter;
         }
-        coedge_iter = coedge_iter->next();
+        coedge_iter = coedge_iter->partner();
+
+        if (coedge_iter == start_coedge) {
+            break;
+        }
     }
+
+    throw cpptrace::logic_error("The edge belongs no coedge referring to the face.");
 
     return nullptr;
 }

@@ -122,11 +122,19 @@ struct Coedge {
         loop_ = loop;
     }
 
+    [[nodiscard]] Coedge *partner() const {
+        return partner_;
+    }
+    void set_partner(Coedge *partner) {
+        partner_ = partner;
+    }
+
   private:
     bool forward = true;
     Edge *edge_ = nullptr;
     PCurve *geometry_ = nullptr;
     Coedge *next_ = nullptr;
+    Coedge *partner_ = nullptr;
     Loop *loop_ = nullptr;
 };
 

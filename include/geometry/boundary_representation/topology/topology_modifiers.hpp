@@ -1,4 +1,7 @@
 #pragma once
+
+#include "cpptrace/cpptrace.hpp"
+
 #include "geometry/boundary_representation/base/tor_def.hpp"
 #include "geometry/boundary_representation/topology_definition.hpp"
 #include "topology_utils.hpp"
@@ -17,6 +20,9 @@ struct TopologyModifiers {
     static void stitch_faces_along_edge(Face *face1, Face *face2, Edge *edge1, Edge *edge2) {
         Coedge *ce1 = TopologyUtils::get_coedge_of_given_face(edge1, face1);
         Coedge *ce2 = TopologyUtils::get_coedge_of_given_face(edge2, face2);
+
+        ce1->set_partner(ce2);
+        ce2->set_partner(ce1);
 
         ce2->set_edge(ce1->edge());
         ce2->set_forward(not ce1->is_forward());
@@ -42,6 +48,7 @@ struct TopologyModifiers {
                 auto c2_mid_pos = c2->param_geometry()->evaluate(c2_mid_param);
 
                 if (glm::distance(c1_mid_pos, c2_mid_pos) < Tolerance::default_tolerance) {
+                    spdlog::debug("[Stitch Faces]: Stitch {} and {} with edge {}, mid position {} {} {}", (void*)face1, (void*)face2, (void*)e1, c1_mid_pos.x, c1_mid_pos.y, c2_mid_pos.z);
                     edge_pairs.emplace_back(e1, e2);
                 }
             }
