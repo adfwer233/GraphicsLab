@@ -5,7 +5,7 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-namespace TopologyUtils {
+struct TopologyUtils {
 
 static Coedge *get_coedge_of_given_face(const Edge *edge, const Face *face) {
     Coedge *start_coedge = edge->coedge();
@@ -25,6 +25,41 @@ static Coedge *get_coedge_of_given_face(const Edge *edge, const Face *face) {
     throw cpptrace::logic_error("The edge belongs no coedge referring to the face.");
 
     return nullptr;
+}
+
+static std::vector<Shell *> get_all_shells(const Body* body) {
+    Shell *shell_start = body->shell();
+    Shell *shell_iter = shell_start;
+    std::vector<Shell *> shells;
+
+    while (shell_iter != nullptr) {
+        shells.push_back(shell_iter);
+        shell_iter = shell_iter->next();
+    }
+
+    return shells;
+}
+
+static std::vector<Face *> get_all_faces(const Shell* shell) {
+    Face* face_start = shell->face();
+    Face* face_iter = face_start;
+    std::vector<Face *> faces;
+
+    while (face_iter != nullptr) {
+        faces.push_back(face_iter);
+        face_iter = face_iter->next();
+    }
+
+    return faces;
+}
+
+static std::vector<Face *> get_all_faces(const Body* body) {
+    std::vector<Face *> faces;
+    for (auto shell: get_all_shells(body)) {
+        std::vector<Face *> shell_faces = get_all_faces(shell);
+        std::ranges::copy(shell_faces, std::back_inserter(faces));
+    }
+    return faces;
 }
 
 static std::vector<Loop *> get_all_loops(const Face *face) {
@@ -61,6 +96,6 @@ static std::vector<Edge *> get_all_edges(const Face *face) {
     }
     return edges;
 }
-} // namespace TopologyUtils
+};
 
 } // namespace GraphicsLab::Geometry::BRep

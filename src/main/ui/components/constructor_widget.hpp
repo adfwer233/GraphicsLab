@@ -2,12 +2,15 @@
 
 #include "component.hpp"
 #include "controller/controller.hpp"
+#include "geometry/boundary_representation/constructors/constructors.hpp"
+#include "geometry/boundary_representation/faceter/naive_faceter.hpp"
 
 #include "utils/sampler.hpp"
 
 #include "geometry/parametric/sphere.hpp"
 #include "geometry/parametric/tessellator.hpp"
 #include "geometry/parametric/torus.hpp"
+#include "geometry/parametric_topology/brep_face.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 #include <geometry/constructor/explicit_surface_constructors.hpp>
@@ -17,6 +20,9 @@
 #include <geometry/parametric/tensor_product_bezier.hpp>
 #include <geometry/parametric_intersector/surface_surface_intersector.hpp>
 
+namespace GraphicsLab::Geometry::BRep {
+struct Body;
+}
 class ConstructorWidget : public UIComponent {
   public:
     ConstructorWidget(GraphicsLab::GraphicsLabInternalContext &context, Controller &controller) : UIComponent(context) {
@@ -88,6 +94,21 @@ class ConstructorWidget : public UIComponent {
                 }
             }
             context_.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), "point cloud");
+        }
+
+        ImGui::Text("BRep Constructors");
+
+        if (ImGui::Button("Add Cube")) {
+            using namespace GraphicsLab::Geometry;
+
+            BRep::Body* cube = BRep::BodyConstructors::cube({0.0, 0.0, 0.0}, {1.0, 1.0, 1.0});
+            auto faces = BRep::TopologyUtils::get_all_faces(cube);
+
+            for (int i = 0; i < faces.size(); i++) {
+                auto mesh = BRep::NaiveFaceter::naive_facet(faces[i], 3, 3);
+
+                context_.sceneTree->addGeometryNode<Mesh3D>(std::move(mesh), std::format("Cube_face_{}", i));
+            }
         }
 
         ImGui::End();
