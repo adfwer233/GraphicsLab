@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometry/parametric_intersector/curve_curve_intersector_2d/curve_curve_inter_result.hpp"
 #include "geometry/parametric_topology/brep_face.hpp"
 #include "geometry/spatial_datastructure/kd_tree.hpp"
 #include "geometry/spatial_datastructure/rtree.hpp"
