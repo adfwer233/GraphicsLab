@@ -341,7 +341,7 @@ struct GeneralSurfaceSurfaceIntersection {
                 params2.push_back(param2);
             }
 
-            int control_points_count = std::max(static_cast<size_t>(10), points.size() / 2);
+            int control_points_count = std::min(static_cast<size_t>(50), std::max(static_cast<size_t>(10), points.size() / 2));
             // fit the 3d curve with BSpline curve
             auto &&curve = BSplineCurve3D::fit(points, 5, control_points_count);
             BSplineCurve3D *curve_alloc = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve));
