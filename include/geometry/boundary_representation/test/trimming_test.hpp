@@ -11,10 +11,9 @@ struct TrimmingTestBase : TestBase {
         return "TrimmingTest";
     }
 
-protected:
+  protected:
     int ssi_counter = 0;
 };
-
 
 struct TrimmingTest1 : TrimmingTestBase {
     [[nodiscard]] std::string test_case_name() const override {
@@ -22,14 +21,18 @@ struct TrimmingTest1 : TrimmingTestBase {
     }
 
     void run_test() override {
-        Face* rect = FaceConstructors::plane({0, 0, 0}, {1, 0, 0}, {0, 0, 1});
+        Face *rect = FaceConstructors::plane({0, 0, 0}, {1, 0, 0}, {0, 0, 1});
 
         auto allocator = BRepAllocator::instance();
 
-        auto param_pc1 = allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.8, 0.5}, {0.8, 0.8}, {0.5, 0.8}});
-        auto param_pc2 = allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.5, 0.8}, {0.2, 0.8}, {0.2, 0.5}});
-        auto param_pc3 = allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.2, 0.5}, {0.2, 0.2}, {0.5, 0.2}});
-        auto param_pc4 = allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.5, 0.2}, {0.8, 0.2}, {0.8, 0.5}});
+        auto param_pc1 =
+            allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.8, 0.5}, {0.8, 0.8}, {0.5, 0.8}});
+        auto param_pc2 =
+            allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.5, 0.8}, {0.2, 0.8}, {0.2, 0.5}});
+        auto param_pc3 =
+            allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.2, 0.5}, {0.2, 0.2}, {0.5, 0.2}});
+        auto param_pc4 =
+            allocator->alloc_param_pcurve<BezierCurve2D>(std::vector<BRepPoint2>{{0.5, 0.2}, {0.8, 0.2}, {0.8, 0.5}});
 
         auto pc1 = TopologyUtils::create_pcurve_from_param_pcurve(param_pc1);
         auto pc2 = TopologyUtils::create_pcurve_from_param_pcurve(param_pc2);
@@ -48,6 +51,6 @@ struct TrimmingTest1 : TrimmingTestBase {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TrimmingTest1)

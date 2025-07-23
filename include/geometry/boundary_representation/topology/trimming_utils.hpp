@@ -25,10 +25,10 @@ struct ContainmentQuery {
      * @param test_point
      * @return containment query result.
      */
-    static ContainmentResult contained(Face* face, BRepPoint2 test_point) {
+    static ContainmentResult contained(Face *face, BRepPoint2 test_point) {
         double wn = 0;
 
-        for (Loop* loop: TopologyUtils::get_all_loops(face)) {
+        for (Loop *loop : TopologyUtils::get_all_loops(face)) {
             wn += winding_number_loop(loop, test_point);
         }
 
@@ -39,20 +39,20 @@ struct ContainmentQuery {
         }
     }
 
-    static bool is_hole(Loop* loop) {
+    static bool is_hole(Loop *loop) {
         double wn = winding_number_loop(loop, std::nullopt);
         return wn < std::numbers::pi;
     }
 
-    static double winding_number_loop(Loop* loop, std::optional<BRepPoint2> test_point_given) {
+    static double winding_number_loop(Loop *loop, std::optional<BRepPoint2> test_point_given) {
         std::vector<BRepPoint2> samples;
 
         if (loop->coedge() == nullptr) {
             throw cpptrace::logic_error("Loop has no coedge");
         }
 
-        Coedge* coedge_start = loop->coedge();
-        Coedge* coedge_iter = loop->coedge();
+        Coedge *coedge_start = loop->coedge();
+        Coedge *coedge_iter = loop->coedge();
 
         constexpr int sample_per_pcurve = 5;
 
@@ -76,7 +76,8 @@ struct ContainmentQuery {
             }
             std::ranges::copy(pcurve_samples, std::back_inserter(samples));
             coedge_iter = coedge_iter->next();
-            if (coedge_iter == coedge_start) break;
+            if (coedge_iter == coedge_start)
+                break;
         }
 
         BRepPoint2 dir = samples[1] - samples[0];
@@ -118,7 +119,7 @@ struct ContainmentQuery {
 struct TrimmingUtils {
 
     struct TrimmingLoop {
-        std::vector<PCurve*> pcurves;
+        std::vector<PCurve *> pcurves;
     };
 
     /**
@@ -128,16 +129,16 @@ struct TrimmingUtils {
      * @return A set of faces, split by given loops.
      */
     static std::vector<Face *> add_trimming_curve(Face *face, std::vector<TrimmingLoop> curves) {
-        std::vector<Face*> faces;
+        std::vector<Face *> faces;
         faces.push_back(face);
 
         for (int i = 0; i < curves.size(); i++) {
-            PCurve* first_pcurve = curves[i].pcurves.front();
+            PCurve *first_pcurve = curves[i].pcurves.front();
             BRepPoint2 test_point = first_pcurve->param_geometry()->evaluate(first_pcurve->param_range().get_mid());
 
             for (int j = 0; j < faces.size(); j++) {
                 if (ContainmentQuery::contained(faces[j], test_point) == ContainmentQuery::ContainmentResult::Inside) {
-                    Face* new_face = split_face_with_trimming_loop(faces[j], curves[i]);
+                    Face *new_face = split_face_with_trimming_loop(faces[j], curves[i]);
                     faces.push_back(new_face);
                 }
             }
@@ -145,11 +146,11 @@ struct TrimmingUtils {
         return faces;
     }
 
-private:
-    static Face* split_face_with_trimming_loop(Face *face, TrimmingLoop trimming_loop) {
+  private:
+    static Face *split_face_with_trimming_loop(Face *face, TrimmingLoop trimming_loop) {
         auto allocator = BRepAllocator::instance();
 
-        Face* new_face = allocator->alloc_face();
+        Face *new_face = allocator->alloc_face();
 
         auto [loop, loop_reverse] = create_loops_from_trimming_loop(face, trimming_loop);
 
@@ -169,9 +170,9 @@ private:
         face->set_next(new_face);
 
         return new_face;
-  }
+    }
 
-  static std::pair<Loop*, Loop*> create_loops_from_trimming_loop(Face* face, TrimmingLoop trimming_loop) {
+    static std::pair<Loop *, Loop *> create_loops_from_trimming_loop(Face *face, TrimmingLoop trimming_loop) {
         std::vector<BRepPoint2> pcurve_start, pcurve_end;
 
         for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
@@ -181,14 +182,15 @@ private:
             pcurve_end.emplace_back(param_pcurve->evaluate(param_range.end()));
         }
 
-        std::vector<Curve*> curves;
-        std::vector<Edge*> edges;
-        std::vector<Coedge*> coedges;
-        std::vector<Coedge*> reverse_coedges;
+        std::vector<Curve *> curves;
+        std::vector<Edge *> edges;
+        std::vector<Coedge *> coedges;
+        std::vector<Coedge *> reverse_coedges;
 
         for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
             auto param_pcurve = trimming_loop.pcurves[i]->param_geometry();
-            auto param_curve = TopologyUtils::create_param_curve_from_pcurve(face->geometry()->param_geometry(), param_pcurve);
+            auto param_curve =
+                TopologyUtils::create_param_curve_from_pcurve(face->geometry()->param_geometry(), param_pcurve);
             auto curve = TopologyUtils::create_curve_from_param_curve(param_curve);
             auto edge = TopologyUtils::create_edge_from_curve(curve);
             auto coedge = TopologyUtils::create_coedge_from_edge(edge);
@@ -199,7 +201,6 @@ private:
             auto reverse_coedge = TopologyUtils::create_coedge_from_edge(reverse_edge);
             reverse_coedge->set_forward(false);
             reverse_coedge->set_geometry(trimming_loop.pcurves[i]);
-
 
             curves.emplace_back(curve);
             edges.emplace_back(edge);
@@ -214,19 +215,19 @@ private:
         coedges.back()->set_next(coedges.front());
         reverse_coedges.front()->set_next(reverse_coedges.back());
 
-        Loop* loop = TopologyUtils::create_loop_from_coedge(coedges.front());
-        Loop* reverse_loop = TopologyUtils::create_loop_from_coedge(reverse_coedges.back());
+        Loop *loop = TopologyUtils::create_loop_from_coedge(coedges.front());
+        Loop *reverse_loop = TopologyUtils::create_loop_from_coedge(reverse_coedges.back());
 
         return {loop, reverse_loop};
     }
 
-    static BRepPoint2 sample_param_point_in_loop(Loop* loop) {
-        PCurve* pcurve = loop->coedge()->geometry();
-        ParamCurve2D* param_pcurve = pcurve->param_geometry();
+    static BRepPoint2 sample_param_point_in_loop(Loop *loop) {
+        PCurve *pcurve = loop->coedge()->geometry();
+        ParamCurve2D *param_pcurve = pcurve->param_geometry();
 
         auto param = pcurve->param_range().get_mid();
         return param_pcurve->evaluate(param);
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

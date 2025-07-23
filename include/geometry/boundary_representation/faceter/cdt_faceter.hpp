@@ -8,4 +8,4 @@ struct CDTFaceter {
     static Mesh3D naive_facet(Face *face, int n = 10, int m = 10);
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

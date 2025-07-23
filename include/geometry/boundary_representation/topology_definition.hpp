@@ -82,7 +82,7 @@ struct Edge {
         return param_range_;
     }
 
-    [[nodiscard]] const ParamRange& param_range() {
+    [[nodiscard]] const ParamRange &param_range() {
         return param_range_;
     }
 

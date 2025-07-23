@@ -41,7 +41,8 @@ template <size_t dim> struct ParamCurveBase {
     virtual std::pair<PointType, double> projection(PointType test_point, std::optional<double> param_guess) const {
         // @todo
         double t = 0.5;
-        if (param_guess.has_value()) t = param_guess.value();
+        if (param_guess.has_value())
+            t = param_guess.value();
 
         constexpr int max_iter = 10;
 

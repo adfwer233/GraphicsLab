@@ -50,17 +50,17 @@ struct PlaneIntersection1 : IntersectionTestBase {
     }
 };
 
-struct TorusPlaneIntersection1: IntersectionTestBase {
+struct TorusPlaneIntersection1 : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TorusPlaneIntersection1";
     }
 
     void run_test() override {
-        Face* plane = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
-        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+        Face *plane = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
+        Face *torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
 
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane->geometry()->param_geometry(),
-                                                             torus->geometry()->param_geometry());
+                                                                     torus->geometry()->param_geometry());
 
         faces["plane"] = plane;
         faces["torus"] = torus;
@@ -73,17 +73,17 @@ struct TorusPlaneIntersection1: IntersectionTestBase {
     }
 };
 
-struct TorusPlaneIntersection2: IntersectionTestBase {
+struct TorusPlaneIntersection2 : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TorusPlaneIntersection2";
     }
 
     void run_test() override {
-        Face* plane = FaceConstructors::plane({-4, 0, -4}, {8, 0, 0}, {0, 0, 8});
-        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+        Face *plane = FaceConstructors::plane({-4, 0, -4}, {8, 0, 0}, {0, 0, 8});
+        Face *torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
 
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane->geometry()->param_geometry(),
-                                                             torus->geometry()->param_geometry());
+                                                                     torus->geometry()->param_geometry());
 
         faces["plane"] = plane;
         faces["torus"] = torus;
@@ -96,17 +96,17 @@ struct TorusPlaneIntersection2: IntersectionTestBase {
     }
 };
 
-struct TorusSplineIntersection: IntersectionTestBase {
+struct TorusSplineIntersection : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TorusSplineIntersection";
     }
 
     void run_test() override {
-        Face* spline = FaceConstructors::wave_spline({-4, 0, -4}, {8, 0, 0}, {0, 0, 8}, 5, 5, 1);
-        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+        Face *spline = FaceConstructors::wave_spline({-4, 0, -4}, {8, 0, 0}, {0, 0, 8}, 5, 5, 1);
+        Face *torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
 
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(spline->geometry()->param_geometry(),
-                                                             torus->geometry()->param_geometry());
+                                                                     torus->geometry()->param_geometry());
 
         faces["spline"] = spline;
         faces["torus"] = torus;
@@ -119,7 +119,7 @@ struct TorusSplineIntersection: IntersectionTestBase {
     }
 };
 
-struct TorusExplicitIntersection: IntersectionTestBase {
+struct TorusExplicitIntersection : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TorusExplicitIntersection";
     }
@@ -142,11 +142,11 @@ struct TorusExplicitIntersection: IntersectionTestBase {
             return result;
         };
 
-        Face* wave = FaceConstructors::explicit_surface(f);
-        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+        Face *wave = FaceConstructors::explicit_surface(f);
+        Face *torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
 
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(wave->geometry()->param_geometry(),
-                                                             torus->geometry()->param_geometry());
+                                                                     torus->geometry()->param_geometry());
 
         faces["wave"] = wave;
         faces["torus"] = torus;
@@ -159,11 +159,14 @@ struct TorusExplicitIntersection: IntersectionTestBase {
     }
 };
 
-
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::PlaneIntersection1)
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusPlaneIntersection1)
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusPlaneIntersection2)
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusSplineIntersection)
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusExplicitIntersection)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::TorusPlaneIntersection1)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::TorusPlaneIntersection2)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::TorusSplineIntersection)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::TorusExplicitIntersection)

@@ -37,13 +37,13 @@ struct EdgeEdgeIntersection {
             throw cpptrace::logic_error("Face has no geometry");
         }
 
-        ParamSurface* param_surface = face->geometry()->param_geometry();
+        ParamSurface *param_surface = face->geometry()->param_geometry();
 
-        PCurve* pcurve1 = coedge1->geometry();
-        PCurve* pcurve2 = coedge2->geometry();
+        PCurve *pcurve1 = coedge1->geometry();
+        PCurve *pcurve2 = coedge2->geometry();
 
-        ParamCurve3D* curve1 = edge1->geometry()->param_geometry();
-        ParamCurve3D* curve2 = edge2->geometry()->param_geometry();
+        ParamCurve3D *curve1 = edge1->geometry()->param_geometry();
+        ParamCurve3D *curve2 = edge2->geometry()->param_geometry();
 
         ParamCurve2D *param_pcurve1 = pcurve1->param_geometry();
         ParamCurve2D *param_pcurve2 = pcurve2->param_geometry();
@@ -52,7 +52,7 @@ struct EdgeEdgeIntersection {
 
         auto param_pcurve_inter_result = GeneralPCurvePCurveIntersection::solve(param_pcurve1, param_pcurve2);
 
-        for (const auto& inter: param_pcurve_inter_result) {
+        for (const auto &inter : param_pcurve_inter_result) {
             EdgeEdgeIntersectionResult intersection_result;
             auto position = param_surface->evaluate(inter.inter_position);
 

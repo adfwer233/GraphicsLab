@@ -200,9 +200,10 @@ struct GeneralSurfaceSurfaceIntersection {
      * @todo Handle param boundary.
      */
     static std::pair<std::vector<IntersectionTraceInfo>, bool> trace_pcurve_single_direction(const ParamSurface *surf1,
-                                                                            const ParamSurface *surf2,
-                                                                            BRepPoint2 begin_param1,
-                                                                            BRepPoint2 begin_param2, int sign) {
+                                                                                             const ParamSurface *surf2,
+                                                                                             BRepPoint2 begin_param1,
+                                                                                             BRepPoint2 begin_param2,
+                                                                                             int sign) {
         std::vector<IntersectionTraceInfo> intersections;
         bool closed = false;
 
@@ -272,12 +273,14 @@ struct GeneralSurfaceSurfaceIntersection {
 
     static std::vector<IntersectionTraceInfo> trace_pcurve(const ParamSurface *surf1, const ParamSurface *surf2,
                                                            BRepPoint2 begin_param1, BRepPoint2 begin_param2) {
-        auto [forward_trace, forward_closed] = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, 1);
+        auto [forward_trace, forward_closed] =
+            trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, 1);
 
         if (forward_closed) {
             return forward_trace;
         } else {
-            auto [backward_trace, backward_closed] = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, -1);
+            auto [backward_trace, backward_closed] =
+                trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, -1);
 
             std::ranges::reverse(backward_trace);
             if (not backward_trace.empty())
@@ -349,7 +352,8 @@ struct GeneralSurfaceSurfaceIntersection {
                 params2.push_back(param2);
             }
 
-            int control_points_count = std::min(static_cast<size_t>(50), std::max(static_cast<size_t>(10), points.size() / 2));
+            int control_points_count =
+                std::min(static_cast<size_t>(50), std::max(static_cast<size_t>(10), points.size() / 2));
             // fit the 3d curve with BSpline curve
             auto &&curve = BSplineCurve3D::fit(points, 5, control_points_count);
             BSplineCurve3D *curve_alloc = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve));

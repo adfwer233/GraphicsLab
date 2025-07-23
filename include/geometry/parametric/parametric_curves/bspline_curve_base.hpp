@@ -82,8 +82,9 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
             if (denom == 0.0)
                 second_derivative_control_points.push_back(PointType(0.0));
             else
-                second_derivative_control_points.push_back(static_cast<double>(degree_ - 1) *
-                                                     (derivative_control_points_[i + 1] - derivative_control_points_[i]) / denom);
+                second_derivative_control_points.push_back(
+                    static_cast<double>(degree_ - 1) *
+                    (derivative_control_points_[i + 1] - derivative_control_points_[i]) / denom);
         }
 
         // Remove first and last knot to match the reduced degree

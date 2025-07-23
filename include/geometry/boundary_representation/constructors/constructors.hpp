@@ -69,7 +69,8 @@ struct FaceConstructors {
         return face;
     }
 
-    static Face* wave_spline(BRepPoint3 base_pos, BRepPoint3 direction1, BRepPoint3 direction2, int n, int m, double wave) {
+    static Face *wave_spline(BRepPoint3 base_pos, BRepPoint3 direction1, BRepPoint3 direction2, int n, int m,
+                             double wave) {
         auto allocator = BRepAllocator::instance();
         std::vector<std::vector<BRepPoint3>> ctrl_pts;
         ctrl_pts.resize(n + 1);
@@ -268,8 +269,6 @@ struct FaceConstructors {
         auto allocator = BRepAllocator::instance();
         // no boundary curves needed from complete torus
     }
-
-
 };
 
 struct BodyConstructors {

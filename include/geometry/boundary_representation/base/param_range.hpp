@@ -34,6 +34,7 @@ struct ParamRange {
     bool contains(const double value) const {
         return start_ <= value && value <= end_;
     }
+
   private:
     double start_ = 0.0;
     double end_ = 1.0;

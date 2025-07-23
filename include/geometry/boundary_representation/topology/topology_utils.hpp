@@ -1,11 +1,11 @@
 #pragma once
 
-#include "geometry/boundary_representation/brep_definition.hpp"
+#include "cpptrace/cpptrace.hpp"
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
+#include "geometry/boundary_representation/brep_definition.hpp"
 #include "geometry/parametric/bspline_curve_3d.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "spdlog/spdlog.h"
-#include "cpptrace/cpptrace.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 
@@ -182,7 +182,8 @@ struct TopologyUtils {
      * @param n
      * @return
      */
-    static ParamCurve3D *create_param_curve_from_pcurve(const ParamSurface *surface, const ParamCurve2D *pcurve, int n = 50) {
+    static ParamCurve3D *create_param_curve_from_pcurve(const ParamSurface *surface, const ParamCurve2D *pcurve,
+                                                        int n = 50) {
         auto allocator = BRepAllocator::instance();
 
         std::vector<BRepPoint3> points;

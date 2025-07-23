@@ -17,7 +17,7 @@ namespace GraphicsLab::Geometry::BRep {
  * We convert all pcurves to the Bezier curves and solve the intersection via bezier clipping
  */
 struct GeneralPCurvePCurveIntersection {
-    static std::vector<PPIResult> solve(const ParamCurve2D* pcurve1, const ParamCurve2D* pcurve2) {
+    static std::vector<PPIResult> solve(const ParamCurve2D *pcurve1, const ParamCurve2D *pcurve2) {
         return param_curves_intersection(pcurve1, pcurve2);
     }
 
@@ -27,13 +27,13 @@ struct GeneralPCurvePCurveIntersection {
         std::vector<BezierCurve2D> bezier_segments_of_curve2;
 
         auto convert_pcurve_to_bezier_curves = [](const ParamCurve2D *curve, std::vector<BezierCurve2D> &segments) {
-            if (auto bezier_curve = dynamic_cast<const BezierCurve2D*>(curve)) {
+            if (auto bezier_curve = dynamic_cast<const BezierCurve2D *>(curve)) {
                 BezierCurve2D bezier_copy = *bezier_curve;
                 segments.emplace_back(std::move(bezier_copy));
-            } else if (auto line = dynamic_cast<const StraightLine2D*>(curve)) {
+            } else if (auto line = dynamic_cast<const StraightLine2D *>(curve)) {
                 BezierCurve2D bezier_line{{line->start_point, line->end_point}};
                 segments.emplace_back(std::move(bezier_line));
-            } else if (auto bspline = dynamic_cast<const BSplineCurve2D*>(curve)) {
+            } else if (auto bspline = dynamic_cast<const BSplineCurve2D *>(curve)) {
                 BSplineCurve2D bspline_copy = *bspline;
                 bspline_copy.insert_all_knots_to_bezier_form();
                 auto bezier_segments = bspline_copy.convert_to_bezier();
@@ -50,9 +50,10 @@ struct GeneralPCurvePCurveIntersection {
 
         for (int i = 0; i < bezier_segments_of_curve1.size(); ++i) {
             for (int j = 0; j < bezier_segments_of_curve2.size(); ++j) {
-                auto segment_inter = BezierBezierIntersector2D::intersect(bezier_segments_of_curve1[i], bezier_segments_of_curve2[j]);
+                auto segment_inter =
+                    BezierBezierIntersector2D::intersect(bezier_segments_of_curve1[i], bezier_segments_of_curve2[j]);
 
-                for (auto inter: segment_inter) {
+                for (auto inter : segment_inter) {
                     PPIResult res;
                     res.inter_position = inter.inter_position;
                     res.param1 = (i + inter.param1) / bezier_segments_of_curve1.size();
