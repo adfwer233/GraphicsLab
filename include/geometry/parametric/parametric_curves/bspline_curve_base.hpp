@@ -71,6 +71,27 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         return bspline_evaluate(param, derivative_control_points_, derivative_knots_, degree_ - 1);
     }
 
+    PointType second_derivative(double param) const override {
+        std::vector<PointType> second_derivative_control_points;
+        std::vector<double> second_derivative_knots;
+
+        const int n = static_cast<int>(derivative_control_points_.size()) - 1;
+
+        for (int i = 0; i < n; ++i) {
+            double denom = derivative_knots_[i + degree_ - 1 + 1] - derivative_knots_[i + 1];
+            if (denom == 0.0)
+                second_derivative_control_points.push_back(PointType(0.0));
+            else
+                second_derivative_control_points.push_back(static_cast<double>(degree_ - 1) *
+                                                     (derivative_control_points_[i + 1] - derivative_control_points_[i]) / denom);
+        }
+
+        // Remove first and last knot to match the reduced degree
+        second_derivative_knots = std::vector(derivative_knots_.begin() + 1, derivative_knots_.end() - 1);
+
+        return bspline_evaluate(param, second_derivative_control_points, second_derivative_knots, degree_ - 2);
+    }
+
     std::vector<BezierCurveBase<dim>> convert_to_bezier() const {
         std::vector<BezierCurveBase<dim>> result;
 

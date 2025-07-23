@@ -78,12 +78,25 @@ struct Edge {
         return end_->geometry()->position();
     }
 
+    [[nodiscard]] ParamRange param_range() const {
+        return param_range_;
+    }
+
+    [[nodiscard]] const ParamRange& param_range() {
+        return param_range_;
+    }
+
+    void set_param_range(ParamRange param_range) {
+        param_range_ = param_range;
+    }
+
   private:
     bool forward = true;
     Curve *geometry_ = nullptr;
     Coedge *coedge_ = nullptr;
     Vertex *start_ = nullptr;
     Vertex *end_ = nullptr;
+    ParamRange param_range_;
 };
 
 struct Coedge {
@@ -129,6 +142,13 @@ struct Coedge {
         partner_ = partner;
     }
 
+    [[nodiscard]] ParamRange get_param_range() const {
+        return param_range_;
+    }
+    void set_param_range(ParamRange param_range) {
+        param_range_ = param_range;
+    }
+
   private:
     bool forward = true;
     Edge *edge_ = nullptr;
@@ -136,6 +156,7 @@ struct Coedge {
     Coedge *next_ = nullptr;
     Coedge *partner_ = nullptr;
     Loop *loop_ = nullptr;
+    ParamRange param_range_{};
 };
 
 struct Loop {
@@ -234,7 +255,6 @@ struct Shell {
   private:
     Body *body_ = nullptr;
     Face *face_ = nullptr;
-    ;
     Shell *next_ = nullptr;
 };
 

@@ -75,6 +75,16 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return evaluate_linear(param, derivative_points_);
     }
 
+    PointType second_derivative(double param) const override {
+        std::vector<PointType> second_derivative_points;
+        int n = derivative_points_.size() - 1;
+        for (int i = 1; i < derivative_points_.size(); i++) {
+            second_derivative_points.push_back((derivative_points_[i] - derivative_points_[i - 1]) * static_cast<double>(n));
+        }
+
+        return evaluate_linear(param, second_derivative_points);
+    }
+
     double min_x = 100, min_y = 100, max_x = -100, max_y = -100;
 
     void update_bounds() {

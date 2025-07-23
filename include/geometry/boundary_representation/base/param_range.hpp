@@ -30,6 +30,10 @@ struct ParamRange {
     [[nodiscard]] double get_mid() const {
         return start_ + (end_ - start_) / 2.0;
     }
+
+    bool contains(const double value) const {
+        return start_ <= value && value <= end_;
+    }
   private:
     double start_ = 0.0;
     double end_ = 1.0;

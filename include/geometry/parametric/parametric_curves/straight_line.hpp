@@ -18,6 +18,10 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
         return end_point - start_point;
     }
 
+    PointType second_derivative(double) const override {
+        return PointType(0);
+    }
+
     PointType normal(double t) const
         requires(dim == 2)
     {
