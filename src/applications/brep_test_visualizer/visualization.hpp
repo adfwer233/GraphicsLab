@@ -26,7 +26,7 @@ struct VisualizationProject : IGraphicsLabProject {
         using namespace GraphicsLab::Geometry::BRep;
         std::unique_ptr<TestBase> test_case = nullptr;
 
-        test_case = std::make_unique<TorusPlaneIntersection2>();
+        test_case = std::make_unique<TorusExplicitIntersection>();
         spdlog::set_level(spdlog::level::debug);
         test_case->run_test();
 
@@ -36,7 +36,7 @@ struct VisualizationProject : IGraphicsLabProject {
 
         // show all faces
         for (const auto &[name, face] : test_case->faces) {
-            auto mesh = NaiveFaceter::naive_facet(face);
+            auto mesh = NaiveFaceter::naive_facet(face, 50, 50);
             context.sceneTree->addGeometryNode<Mesh3D>(std::move(mesh), name);
         }
 

@@ -14,7 +14,7 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
         return glm::mix(start_point, end_point, t);
     }
 
-    PointType derivative(double t) const override {
+    PointType derivative(double) const override {
         return end_point - start_point;
     }
 

@@ -96,8 +96,74 @@ struct TorusPlaneIntersection2: IntersectionTestBase {
     }
 };
 
+struct TorusSplineIntersection: IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "TorusSplineIntersection";
+    }
+
+    void run_test() override {
+        Face* spline = FaceConstructors::wave_spline({-4, 0, -4}, {8, 0, 0}, {0, 0, 8}, 5, 5, 1);
+        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(spline->geometry()->param_geometry(),
+                                                             torus->geometry()->param_geometry());
+
+        faces["spline"] = spline;
+        faces["torus"] = torus;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 2) {
+            result = TestResult::Fail;
+        }
+    }
+};
+
+struct TorusExplicitIntersection: IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "TorusExplicitIntersection";
+    }
+
+    void run_test() override {
+
+        auto f = [](GraphicsLab::Geometry::autodiff_vec2 param) -> GraphicsLab::Geometry::autodiff_vec3 {
+            GraphicsLab::Geometry::autodiff_vec3 result;
+
+            BRepPoint3 base{-4, 0, -4};
+            BRepPoint3 dir1{8, 0, 0};
+            BRepPoint3 dir2{0, 0, 8};
+
+            auto u = 2 * 2 * std::numbers::pi * param.x();
+            auto v = 2 * 2 * std::numbers::pi * param.y();
+            result.x() = base.x + dir1.x * param.x();
+            result.y() = 0.3 * sin(u) * sin(v);
+            result.z() = base.z + dir2.z * param.y();
+
+            return result;
+        };
+
+        Face* wave = FaceConstructors::explicit_surface(f);
+        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(wave->geometry()->param_geometry(),
+                                                             torus->geometry()->param_geometry());
+
+        faces["wave"] = wave;
+        faces["torus"] = torus;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 2) {
+            result = TestResult::Fail;
+        }
+    }
+};
+
+
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::PlaneIntersection1)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusPlaneIntersection1)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusPlaneIntersection2)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusSplineIntersection)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusExplicitIntersection)

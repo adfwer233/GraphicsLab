@@ -9,6 +9,7 @@
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "geometry/parametric/plane.hpp"
 #include "geometry/parametric/sphere.hpp"
+#include "geometry/parametric/tensor_product_bezier.hpp"
 #include "geometry/parametric/torus.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
@@ -59,6 +60,37 @@ struct FaceConstructors {
         auto allocator = BRepAllocator::instance();
 
         auto param_geometry = allocator->alloc_param_surface<Sphere>(center, radius);
+        auto surface = allocator->alloc_surface();
+        surface->set_param_geometry(param_geometry);
+
+        auto face = allocator->alloc_face();
+        face->set_geometry(surface);
+
+        return face;
+    }
+
+    static Face* wave_spline(BRepPoint3 base_pos, BRepPoint3 direction1, BRepPoint3 direction2, int n, int m, double wave) {
+        auto allocator = BRepAllocator::instance();
+        std::vector<std::vector<BRepPoint3>> ctrl_pts;
+        ctrl_pts.resize(n + 1);
+        for (int i = 0; i <= n; i++) {
+            ctrl_pts[i].resize(m + 1);
+        }
+
+        BRepVector3 normal = glm::normalize(glm::cross(direction1, direction2));
+
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= m; j++) {
+                double u = 1.0 * i / n;
+                double v = 1.0 * j / m;
+
+                double sign = std::cos(n * std::numbers::pi * u) * std::cos(m * std::numbers::pi * v);
+                ctrl_pts[i][j] = base_pos + u * direction1 + direction2 * v + normal * wave * sign;
+            }
+        }
+
+        auto param_geometry = allocator->alloc_param_surface<TensorProductBezier>(std::move(ctrl_pts));
+
         auto surface = allocator->alloc_surface();
         surface->set_param_geometry(param_geometry);
 

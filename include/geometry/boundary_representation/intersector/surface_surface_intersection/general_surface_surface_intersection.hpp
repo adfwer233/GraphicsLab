@@ -199,11 +199,12 @@ struct GeneralSurfaceSurfaceIntersection {
      *
      * @todo Handle param boundary.
      */
-    static std::vector<IntersectionTraceInfo> trace_pcurve_single_direction(const ParamSurface *surf1,
+    static std::pair<std::vector<IntersectionTraceInfo>, bool> trace_pcurve_single_direction(const ParamSurface *surf1,
                                                                             const ParamSurface *surf2,
                                                                             BRepPoint2 begin_param1,
                                                                             BRepPoint2 begin_param2, int sign) {
         std::vector<IntersectionTraceInfo> intersections;
+        bool closed = false;
 
         spdlog::debug("initial guess: ({}, {}), ({}, {})", begin_param1.x, begin_param1.y, begin_param2.x,
                       begin_param2.y);
@@ -260,24 +261,31 @@ struct GeneralSurfaceSurfaceIntersection {
                 intersections.emplace_back(param1 + offset1, param2 + offset2, surf1->evaluate(begin_param1));
                 spdlog::debug("start end distance {}",
                               glm::distance(surf1->move_param_to_std_domain(param1 + offset1), begin_param1));
+
+                closed = true;
                 break;
             }
         }
 
-        return intersections;
+        return {intersections, closed};
     }
 
     static std::vector<IntersectionTraceInfo> trace_pcurve(const ParamSurface *surf1, const ParamSurface *surf2,
                                                            BRepPoint2 begin_param1, BRepPoint2 begin_param2) {
-        auto forward_trace = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, 1);
-        auto backward_trace = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, -1);
+        auto [forward_trace, forward_closed] = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, 1);
 
-        std::ranges::reverse(backward_trace);
-        if (not backward_trace.empty())
-            backward_trace.pop_back();
+        if (forward_closed) {
+            return forward_trace;
+        } else {
+            auto [backward_trace, backward_closed] = trace_pcurve_single_direction(surf1, surf2, begin_param1, begin_param2, -1);
 
-        std::ranges::copy(forward_trace, std::back_inserter(backward_trace));
-        return backward_trace;
+            std::ranges::reverse(backward_trace);
+            if (not backward_trace.empty())
+                backward_trace.pop_back();
+
+            std::ranges::copy(forward_trace, std::back_inserter(backward_trace));
+            return backward_trace;
+        }
     }
 
     static std::vector<SSIResult> intersect_all(const ParamSurface *surf1, const ParamSurface *surf2) {
