@@ -1,6 +1,7 @@
 #pragma once
 
 #include "geometry/boundary_representation/brep_definition.hpp"
+#include "language/meta_programming/type_register/type_register.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 
@@ -28,8 +29,10 @@ struct TestBase {
     std::map<std::string, ParamCurve2D *> param_pcurve;
 
     virtual void run_test() = 0;
-    virtual std::string test_suite_name() const = 0;
-    virtual std::string test_case_name() const = 0;
+    [[nodiscard]] virtual std::string test_suite_name() const = 0;
+    [[nodiscard]] virtual std::string test_case_name() const = 0;
 };
+
+struct BRepTestRegisterTag {};
 
 } // namespace GraphicsLab::Geometry::BRep

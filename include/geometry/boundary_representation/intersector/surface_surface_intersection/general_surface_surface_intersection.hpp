@@ -341,19 +341,20 @@ struct GeneralSurfaceSurfaceIntersection {
                 params2.push_back(param2);
             }
 
+            int control_points_count = std::max(static_cast<size_t>(10), points.size() / 2);
             // fit the 3d curve with BSpline curve
-            auto &&curve = BSplineCurve3D::fit(points, 5, 50);
+            auto &&curve = BSplineCurve3D::fit(points, 5, control_points_count);
             BSplineCurve3D *curve_alloc = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve));
             ssi_result.inter_curve = curve_alloc;
 
             // fit the pcurves with BSpline curves
-            auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, 50);
+            auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, control_points_count);
             pcurve1.control_points_.front() = params1.front();
             pcurve1.control_points_.back() = params1.back();
             BSplineCurve2D *pcurve1_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve1));
             ssi_result.pcurve1 = pcurve1_alloc;
 
-            auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, 50);
+            auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, control_points_count);
             pcurve2.control_points_.front() = params2.front();
             pcurve2.control_points_.back() = params2.back();
             auto pcurve2_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve2));

@@ -16,7 +16,7 @@ struct IntersectionTestBase : TestBase {
         ssi_counter++;
     }
 
-    std::string test_suite_name() const override {
+    [[nodiscard]] std::string test_suite_name() const override {
         return "IntersectionTest";
     }
 
@@ -25,7 +25,7 @@ struct IntersectionTestBase : TestBase {
 };
 
 struct PlaneIntersection1 : IntersectionTestBase {
-    std::string test_case_name() const override {
+    [[nodiscard]] std::string test_case_name() const override {
         return "PlaneIntersection1";
     }
 
@@ -50,4 +50,54 @@ struct PlaneIntersection1 : IntersectionTestBase {
     }
 };
 
+struct TorusPlaneIntersection1: IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "TorusPlaneIntersection1";
+    }
+
+    void run_test() override {
+        Face* plane = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
+        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane->geometry()->param_geometry(),
+                                                             torus->geometry()->param_geometry());
+
+        faces["plane"] = plane;
+        faces["torus"] = torus;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 5) {
+            result = TestResult::Fail;
+        }
+    }
+};
+
+struct TorusPlaneIntersection2: IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "TorusPlaneIntersection2";
+    }
+
+    void run_test() override {
+        Face* plane = FaceConstructors::plane({-4, 0, -4}, {8, 0, 0}, {0, 0, 8});
+        Face* torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane->geometry()->param_geometry(),
+                                                             torus->geometry()->param_geometry());
+
+        faces["plane"] = plane;
+        faces["torus"] = torus;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 2) {
+            result = TestResult::Fail;
+        }
+    }
+};
+
 } // namespace GraphicsLab::Geometry::BRep
+
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::PlaneIntersection1)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusPlaneIntersection1)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusPlaneIntersection2)

@@ -20,6 +20,7 @@ set(SRC_FILE
         numeric/polynomial_test.cpp
         crtp/crtp_test.cpp
         parallel/thread_pool_test.cpp
+        main.cpp
 )
 
 enable_testing()
