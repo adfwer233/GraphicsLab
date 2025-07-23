@@ -1,7 +1,11 @@
 #pragma once
 
 #include "geometry/boundary_representation/brep_definition.hpp"
+#include "geometry/boundary_representation/allocator/brep_allocator.hpp"
+#include "geometry/parametric/bspline_curve_3d.hpp"
+#include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "spdlog/spdlog.h"
+#include "cpptrace/cpptrace.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 
@@ -23,8 +27,6 @@ struct TopologyUtils {
         }
 
         throw cpptrace::logic_error("The edge belongs no coedge referring to the face.");
-
-        return nullptr;
     }
 
     static std::vector<Shell *> get_all_shells(const Body *body) {
@@ -62,6 +64,20 @@ struct TopologyUtils {
         return faces;
     }
 
+    static std::vector<Coedge *> get_all_coedges(const Loop *loop) {
+        Coedge *coedge_start = loop->coedge();
+        Coedge *coedge_iter = coedge_start;
+        std::vector<Coedge *> coedges;
+        while (coedge_iter != nullptr) {
+            coedges.push_back(coedge_iter);
+            coedge_iter = coedge_iter->next();
+            if (coedge_iter == coedge_start) {
+                break;
+            }
+        }
+        return coedges;
+    }
+
     static std::vector<Loop *> get_all_loops(const Face *face) {
         Loop *loop_iter = face->loop();
         std::vector<Loop *> loops;
@@ -95,6 +111,93 @@ struct TopologyUtils {
             std::ranges::copy(loop_edges, std::back_inserter(edges));
         }
         return edges;
+    }
+
+    static Loop *create_loop_from_coedge(Coedge *coedge) {
+        auto allocator = BRepAllocator::instance();
+        Loop *loop = allocator->alloc_loop();
+        loop->set_coedge(coedge);
+        return loop;
+    }
+
+    static Coedge *create_coedge_from_edge(Edge *edge) {
+        auto allocator = BRepAllocator::instance();
+        Coedge *coedge = allocator->alloc_coedge();
+        coedge->set_edge(edge);
+        return coedge;
+    }
+
+    static Edge *create_edge_from_curve(Curve *curve) {
+        auto allocator = BRepAllocator::instance();
+        auto edge = allocator->alloc_edge();
+        edge->set_geometry(curve);
+        edge->set_start(create_vertex_from_position(curve->param_geometry()->evaluate(curve->param_range().start())));
+        edge->set_end(create_vertex_from_position(curve->param_geometry()->evaluate(curve->param_range().end())));
+
+        edge->start()->set_edge(edge);
+        edge->end()->set_edge(edge);
+
+        return edge;
+    }
+
+    static Curve *create_curve_from_param_curve(ParamCurve3D *param_curve) {
+        auto allocator = BRepAllocator::instance();
+        auto curve = allocator->alloc_curve();
+        curve->set_param_range(ParamRange{0.0, 1.0});
+        curve->set_param_geometry(param_curve);
+        return curve;
+    }
+
+    static PCurve *create_pcurve_from_param_pcurve(ParamCurve2D *param_pcurve) {
+        auto allocator = BRepAllocator::instance();
+        auto pcurve = allocator->alloc_pcurve();
+        pcurve->set_param_geometry(param_pcurve);
+        return pcurve;
+    }
+
+    static PCurve *create_straight_line_pcurve(const glm::dvec2 &start, const glm::dvec2 &end) {
+        auto allocator = BRepAllocator::instance();
+        auto param_pcurve = allocator->alloc_param_pcurve<StraightLine2D>(start, end);
+        auto pcurve = allocator->alloc_pcurve();
+        pcurve->set_param_geometry(param_pcurve);
+
+        return pcurve;
+    }
+
+    static Vertex *create_vertex_from_position(const BRepPoint3 &position) {
+        auto allocator = BRepAllocator::instance();
+        Point *point = allocator->alloc_point();
+        point->set_position(position);
+
+        Vertex *vertex = allocator->alloc_vertex();
+        vertex->set_geometry(point);
+
+        return vertex;
+    }
+
+    /**
+     * @brief Create a curve from then pcurve. Sample some points and fit by BSplineCurve3D
+     * @param surface
+     * @param pcurve
+     * @param n
+     * @return
+     */
+    static ParamCurve3D *create_param_curve_from_pcurve(const ParamSurface *surface, const ParamCurve2D *pcurve, int n = 50) {
+        auto allocator = BRepAllocator::instance();
+
+        std::vector<BRepPoint3> points;
+        std::vector<BRepPoint2> param_points;
+
+        for (int i = 0; i <= n; i++) {
+            double param = 1.0 * i / (double)n;
+            auto param_point = pcurve->evaluate(param);
+            param_points.push_back(param_point);
+            points.emplace_back(surface->evaluate(param_point));
+        }
+
+        auto &&curve_temp = BSplineCurve3D::fit(points, 3, 10);
+        auto curve = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve_temp));
+        return curve;
     }
 };
 

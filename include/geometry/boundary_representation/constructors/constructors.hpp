@@ -113,25 +113,25 @@ struct FaceConstructors {
         auto geo_c3 = allocator->alloc_param_curve<StraightLine3D>(v3_pos, v4_pos);
         auto geo_c4 = allocator->alloc_param_curve<StraightLine3D>(v4_pos, v1_pos);
 
-        auto c1 = create_curve_from_param_curve(geo_c1);
-        auto c2 = create_curve_from_param_curve(geo_c2);
-        auto c3 = create_curve_from_param_curve(geo_c3);
-        auto c4 = create_curve_from_param_curve(geo_c4);
+        auto c1 = TopologyUtils::create_curve_from_param_curve(geo_c1);
+        auto c2 = TopologyUtils::create_curve_from_param_curve(geo_c2);
+        auto c3 = TopologyUtils::create_curve_from_param_curve(geo_c3);
+        auto c4 = TopologyUtils::create_curve_from_param_curve(geo_c4);
 
-        auto pc1 = create_straight_line_pcurve({0.0, 0.0}, {1.0, 0.0});
-        auto pc2 = create_straight_line_pcurve({1.0, 0.0}, {1.0, 1.0});
-        auto pc3 = create_straight_line_pcurve({1.0, 1.0}, {0.0, 1.0});
-        auto pc4 = create_straight_line_pcurve({0.0, 1.0}, {0.0, 0.0});
+        auto pc1 = TopologyUtils::create_straight_line_pcurve({0.0, 0.0}, {1.0, 0.0});
+        auto pc2 = TopologyUtils::create_straight_line_pcurve({1.0, 0.0}, {1.0, 1.0});
+        auto pc3 = TopologyUtils::create_straight_line_pcurve({1.0, 1.0}, {0.0, 1.0});
+        auto pc4 = TopologyUtils::create_straight_line_pcurve({0.0, 1.0}, {0.0, 0.0});
 
-        auto e1 = create_edge_from_curve(c1);
-        auto e2 = create_edge_from_curve(c2);
-        auto e3 = create_edge_from_curve(c3);
-        auto e4 = create_edge_from_curve(c4);
+        auto e1 = TopologyUtils::create_edge_from_curve(c1);
+        auto e2 = TopologyUtils::create_edge_from_curve(c2);
+        auto e3 = TopologyUtils::create_edge_from_curve(c3);
+        auto e4 = TopologyUtils::create_edge_from_curve(c4);
 
-        auto ce1 = create_coedge_from_edge(e1);
-        auto ce2 = create_coedge_from_edge(e2);
-        auto ce3 = create_coedge_from_edge(e3);
-        auto ce4 = create_coedge_from_edge(e4);
+        auto ce1 = TopologyUtils::create_coedge_from_edge(e1);
+        auto ce2 = TopologyUtils::create_coedge_from_edge(e2);
+        auto ce3 = TopologyUtils::create_coedge_from_edge(e3);
+        auto ce4 = TopologyUtils::create_coedge_from_edge(e4);
 
         ce1->set_geometry(pc1);
         ce2->set_geometry(pc2);
@@ -148,7 +148,7 @@ struct FaceConstructors {
         ce3->set_next(ce4);
         ce4->set_next(ce1);
 
-        Loop *lp = create_loop_from_coedge(ce1);
+        Loop *lp = TopologyUtils::create_loop_from_coedge(ce1);
         lp->set_face(face);
 
         ce1->set_loop(lp);
@@ -181,20 +181,20 @@ struct FaceConstructors {
             param_pcurve_left = allocator->alloc_param_pcurve<StraightLine2D>(v4_param, v1_param);
             param_pcurve_right = allocator->alloc_param_pcurve<StraightLine2D>(v2_param, v3_param);
 
-            param_curve_left = create_curve_from_pcurve(surface, param_pcurve_left);
-            param_curve_right = create_curve_from_pcurve(surface, param_pcurve_right);
+            param_curve_left = TopologyUtils::create_param_curve_from_pcurve(surface, param_pcurve_left);
+            param_curve_right = TopologyUtils::create_param_curve_from_pcurve(surface, param_pcurve_right);
 
-            pcurve_left = create_pcurve_from_param_pcurve(param_pcurve_left);
-            pcurve_right = create_pcurve_from_param_pcurve(param_pcurve_right);
+            pcurve_left = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve_left);
+            pcurve_right = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve_right);
 
-            curve_left = create_curve_from_param_curve(param_curve_left);
-            curve_right = create_curve_from_param_curve(param_curve_right);
+            curve_left = TopologyUtils::create_curve_from_param_curve(param_curve_left);
+            curve_right = TopologyUtils::create_curve_from_param_curve(param_curve_right);
 
-            edge_left = create_edge_from_curve(curve_left);
-            edge_right = create_edge_from_curve(curve_right);
+            edge_left = TopologyUtils::create_edge_from_curve(curve_left);
+            edge_right = TopologyUtils::create_edge_from_curve(curve_right);
 
-            coedge_left = create_coedge_from_edge(edge_left);
-            coedge_right = create_coedge_from_edge(edge_right);
+            coedge_left = TopologyUtils::create_coedge_from_edge(edge_left);
+            coedge_right = TopologyUtils::create_coedge_from_edge(edge_right);
 
             pcurve_left->set_param_geometry(param_pcurve_left);
             pcurve_right->set_param_geometry(param_pcurve_right);
@@ -208,20 +208,20 @@ struct FaceConstructors {
             param_pcurve_top = allocator->alloc_param_pcurve<StraightLine2D>(v3_param, v4_param);
             param_pcurve_bottom = allocator->alloc_param_pcurve<StraightLine2D>(v1_param, v2_param);
 
-            param_curve_top = create_curve_from_pcurve(surface, param_pcurve_top);
-            param_curve_bottom = create_curve_from_pcurve(surface, param_pcurve_bottom);
+            param_curve_top = TopologyUtils::create_param_curve_from_pcurve(surface, param_pcurve_top);
+            param_curve_bottom = TopologyUtils::create_param_curve_from_pcurve(surface, param_pcurve_bottom);
 
-            pcurve_top = create_pcurve_from_param_pcurve(param_pcurve_top);
-            pcurve_bottom = create_pcurve_from_param_pcurve(param_pcurve_bottom);
+            pcurve_top = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve_top);
+            pcurve_bottom = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve_bottom);
 
-            curve_top = create_curve_from_param_curve(param_curve_top);
-            curve_bottom = create_curve_from_param_curve(param_curve_bottom);
+            curve_top = TopologyUtils::create_curve_from_param_curve(param_curve_top);
+            curve_bottom = TopologyUtils::create_curve_from_param_curve(param_curve_bottom);
 
-            edge_top = create_edge_from_curve(curve_top);
-            edge_bottom = create_edge_from_curve(curve_bottom);
+            edge_top = TopologyUtils::create_edge_from_curve(curve_top);
+            edge_bottom = TopologyUtils::create_edge_from_curve(curve_bottom);
 
-            coedge_top = create_coedge_from_edge(edge_top);
-            coedge_bottom = create_coedge_from_edge(edge_bottom);
+            coedge_top = TopologyUtils::create_coedge_from_edge(edge_top);
+            coedge_bottom = TopologyUtils::create_coedge_from_edge(edge_bottom);
 
             pcurve_top->set_param_geometry(param_pcurve_top);
             pcurve_bottom->set_param_geometry(param_pcurve_bottom);
@@ -238,12 +238,12 @@ struct FaceConstructors {
             coedge_top->set_next(coedge_left);
             coedge_left->set_next(coedge_bottom);
 
-            Loop *lp = create_loop_from_coedge(coedge_bottom);
+            Loop *lp = TopologyUtils::create_loop_from_coedge(coedge_bottom);
             lp->set_face(face);
             face->set_loop(lp);
         } else if (is_u_periodic and not is_v_periodic) {
-            Loop *loop_top = create_loop_from_coedge(coedge_top);
-            Loop *loop_bottom = create_loop_from_coedge(coedge_bottom);
+            Loop *loop_top = TopologyUtils::create_loop_from_coedge(coedge_top);
+            Loop *loop_bottom = TopologyUtils::create_loop_from_coedge(coedge_bottom);
 
             loop_top->set_face(face);
             loop_bottom->set_face(face);
@@ -251,8 +251,8 @@ struct FaceConstructors {
             loop_bottom->set_next(loop_top);
             face->set_loop(loop_bottom);
         } else if (not is_u_periodic and is_v_periodic) {
-            Loop *loop_left = create_loop_from_coedge(coedge_left);
-            Loop *loop_right = create_loop_from_coedge(coedge_right);
+            Loop *loop_left = TopologyUtils::create_loop_from_coedge(coedge_left);
+            Loop *loop_right = TopologyUtils::create_loop_from_coedge(coedge_right);
 
             loop_left->set_face(face);
             loop_right->set_face(face);
@@ -269,92 +269,7 @@ struct FaceConstructors {
         // no boundary curves needed from complete torus
     }
 
-    static Loop *create_loop_from_coedge(Coedge *coedge) {
-        auto allocator = BRepAllocator::instance();
-        Loop *loop = allocator->alloc_loop();
-        loop->set_coedge(coedge);
-        return loop;
-    }
 
-    static Coedge *create_coedge_from_edge(Edge *edge) {
-        auto allocator = BRepAllocator::instance();
-        Coedge *coedge = allocator->alloc_coedge();
-        coedge->set_edge(edge);
-        return coedge;
-    }
-
-    static Edge *create_edge_from_curve(Curve *curve) {
-        auto allocator = BRepAllocator::instance();
-        auto edge = allocator->alloc_edge();
-        edge->set_geometry(curve);
-        edge->set_start(create_vertex_from_position(curve->param_geometry()->evaluate(curve->param_range().start())));
-        edge->set_end(create_vertex_from_position(curve->param_geometry()->evaluate(curve->param_range().end())));
-
-        edge->start()->set_edge(edge);
-        edge->end()->set_edge(edge);
-
-        return edge;
-    }
-
-    static Curve *create_curve_from_param_curve(ParamCurve3D *param_curve) {
-        auto allocator = BRepAllocator::instance();
-        auto curve = allocator->alloc_curve();
-        curve->set_param_range(ParamRange{0.0, 1.0});
-        curve->set_param_geometry(param_curve);
-        return curve;
-    }
-
-    static PCurve *create_pcurve_from_param_pcurve(ParamCurve2D *param_pcurve) {
-        auto allocator = BRepAllocator::instance();
-        auto pcurve = allocator->alloc_pcurve();
-        pcurve->set_param_geometry(param_pcurve);
-        return pcurve;
-    }
-
-    static PCurve *create_straight_line_pcurve(const glm::dvec2 &start, const glm::dvec2 &end) {
-        auto allocator = BRepAllocator::instance();
-        auto param_pcurve = allocator->alloc_param_pcurve<StraightLine2D>(start, end);
-        auto pcurve = allocator->alloc_pcurve();
-        pcurve->set_param_geometry(param_pcurve);
-
-        return pcurve;
-    }
-
-    static Vertex *create_vertex_from_position(const BRepPoint3 &position) {
-        auto allocator = BRepAllocator::instance();
-        Point *point = allocator->alloc_point();
-        point->set_position(position);
-
-        Vertex *vertex = allocator->alloc_vertex();
-        vertex->set_geometry(point);
-
-        return vertex;
-    }
-
-    /**
-     * @brief Create curve from pcruve. Sample some points and fit by BSplineCurve3D
-     * @param surface
-     * @param pcurve
-     * @param n
-     * @return
-     */
-    static ParamCurve3D *create_curve_from_pcurve(const ParamSurface *surface, const ParamCurve2D *pcurve, int n = 50) {
-        auto allocator = BRepAllocator::instance();
-
-        std::vector<BRepPoint3> points;
-        std::vector<BRepPoint2> param_points;
-
-        for (int i = 0; i <= n; i++) {
-            double param = 1.0 * i / (double)n;
-            auto param_point = pcurve->evaluate(param);
-            param_points.push_back(param_point);
-            points.emplace_back(surface->evaluate(param_point));
-        }
-
-        auto &&curve_temp = BSplineCurve3D::fit(points, 3, 10);
-        auto curve = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve_temp));
-        return curve;
-    }
 };
 
 struct BodyConstructors {

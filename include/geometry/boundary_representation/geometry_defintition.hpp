@@ -49,7 +49,16 @@ struct PCurve {
         geometry_ = param_geometry;
     }
 
+    [[nodiscard]] ParamRange param_range() const {
+        return param_range_;
+    }
+
+    void set_param_range(const ParamRange &range) {
+        param_range_ = range;
+    }
+
   private:
+    ParamRange param_range_{};
     ParamCurve2D *geometry_ = nullptr;
 };
 

@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SRC_FILE
         parametric/tessellator.cpp
+        boundary_representation/faceter/cdt_faceter.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILE})

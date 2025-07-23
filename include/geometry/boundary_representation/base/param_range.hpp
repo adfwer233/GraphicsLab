@@ -27,6 +27,9 @@ struct ParamRange {
         end_ = end;
     }
 
+    [[nodiscard]] double get_mid() const {
+        return start_ + (end_ - start_) / 2.0;
+    }
   private:
     double start_ = 0.0;
     double end_ = 1.0;
