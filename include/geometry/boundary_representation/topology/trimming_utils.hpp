@@ -25,7 +25,7 @@ struct ContainmentQuery {
      * @param test_point
      * @return containment query result.
      */
-    static ContainmentResult contained(Face *face, BRepPoint2 test_point) {
+    static ContainmentResult contained(const Face *face, BRepPoint2 test_point) {
         double wn = 0;
 
         for (Loop *loop : TopologyUtils::get_all_loops(face)) {

@@ -35,15 +35,8 @@ struct Vertex {
 };
 
 struct Edge {
-    Curve *geometry() {
+    [[nodiscard]] Curve *geometry() const {
         return geometry_;
-    }
-
-    [[nodiscard]] bool is_forward() const {
-        return forward;
-    }
-    void set_forward(bool is_forward) {
-        forward = is_forward;
     }
 
     void set_geometry(Curve *geometry) {
@@ -53,7 +46,7 @@ struct Edge {
         coedge_ = coedge;
     }
 
-    Coedge *coedge() const {
+    [[nodiscard]] Coedge *coedge() const {
         return coedge_;
     }
 
@@ -91,7 +84,6 @@ struct Edge {
     }
 
   private:
-    bool forward = true;
     Curve *geometry_ = nullptr;
     Coedge *coedge_ = nullptr;
     Vertex *start_ = nullptr;
