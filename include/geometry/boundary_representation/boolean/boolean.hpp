@@ -13,8 +13,6 @@ namespace GraphicsLab::Geometry::BRep {
  * 4. rebuild topology
  *
  */
-struct Boolean {
+struct Boolean {};
 
-};
-
-}
+} // namespace GraphicsLab::Geometry::BRep

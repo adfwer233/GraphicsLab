@@ -20,8 +20,8 @@ struct IntersectionTestBase : TestBase {
 
     void save_ffi_results(const std::vector<FaceFaceIntersectionResult> &inter_results) {
         for (int i = 0; i < inter_results.size(); i++) {
-            Curve* curve = TopologyUtils::create_curve_from_param_curve(inter_results[i].curve);
-            Edge* edge = TopologyUtils::create_edge_from_curve(curve);
+            Curve *curve = TopologyUtils::create_curve_from_param_curve(inter_results[i].curve);
+            Edge *edge = TopologyUtils::create_edge_from_curve(curve);
             edge->set_param_range(ParamRange{inter_results[i].curve_range});
             edges[std::format("ffi{}_edge_{}", ffi_counter, i)] = edge;
         }
@@ -216,7 +216,7 @@ struct FaceFaceIntersectionTest1 : IntersectionTestBase {
         trimming_loop.pcurves = {pc1, pc2, pc3, pc4};
         auto trimming_result = TrimmingUtils::add_trimming_curve(rect, {trimming_loop});
 
-        Face* rect2 = FaceConstructors::plane({-3, -3, 0}, {6, 0, 0}, {0, 6, 0});
+        Face *rect2 = FaceConstructors::plane({-3, -3, 0}, {6, 0, 0}, {0, 6, 0});
 
         for (int i = 0; i < trimming_result.size(); i++) {
             faces[std::format("face_{}", i)] = trimming_result[i];

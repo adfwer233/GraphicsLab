@@ -23,24 +23,25 @@ struct EdgeFaceIntersectionResult {
  * 3. determine whether the point is contained in face
  */
 struct EdgeFaceIntersection {
-    static std::vector<EdgeFaceIntersectionResult> solve(const Edge* edge, const Face* face) {
+    static std::vector<EdgeFaceIntersectionResult> solve(const Edge *edge, const Face *face) {
         return intersect(edge, face);
     }
 
-private:
-
-    static std::vector<EdgeFaceIntersectionResult> intersect(const Edge* edge, const Face* face) {
+  private:
+    static std::vector<EdgeFaceIntersectionResult> intersect(const Edge *edge, const Face *face) {
         std::vector<EdgeFaceIntersectionResult> result;
 
-        ParamCurve3D* curve = edge->geometry()->param_geometry();
-        ParamSurface* surface = face->geometry()->param_geometry();
+        ParamCurve3D *curve = edge->geometry()->param_geometry();
+        ParamSurface *surface = face->geometry()->param_geometry();
 
         auto csi_results = GeneralCurveSurfaceIntersection::solve(curve, surface);
 
-        for (auto csi: csi_results) {
-            if (not edge->param_range().contains(csi.curve_parameter)) continue;
+        for (auto csi : csi_results) {
+            if (not edge->param_range().contains(csi.curve_parameter))
+                continue;
 
-            if (ContainmentQuery::contained(face, csi.surface_parameter) == ContainmentQuery::ContainmentResult::Outside) {
+            if (ContainmentQuery::contained(face, csi.surface_parameter) ==
+                ContainmentQuery::ContainmentResult::Outside) {
                 continue;
             }
 
@@ -56,4 +57,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

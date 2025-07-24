@@ -50,7 +50,7 @@ struct VisualizationProject : IGraphicsLabProject {
         }
 
         // show all edges
-        for (const auto& [name, edge]: test_case->edges) {
+        for (const auto &[name, edge] : test_case->edges) {
             auto mesh = NaiveFaceter::naive_edge_facet(edge, 30);
             context.sceneTree->addGeometryNode<CurveMesh3D>(std::move(mesh), name);
         }

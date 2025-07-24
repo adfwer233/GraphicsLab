@@ -10,9 +10,9 @@
 namespace GraphicsLab::Geometry::BRep {
 
 struct FaceFaceIntersectionResult {
-    ParamCurve3D* curve = nullptr;
-    ParamCurve2D* pcurve1 = nullptr;
-    ParamCurve2D* pcurve2 = nullptr;
+    ParamCurve3D *curve = nullptr;
+    ParamCurve2D *pcurve1 = nullptr;
+    ParamCurve2D *pcurve2 = nullptr;
 
     ParamRange pcurve_range1;
     ParamRange pcurve_range2;
@@ -30,31 +30,32 @@ struct FaceFaceIntersectionResult {
  */
 struct FaceFaceIntersection {
 
-    static std::vector<FaceFaceIntersectionResult> solve(const Face* face1, const Face* face2) {
+    static std::vector<FaceFaceIntersectionResult> solve(const Face *face1, const Face *face2) {
         return intersect(face1, face2);
     }
 
-private:
-    static std::vector<FaceFaceIntersectionResult> intersect(const Face* face1, const Face* face2) {
+  private:
+    static std::vector<FaceFaceIntersectionResult> intersect(const Face *face1, const Face *face2) {
         std::vector<FaceFaceIntersectionResult> ffi_results;
 
-        ParamSurface* surface1 = face1->geometry()->param_geometry();
-        ParamSurface* surface2 = face2->geometry()->param_geometry();
+        ParamSurface *surface1 = face1->geometry()->param_geometry();
+        ParamSurface *surface2 = face2->geometry()->param_geometry();
 
         auto ssi_results = GeneralSurfaceSurfaceIntersection::solve(surface1, surface2);
 
-        for (auto& ssi_result: ssi_results) {
+        for (auto &ssi_result : ssi_results) {
 
             // (curve param, pcurve1 param, pcurve2 param)
             std::vector<std::tuple<double, double, double>> inter_info;
 
             // break with pcurves in surface1
             for (auto edge : TopologyUtils::get_all_edges(face1)) {
-                PCurve* pcurve = TopologyUtils::get_coedge_of_given_face(edge, face1)->geometry();
+                PCurve *pcurve = TopologyUtils::get_coedge_of_given_face(edge, face1)->geometry();
                 auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve1, pcurve->param_geometry());
 
-                for (auto &ppi_result: ppi_results) {
-                    if (not pcurve->param_range().contains(ppi_result.param2)) continue;
+                for (auto &ppi_result : ppi_results) {
+                    if (not pcurve->param_range().contains(ppi_result.param2))
+                        continue;
 
                     auto pos_3d = surface1->evaluate(ppi_result.inter_position);
                     auto curve_param = ssi_result.inter_curve->projection(pos_3d, ppi_result.param1).second;
@@ -71,11 +72,12 @@ private:
 
             // break with pcurves in surface2
             for (auto edge : TopologyUtils::get_all_edges(face2)) {
-                PCurve* pcurve = TopologyUtils::get_coedge_of_given_face(edge, face2)->geometry();
+                PCurve *pcurve = TopologyUtils::get_coedge_of_given_face(edge, face2)->geometry();
                 auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve2, pcurve->param_geometry());
 
-                for (auto &ppi_result: ppi_results) {
-                    if (not pcurve->param_range().contains(ppi_result.param2)) continue;
+                for (auto &ppi_result : ppi_results) {
+                    if (not pcurve->param_range().contains(ppi_result.param2))
+                        continue;
 
                     auto pos_3d = surface2->evaluate(ppi_result.inter_position);
                     auto curve_param = ssi_result.inter_curve->projection(pos_3d, ppi_result.param2).second;
@@ -113,14 +115,12 @@ private:
                     continue;
                 }
 
-                FaceFaceIntersectionResult ffi {
-                    .curve = ssi_result.inter_curve,
-                    .pcurve1 = ssi_result.pcurve1,
-                    .pcurve2 = ssi_result.pcurve2,
-                    .pcurve_range1 = ParamRange{pc1_start, pc1_end},
-                    .pcurve_range2 = ParamRange{pc2_start, pc2_end},
-                    .curve_range = ParamRange{curve_start, curve_end}
-                };
+                FaceFaceIntersectionResult ffi{.curve = ssi_result.inter_curve,
+                                               .pcurve1 = ssi_result.pcurve1,
+                                               .pcurve2 = ssi_result.pcurve2,
+                                               .pcurve_range1 = ParamRange{pc1_start, pc1_end},
+                                               .pcurve_range2 = ParamRange{pc2_start, pc2_end},
+                                               .curve_range = ParamRange{curve_start, curve_end}};
 
                 ffi_results.push_back(ffi);
             }
@@ -128,7 +128,6 @@ private:
 
         return ffi_results;
     }
-
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

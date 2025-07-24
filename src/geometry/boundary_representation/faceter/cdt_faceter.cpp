@@ -101,7 +101,7 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
 
     if (points.size() < cdt.vertices.size()) {
         points.clear();
-        for (auto vert: cdt.vertices) {
+        for (auto vert : cdt.vertices) {
             points.emplace_back(vert.x, vert.y);
         }
     }
