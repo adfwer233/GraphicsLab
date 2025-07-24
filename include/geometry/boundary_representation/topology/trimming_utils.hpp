@@ -54,7 +54,7 @@ struct ContainmentQuery {
         Coedge *coedge_start = loop->coedge();
         Coedge *coedge_iter = loop->coedge();
 
-        constexpr int sample_per_pcurve = 5;
+        constexpr int sample_per_pcurve = 25;
 
         while (true) {
             if (coedge_iter->geometry() == nullptr) {
@@ -105,10 +105,10 @@ struct ContainmentQuery {
         auto outer = v1.x * v2.y - v1.y * v2.x;
         auto inner = glm::dot(v1, v2);
 
-        auto acos_value = std::clamp(std::acos(inner), -1.0, 1.0);
+        auto acos_value = std::acos(std::clamp(inner, -0.9999, 0.9999));
 
         if (std::isnan(acos_value)) {
-            // spdlog::info("NAN CASE");
+            spdlog::info("NAN CASE");
             return 0;
         }
 

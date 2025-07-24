@@ -178,8 +178,24 @@ struct FaceFaceIntersectionTest1 : IntersectionTestBase {
     }
 
     void run_test() override {
-        Face *rect = FaceConstructors::plane({-1, 0, -1}, {2, 0, 0}, {0, 0, 2});
+        auto f = [](GraphicsLab::Geometry::autodiff_vec2 param) -> GraphicsLab::Geometry::autodiff_vec3 {
+            GraphicsLab::Geometry::autodiff_vec3 result;
 
+            BRepPoint3 base{-2, 0, -2};
+            BRepPoint3 dir1{4, 0, 0};
+            BRepPoint3 dir2{0, 0, 4};
+
+            auto u = 2 * 2 * std::numbers::pi * param.x();
+            auto v = 2 * 2 * std::numbers::pi * param.y();
+            result.x() = base.x + dir1.x * param.x();
+            result.y() = 0.3 * sin(u) * sin(v);
+            result.z() = base.z + dir2.z * param.y();
+
+            return result;
+        };
+
+        // Face *rect = FaceConstructors::plane({-1, 0, -1}, {2, 0, 0}, {0, 0, 2});
+        Face *rect = FaceConstructors::explicit_surface(f);
         auto allocator = BRepAllocator::instance();
 
         auto param_pc1 =
@@ -205,6 +221,7 @@ struct FaceFaceIntersectionTest1 : IntersectionTestBase {
         for (int i = 0; i < trimming_result.size(); i++) {
             faces[std::format("face_{}", i)] = trimming_result[i];
         }
+        faces["rect"] = rect2;
 
         auto ffi_result = FaceFaceIntersection::solve(trimming_result[1], rect2);
 

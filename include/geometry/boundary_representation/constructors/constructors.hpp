@@ -239,10 +239,18 @@ struct FaceConstructors {
             coedge_top->set_next(coedge_left);
             coedge_left->set_next(coedge_bottom);
 
+            coedge_bottom->set_geometry(pcurve_bottom);
+            coedge_top->set_geometry(pcurve_top);
+            coedge_right->set_geometry(pcurve_right);
+            coedge_left->set_geometry(pcurve_bottom);
+
             Loop *lp = TopologyUtils::create_loop_from_coedge(coedge_bottom);
             lp->set_face(face);
             face->set_loop(lp);
         } else if (is_u_periodic and not is_v_periodic) {
+            coedge_top->set_geometry(pcurve_top);
+            coedge_bottom->set_geometry(pcurve_bottom);
+
             Loop *loop_top = TopologyUtils::create_loop_from_coedge(coedge_top);
             Loop *loop_bottom = TopologyUtils::create_loop_from_coedge(coedge_bottom);
 
@@ -252,6 +260,9 @@ struct FaceConstructors {
             loop_bottom->set_next(loop_top);
             face->set_loop(loop_bottom);
         } else if (not is_u_periodic and is_v_periodic) {
+            coedge_left->set_geometry(pcurve_left);
+            coedge_right->set_geometry(pcurve_right);
+
             Loop *loop_left = TopologyUtils::create_loop_from_coedge(coedge_left);
             Loop *loop_right = TopologyUtils::create_loop_from_coedge(coedge_right);
 

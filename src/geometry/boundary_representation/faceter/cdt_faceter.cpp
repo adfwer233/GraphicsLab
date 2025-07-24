@@ -23,7 +23,7 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
         }
     }
 
-    int curve_sample_num = 128;
+    int curve_sample_num = 25;
 
     int u_repeat = 0;
     if (face->geometry()->param_geometry()->u_periodic)
@@ -88,7 +88,7 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
 
     spdlog::info("CDT begin, points num {}, edge num {}", points.size(), edges.size());
     // CDT::Triangulation<double> cdt;
-    CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Auto, CDT::IntersectingConstraintEdges::DontCheck, 1e-8);
+    CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Auto, CDT::IntersectingConstraintEdges::TryResolve, 1e-8);
     cdt.insertVertices(
         points.begin(), points.end(), [](const auto &p) { return p.x; }, [](const auto &p) { return p.y; });
     cdt.insertEdges(
@@ -98,9 +98,12 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
     spdlog::info("CDT end");
 
     spdlog::info("CDT input vertices {}, find vertices {}", points.size(), cdt.vertices.size());
-    points.clear();
-    for (auto &p : cdt.vertices) {
-        points.emplace_back(p.x, p.y);
+
+    if (points.size() < cdt.vertices.size()) {
+        points.clear();
+        for (auto vert: cdt.vertices) {
+            points.emplace_back(vert.x, vert.y);
+        }
     }
 
     std::vector<TriangleIndex> triangles;
