@@ -218,6 +218,11 @@ struct TrimmingUtils {
         Loop *loop = TopologyUtils::create_loop_from_coedge(coedges.front());
         Loop *reverse_loop = TopologyUtils::create_loop_from_coedge(reverse_coedges.back());
 
+        for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
+            coedges[i]->set_loop(loop);
+            reverse_coedges[i]->set_loop(reverse_loop);
+        }
+
         return {loop, reverse_loop};
     }
 

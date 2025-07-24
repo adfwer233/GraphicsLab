@@ -50,6 +50,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
     BSplineCurveBase(const BSplineCurveBase<dim> &other) {
         degree_ = other.degree_;
         control_points_ = other.control_points_;
+        derivative_knots_ = other.derivative_knots_;
+        derivative_control_points_ = other.derivative_control_points_;
         knots_ = other.knots_;
         this->box = other.box;
         // this->mesh = std::make_unique<MeshType>(*other.mesh);
@@ -57,6 +59,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
     BSplineCurveBase(BSplineCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
+        derivative_knots_ = std::move(other.derivative_knots_);
+        derivative_control_points_ = std::move(other.derivative_control_points_);
         knots_ = std::move(other.knots_);
         degree_ = other.degree_;
         this->box = other.box;
@@ -340,6 +344,10 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
         const int n = static_cast<int>(ctrl_pts.size()) - 1;
         const int k = degree;
+
+        if (ctrl_pts.empty()) {
+            throw cpptrace::logic_error("empty control points");
+        }
 
         // Clamp u to [0,1]
         u = std::clamp(u, 0.0, 1.0);

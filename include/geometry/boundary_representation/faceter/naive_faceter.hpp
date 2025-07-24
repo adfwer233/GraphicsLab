@@ -30,10 +30,11 @@ struct NaiveFaceter {
             throw cpptrace::logic_error("Curve has no parametric geometry");
         }
 
-        Tessellator::tessellate(*edge->geometry()->param_geometry());
+        Tessellator::tessellate(*edge->geometry()->param_geometry(), n, edge->param_range().start(), edge->param_range().end());
 
         return *edge->geometry()->param_geometry()->mesh.get();
     }
+
 };
 
 } // namespace GraphicsLab::Geometry::BRep

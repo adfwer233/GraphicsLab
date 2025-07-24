@@ -43,7 +43,7 @@ struct Tessellator {
         spdlog::info("Tessellator tessellate() finish");
     }
 
-    static void tessellate(ParamCurve3D &curve, const int n = 50);
+    static void tessellate(ParamCurve3D &curve, const int n = 50, float start = 0.0, float end = 1.0);
     static void tessellate(ParamCurve2D &curve, const int n = 50);
 
     static void tessellate(BRepFace *face);

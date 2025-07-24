@@ -30,7 +30,7 @@ struct FaceFaceIntersectionResult {
  */
 struct FaceFaceIntersection {
 
-    std::vector<FaceFaceIntersectionResult> solve(const Face* face1, const Face* face2) {
+    static std::vector<FaceFaceIntersectionResult> solve(const Face* face1, const Face* face2) {
         return intersect(face1, face2);
     }
 

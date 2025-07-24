@@ -8,11 +8,11 @@
 
 namespace GraphicsLab::Geometry {
 
-void Tessellator::tessellate(ParamCurve3D &curve, const int n) {
+void Tessellator::tessellate(ParamCurve3D &curve, const int n, float start, float end) {
     curve.mesh = std::make_unique<CurveMesh3D>();
 
     for (int i = 0; i <= n; i++) {
-        double param = static_cast<double>(i) / static_cast<double>(n);
+        double param = start + (end - start) * static_cast<double>(i) / static_cast<double>(n);
 
         CurveMesh3D::vertex_type vertex;
         vertex.position = curve.evaluate(param);
@@ -24,6 +24,7 @@ void Tessellator::tessellate(ParamCurve3D &curve, const int n) {
         curve.mesh->indices.push_back({static_cast<uint32_t>(i), static_cast<uint32_t>(i + 1)});
     }
 }
+
 void Tessellator::tessellate(ParamCurve2D &curve, const int n) {
     curve.mesh = std::make_unique<CurveMesh2D>();
 

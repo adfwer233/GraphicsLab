@@ -21,6 +21,7 @@ struct BezierBezierIntersector2D {
             result.param1 = p1;
             result.param2 = p2;
             result.inter_position = (pos1 + pos2) / 2.0;
+            results.push_back(result);
         }
 
         return results;
