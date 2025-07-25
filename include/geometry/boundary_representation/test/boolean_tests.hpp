@@ -5,20 +5,20 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-struct BooleanTestBase: TestBase {
+struct BooleanTestBase : TestBase {
     [[nodiscard]] std::string test_suite_name() const override {
         return "BooleanTest";
     }
 };
 
-struct BreakFaceTest1: BooleanTestBase {
+struct BreakFaceTest1 : BooleanTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "BreakFaceTest1";
     }
 
     void run_test() override {
         Face *plane1 = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
-        Body* body = BodyConstructors::cube({-1, -1, -1}, {1, 1, 1});
+        Body *body = BodyConstructors::cube({-1, -1, -1}, {1, 1, 1});
 
         auto results = Boolean::break_face_by_intersection(plane1, body);
 
@@ -33,4 +33,4 @@ struct BreakFaceTest1: BooleanTestBase {
         result = TestResult::Success;
     }
 };
-}
+} // namespace GraphicsLab::Geometry::BRep

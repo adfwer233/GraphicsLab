@@ -122,7 +122,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
         std::vector<size_t> stack; // vertex stack for reconstructing cycles
 
         // Tarjan’s SCC algorithm
-        auto tarjan_scc = [&](const std::vector<std::vector<Edge>>& graph) -> std::vector<std::vector<size_t>> {
+        auto tarjan_scc = [&](const std::vector<std::vector<Edge>> &graph) -> std::vector<std::vector<size_t>> {
             constexpr size_t UNVISITED = std::numeric_limits<size_t>::max();
             std::vector<size_t> index(graph.size(), UNVISITED), lowlink(graph.size());
             std::vector<bool> on_stack(graph.size(), false);
@@ -135,7 +135,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                 tarjan_stack.push(v);
                 on_stack[v] = true;
 
-                for (const auto& edge : graph[v]) {
+                for (const auto &edge : graph[v]) {
                     size_t w = edge.to;
                     if (index[w] == UNVISITED) {
                         strong_connect(w);
@@ -170,7 +170,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
         // Unblock a node recursively
         std::function<void(size_t)> unblock = [&](size_t u) {
             blocked[u] = false;
-            for (auto& w : block_map[u]) {
+            for (auto &w : block_map[u]) {
                 if (blocked[w]) {
                     unblock(w);
                 }
@@ -184,7 +184,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             stack.push_back(v);
             blocked[v] = true;
 
-            for (const auto& edge : G[v]) {
+            for (const auto &edge : G[v]) {
                 size_t w = edge.to;
                 if (w == s) {
                     // Reconstruct cycle using current stack
@@ -192,7 +192,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                     for (size_t i = 0; i < stack.size(); ++i) {
                         size_t from = stack[i];
                         size_t to = stack[(i + 1) % stack.size()];
-                        for (const auto& e : G[from]) {
+                        for (const auto &e : G[from]) {
                             if (e.to == to) {
                                 cycle.push_back(e);
                                 break;
@@ -211,7 +211,7 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             if (found_cycle) {
                 unblock(v);
             } else {
-                for (const auto& edge : G[v]) {
+                for (const auto &edge : G[v]) {
                     size_t w = edge.to;
                     if (std::find(block_map[w].begin(), block_map[w].end(), v) == block_map[w].end()) {
                         block_map[w].push_back(v);
@@ -229,8 +229,9 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             // Build subgraph of unremoved nodes
             std::vector<std::vector<Edge>> subgraph(N);
             for (size_t u = 0; u < N; ++u) {
-                if (removed[u]) continue;
-                for (const auto& edge : G[u]) {
+                if (removed[u])
+                    continue;
+                for (const auto &edge : G[u]) {
                     if (!removed[edge.to]) {
                         subgraph[u].push_back(edge);
                     }
@@ -243,8 +244,9 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
             // Find SCC with least vertex ≥ start that has size ≥ 2
             std::optional<std::vector<size_t>> selected_scc;
             size_t least_node = N;
-            for (const auto& scc : sccs) {
-                if (scc.size() < 2) continue;
+            for (const auto &scc : sccs) {
+                if (scc.size() < 2)
+                    continue;
                 size_t min_node = *std::min_element(scc.begin(), scc.end());
                 if (min_node >= start && min_node < least_node) {
                     least_node = min_node;
@@ -252,7 +254,8 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                 }
             }
 
-            if (!selected_scc) break;
+            if (!selected_scc)
+                break;
 
             size_t s = least_node;
             for (size_t v : *selected_scc) {

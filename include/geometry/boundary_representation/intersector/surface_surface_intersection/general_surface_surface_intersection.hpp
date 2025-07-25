@@ -234,7 +234,8 @@ struct GeneralSurfaceSurfaceIntersection {
             return false;
         };
 
-        auto interpolate_boundary = [](const BRepPoint2 &param1, const BRepPoint2 &param2, const ParamSurface *surf) -> BRepPoint2 {
+        auto interpolate_boundary = [](const BRepPoint2 &param1, const BRepPoint2 &param2,
+                                       const ParamSurface *surf) -> BRepPoint2 {
             BRepPoint2 res = param1;
             if (not surf->u_periodic) {
                 if (param1.x < 1 and param2.x > 1) {

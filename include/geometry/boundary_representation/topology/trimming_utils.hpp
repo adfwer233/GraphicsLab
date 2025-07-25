@@ -133,7 +133,7 @@ struct TrimmingUtils {
         std::vector<Face *> faces;
         faces.push_back(face);
 
-        for (auto & curve : curves) {
+        for (auto &curve : curves) {
             PCurve *first_pcurve = curve.pcurves.front();
             BRepPoint2 test_point = first_pcurve->param_geometry()->evaluate(0.5);
 
@@ -188,7 +188,7 @@ struct TrimmingUtils {
         std::vector<Coedge *> coedges;
         std::vector<Coedge *> reverse_coedges;
 
-        for (auto & pcurve : trimming_loop.pcurves) {
+        for (auto &pcurve : trimming_loop.pcurves) {
             auto param_pcurve = pcurve->param_geometry();
             auto param_curve =
                 TopologyUtils::create_param_curve_from_pcurve(face->geometry()->param_geometry(), param_pcurve);

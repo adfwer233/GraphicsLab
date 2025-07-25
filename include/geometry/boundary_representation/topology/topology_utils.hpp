@@ -174,41 +174,42 @@ struct TopologyUtils {
         return vertex;
     }
 
-    static Coedge *create_reverse_coedge(const Coedge* coedge) {
+    static Coedge *create_reverse_coedge(const Coedge *coedge) {
         if (coedge->edge() == nullptr) {
             throw cpptrace::logic_error("edge of given coedge is null");
         }
-        Coedge* coedge_reverse = create_coedge_from_edge(coedge->edge());
+        Coedge *coedge_reverse = create_coedge_from_edge(coedge->edge());
         coedge_reverse->set_forward(not coedge->is_forward());
         coedge_reverse->set_edge(coedge->edge());
         coedge_reverse->set_geometry(coedge->geometry());
 
-        PCurve* pcurve_reverse = create_pcurve_from_param_pcurve(coedge->geometry()->param_geometry());
+        PCurve *pcurve_reverse = create_pcurve_from_param_pcurve(coedge->geometry()->param_geometry());
         pcurve_reverse->set_forward(not coedge->geometry()->is_forward());
         coedge_reverse->set_geometry(pcurve_reverse);
 
         return coedge_reverse;
     }
 
-    static std::vector<Coedge*> break_coedge_with_pcurve_params(const Coedge* coedge, const Face* face, const std::vector<double>& pcurve_params) {
+    static std::vector<Coedge *> break_coedge_with_pcurve_params(const Coedge *coedge, const Face *face,
+                                                                 const std::vector<double> &pcurve_params) {
         if (pcurve_params.empty() or pcurve_params.size() <= 1) {
             throw cpptrace::logic_error("At least two params should be provided");
         }
-        std::vector<Coedge*> coedges;
+        std::vector<Coedge *> coedges;
 
-        Curve* curve = coedge->edge()->geometry();
-        PCurve* pcurve = coedge->geometry();
-        Surface* surface = face->geometry();
+        Curve *curve = coedge->edge()->geometry();
+        PCurve *pcurve = coedge->geometry();
+        Surface *surface = face->geometry();
 
         std::vector<double> curve_params;
-        for (double pcurve_param: pcurve_params) {
+        for (double pcurve_param : pcurve_params) {
             auto pos = surface->param_geometry()->evaluate(pcurve->param_geometry()->evaluate(pcurve_param));
             curve_params.push_back(curve->param_geometry()->projection(pos, pcurve_param).second);
         }
 
         for (int i = 1; i < pcurve_params.size(); ++i) {
-            Edge* edge = create_edge_from_curve(curve, curve_params[i - 1], curve_params[i]);
-            Coedge* coedge_new = create_coedge_from_edge(edge);
+            Edge *edge = create_edge_from_curve(curve, curve_params[i - 1], curve_params[i]);
+            Coedge *coedge_new = create_coedge_from_edge(edge);
             coedge_new->set_param_range(ParamRange(pcurve_params[i - 1], pcurve_params[i]));
 
             edge->set_coedge(coedge_new);
@@ -228,7 +229,7 @@ struct TopologyUtils {
         return coedges;
     }
 
-    static Face* create_face_from_loop(Loop* loop) {
+    static Face *create_face_from_loop(Loop *loop) {
         auto allocator = BRepAllocator::instance();
         auto face = allocator->alloc_face();
         face->set_loop(loop);
