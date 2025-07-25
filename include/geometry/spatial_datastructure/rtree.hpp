@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stack>
 #include "glm/glm.hpp"
 
 namespace GraphicsLab::Geometry {
