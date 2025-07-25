@@ -62,8 +62,8 @@ struct ContainmentQuery {
             }
 
             auto pcurve = coedge_iter->geometry();
-            auto pcurve_param_start = pcurve->param_range().start();
-            auto pcurve_param_end = pcurve->param_range().end();
+            auto pcurve_param_start = coedge_iter->param_range().start();
+            auto pcurve_param_end = coedge_iter->param_range().end();
             auto delta = (pcurve_param_end - pcurve_param_start) / sample_per_pcurve;
             std::vector<BRepPoint2> pcurve_samples;
             for (int i = 0; i <= sample_per_pcurve; i++) {
@@ -71,9 +71,10 @@ struct ContainmentQuery {
                 pcurve_samples.emplace_back(pcurve->param_geometry()->evaluate(param));
             }
 
-            if (not coedge_iter->is_forward()) {
+            if (not pcurve->is_forward()) {
                 std::ranges::reverse(pcurve_samples);
             }
+
             std::ranges::copy(pcurve_samples, std::back_inserter(samples));
             coedge_iter = coedge_iter->next();
             if (coedge_iter == coedge_start)
@@ -132,13 +133,13 @@ struct TrimmingUtils {
         std::vector<Face *> faces;
         faces.push_back(face);
 
-        for (int i = 0; i < curves.size(); i++) {
-            PCurve *first_pcurve = curves[i].pcurves.front();
-            BRepPoint2 test_point = first_pcurve->param_geometry()->evaluate(first_pcurve->param_range().get_mid());
+        for (auto & curve : curves) {
+            PCurve *first_pcurve = curve.pcurves.front();
+            BRepPoint2 test_point = first_pcurve->param_geometry()->evaluate(0.5);
 
             for (int j = 0; j < faces.size(); j++) {
                 if (ContainmentQuery::contained(faces[j], test_point) == ContainmentQuery::ContainmentResult::Inside) {
-                    Face *new_face = split_face_with_trimming_loop(faces[j], curves[i]);
+                    Face *new_face = split_face_with_trimming_loop(faces[j], curve);
                     faces.push_back(new_face);
                 }
             }
@@ -177,7 +178,7 @@ struct TrimmingUtils {
 
         for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
             auto param_pcurve = trimming_loop.pcurves[i]->param_geometry();
-            auto param_range = trimming_loop.pcurves[i]->param_range();
+            ParamRange param_range{0, 1};
             pcurve_start.emplace_back(param_pcurve->evaluate(param_range.start()));
             pcurve_end.emplace_back(param_pcurve->evaluate(param_range.end()));
         }
@@ -187,20 +188,22 @@ struct TrimmingUtils {
         std::vector<Coedge *> coedges;
         std::vector<Coedge *> reverse_coedges;
 
-        for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
-            auto param_pcurve = trimming_loop.pcurves[i]->param_geometry();
+        for (auto & pcurve : trimming_loop.pcurves) {
+            auto param_pcurve = pcurve->param_geometry();
             auto param_curve =
                 TopologyUtils::create_param_curve_from_pcurve(face->geometry()->param_geometry(), param_pcurve);
             auto curve = TopologyUtils::create_curve_from_param_curve(param_curve);
             auto edge = TopologyUtils::create_edge_from_curve(curve);
             auto coedge = TopologyUtils::create_coedge_from_edge(edge);
-            coedge->set_geometry(trimming_loop.pcurves[i]);
+            coedge->set_geometry(pcurve);
             edge->set_coedge(coedge);
 
             auto reverse_edge = TopologyUtils::create_edge_from_curve(curve);
             auto reverse_coedge = TopologyUtils::create_coedge_from_edge(reverse_edge);
             reverse_coedge->set_forward(false);
-            reverse_coedge->set_geometry(trimming_loop.pcurves[i]);
+            auto reverse_pcurve = TopologyUtils::create_pcurve_from_param_pcurve(pcurve->param_geometry());
+            reverse_pcurve->set_forward(false);
+            reverse_coedge->set_geometry(reverse_pcurve);
 
             curves.emplace_back(curve);
             edges.emplace_back(edge);
@@ -230,7 +233,7 @@ struct TrimmingUtils {
         PCurve *pcurve = loop->coedge()->geometry();
         ParamCurve2D *param_pcurve = pcurve->param_geometry();
 
-        auto param = pcurve->param_range().get_mid();
+        auto param = loop->coedge()->param_range().get_mid();
         return param_pcurve->evaluate(param);
     }
 };

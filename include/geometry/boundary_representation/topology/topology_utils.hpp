@@ -127,13 +127,13 @@ struct TopologyUtils {
         return coedge;
     }
 
-    static Edge *create_edge_from_curve(Curve *curve) {
+    static Edge *create_edge_from_curve(Curve *curve, double param_start = 0.0, double param_end = 1.0) {
         auto allocator = BRepAllocator::instance();
         auto edge = allocator->alloc_edge();
         edge->set_geometry(curve);
-        edge->set_start(create_vertex_from_position(curve->param_geometry()->evaluate(curve->param_range().start())));
-        edge->set_end(create_vertex_from_position(curve->param_geometry()->evaluate(curve->param_range().end())));
-
+        edge->set_start(create_vertex_from_position(curve->param_geometry()->evaluate(param_start)));
+        edge->set_end(create_vertex_from_position(curve->param_geometry()->evaluate(param_end)));
+        edge->set_param_range(ParamRange(param_start, param_end));
         edge->start()->set_edge(edge);
         edge->end()->set_edge(edge);
 
@@ -143,7 +143,6 @@ struct TopologyUtils {
     static Curve *create_curve_from_param_curve(ParamCurve3D *param_curve) {
         auto allocator = BRepAllocator::instance();
         auto curve = allocator->alloc_curve();
-        curve->set_param_range(ParamRange{0.0, 1.0});
         curve->set_param_geometry(param_curve);
         return curve;
     }
@@ -173,6 +172,64 @@ struct TopologyUtils {
         vertex->set_geometry(point);
 
         return vertex;
+    }
+
+    static Coedge *create_reverse_coedge(const Coedge* coedge) {
+        if (coedge->edge() == nullptr) {
+            throw cpptrace::logic_error("edge of given coedge is null");
+        }
+        Coedge* coedge_reverse = create_coedge_from_edge(coedge->edge());
+        coedge_reverse->set_forward(not coedge->is_forward());
+        coedge_reverse->set_edge(coedge->edge());
+        coedge_reverse->set_geometry(coedge->geometry());
+
+        return coedge_reverse;
+    }
+
+    static std::vector<Coedge*> break_coedge_with_pcurve_params(const Coedge* coedge, const Face* face, const std::vector<double>& pcurve_params) {
+        if (pcurve_params.empty() or pcurve_params.size() <= 1) {
+            throw cpptrace::logic_error("At least two params should be provided");
+        }
+        std::vector<Coedge*> coedges;
+
+        Curve* curve = coedge->edge()->geometry();
+        PCurve* pcurve = coedge->geometry();
+        Surface* surface = face->geometry();
+
+        std::vector<double> curve_params;
+        for (double pcurve_param: pcurve_params) {
+            auto pos = surface->param_geometry()->evaluate(pcurve->param_geometry()->evaluate(pcurve_param));
+            curve_params.push_back(curve->param_geometry()->projection(pos, pcurve_param).second);
+        }
+
+        for (int i = 1; i < pcurve_params.size(); ++i) {
+            Edge* edge = create_edge_from_curve(curve, curve_params[i - 1], curve_params[i]);
+            Coedge* coedge_new = create_coedge_from_edge(edge);
+            coedge_new->set_param_range(ParamRange(pcurve_params[i - 1], pcurve_params[i]));
+
+            edge->set_coedge(coedge_new);
+            coedge_new->set_geometry(pcurve);
+
+            coedges.push_back(coedge_new);
+        }
+
+        if (not coedge->is_forward()) {
+            std::ranges::reverse(coedges);
+        }
+
+        for (int i = 1; i < coedges.size(); ++i) {
+            coedges[i - 1]->set_next(coedges[i]);
+        }
+
+        return coedges;
+    }
+
+    static Face* create_face_from_loop(Loop* loop) {
+        auto allocator = BRepAllocator::instance();
+        auto face = allocator->alloc_face();
+        face->set_loop(loop);
+        loop->set_face(face);
+        return face;
     }
 
     /**

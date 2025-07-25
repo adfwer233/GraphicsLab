@@ -9,7 +9,7 @@
 
 namespace GraphicsLab::Geometry::BRep {
 
-struct FaceFaceIntersectionResult {
+struct FFIResult {
     ParamCurve3D *curve = nullptr;
     ParamCurve2D *pcurve1 = nullptr;
     ParamCurve2D *pcurve2 = nullptr;
@@ -18,6 +18,33 @@ struct FaceFaceIntersectionResult {
     ParamRange pcurve_range2;
 
     ParamRange curve_range;
+
+    [[nodiscard]] std::pair<Coedge*, Coedge*> create_face_coedges() const {
+        Curve* curve1 = TopologyUtils::create_curve_from_param_curve(curve);
+        Edge* edge = TopologyUtils::create_edge_from_curve(curve1);
+        edge->set_param_range(curve_range);
+
+        Coedge* coedge = TopologyUtils::create_coedge_from_edge(edge);
+        edge->set_coedge(coedge);
+
+        Coedge* coedge2 = TopologyUtils::create_coedge_from_edge(edge);
+        coedge2->set_param_range(curve_range);
+        coedge2->set_forward(false);
+
+        coedge->set_partner(coedge2);
+        coedge2->set_partner(coedge);
+
+        PCurve* pcurve1_ = TopologyUtils::create_pcurve_from_param_pcurve(pcurve1);
+        coedge->set_param_range(pcurve_range1);
+
+        PCurve* pcurve2_ = TopologyUtils::create_pcurve_from_param_pcurve(pcurve2);
+        coedge2->set_param_range(pcurve_range2);
+
+        coedge->set_geometry(pcurve1_);
+        coedge2->set_geometry(pcurve2_);
+
+        return {coedge, coedge2};
+    }
 };
 
 /**
@@ -30,13 +57,13 @@ struct FaceFaceIntersectionResult {
  */
 struct FaceFaceIntersection {
 
-    static std::vector<FaceFaceIntersectionResult> solve(const Face *face1, const Face *face2) {
+    static std::vector<FFIResult> solve(const Face *face1, const Face *face2) {
         return intersect(face1, face2);
     }
 
   private:
-    static std::vector<FaceFaceIntersectionResult> intersect(const Face *face1, const Face *face2) {
-        std::vector<FaceFaceIntersectionResult> ffi_results;
+    static std::vector<FFIResult> intersect(const Face *face1, const Face *face2) {
+        std::vector<FFIResult> ffi_results;
 
         ParamSurface *surface1 = face1->geometry()->param_geometry();
         ParamSurface *surface2 = face2->geometry()->param_geometry();
@@ -50,11 +77,12 @@ struct FaceFaceIntersection {
 
             // break with pcurves in surface1
             for (auto edge : TopologyUtils::get_all_edges(face1)) {
-                PCurve *pcurve = TopologyUtils::get_coedge_of_given_face(edge, face1)->geometry();
+                Coedge* coedge = TopologyUtils::get_coedge_of_given_face(edge, face1);
+                PCurve *pcurve = coedge->geometry();
                 auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve1, pcurve->param_geometry());
 
                 for (auto &ppi_result : ppi_results) {
-                    if (not pcurve->param_range().contains(ppi_result.param2))
+                    if (not coedge->param_range().contains(ppi_result.param2))
                         continue;
 
                     auto pos_3d = surface1->evaluate(ppi_result.inter_position);
@@ -72,11 +100,12 @@ struct FaceFaceIntersection {
 
             // break with pcurves in surface2
             for (auto edge : TopologyUtils::get_all_edges(face2)) {
-                PCurve *pcurve = TopologyUtils::get_coedge_of_given_face(edge, face2)->geometry();
+                Coedge* coedge = TopologyUtils::get_coedge_of_given_face(edge, face2);
+                PCurve *pcurve = coedge->geometry();
                 auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve2, pcurve->param_geometry());
 
                 for (auto &ppi_result : ppi_results) {
-                    if (not pcurve->param_range().contains(ppi_result.param2))
+                    if (not coedge->param_range().contains(ppi_result.param2))
                         continue;
 
                     auto pos_3d = surface2->evaluate(ppi_result.inter_position);
@@ -115,12 +144,12 @@ struct FaceFaceIntersection {
                     continue;
                 }
 
-                FaceFaceIntersectionResult ffi{.curve = ssi_result.inter_curve,
-                                               .pcurve1 = ssi_result.pcurve1,
-                                               .pcurve2 = ssi_result.pcurve2,
-                                               .pcurve_range1 = ParamRange{pc1_start, pc1_end},
-                                               .pcurve_range2 = ParamRange{pc2_start, pc2_end},
-                                               .curve_range = ParamRange{curve_start, curve_end}};
+                FFIResult ffi{.curve = ssi_result.inter_curve,
+                                           .pcurve1 = ssi_result.pcurve1,
+                                           .pcurve2 = ssi_result.pcurve2,
+                                           .pcurve_range1 = ParamRange{pc1_start, pc1_end},
+                                           .pcurve_range2 = ParamRange{pc2_start, pc2_end},
+                                           .curve_range = ParamRange{curve_start, curve_end}};
 
                 ffi_results.push_back(ffi);
             }

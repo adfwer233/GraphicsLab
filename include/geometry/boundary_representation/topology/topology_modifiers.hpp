@@ -40,11 +40,11 @@ struct TopologyModifiers {
                 // sample midpoint from e1
 
                 auto c1 = e1->geometry();
-                auto c1_mid_param = (c1->param_range().start() + c1->param_range().end()) / 2;
+                auto c1_mid_param = (e1->param_range().start() + e1->param_range().end()) / 2;
                 auto c1_mid_pos = c1->param_geometry()->evaluate(c1_mid_param);
 
                 auto c2 = e2->geometry();
-                auto c2_mid_param = (c2->param_range().start() + c2->param_range().end()) / 2;
+                auto c2_mid_param = (e2->param_range().start() + e2->param_range().end()) / 2;
                 auto c2_mid_pos = c2->param_geometry()->evaluate(c2_mid_param);
 
                 if (glm::distance(c1_mid_pos, c2_mid_pos) < Tolerance::default_tolerance) {
@@ -57,6 +57,10 @@ struct TopologyModifiers {
 
         for (auto [e1, e2] : edge_pairs) {
             stitch_faces_along_edge(face1, face2, e1, e2);
+        }
+
+        if (edge_pairs.empty()) {
+            throw cpptrace::runtime_error("No matching edge between faces");
         }
     }
 };

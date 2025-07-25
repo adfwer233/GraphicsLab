@@ -18,7 +18,7 @@ struct IntersectionTestBase : TestBase {
         ssi_counter++;
     }
 
-    void save_ffi_results(const std::vector<FaceFaceIntersectionResult> &inter_results) {
+    void save_ffi_results(const std::vector<FFIResult> &inter_results) {
         for (int i = 0; i < inter_results.size(); i++) {
             Curve *curve = TopologyUtils::create_curve_from_param_curve(inter_results[i].curve);
             Edge *edge = TopologyUtils::create_edge_from_curve(curve);

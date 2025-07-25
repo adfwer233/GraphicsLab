@@ -3,15 +3,16 @@
 namespace GraphicsLab::Geometry::BRep {
 
 struct ParamRange {
-    double start() const {
+    [[nodiscard]] double start() const {
         return start_;
     }
-    double end() const {
+    [[nodiscard]] double end() const {
         return end_;
     }
 
     explicit ParamRange() : start_(0), end_(1.0) {
     }
+
     explicit ParamRange(double start, double end) : start_(start), end_(end) {
     }
 
@@ -31,7 +32,7 @@ struct ParamRange {
         return start_ + (end_ - start_) / 2.0;
     }
 
-    bool contains(const double value) const {
+    [[nodiscard]] bool contains(const double value) const {
         return start_ <= value && value <= end_;
     }
 

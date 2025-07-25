@@ -134,7 +134,7 @@ struct Coedge {
         partner_ = partner;
     }
 
-    [[nodiscard]] ParamRange get_param_range() const {
+    [[nodiscard]] ParamRange param_range() const {
         return param_range_;
     }
     void set_param_range(ParamRange param_range) {

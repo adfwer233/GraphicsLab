@@ -24,24 +24,16 @@ struct Curve {
         return geometry_;
     }
 
-    [[nodiscard]] ParamRange param_range() const {
-        return param_range_;
-    }
-    void set_param_range(const ParamRange &range) {
-        param_range_ = range;
-    }
-
     void set_param_geometry(ParamCurve3D *param_geometry) {
         geometry_ = param_geometry;
     }
 
   private:
-    ParamRange param_range_{};
     ParamCurve3D *geometry_ = nullptr;
 };
 
 struct PCurve {
-    ParamCurve2D *param_geometry() {
+    [[nodiscard]] ParamCurve2D *param_geometry() const {
         return geometry_;
     }
 
@@ -49,16 +41,15 @@ struct PCurve {
         geometry_ = param_geometry;
     }
 
-    [[nodiscard]] ParamRange param_range() const {
-        return param_range_;
+    [[nodiscard]] bool is_forward() const {
+        return forward_;
     }
-
-    void set_param_range(const ParamRange &range) {
-        param_range_ = range;
+    void set_forward(bool is_forward) {
+        forward_ = is_forward;
     }
 
   private:
-    ParamRange param_range_{};
+    bool forward_ = true;
     ParamCurve2D *geometry_ = nullptr;
 };
 

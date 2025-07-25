@@ -5,6 +5,7 @@
 #include "spdlog/spdlog.h"
 
 #include "geometry/boundary_representation/faceter/naive_faceter.hpp"
+#include "geometry/boundary_representation/test/boolean_tests.hpp"
 #include "geometry/boundary_representation/test/intersection_test.hpp"
 #include "geometry/boundary_representation/test/test_base.hpp"
 #include "geometry/boundary_representation/test/trimming_test.hpp"
@@ -28,7 +29,7 @@ struct VisualizationProject : IGraphicsLabProject {
         using namespace GraphicsLab::Geometry::BRep;
         std::unique_ptr<TestBase> test_case = nullptr;
 
-        test_case = std::make_unique<FaceFaceIntersectionTest1>();
+        test_case = std::make_unique<PlaneIntersection1>();
         spdlog::set_level(spdlog::level::debug);
         test_case->run_test();
 

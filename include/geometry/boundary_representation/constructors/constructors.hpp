@@ -316,7 +316,7 @@ struct BodyConstructors {
         TopologyModifiers::stitch_faces(front, right);
         TopologyModifiers::stitch_faces(right, back);
         TopologyModifiers::stitch_faces(back, left);
-        TopologyModifiers::stitch_faces(left, top);
+        TopologyModifiers::stitch_faces(left, front);
 
         TopologyModifiers::stitch_faces(top, front);
         TopologyModifiers::stitch_faces(top, right);
