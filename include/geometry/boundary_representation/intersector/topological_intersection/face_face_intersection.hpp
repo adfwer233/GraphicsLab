@@ -73,7 +73,8 @@ struct FaceFaceIntersection {
         for (auto &ssi_result : ssi_results) {
 
             // (curve param, pcurve1 param, pcurve2 param)
-            std::vector<std::tuple<double, double, double>> inter_info;
+            using InterType = std::tuple<double, double, double>;
+            std::vector<InterType> inter_info;
 
             // break with pcurves in surface1
             for (auto edge : TopologyUtils::get_all_edges(face1)) {
@@ -126,6 +127,13 @@ struct FaceFaceIntersection {
             inter_info.push_back({1.0, 1.0, 1.0});
 
             std::ranges::sort(inter_info);
+            auto last = std::unique(inter_info.begin(), inter_info.end(), [](InterType a, InterType b) {
+                return std::fabs(std::get<0>(a) - std::get<0>(b)) < 1e-4;
+            });
+
+            // Erase the duplicates
+            inter_info.erase(last, inter_info.end());
+
 
             for (int i = 1; i < inter_info.size(); i++) {
                 auto [curve_start, pc1_start, pc2_start] = inter_info[i - 1];

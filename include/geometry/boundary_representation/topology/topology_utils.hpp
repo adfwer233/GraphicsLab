@@ -183,6 +183,10 @@ struct TopologyUtils {
         coedge_reverse->set_edge(coedge->edge());
         coedge_reverse->set_geometry(coedge->geometry());
 
+        PCurve* pcurve_reverse = create_pcurve_from_param_pcurve(coedge->geometry()->param_geometry());
+        pcurve_reverse->set_forward(not coedge->geometry()->is_forward());
+        coedge_reverse->set_geometry(pcurve_reverse);
+
         return coedge_reverse;
     }
 

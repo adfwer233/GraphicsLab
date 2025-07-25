@@ -96,10 +96,16 @@ struct Boolean {
 
         auto add_to_rtree = [&](BRepPoint3 pos) -> size_t {
             RTreeNode find_node;
-            auto found = rtree.findPointInRange(pos, find_node, 1e-6);
+            auto found = rtree.findPointInRange(pos, find_node, 0.01);
             if (not found) {
-                rtree.insert(pos, {pos, par_pos_of_vertices.size()});
+                rtree.insert(pos, {pos, par_pos_of_vertices.size()}, 0.01);
+                double minv = 100;
+                for (auto p: par_pos_of_vertices) {
+                    minv = std::min(minv, glm::distance(p, pos));
+                }
+                spdlog::critical("minv {}", minv);
                 par_pos_of_vertices.push_back(pos);
+
                 return par_pos_of_vertices.size() - 1;
             } else {
                 return find_node.index;
@@ -139,10 +145,33 @@ struct Boolean {
         // add inter coedges (with bi-direction)
         for (Coedge* coedge: intersection_coedges) {
             auto [u, v] = coedge_vertices[coedge];
-            face_intersection_graph.add_bidirectional_edge(u, v, {coedge});
+            face_intersection_graph.add_directed_edge(u, v, {coedge});
         }
 
-        auto circuits = face_intersection_graph.find_all_simple_circuits();
+        auto simple_circuits = face_intersection_graph.find_all_simple_circuits();
+
+        decltype(simple_circuits) circuits;
+
+        // (edge) -> index in simple_circuits
+        std::map<std::pair<int, int>, size_t> index_map;
+        std::set<size_t> visited_index;
+        for (int i = 0; i < simple_circuits.size(); ++i) {
+            const auto& circuit = simple_circuits[i];
+            size_t n = circuit.size();
+            for (const auto& edge: circuit) {
+                std::pair<int, int> e{edge.from, edge.to};
+                if (not index_map.contains(e) or simple_circuits[index_map[e]].size() < n) {
+                    index_map[e] = i;
+                }
+            }
+        }
+
+        for (auto [e, i]: index_map) {
+            visited_index.insert(i);
+        }
+        for (auto i: visited_index) {
+            circuits.push_back(simple_circuits[i]);
+        }
 
         // build topology from circuits.
         std::vector<Loop*> loops;
@@ -162,9 +191,49 @@ struct Boolean {
             loops.push_back(loop);
         }
 
+        // @todo: non-simply connected case.
+
+        std::set<Face*> faces_set;
+        std::vector<Loop*> hole_loops;
         for (int i = 0; i < loops.size(); ++i) {
-            Face* f = TopologyUtils::create_face_from_loop(loops[i]);
-            f->set_geometry(face->geometry());
+
+            bool is_hole = ContainmentQuery::is_hole(loops[i]);
+
+            if (not is_hole) {
+                Face* f = TopologyUtils::create_face_from_loop(loops[i]);
+                f->set_geometry(face->geometry());
+                faces_set.insert(f);
+            } else {
+                hole_loops.push_back(loops[i]);
+            }
+        }
+
+        for (Loop* lp: hole_loops) {
+            Coedge* first_coedge = lp->coedge();
+            double sample_param = first_coedge->param_range().get_mid();
+            BRepVector2 derivative = first_coedge->geometry()->param_geometry()->derivative(sample_param);
+
+            if (not first_coedge->is_forward()) derivative = -derivative;
+            BRepVector2 in_normal = glm::normalize(BRepVector2{-derivative.y, derivative.x});
+            BRepPoint2 sample = first_coedge->geometry()->param_geometry()->evaluate(sample_param) + in_normal * 1e-3;
+
+            bool flag = false;
+            for (Face* f: faces_set) {
+                //@todo handle nested loops
+                if (ContainmentQuery::contained(f, sample) == ContainmentQuery::ContainmentResult::Inside) {
+                    // add loop
+                    lp->set_next(f->loop()->next());
+                    f->loop()->set_next(lp);
+                    lp->set_face(f);
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (not flag) throw cpptrace::runtime_error("Hole loop can not find corresponding loop");
+        }
+
+        for (auto f: faces_set) {
             faces.push_back(f);
         }
 

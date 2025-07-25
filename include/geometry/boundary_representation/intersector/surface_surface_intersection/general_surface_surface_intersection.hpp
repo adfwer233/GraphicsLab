@@ -234,6 +234,29 @@ struct GeneralSurfaceSurfaceIntersection {
             return false;
         };
 
+        auto interpolate_boundary = [](const BRepPoint2 &param1, const BRepPoint2 &param2, const ParamSurface *surf) -> BRepPoint2 {
+            BRepPoint2 res = param1;
+            if (not surf->u_periodic) {
+                if (param1.x < 1 and param2.x > 1) {
+                    res = glm::mix(param1, param2, (1 - param1.x) / (param2.x - param1.x));
+                }
+                if (param1.x > 0 and param2.x < 0) {
+                    res = glm::mix(param1, param2, (param1.x) / (param1.x - param2.x));
+                }
+            }
+
+            if (not surf->v_periodic) {
+                if (param1.y < 1 and param2.y > 1) {
+                    res = glm::mix(param1, param2, (1 - param1.y) / (param2.y - param1.y));
+                }
+                if (param1.y > 0 and param2.y < 0) {
+                    res = glm::mix(param1, param2, (param1.y) / (param1.y - param2.y));
+                }
+            }
+
+            return res;
+        };
+
         for (int step = 0; step < max_iter; step++) {
             // spdlog::info("current param: ({}, {}), ({}, {})", param1.x, param1.y, param2.x, param2.y);
             auto F = surf1->evaluate(param1) - surf2->evaluate(param2);
@@ -243,17 +266,28 @@ struct GeneralSurfaceSurfaceIntersection {
                 param1 = refine_param1;
                 param2 = refine_param2;
             }
-
             if (check_out_boundary(param1, surf1) or check_out_boundary(param2, surf2)) {
                 break;
             }
-
             intersections.emplace_back(param1, param2, surf1->evaluate(param1));
 
             auto [param1_tangent, param2_tangent] = compute_tangent_direction(surf1, surf2, param1, param2);
 
             param1 = param1 + step_length * param1_tangent * static_cast<double>(sign);
             param2 = param2 + step_length * param2_tangent * static_cast<double>(sign);
+
+            if (check_out_boundary(param1, surf1) or check_out_boundary(param2, surf2)) {
+                auto param1_old = param1 - step_length * param1_tangent * static_cast<double>(sign);
+                auto param2_old = param2 - step_length * param2_tangent * static_cast<double>(sign);
+
+                auto res1 = interpolate_boundary(param1_old, param1, surf1);
+                auto res2 = interpolate_boundary(param2_old, param2, surf2);
+                auto eval1 = surf1->evaluate(res1);
+                auto eval2 = surf2->evaluate(res2);
+
+                intersections.emplace_back(res1, res2, (eval1 + eval2) / 2.0);
+                break;
+            }
 
             if (glm::distance(surf1->move_param_to_std_domain(param1), begin_param1) < 1e-3 or
                 glm::distance(surf2->move_param_to_std_domain(param2), begin_param2) < 1e-3) {

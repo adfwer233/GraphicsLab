@@ -90,10 +90,9 @@ template <size_t dim, typename AttachmentType> class RTree {
 
     void insert(const PointType &position, AttachmentType data, double pos_tol = 1e-6) {
         pos_tol = std::max(pos_tol, tol_);
-        // 构造新Node
+
         Node *newNode = new Node(new Sphere(position, pos_tol), data, nullptr, pos_tol);
 
-        // 利用stack找到一个叶子节点
         std::stack<Node *> stack;
         stack.push(root_);
         while (stack.top()->children_.size() > 0) {
@@ -118,7 +117,6 @@ template <size_t dim, typename AttachmentType> class RTree {
                 split(top, new_split_node);
                 new_split_node->parent_ = top->parent_;
 
-                // 更新包围球
                 top->updateSphere();
                 new_split_node->updateSphere();
 

@@ -115,86 +115,29 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
      */
     std::vector<std::vector<Edge>> find_all_simple_circuits() {
         std::vector<std::vector<Edge>> result;
-        std::vector<bool> blocked(nodes.size(), false);
+
+        const size_t N = nodes.size();
+        std::vector<bool> blocked(N, false);
         std::unordered_map<size_t, std::vector<size_t>> block_map;
-        std::stack<size_t> stack;
-        std::vector<size_t> stack_vec;
+        std::vector<size_t> stack; // vertex stack for reconstructing cycles
 
-        std::function<void(size_t)> unblock = [&](size_t node) {
-            blocked[node] = false;
-            while (!block_map[node].empty()) {
-                size_t w = block_map[node].back();
-                block_map[node].pop_back();
-                if (blocked[w]) {
-                    unblock(w);
-                }
-            }
-        };
-
-        std::function<bool(size_t, size_t)> circuit = [&](size_t v, size_t start) -> bool {
-            bool found_cycle = false;
-            stack.push(v);
-            blocked[v] = true;
-            stack_vec.push_back(v);
-
-            for (const auto &edge : G[v]) {
-                size_t w = edge.to;
-                if (w == start) {
-                    std::vector<Edge> cycle;
-
-                    /**
-                     * @todo: use map here
-                     */
-                    for (size_t i = 0; i < stack_vec.size(); ++i) {
-                        size_t next = stack_vec[(i + 1) % stack_vec.size()];
-                        for (auto ed : G[stack_vec[i]]) {
-                            if (ed.to == next) {
-                                cycle.push_back(ed);
-                                break;
-                            }
-                        }
-                    }
-                    result.push_back(cycle);
-                    found_cycle = true;
-                } else if (!blocked[w]) {
-                    if (circuit(w, start)) {
-                        found_cycle = true;
-                    }
-                }
-            }
-
-            if (found_cycle) {
-                unblock(v);
-            } else {
-                for (const auto &edge : G[v]) {
-                    size_t w = edge.to;
-                    if (std::find(block_map[w].begin(), block_map[w].end(), v) == block_map[w].end()) {
-                        block_map[w].push_back(v);
-                    }
-                }
-            }
-
-            stack.pop();
-            stack_vec.pop_back();
-            return found_cycle;
-        };
-
-        auto tarjan_scc = [&](const std::vector<std::vector<Edge>> &graph) -> std::vector<std::vector<size_t>> {
-            std::vector<std::vector<size_t>> sccs;
-            std::vector<size_t> index(graph.size(), -1);
-            std::vector<size_t> lowlink(graph.size(), -1);
+        // Tarjan’s SCC algorithm
+        auto tarjan_scc = [&](const std::vector<std::vector<Edge>>& graph) -> std::vector<std::vector<size_t>> {
+            constexpr size_t UNVISITED = std::numeric_limits<size_t>::max();
+            std::vector<size_t> index(graph.size(), UNVISITED), lowlink(graph.size());
             std::vector<bool> on_stack(graph.size(), false);
             std::stack<size_t> tarjan_stack;
-            size_t current_index = 0;
+            std::vector<std::vector<size_t>> sccs;
+            size_t idx = 0;
 
-            std::function<void(size_t)> strong_connect = [&](size_t v) -> void {
-                index[v] = lowlink[v] = current_index++;
+            std::function<void(size_t)> strong_connect = [&](size_t v) {
+                index[v] = lowlink[v] = idx++;
                 tarjan_stack.push(v);
                 on_stack[v] = true;
 
-                for (const auto &edge : graph[v]) {
+                for (const auto& edge : graph[v]) {
                     size_t w = edge.to;
-                    if (index[w] == -1) {
+                    if (index[w] == UNVISITED) {
                         strong_connect(w);
                         lowlink[v] = std::min(lowlink[v], lowlink[w]);
                     } else if (on_stack[w]) {
@@ -210,54 +153,115 @@ template <typename NodeAttachmentType, typename EdgeAttachmentType> struct Direc
                         tarjan_stack.pop();
                         on_stack[w] = false;
                         scc.push_back(w);
-                    } while (v != w);
+                    } while (w != v);
                     sccs.push_back(scc);
                 }
             };
 
-            for (size_t i = 0; i < graph.size(); ++i) {
-                if (index[i] == -1) {
-                    strong_connect(i);
+            for (size_t v = 0; v < graph.size(); ++v) {
+                if (index[v] == UNVISITED) {
+                    strong_connect(v);
                 }
             }
 
             return sccs;
         };
 
-        size_t start_index = 0;
-        while (start_index < nodes.size()) {
-            std::vector<std::vector<Edge>> subgraph(nodes.size());
-            for (size_t i = start_index; i < nodes.size(); ++i) {
-                for (const auto &edge : G[i]) {
-                    if (edge.to >= start_index) {
-                        subgraph[i].push_back(edge);
+        // Unblock a node recursively
+        std::function<void(size_t)> unblock = [&](size_t u) {
+            blocked[u] = false;
+            for (auto& w : block_map[u]) {
+                if (blocked[w]) {
+                    unblock(w);
+                }
+            }
+            block_map[u].clear();
+        };
+
+        // The main DFS-like recursive circuit finder
+        std::function<bool(size_t, size_t)> circuit = [&](size_t v, size_t s) -> bool {
+            bool found_cycle = false;
+            stack.push_back(v);
+            blocked[v] = true;
+
+            for (const auto& edge : G[v]) {
+                size_t w = edge.to;
+                if (w == s) {
+                    // Reconstruct cycle using current stack
+                    std::vector<Edge> cycle;
+                    for (size_t i = 0; i < stack.size(); ++i) {
+                        size_t from = stack[i];
+                        size_t to = stack[(i + 1) % stack.size()];
+                        for (const auto& e : G[from]) {
+                            if (e.to == to) {
+                                cycle.push_back(e);
+                                break;
+                            }
+                        }
+                    }
+                    result.push_back(std::move(cycle));
+                    found_cycle = true;
+                } else if (!blocked[w]) {
+                    if (circuit(w, s)) {
+                        found_cycle = true;
                     }
                 }
             }
 
-            auto sccs = tarjan_scc(subgraph);
-            if (sccs.empty()) {
-                break;
-            }
-
-            for (const auto &scc : sccs) {
-                if (scc.size() > 1) {
-                    start_index = *std::min_element(scc.begin(), scc.end());
-                    break;
-                }
-            }
-
-            if (sccs.front().size() == 1) {
-                start_index++;
+            if (found_cycle) {
+                unblock(v);
             } else {
-                size_t s = sccs.front().front();
-                for (const auto &node : sccs.front()) {
-                    blocked[node] = false;
-                    block_map[node].clear();
+                for (const auto& edge : G[v]) {
+                    size_t w = edge.to;
+                    if (std::find(block_map[w].begin(), block_map[w].end(), v) == block_map[w].end()) {
+                        block_map[w].push_back(v);
+                    }
                 }
-                circuit(s, s);
-                start_index++;
             }
+
+            stack.pop_back();
+            return found_cycle;
+        };
+
+        // Johnson’s main loop
+        std::vector<bool> removed(N, false);
+        for (size_t start = 0; start < N; ++start) {
+            // Build subgraph of unremoved nodes
+            std::vector<std::vector<Edge>> subgraph(N);
+            for (size_t u = 0; u < N; ++u) {
+                if (removed[u]) continue;
+                for (const auto& edge : G[u]) {
+                    if (!removed[edge.to]) {
+                        subgraph[u].push_back(edge);
+                    }
+                }
+            }
+
+            // Get SCCs of subgraph
+            auto sccs = tarjan_scc(subgraph);
+
+            // Find SCC with least vertex ≥ start that has size ≥ 2
+            std::optional<std::vector<size_t>> selected_scc;
+            size_t least_node = N;
+            for (const auto& scc : sccs) {
+                if (scc.size() < 2) continue;
+                size_t min_node = *std::min_element(scc.begin(), scc.end());
+                if (min_node >= start && min_node < least_node) {
+                    least_node = min_node;
+                    selected_scc = scc;
+                }
+            }
+
+            if (!selected_scc) break;
+
+            size_t s = least_node;
+            for (size_t v : *selected_scc) {
+                blocked[v] = false;
+                block_map[v].clear();
+            }
+
+            circuit(s, s);
+            removed[s] = true; // Mark the node as removed
         }
 
         return result;

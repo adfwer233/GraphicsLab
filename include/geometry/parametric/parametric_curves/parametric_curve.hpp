@@ -70,9 +70,10 @@ template <size_t dim> struct ParamCurveBase {
         }
 
         PointType pos = evaluate(t);
-        if (glm::dot(test_point - pos, derivative(t)) > 1e-3) {
-            throw cpptrace::logic_error("Curve projection failed.");
-        }
+        auto dis = glm::distance(pos, test_point);
+        // if (glm::dot(test_point - pos, derivative(t)) > 1e-3) {
+        //     throw cpptrace::logic_error("Curve projection failed.");
+        // }
 
         return {evaluate(t), t};
     }

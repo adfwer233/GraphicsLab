@@ -83,7 +83,7 @@ struct ContainmentQuery {
 
         BRepPoint2 dir = samples[1] - samples[0];
         BRepPoint2 in_dir{-dir.y, dir.x};
-        BRepPoint2 test_point = glm::mix(samples[0], samples[1], 0.5) + in_dir * 1e-3;
+        BRepPoint2 test_point = glm::mix(samples[0], samples[1], 0.5) + glm::normalize(in_dir) * 1e-2;
 
         if (test_point_given.has_value()) {
             test_point = test_point_given.value();
@@ -106,7 +106,7 @@ struct ContainmentQuery {
         auto outer = v1.x * v2.y - v1.y * v2.x;
         auto inner = glm::dot(v1, v2);
 
-        auto acos_value = std::acos(std::clamp(inner, -0.9999, 0.9999));
+        auto acos_value = std::acos(std::clamp(inner, -0.999999999, 0.99999999));
 
         if (std::isnan(acos_value)) {
             spdlog::info("NAN CASE");
