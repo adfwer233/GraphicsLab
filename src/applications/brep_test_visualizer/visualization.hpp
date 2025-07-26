@@ -29,8 +29,8 @@ struct VisualizationProject : IGraphicsLabProject {
         using namespace GraphicsLab::Geometry::BRep;
         std::unique_ptr<TestBase> test_case = nullptr;
 
-        test_case = std::make_unique<BreakFaceTest1>();
-        spdlog::set_level(spdlog::level::debug);
+        test_case = std::make_unique<CubeBooleanUniteTest1>();
+        // spdlog::set_level(spdlog::level::debug);
         test_case->run_test();
 
         if (test_case->result != TestBase::TestResult::Success) {

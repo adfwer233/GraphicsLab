@@ -12,6 +12,9 @@
 namespace GraphicsLab {
 
 template <typename NodeAttachmentType, typename EdgeAttachmentType> struct DirectedGraph {
+    using NodeType = NodeAttachmentType;
+    using EdgeType = EdgeAttachmentType;
+
     struct Node {
         NodeAttachmentType data;
     };

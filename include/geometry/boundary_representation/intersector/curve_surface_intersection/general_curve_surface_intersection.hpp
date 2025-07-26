@@ -37,6 +37,18 @@ struct GeneralCurveSurfaceIntersection {
         constexpr double tol = Tolerance::default_tolerance;
         // spdlog::info("refine initial len {}", glm::length(surf->evaluate(surf_param) - cur->evaluate(curve_param)));
 
+        auto check_surf_out_boundary = [](const BRepPoint2 &param, const ParamSurface *surf) -> bool {
+            if (not surf->u_periodic) {
+                if (param.x < 0 or param.x > 1)
+                    return true;
+            }
+            if (not surf->v_periodic) {
+                if (param.y < 0 or param.y > 1)
+                    return true;
+            }
+            return false;
+        };
+
         for (int i = 0; i < max_newton_iter; i++) {
             BRepPoint3 p1 = surf->evaluate(surf_param);
             BRepPoint3 p2 = cur->evaluate(curve_param);
@@ -61,6 +73,10 @@ struct GeneralCurveSurfaceIntersection {
             surf_param.x -= delta[0];
             surf_param.y -= delta[1];
             curve_param -= delta[2];
+
+            if (check_surf_out_boundary(surf_param, surf)) {
+                break;
+            }
         }
 
         // spdlog::info("refine result len {}, param1 = ({}, {}), param2 = {}", glm::length(surf->evaluate(surf_param) -

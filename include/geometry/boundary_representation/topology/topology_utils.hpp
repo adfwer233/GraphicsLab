@@ -237,6 +237,26 @@ struct TopologyUtils {
         return face;
     }
 
+    static Shell* create_shell_from_faces(const std::vector<Face*>& faces) {
+        auto allocator = BRepAllocator::instance();
+        auto shell = allocator->alloc_shell();
+        shell->set_face(faces.front());
+        faces.front()->set_shell(shell);
+        for (int i = 1; i < faces.size(); ++i) {
+            faces[i - 1]->set_next(faces[i]);
+            faces[i]->set_shell(shell);
+        }
+        return shell;
+    }
+
+    static Body* create_body_from_shell(Shell* shell) {
+        auto allocator = BRepAllocator::instance();
+        auto body = allocator->alloc_body();
+        body->set_shell(shell);
+        shell->set_body(body);
+        return body;
+    }
+
     /**
      * @brief Create a curve from then pcurve. Sample some points and fit by BSplineCurve3D
      * @param surface
