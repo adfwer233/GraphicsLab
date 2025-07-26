@@ -237,7 +237,7 @@ struct TopologyUtils {
         return face;
     }
 
-    static Shell* create_shell_from_faces(const std::vector<Face*>& faces) {
+    static Shell *create_shell_from_faces(const std::vector<Face *> &faces) {
         auto allocator = BRepAllocator::instance();
         auto shell = allocator->alloc_shell();
         shell->set_face(faces.front());
@@ -249,7 +249,7 @@ struct TopologyUtils {
         return shell;
     }
 
-    static Body* create_body_from_shell(Shell* shell) {
+    static Body *create_body_from_shell(Shell *shell) {
         auto allocator = BRepAllocator::instance();
         auto body = allocator->alloc_body();
         body->set_shell(shell);

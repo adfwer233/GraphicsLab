@@ -29,8 +29,8 @@ struct GeneralCurveSurfaceIntersection {
 
     static std::vector<CSIResult> solve(const ParamCurve3D *curve, const ParamSurface *surface) {
 
-        if (auto line = dynamic_cast<const StraightLine3D*>(curve)) {
-            if (auto plane = dynamic_cast<const Plane*>(surface)) {
+        if (auto line = dynamic_cast<const StraightLine3D *>(curve)) {
+            if (auto plane = dynamic_cast<const Plane *>(surface)) {
                 return LinePlaneIntersection::solve(line, plane);
             }
         }
@@ -109,8 +109,7 @@ struct GeneralCurveSurfaceIntersection {
 
             auto [refine_surface, refine_curve] = refine_with_newton(surface, curve, proj_param, param);
 
-            if (glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve)) <
-                1e-3) {
+            if (glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve)) < 1e-3) {
                 initial_guess.emplace_back(refine_surface, refine_curve);
             }
         }

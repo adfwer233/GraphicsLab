@@ -23,7 +23,7 @@ struct LinePlaneIntersection {
      * ---> [x, y, -d] [u, v, t]^T = p - o
      * ---> [u, v, t]^T = [x, y, -d]^{-1} (p - o)
      */
-    static std::vector<CSIResult> solve(const StraightLine3D* line, const Plane* plane) {
+    static std::vector<CSIResult> solve(const StraightLine3D *line, const Plane *plane) {
         glm::dmat3 M = glm::dmat3();
         M[0][0] = plane->u_direction_.x;
         M[1][0] = plane->u_direction_.y;
@@ -58,7 +58,6 @@ struct LinePlaneIntersection {
 
         return {};
     }
-
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

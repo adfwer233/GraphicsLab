@@ -113,10 +113,8 @@ struct Boolean {
         // put all endpoints to Rtree and record
         std::map<Coedge *, std::pair<size_t, size_t>> coedge_vertices;
         for (Coedge *coedge : broken_coedges) {
-            BRepPoint2 start_pos =
-                coedge->geometry()->param_geometry()->evaluate(coedge->param_range().start());
-            BRepPoint2 end_pos =
-                coedge->geometry()->param_geometry()->evaluate(coedge->param_range().end());
+            BRepPoint2 start_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().start());
+            BRepPoint2 end_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().end());
             if (not coedge->is_forward())
                 std::swap(start_pos, end_pos);
             auto start_idx = add_to_rtree(start_pos);
@@ -125,10 +123,8 @@ struct Boolean {
         }
 
         for (Coedge *coedge : intersection_coedges) {
-            BRepPoint2 start_pos =
-                coedge->geometry()->param_geometry()->evaluate(coedge->param_range().start());
-            BRepPoint2 end_pos =
-                coedge->geometry()->param_geometry()->evaluate(coedge->param_range().end());
+            BRepPoint2 start_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().start());
+            BRepPoint2 end_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().end());
             if (not coedge->is_forward())
                 std::swap(start_pos, end_pos);
             auto start_idx = add_to_rtree(start_pos);
@@ -178,7 +174,7 @@ struct Boolean {
         }
 
         using G = decltype(face_intersection_graph);
-        auto planar_face_extraction = [](G& graph) -> std::vector<std::vector<G::Edge>> {
+        auto planar_face_extraction = [](G &graph) -> std::vector<std::vector<G::Edge>> {
             int n = graph.nodes.size();
             for (int i = 0; i < n; i++) {
                 std::ranges::sort(graph.G[i], [graph](G::Edge a, G::Edge b) -> bool {
@@ -193,11 +189,12 @@ struct Boolean {
 
             std::vector<std::vector<G::Edge>> result;
             std::vector<G::Edge> cur;
-            auto dfs = [&](auto&& dfs_func, int v, int prev, int start) -> void {
+            auto dfs = [&](auto &&dfs_func, int v, int prev, int start) -> void {
                 for (int i = 0; i < graph.G[v].size(); ++i) {
                     decltype(visited)::value_type p = std::make_pair(graph.G[v][i].from, graph.G[v][i].to);
 
-                    if (p.second == prev) continue;
+                    if (p.second == prev)
+                        continue;
                     if (not visited.contains(p)) {
                         visited.insert(p);
                         cur.push_back(graph.G[v][i]);
@@ -211,7 +208,8 @@ struct Boolean {
             for (int i = 0; i < n; i++) {
                 cur.clear();
                 dfs(dfs, i, -1, i);
-                if (not cur.empty()) result.push_back(cur);
+                if (not cur.empty())
+                    result.push_back(cur);
             }
 
             return result;
@@ -241,7 +239,7 @@ struct Boolean {
 
         std::set<Face *> faces_set;
         std::vector<Loop *> hole_loops;
-        for (auto & loop : loops) {
+        for (auto &loop : loops) {
 
             bool is_hole = ContainmentQuery::is_hole(loop);
 
@@ -295,13 +293,13 @@ struct Boolean {
      * @param op
      * @return
      */
-    static Body* boolean_operation(const Body* body1, const Body* body2, Operation op) {
-        std::vector<Face*> body1_faces, body2_faces;
+    static Body *boolean_operation(const Body *body1, const Body *body2, Operation op) {
+        std::vector<Face *> body1_faces, body2_faces;
         std::vector<bool> body1_faces_inside_flag, body2_faces_inside_flag;
         // stage1: break faces by intersection
 
-        auto break_faces_in_body = [](const Body* b1, const Body* b2, std::vector<Face*>& face_vec) {
-            for (auto f: TopologyUtils::get_all_faces(b1)) {
+        auto break_faces_in_body = [](const Body *b1, const Body *b2, std::vector<Face *> &face_vec) {
+            for (auto f : TopologyUtils::get_all_faces(b1)) {
                 auto faces = break_face_by_intersection(f, b2);
                 std::ranges::copy(faces, std::back_inserter(face_vec));
             }
@@ -312,7 +310,8 @@ struct Boolean {
 
         // stage2: inside/outside classification
 
-        auto inside_outside_classification = [](std::vector<Face*>& faces, std::vector<bool>& faces_inside_flag, const Body* another_body) {
+        auto inside_outside_classification = [](std::vector<Face *> &faces, std::vector<bool> &faces_inside_flag,
+                                                const Body *another_body) {
             // we use a simple ray casting and determine inside/outside by odd-even rule
             faces_inside_flag.clear();
             faces_inside_flag.resize(faces.size());
@@ -322,12 +321,15 @@ struct Boolean {
                 StraightLine3D test_line{sample_point + direction * 1e-3, sample_point + direction * 100.0};
 
                 int inter_num = 0;
-                for (auto f: TopologyUtils::get_all_faces(another_body)) {
+                for (auto f : TopologyUtils::get_all_faces(another_body)) {
                     auto inter = GeneralCurveSurfaceIntersection::solve(&test_line, f->geometry()->param_geometry());
 
-                    for (auto csi: inter) {
-                        spdlog::info("csi info: curve param {}, surf param {} {}, pos {} {} {}", csi.curve_parameter, csi.surface_parameter.x, csi.surface_parameter.y, csi.inter_position.x, csi.inter_position.y, csi.inter_position.z);
-                        if (ContainmentQuery::contained(f, csi.surface_parameter) == ContainmentQuery::ContainmentResult::Inside) {
+                    for (auto csi : inter) {
+                        spdlog::info("csi info: curve param {}, surf param {} {}, pos {} {} {}", csi.curve_parameter,
+                                     csi.surface_parameter.x, csi.surface_parameter.y, csi.inter_position.x,
+                                     csi.inter_position.y, csi.inter_position.z);
+                        if (ContainmentQuery::contained(f, csi.surface_parameter) ==
+                            ContainmentQuery::ContainmentResult::Inside) {
                             inter_num++;
                         }
                     }
@@ -337,13 +339,12 @@ struct Boolean {
             }
         };
 
-
         inside_outside_classification(body1_faces, body1_faces_inside_flag, body2);
         inside_outside_classification(body2_faces, body2_faces_inside_flag, body1);
 
         // stage3: rebuild topology
 
-        auto rebuild_topology_preprocess = [](Face* face, bool inside_flag, bool is_blank, Operation op) -> bool {
+        auto rebuild_topology_preprocess = [](Face *face, bool inside_flag, bool is_blank, Operation op) -> bool {
             if (op == Operation::Union) {
                 return not inside_flag;
             } else if (op == Operation::Intersection) {
@@ -358,7 +359,7 @@ struct Boolean {
             }
         };
 
-        std::vector<Face*> faces_set;
+        std::vector<Face *> faces_set;
         for (int i = 0; i < body1_faces.size(); ++i) {
             if (auto reserve = rebuild_topology_preprocess(body1_faces[i], body1_faces_inside_flag[i], true, op)) {
                 faces_set.push_back(body1_faces[i]);
@@ -376,8 +377,8 @@ struct Boolean {
 
         // @todo stitch adjoint faces.
 
-        Shell* shell = TopologyUtils::create_shell_from_faces(faces_set);
-        Body* result = TopologyUtils::create_body_from_shell(shell);
+        Shell *shell = TopologyUtils::create_shell_from_faces(faces_set);
+        Body *result = TopologyUtils::create_body_from_shell(shell);
 
         return result;
     }
@@ -388,18 +389,19 @@ struct Boolean {
      * @param face
      * @return
      */
-    static std::pair<BRepPoint3, BRepPoint2> get_point_in_face(const Face* face) {
-        Loop* lp = face->loop();
-        Coedge* ce = lp->coedge();
-        PCurve* pc = ce->geometry();
-        ParamCurve2D* param_pc = pc->param_geometry();
+    static std::pair<BRepPoint3, BRepPoint2> get_point_in_face(const Face *face) {
+        Loop *lp = face->loop();
+        Coedge *ce = lp->coedge();
+        PCurve *pc = ce->geometry();
+        ParamCurve2D *param_pc = pc->param_geometry();
 
         double param = ce->param_range().get_mid();
         BRepPoint2 par_pos = param_pc->evaluate(param);
 
         BRepVector2 t = param_pc->derivative(param);
 
-        if (not pc->is_forward()) t = -t;
+        if (not pc->is_forward())
+            t = -t;
 
         BRepVector2 n{-t.y, t.x};
 
@@ -411,8 +413,6 @@ struct Boolean {
 
         return {face->geometry()->param_geometry()->evaluate(sample), sample};
     }
-
-
 
     static void remove_duplicates(std::vector<double> &vec, double eps) {
         // Sort the vector first
