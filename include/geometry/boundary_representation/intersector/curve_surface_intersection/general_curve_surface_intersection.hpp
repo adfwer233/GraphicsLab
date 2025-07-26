@@ -1,6 +1,7 @@
 #pragma once
 
 #include "csi_results.hpp"
+#include "line_plane_intersection.hpp"
 
 #include <Eigen/Eigen>
 
@@ -27,27 +28,33 @@ struct CSIResult;
 struct GeneralCurveSurfaceIntersection {
 
     static std::vector<CSIResult> solve(const ParamCurve3D *curve, const ParamSurface *surface) {
+
+        if (auto line = dynamic_cast<const StraightLine3D*>(curve)) {
+            if (auto plane = dynamic_cast<const Plane*>(surface)) {
+                return LinePlaneIntersection::solve(line, plane);
+            }
+        }
+
         return intersect(curve, surface);
     }
 
   private:
+    static auto check_surf_out_boundary(const BRepPoint2 &param, const ParamSurface *surf) -> bool {
+        if (not surf->u_periodic) {
+            if (param.x < 0 or param.x > 1)
+                return true;
+        }
+        if (not surf->v_periodic) {
+            if (param.y < 0 or param.y > 1)
+                return true;
+        }
+        return false;
+    };
+
     static std::pair<BRepPoint2, double> refine_with_newton(const ParamSurface *surf, const ParamCurve3D *cur,
                                                             BRepPoint2 surf_param, double curve_param) {
         constexpr int max_newton_iter = 10;
         constexpr double tol = Tolerance::default_tolerance;
-        // spdlog::info("refine initial len {}", glm::length(surf->evaluate(surf_param) - cur->evaluate(curve_param)));
-
-        auto check_surf_out_boundary = [](const BRepPoint2 &param, const ParamSurface *surf) -> bool {
-            if (not surf->u_periodic) {
-                if (param.x < 0 or param.x > 1)
-                    return true;
-            }
-            if (not surf->v_periodic) {
-                if (param.y < 0 or param.y > 1)
-                    return true;
-            }
-            return false;
-        };
 
         for (int i = 0; i < max_newton_iter; i++) {
             BRepPoint3 p1 = surf->evaluate(surf_param);
@@ -79,9 +86,6 @@ struct GeneralCurveSurfaceIntersection {
             }
         }
 
-        // spdlog::info("refine result len {}, param1 = ({}, {}), param2 = {}", glm::length(surf->evaluate(surf_param) -
-        // cur->evaluate(curve_param)), surf_param.x, surf_param.y, curve_param);
-
         return std::make_pair(surf_param, curve_param);
     }
 
@@ -99,10 +103,14 @@ struct GeneralCurveSurfaceIntersection {
                 continue;
             }
 
+            if (check_surf_out_boundary(proj_param, surface)) {
+                continue;
+            }
+
             auto [refine_surface, refine_curve] = refine_with_newton(surface, curve, proj_param, param);
 
             if (glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve)) <
-                Tolerance::default_tolerance) {
+                1e-3) {
                 initial_guess.emplace_back(refine_surface, refine_curve);
             }
         }
@@ -132,6 +140,11 @@ struct GeneralCurveSurfaceIntersection {
                 }
 
                 if (not already_exists) {
+                    double dist = glm::distance(surf_pos, curve->evaluate(curve_param));
+                    if (dist > 1e-3) {
+                        throw cpptrace::runtime_error("curve surface intersection failed");
+                    }
+
                     result.emplace_back(surf_pos, curve_param, surf_param);
                 }
             }

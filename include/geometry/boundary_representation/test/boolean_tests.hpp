@@ -36,7 +36,7 @@ struct BreakFaceTest1 : BooleanTestBase {
 
 struct BreakFaceTest2 : BooleanTestBase {
     [[nodiscard]] std::string test_case_name() const override {
-        return "BreakFaceTest1";
+        return "BreakFaceTest2";
     }
 
     void run_test() override {

@@ -4,6 +4,7 @@
 #include "geometry/boundary_representation/topology_definition.hpp"
 #include "geometry/spatial_datastructure/rtree.hpp"
 #include "utils/graph.hpp"
+#include "utils/sampler.hpp"
 
 #include <set>
 #include <vector>
@@ -317,14 +318,15 @@ struct Boolean {
             faces_inside_flag.resize(faces.size());
             for (int i = 0; i < faces.size(); ++i) {
                 auto [sample_point, sample_par_pos] = get_point_in_face(faces[i]);
-                StraightLine3D test_line{sample_point, sample_point + BRepVector3{10, 0, 0}};
+                BRepPoint3 direction = Sampler::sampleUniformVec3();
+                StraightLine3D test_line{sample_point + direction * 1e-3, sample_point + direction * 100.0};
 
                 int inter_num = 0;
                 for (auto f: TopologyUtils::get_all_faces(another_body)) {
                     auto inter = GeneralCurveSurfaceIntersection::solve(&test_line, f->geometry()->param_geometry());
 
                     for (auto csi: inter) {
-                        spdlog::info("csi info: curve param {}, pos {} {} {}", csi.curve_parameter, csi.inter_position.x, csi.inter_position.y, csi.inter_position.z);
+                        spdlog::info("csi info: curve param {}, surf param {} {}, pos {} {} {}", csi.curve_parameter, csi.surface_parameter.x, csi.surface_parameter.y, csi.inter_position.x, csi.inter_position.y, csi.inter_position.z);
                         if (ContainmentQuery::contained(f, csi.surface_parameter) == ContainmentQuery::ContainmentResult::Inside) {
                             inter_num++;
                         }

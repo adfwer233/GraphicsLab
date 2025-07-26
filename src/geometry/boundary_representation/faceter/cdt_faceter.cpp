@@ -86,18 +86,18 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
         edge.second = indexMap[edge.second];
     }
 
-    spdlog::info("CDT begin, points num {}, edge num {}", points.size(), edges.size());
+    spdlog::debug("CDT begin, points num {}, edge num {}", points.size(), edges.size());
     // CDT::Triangulation<double> cdt;
     CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Auto, CDT::IntersectingConstraintEdges::TryResolve, 1e-8);
     cdt.insertVertices(
         points.begin(), points.end(), [](const auto &p) { return p.x; }, [](const auto &p) { return p.y; });
     cdt.insertEdges(
         edges.begin(), edges.end(), [](const auto &e) { return e.first; }, [](const auto &e) { return e.second; });
-    spdlog::info("CDT start culling");
+    spdlog::debug("CDT start culling");
     cdt.eraseSuperTriangle();
-    spdlog::info("CDT end");
+    spdlog::debug("CDT end");
 
-    spdlog::info("CDT input vertices {}, find vertices {}", points.size(), cdt.vertices.size());
+    spdlog::debug("CDT input vertices {}, find vertices {}", points.size(), cdt.vertices.size());
 
     if (points.size() < cdt.vertices.size()) {
         points.clear();
@@ -107,7 +107,7 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
     }
 
     std::vector<TriangleIndex> triangles;
-    spdlog::info("Winding Number Culling begin");
+    spdlog::debug("Winding Number Culling begin");
     for (auto &tri : cdt.triangles) {
         auto barycenter = (points[tri.vertices[0]] + points[tri.vertices[1]] + points[tri.vertices[2]]) / 3.0;
         if (is_in_domain(barycenter) and is_in_domain(points[tri.vertices[0]]) and
@@ -117,7 +117,7 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
             }
         }
     }
-    spdlog::info("Winding Number Culling end, {} triangle, remain {}", cdt.triangles.size(), triangles.size());
+    spdlog::debug("Winding Number Culling end, {} triangle, remain {}", cdt.triangles.size(), triangles.size());
 
     Mesh3D mesh;
     mesh.indices = triangles;

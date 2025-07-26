@@ -259,7 +259,6 @@ struct GeneralSurfaceSurfaceIntersection {
         };
 
         for (int step = 0; step < max_iter; step++) {
-            // spdlog::info("current param: ({}, {}), ({}, {})", param1.x, param1.y, param2.x, param2.y);
             auto F = surf1->evaluate(param1) - surf2->evaluate(param2);
 
             if (glm::length(F) > length_iter) {
@@ -339,8 +338,6 @@ struct GeneralSurfaceSurfaceIntersection {
     static std::vector<SSIResult> intersect_all(const ParamSurface *surf1, const ParamSurface *surf2) {
         auto inital = find_all_possible_initial_guess(surf1, surf2);
 
-        spdlog::info("initial size {}", inital.size());
-
         std::vector<SSIResult> result;
 
         std::vector<KDTree::KDTree<3, KDTree::PointPrimitive<3>>> curve_kd_trees;
@@ -357,7 +354,6 @@ struct GeneralSurfaceSurfaceIntersection {
                 auto pos1 = surf1->evaluate(refine_param1);
                 auto dist = t.nearestNeighbor(t.root, pos1).distance_to(pos1);
                 auto dist_pos = glm::distance(pos1, surf2->evaluate(refine_param2));
-                // spdlog::info("dist {}, dist pos {}", dist, dist_pos);
 
                 min_dis_pos = std::min(min_dis_pos, dist);
                 if (dist < 5 * 1e-2 and dist_pos < 1e-3) {
@@ -382,13 +378,10 @@ struct GeneralSurfaceSurfaceIntersection {
             }
         }
 
-        spdlog::info("components num {}", trace_results.size());
-
         auto allocator = BRepAllocator::instance();
 
         for (auto &trace : trace_results) {
             SSIResult ssi_result;
-            spdlog::info("size {}", trace.size());
             std::vector<BRepPoint3> points;
             std::vector<BRepPoint2> params1, params2;
             for (auto [param1, param2, pos] : trace) {
@@ -412,8 +405,6 @@ struct GeneralSurfaceSurfaceIntersection {
             pcurve1.control_points_.back() = params1.back();
             BSplineCurve2D *pcurve1_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve1));
             ssi_result.pcurve1 = pcurve1_alloc;
-
-            spdlog::info("pcurve1 start from {} {}, to {} {}", params1.front().x, params1.front().y, params1.back().x, params1.back().y);
 
             auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, control_points_count);
             pcurve2.control_points_.front() = params2.front();
