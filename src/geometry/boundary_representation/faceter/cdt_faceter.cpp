@@ -127,6 +127,10 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
         vertex.position = face->geometry()->param_geometry()->evaluate({p.x, p.y});
         vertex.normal = face->geometry()->param_geometry()->normal({p.x, p.y});
 
+        if (not face->is_forward()) {
+            vertex.normal = -vertex.normal;
+        }
+
         mesh.vertices.push_back(vertex);
     }
 
