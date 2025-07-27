@@ -408,6 +408,18 @@ struct GeneralSurfaceSurfaceIntersection {
                 continue;
             }
 
+            bool replicated = false;
+            for (auto &t : result) {
+                auto pos = points[points.size() / 2];
+                auto proj = t.inter_curve->projection(pos, 0.5);
+                double dist = glm::distance(proj.first, pos);
+                if (dist < Tolerance::default_tolerance) {
+                    replicated = true;
+                }
+                // spdlog::info("trace dist {}", dist);
+            }
+            if (replicated) continue;
+
             spdlog::info("trace len {}", trace.size());
             int control_points_count =
                 std::min(static_cast<size_t>(50), std::max(static_cast<size_t>(10), points.size() / 2));

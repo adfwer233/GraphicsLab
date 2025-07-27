@@ -91,12 +91,12 @@ struct SpherePlaneIntersection1 : IntersectionTestBase {
 
 struct SpherePlaneIntersection2 : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
-        return "SpherePlaneIntersection1";
+        return "SpherePlaneIntersection2";
     }
 
     void run_test() override {
-        Face *sphere = FaceConstructors::sphere({0, 0, 0}, 0.9);
-        Face *plane2 = FaceConstructors::plane({-1, 0, -1}, {2, 0, 0}, {0, 0, 2});
+        Face *sphere = FaceConstructors::sphere({0.1, 0.1, 0.1}, 0.9);
+        Face *plane2 = FaceConstructors::plane({0, 0, 0}, {2, 0, 0}, {0, 0, 2});
 
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(sphere->geometry()->param_geometry(),
                                                                      plane2->geometry()->param_geometry());
@@ -288,6 +288,10 @@ struct FaceFaceIntersectionTest1 : IntersectionTestBase {
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::PlaneIntersection1)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::SpherePlaneIntersection1)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::SpherePlaneIntersection2)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::TorusPlaneIntersection1)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
