@@ -66,6 +66,7 @@ struct FaceConstructors {
         auto face = allocator->alloc_face();
         face->set_geometry(surface);
 
+        create_basic_topology(param_geometry, face);
         return face;
     }
 
@@ -254,6 +255,9 @@ struct FaceConstructors {
             Loop *loop_top = TopologyUtils::create_loop_from_coedge(coedge_top);
             Loop *loop_bottom = TopologyUtils::create_loop_from_coedge(coedge_bottom);
 
+            coedge_top->set_loop(loop_top);
+            coedge_bottom->set_loop(loop_bottom);
+
             loop_top->set_face(face);
             loop_bottom->set_face(face);
 
@@ -265,6 +269,9 @@ struct FaceConstructors {
 
             Loop *loop_left = TopologyUtils::create_loop_from_coedge(coedge_left);
             Loop *loop_right = TopologyUtils::create_loop_from_coedge(coedge_right);
+
+            coedge_left->set_loop(loop_left);
+            coedge_right->set_loop(loop_right);
 
             loop_left->set_face(face);
             loop_right->set_face(face);
@@ -329,6 +336,11 @@ struct BodyConstructors {
         TopologyModifiers::stitch_faces(bottom, left);
 
         return create_body_from_list_of_faces({front, right, back, left, top, bottom});
+    }
+
+    static Body* sphere(BRepPoint3 center, double radius) {
+        Face* face = FaceConstructors::sphere(center, radius);
+        return create_body_from_list_of_faces({face});
     }
 
   private:

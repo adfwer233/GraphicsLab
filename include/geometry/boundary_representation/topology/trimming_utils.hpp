@@ -28,6 +28,10 @@ struct ContainmentQuery {
     static ContainmentResult contained(const Face *face, BRepPoint2 test_point) {
         double wn = 0;
 
+        if (face->loop() == nullptr) {
+            return ContainmentResult::Inside;
+        }
+
         for (Loop *loop : TopologyUtils::get_all_loops(face)) {
             wn += winding_number_loop(loop, test_point);
         }
@@ -56,7 +60,7 @@ struct ContainmentQuery {
 
         constexpr int sample_per_pcurve = 25;
 
-        while (true) {
+        while (coedge_iter != nullptr) {
             if (coedge_iter->geometry() == nullptr) {
                 throw cpptrace::logic_error("coedge has no pcurve");
             }

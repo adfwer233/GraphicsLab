@@ -10,6 +10,19 @@ struct BezierBezierIntersector2D {
         std::vector<PPIResult> results;
         std::vector<std::pair<double, double>> intersections;
 
+        if (is_point(curve1) or is_point(curve2)) {
+            if (glm::distance(curve1.evaluate(0), curve2.evaluate(0)) < 1e-3) {
+                return {
+                    PPIResult{
+                        .param1 = 0,
+                        .param2 = 0,
+                        .inter_position = curve1.start_position()
+                    }
+                };
+            } else {
+                return {};
+            }
+        }
         intersect_recursive(curve1, curve2, 0.0, 1.0, 0.0, 1.0, intersections);
 
         for (auto [p1, p2] : intersections) {
@@ -48,6 +61,10 @@ struct BezierBezierIntersector2D {
 
         if (glm::distance(p1, p2) < EPSILON) {
             intersections.emplace_back((t1a + t1b) / 2.0, (t2a + t2b) / 2.0);
+
+            if (intersections.size() > 10) {
+                int n = 0;
+            }
             return;
         }
 
@@ -78,6 +95,15 @@ struct BezierBezierIntersector2D {
         double u = cross(qp, r) / denom;
 
         return (t > 0 && t < 1 && u > 0 && u < 1);
+    }
+
+    static bool is_point(const BezierCurve2D &curve) {
+        for (int i = 1; i < curve.control_points_.size(); ++i) {
+            if (glm::distance(curve.control_points_[i], curve.control_points_[i - 1]) > 1e-3) {
+                return false;
+            }
+        }
+        return true;
     }
 };
 

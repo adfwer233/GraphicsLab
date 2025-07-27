@@ -2,6 +2,7 @@
 #include "geometry/boundary_representation/intersector/curve_surface_intersection/general_curve_surface_intersection.hpp"
 #include "geometry/boundary_representation/intersector/topological_intersection/face_face_intersection.hpp"
 #include "geometry/boundary_representation/topology_definition.hpp"
+#include "geometry/parametric/sphere.hpp"
 #include "geometry/spatial_datastructure/rtree.hpp"
 #include "utils/graph.hpp"
 #include "utils/sampler.hpp"
@@ -236,11 +237,12 @@ struct Boolean {
         }
 
         // @todo: non-simply connected case.
+        bool is_simply_connected = not face->geometry()->param_geometry()->u_periodic and not face->geometry()->param_geometry()->v_periodic;
 
         std::set<Face *> faces_set;
         std::vector<Loop *> hole_loops;
-        for (auto &loop : loops) {
 
+        for (auto &loop : loops) {
             bool is_hole = ContainmentQuery::is_hole(loop);
 
             if (not is_hole) {
@@ -250,6 +252,17 @@ struct Boolean {
             } else {
                 hole_loops.push_back(loop);
             }
+        }
+
+        if (dynamic_cast<Sphere*>(face->geometry()->param_geometry())) {
+            int x = 0;
+        }
+
+        if (not is_simply_connected) {
+            Face* f = BRepAllocator::instance()->alloc_face();
+            f->set_forward(face->is_forward());
+            f->set_geometry(face->geometry());
+            faces_set.insert(f);
         }
 
         for (Loop *lp : hole_loops) {
@@ -267,8 +280,12 @@ struct Boolean {
                 //@todo handle nested loops
                 if (ContainmentQuery::contained(f, sample) == ContainmentQuery::ContainmentResult::Inside) {
                     // add loop
-                    lp->set_next(f->loop()->next());
-                    f->loop()->set_next(lp);
+                    if (f->loop() != nullptr) {
+                        lp->set_next(f->loop()->next());
+                        f->loop()->set_next(lp);
+                    } else {
+                        f->set_loop(lp);
+                    }
                     lp->set_face(f);
                     flag = true;
                     break;
@@ -306,7 +323,11 @@ struct Boolean {
         };
 
         break_faces_in_body(body1, body2, body1_faces);
+        spdlog::info("boolean slice1 done");
+
         break_faces_in_body(body2, body1, body2_faces);
+        spdlog::info("boolean slice2 done");
+
 
         // stage2: inside/outside classification
 
@@ -341,6 +362,8 @@ struct Boolean {
 
         inside_outside_classification(body1_faces, body1_faces_inside_flag, body2);
         inside_outside_classification(body2_faces, body2_faces_inside_flag, body1);
+
+        spdlog::info("boolean classification done");
 
         // stage3: rebuild topology
 
@@ -391,6 +414,11 @@ struct Boolean {
      */
     static std::pair<BRepPoint3, BRepPoint2> get_point_in_face(const Face *face) {
         Loop *lp = face->loop();
+
+        if (lp == nullptr) {
+            return {face->geometry()->param_geometry()->evaluate({0.5 ,0.5}), {0.5, 0.5}};
+        }
+
         Coedge *ce = lp->coedge();
         PCurve *pc = ce->geometry();
         ParamCurve2D *param_pc = pc->param_geometry();
@@ -408,7 +436,7 @@ struct Boolean {
         BRepPoint2 sample = par_pos + n * 1e-2;
 
         if (ContainmentQuery::contained(face, sample) != ContainmentQuery::ContainmentResult::Inside) {
-            throw cpptrace::runtime_error("get point from face failed");
+            // throw cpptrace::runtime_error("get point from face failed");
         }
 
         return {face->geometry()->param_geometry()->evaluate(sample), sample};

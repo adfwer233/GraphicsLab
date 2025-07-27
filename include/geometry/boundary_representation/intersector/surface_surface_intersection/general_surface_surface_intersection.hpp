@@ -400,6 +400,11 @@ struct GeneralSurfaceSurfaceIntersection {
                 params2.push_back(param2);
             }
 
+            if (points.size() <= 10) {
+                continue;
+            }
+
+            spdlog::info("trace len {}", trace.size());
             int control_points_count =
                 std::min(static_cast<size_t>(50), std::max(static_cast<size_t>(10), points.size() / 2));
             // fit the 3d curve with BSpline curve

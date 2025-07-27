@@ -17,6 +17,8 @@ struct ParamSurface {
     using PointType = glm::vec<3, double>;
     using VectorType = glm::vec<3, double>;
 
+    ParamSurface() {}
+
     virtual PointType evaluate(const ParamType param) const = 0;
     virtual PointType normal(const ParamType param) const = 0;
     virtual std::pair<PointType, ParamType> project(const PointType point) const = 0;

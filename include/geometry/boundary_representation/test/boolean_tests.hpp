@@ -101,6 +101,28 @@ struct CubeBooleanUniteTest2 : BooleanTestBase {
     }
 };
 
+struct CubeSphereBooleanUniteTest1 : BooleanTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "CubeBooleanUniteTest2";
+    }
+
+    void run_test() override {
+        Body *blank = BodyConstructors::sphere({0.1, 0.1, 0.1}, 1);
+        Body *tool = BodyConstructors::cube({0, 0, 0}, {2, 2, 2});
+
+        Body *res = Boolean::boolean_operation(blank, tool, Boolean::Operation::Difference);
+
+        for (int i = 0; auto f : TopologyUtils::get_all_faces(res)) {
+            faces[std::format("result_face_{}", i)] = f;
+            i++;
+        }
+
+        if (faces.size() != 9) {
+            result = TestResult::Fail;
+        }
+    }
+};
+
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::BreakFaceTest1)
