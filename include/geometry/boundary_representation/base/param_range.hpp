@@ -28,6 +28,26 @@ struct ParamRange {
         end_ = end;
     }
 
+    [[nodiscard]] bool is_upper_infinite() const {
+        return is_upper_infinite_;
+    }
+
+    [[nodiscard]] bool is_lower_infinite() const {
+        return is_lower_infinite_;
+    }
+
+    void set_upper_infinite(bool is_upper_infinite = true) {
+        is_upper_infinite_ = is_upper_infinite;
+    }
+
+    void set_lower_infinite(bool is_lower_infinite = true) {
+        is_lower_infinite_ = is_lower_infinite;
+    }
+
+    void set_both_infinite() {
+        is_upper_infinite_ = true;
+        is_lower_infinite_ = true;
+    }
     [[nodiscard]] double get_mid() const {
         return start_ + (end_ - start_) / 2.0;
     }
@@ -39,6 +59,9 @@ struct ParamRange {
   private:
     double start_ = 0.0;
     double end_ = 1.0;
+
+    bool is_upper_infinite_ = false;
+    bool is_lower_infinite_ = false;
 };
 
 } // namespace GraphicsLab::Geometry::BRep

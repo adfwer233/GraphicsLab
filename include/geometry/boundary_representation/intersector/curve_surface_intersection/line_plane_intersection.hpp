@@ -23,7 +23,7 @@ struct LinePlaneIntersection {
      * ---> [x, y, -d] [u, v, t]^T = p - o
      * ---> [u, v, t]^T = [x, y, -d]^{-1} (p - o)
      */
-    static std::vector<CSIResult> solve(const StraightLine3D *line, const Plane *plane) {
+    static std::vector<CSIResult> solve(const StraightLine3D *line, const Plane *plane, bool check_line_range = true, bool check_plane_range = true) {
         glm::dmat3 M = glm::dmat3();
         M[0][0] = plane->u_direction_.x;
         M[1][0] = plane->u_direction_.y;
@@ -46,7 +46,11 @@ struct LinePlaneIntersection {
 
             double u = res[0], v = res[1], t = res[2];
 
-            if (u > 0 and u < 1 and v > 0 and v < 1 and t > 0 and t < 1) {
+            if (check_line_range) {
+                if (t < 0 or t > 1) return {};
+            }
+
+            if (not check_plane_range or (u > 0 and u < 1 and v > 0 and v < 1)) {
                 CSIResult csi{};
                 csi.surface_parameter = {u, v};
                 csi.curve_parameter = t;

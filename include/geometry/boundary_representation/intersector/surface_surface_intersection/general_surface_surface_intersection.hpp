@@ -5,6 +5,7 @@
 #include "geometry/parametric/bspline_curve_2d.hpp"
 #include "geometry/parametric/parametric_surface.hpp"
 #include "geometry/spatial_datastructure/kd_tree.hpp"
+#include "plane_plane_intersection.hpp"
 #include "ssi_results.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
@@ -27,6 +28,15 @@ namespace GraphicsLab::Geometry::BRep {
 struct GeneralSurfaceSurfaceIntersection {
 
     static std::vector<SSIResult> solve(const ParamSurface *surf1, const ParamSurface *surf2) {
+
+        // special case:
+
+        if (auto plane1 = dynamic_cast<const Plane*>(surf1)) {
+            if (auto plane2 = dynamic_cast<const Plane*>(surf2)) {
+                return PlanePlaneIntersection::solve(plane1, plane2);
+            }
+        }
+
         return intersect_all(surf1, surf2);
     }
 
