@@ -63,6 +63,58 @@ struct PlaneIntersection1 : IntersectionTestBase {
     }
 };
 
+struct SpherePlaneIntersection1 : IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "SpherePlaneIntersection1";
+    }
+
+    void run_test() override {
+        Face *sphere = FaceConstructors::sphere({0, 0, 0}, 0.9);
+        Face *plane2 = FaceConstructors::plane({-1, -1, 0}, {2, 0, 0}, {0, 2, 0});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(sphere->geometry()->param_geometry(),
+                                                                     plane2->geometry()->param_geometry());
+
+        faces["sphere"] = sphere;
+        faces["plane2"] = plane2;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 1) {
+            result = TestResult::Fail;
+            return;
+        }
+
+        result = TestResult::Success;
+    }
+};
+
+struct SpherePlaneIntersection2 : IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "SpherePlaneIntersection1";
+    }
+
+    void run_test() override {
+        Face *sphere = FaceConstructors::sphere({0, 0, 0}, 0.9);
+        Face *plane2 = FaceConstructors::plane({-1, 0, -1}, {2, 0, 0}, {0, 0, 2});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(sphere->geometry()->param_geometry(),
+                                                                     plane2->geometry()->param_geometry());
+
+        faces["sphere"] = sphere;
+        faces["plane2"] = plane2;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 1) {
+            result = TestResult::Fail;
+            return;
+        }
+
+        result = TestResult::Success;
+    }
+};
+
 struct TorusPlaneIntersection1 : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TorusPlaneIntersection1";

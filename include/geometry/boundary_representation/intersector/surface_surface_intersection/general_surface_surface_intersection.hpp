@@ -281,6 +281,10 @@ struct GeneralSurfaceSurfaceIntersection {
             }
             intersections.emplace_back(param1, param2, surf1->evaluate(param1));
 
+            if (surf1->is_singular(param1) or surf2->is_singular(param2)) {
+                break;
+            }
+
             auto [param1_tangent, param2_tangent] = compute_tangent_direction(surf1, surf2, param1, param2);
 
             param1 = param1 + step_length * param1_tangent * static_cast<double>(sign);

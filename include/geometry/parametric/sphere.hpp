@@ -43,6 +43,13 @@ struct Sphere : public ParamSurface {
         return {dx, dy};
     }
 
+    [[nodiscard]] bool is_singular(ParamType param) const override {
+        if (std::abs(param.y) < 1e-6 or std::abs(param.y - 1.0) < 1e-6) {
+            return true;
+        }
+        return false;
+    }
+
     PointType normal(const ParamType param) const override {
         auto pos = evaluate(param);
         return glm::normalize(pos - center);
