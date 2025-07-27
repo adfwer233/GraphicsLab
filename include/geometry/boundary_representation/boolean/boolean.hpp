@@ -237,7 +237,8 @@ struct Boolean {
         }
 
         // @todo: non-simply connected case.
-        bool is_simply_connected = not face->geometry()->param_geometry()->u_periodic and not face->geometry()->param_geometry()->v_periodic;
+        bool is_simply_connected =
+            not face->geometry()->param_geometry()->u_periodic and not face->geometry()->param_geometry()->v_periodic;
 
         std::set<Face *> faces_set;
         std::vector<Loop *> hole_loops;
@@ -254,12 +255,12 @@ struct Boolean {
             }
         }
 
-        if (dynamic_cast<Sphere*>(face->geometry()->param_geometry())) {
+        if (dynamic_cast<Sphere *>(face->geometry()->param_geometry())) {
             int x = 0;
         }
 
         if (not is_simply_connected) {
-            Face* f = BRepAllocator::instance()->alloc_face();
+            Face *f = BRepAllocator::instance()->alloc_face();
             f->set_forward(face->is_forward());
             f->set_geometry(face->geometry());
             faces_set.insert(f);
@@ -327,7 +328,6 @@ struct Boolean {
 
         break_faces_in_body(body2, body1, body2_faces);
         spdlog::info("boolean slice2 done");
-
 
         // stage2: inside/outside classification
 
@@ -416,7 +416,7 @@ struct Boolean {
         Loop *lp = face->loop();
 
         if (lp == nullptr) {
-            return {face->geometry()->param_geometry()->evaluate({0.5 ,0.5}), {0.5, 0.5}};
+            return {face->geometry()->param_geometry()->evaluate({0.5, 0.5}), {0.5, 0.5}};
         }
 
         Coedge *ce = lp->coedge();

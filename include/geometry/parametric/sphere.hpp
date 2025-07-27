@@ -17,7 +17,7 @@ struct Sphere : public ParamSurface {
         u_periodic = true;
         v_periodic = false;
     }
-    Sphere(Sphere &&rhs)  noexcept {
+    Sphere(Sphere &&rhs) noexcept {
         u_periodic = true;
         v_periodic = false;
         center = rhs.center;
@@ -37,8 +37,10 @@ struct Sphere : public ParamSurface {
         const double theta = 2 * std::numbers::pi * param.x; // Azimuthal angle (0 to 2π)
         const double phi = std::numbers::pi * param.y;       // Polar angle (0 to π)
 
-        VectorType dx = 2 * std::numbers::pi * VectorType(-std::sin(phi) * std::sin(theta), std::sin(phi) * std::cos(theta), std::cos(phi));
-        VectorType dy = std::numbers::pi * VectorType(std::cos(phi) * std::cos(theta), std::cos(phi) * std::sin(theta), -std::sin(phi));
+        VectorType dx = 2 * std::numbers::pi *
+                        VectorType(-std::sin(phi) * std::sin(theta), std::sin(phi) * std::cos(theta), std::cos(phi));
+        VectorType dy = std::numbers::pi *
+                        VectorType(std::cos(phi) * std::cos(theta), std::cos(phi) * std::sin(theta), -std::sin(phi));
 
         return {dx, dy};
     }

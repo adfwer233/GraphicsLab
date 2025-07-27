@@ -11,7 +11,7 @@ namespace GraphicsLab::Geometry::BRep {
 
 struct PlanePlaneIntersection {
 
-    static std::vector<SSIResult> solve(const Plane* plane1, const Plane* plane2) {
+    static std::vector<SSIResult> solve(const Plane *plane1, const Plane *plane2) {
         std::vector<SSIResult> result;
 
         auto dir1 = plane1->u_direction_ + plane1->v_direction_;
@@ -77,13 +77,11 @@ struct PlanePlaneIntersection {
 
             return {ssi};
         }
-         return {};
+        return {};
     }
 
-
-private:
-
-    static std::optional<ParamRange> intersect_with_plane_boundary(BRepPoint3 p, BRepPoint3 d, const Plane* plane) {
+  private:
+    static std::optional<ParamRange> intersect_with_plane_boundary(BRepPoint3 p, BRepPoint3 d, const Plane *plane) {
         std::vector<double> params;
 
         BRepPoint2 p_uv = plane->project(p).second;
@@ -93,7 +91,7 @@ private:
         if (std::abs(dir_uv.x) > 1e-10) {
             // u = 0
             {
-                double t = - p_uv.x / dir_uv.x;
+                double t = -p_uv.x / dir_uv.x;
                 auto par_pos = p_uv + t * dir_uv;
                 if (par_pos.y > 0 and par_pos.y < 1) {
                     params.push_back(t);
@@ -113,7 +111,7 @@ private:
         if (std::abs(dir_uv.y) > 1e-10) {
             // v = 0
             {
-                double t = - p_uv.y / dir_uv.y;
+                double t = -p_uv.y / dir_uv.y;
                 auto par_pos = p_uv + t * dir_uv;
                 if (par_pos.x > 0 and par_pos.x < 1) {
                     params.push_back(t);
@@ -139,4 +137,4 @@ private:
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

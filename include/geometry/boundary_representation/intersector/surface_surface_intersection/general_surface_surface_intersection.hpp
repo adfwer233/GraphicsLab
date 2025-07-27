@@ -31,8 +31,8 @@ struct GeneralSurfaceSurfaceIntersection {
 
         // special case:
 
-        if (auto plane1 = dynamic_cast<const Plane*>(surf1)) {
-            if (auto plane2 = dynamic_cast<const Plane*>(surf2)) {
+        if (auto plane1 = dynamic_cast<const Plane *>(surf1)) {
+            if (auto plane2 = dynamic_cast<const Plane *>(surf2)) {
                 return PlanePlaneIntersection::solve(plane1, plane2);
             }
         }
@@ -418,7 +418,8 @@ struct GeneralSurfaceSurfaceIntersection {
                 }
                 // spdlog::info("trace dist {}", dist);
             }
-            if (replicated) continue;
+            if (replicated)
+                continue;
 
             spdlog::info("trace len {}", trace.size());
             int control_points_count =

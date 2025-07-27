@@ -102,8 +102,10 @@ struct ContainmentQuery {
             if (loop->face()->geometry()->param_geometry()->u_periodic) {
                 if (glm::distance(samples.front(), samples.back()) > 0.5) {
                     auto wn_seg = winding_number_line_segment(test_point, samples.front(), samples.back());
-                    if (wn_seg > 0) wn += std::numbers::pi;
-                    if (wn_seg < 0) wn -= std::numbers::pi;
+                    if (wn_seg > 0)
+                        wn += std::numbers::pi;
+                    if (wn_seg < 0)
+                        wn -= std::numbers::pi;
                     wn -= wn_seg;
                 }
             }

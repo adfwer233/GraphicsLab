@@ -12,13 +12,7 @@ struct BezierBezierIntersector2D {
 
         if (is_point(curve1) or is_point(curve2)) {
             if (glm::distance(curve1.evaluate(0), curve2.evaluate(0)) < 1e-3) {
-                return {
-                    PPIResult{
-                        .param1 = 0,
-                        .param2 = 0,
-                        .inter_position = curve1.start_position()
-                    }
-                };
+                return {PPIResult{.param1 = 0, .param2 = 0, .inter_position = curve1.start_position()}};
             } else {
                 return {};
             }

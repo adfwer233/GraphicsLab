@@ -338,8 +338,8 @@ struct BodyConstructors {
         return create_body_from_list_of_faces({front, right, back, left, top, bottom});
     }
 
-    static Body* sphere(BRepPoint3 center, double radius) {
-        Face* face = FaceConstructors::sphere(center, radius);
+    static Body *sphere(BRepPoint3 center, double radius) {
+        Face *face = FaceConstructors::sphere(center, radius);
         return create_body_from_list_of_faces({face});
     }
 
