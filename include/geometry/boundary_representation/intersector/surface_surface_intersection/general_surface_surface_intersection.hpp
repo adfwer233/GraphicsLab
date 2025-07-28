@@ -465,7 +465,7 @@ struct GeneralSurfaceSurfaceIntersection {
             // for (auto& ctrl_pt: pcurve1.control_points_) {
             //     spdlog::info("{} {}", ctrl_pt.x, ctrl_pt.y);
             // }
-            for (auto param: params1) {
+            for (auto param : params1) {
                 auto proj = pcurve1.projection(param, 0.5).first;
                 double dist = glm::distance(param, proj);
                 spdlog::info("dist {}, pos {} {}", dist, param.x, param.y);

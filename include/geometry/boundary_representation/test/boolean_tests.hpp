@@ -101,7 +101,7 @@ struct CubeBooleanUniteTest2 : BooleanTestBase {
     }
 };
 
-struct CubeSphereBreakTest: BooleanTestBase {
+struct CubeSphereBreakTest : BooleanTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "CubeBooleanUniteTest2";
     }

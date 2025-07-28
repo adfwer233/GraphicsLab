@@ -101,7 +101,7 @@ struct SpherePlaneIntersection2 : IntersectionTestBase {
 
         auto cube_faces = TopologyUtils::get_all_faces(cube);
 
-        Face* plane2 = cube_faces[5];
+        Face *plane2 = cube_faces[5];
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(sphere->geometry()->param_geometry(),
                                                                      plane2->geometry()->param_geometry());
 
