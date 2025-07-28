@@ -34,6 +34,11 @@ struct ContainmentQuery {
 
         for (Loop *loop : TopologyUtils::get_all_loops(face)) {
             wn += winding_number_loop(loop, test_point);
+
+            if (face->geometry()->param_geometry()->u_periodic) {
+                wn += winding_number_loop(loop, test_point - BRepVector2{1.0, 0.0});
+                wn += winding_number_loop(loop, test_point + BRepVector2{1.0, 0.0});
+            }
         }
 
         if (wn > std::numbers::pi) {

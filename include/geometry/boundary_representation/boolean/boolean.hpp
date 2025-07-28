@@ -100,9 +100,9 @@ struct Boolean {
 
         auto add_to_rtree = [&](const BRepPoint2 &pos) -> size_t {
             RTreeNode find_node{};
-            auto found = rtree.findPointInRange(pos, find_node, 0.01);
+            auto found = rtree.findPointInRange(pos, find_node, 0.05);
             if (not found) {
-                rtree.insert(pos, {pos, par_pos_of_vertices.size()}, 0.01);
+                rtree.insert(pos, {pos, par_pos_of_vertices.size()}, 0.05);
                 par_pos_of_vertices.push_back(pos);
 
                 return par_pos_of_vertices.size() - 1;
@@ -116,7 +116,7 @@ struct Boolean {
         for (Coedge *coedge : broken_coedges) {
             BRepPoint2 start_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().start());
             BRepPoint2 end_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().end());
-            if (not coedge->is_forward())
+            if (not coedge->geometry()->is_forward())
                 std::swap(start_pos, end_pos);
             auto start_idx = add_to_rtree(start_pos);
             auto end_idx = add_to_rtree(end_pos);
@@ -126,7 +126,7 @@ struct Boolean {
         for (Coedge *coedge : intersection_coedges) {
             BRepPoint2 start_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().start());
             BRepPoint2 end_pos = coedge->geometry()->param_geometry()->evaluate(coedge->param_range().end());
-            if (not coedge->is_forward())
+            if (not coedge->geometry()->is_forward())
                 std::swap(start_pos, end_pos);
             auto start_idx = add_to_rtree(start_pos);
             auto end_idx = add_to_rtree(end_pos);

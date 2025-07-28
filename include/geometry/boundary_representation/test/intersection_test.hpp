@@ -95,9 +95,13 @@ struct SpherePlaneIntersection2 : IntersectionTestBase {
     }
 
     void run_test() override {
-        Face *sphere = FaceConstructors::sphere({0.1, 0.1, 0.1}, 0.9);
-        Face *plane2 = FaceConstructors::plane({0, 0, 0}, {2, 0, 0}, {0, 0, 2});
+        Face *sphere = FaceConstructors::sphere({0.1, 0.1, 0.1}, 1.0);
+        Body *cube = BodyConstructors::cube({0, 0, 0}, {2, 2, 2});
+        // Face *plane2 = FaceConstructors::plane({0, 0, 0}, {0, 2, 0}, {0, 0, 2});
 
+        auto cube_faces = TopologyUtils::get_all_faces(cube);
+
+        Face* plane2 = cube_faces[5];
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(sphere->geometry()->param_geometry(),
                                                                      plane2->geometry()->param_geometry());
 

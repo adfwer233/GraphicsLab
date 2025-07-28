@@ -279,11 +279,12 @@ struct GeneralSurfaceSurfaceIntersection {
             if (check_out_boundary(param1, surf1) or check_out_boundary(param2, surf2)) {
                 break;
             }
-            intersections.emplace_back(param1, param2, surf1->evaluate(param1));
 
             if (surf1->is_singular(param1) or surf2->is_singular(param2)) {
                 break;
             }
+
+            intersections.emplace_back(param1, param2, surf1->evaluate(param1));
 
             auto [param1_tangent, param2_tangent] = compute_tangent_direction(surf1, surf2, param1, param2);
 
@@ -301,14 +302,38 @@ struct GeneralSurfaceSurfaceIntersection {
 
                 if (check_out_boundary(param1, surf1)) {
                     BRepPoint3 pos = surf1->evaluate(res1);
-                    res2 = surf2->project(pos).second;
-                    intersections.emplace_back(res1, res2, pos);
+                    auto [proj, res2] = surf2->project(pos);
+                    double dist = glm::distance(pos, proj);
+
+                    if (glm::distance(pos, proj) < Tolerance::default_tolerance * 10000) {
+                        intersections.emplace_back(res1, res2, pos);
+                    } else {
+                        int x = 0;
+                    }
                 }
 
                 if (check_out_boundary(param2, surf2)) {
                     BRepPoint3 pos = surf2->evaluate(res2);
-                    res1 = surf1->project(pos).second;
-                    intersections.emplace_back(res1, res2, pos);
+                    auto [proj, res1] = surf1->project(pos);
+                    double dist = glm::distance(pos, proj);
+                    if (glm::distance(res1, param1) > 0.5) {
+                        auto res1_left = res1 + BRepVector2{-1.0, 0};
+                        auto res1_right = res1 + BRepVector2{1.0, 0};
+
+                        double dist_left = glm::distance(res1_left, param1);
+                        double dist_right = glm::distance(res1_right, param1);
+
+                        if (dist_left < dist_right) {
+                            res1 = res1_left;
+                        } else {
+                            res1 = res1_right;
+                        }
+                    }
+                    if (glm::distance(pos, proj) < Tolerance::default_tolerance * 10000) {
+                        intersections.emplace_back(res1, res2, pos);
+                    } else {
+                        int x = 0;
+                    }
                 }
                 break;
             }
@@ -423,7 +448,7 @@ struct GeneralSurfaceSurfaceIntersection {
 
             spdlog::info("trace len {}", trace.size());
             int control_points_count =
-                std::min(static_cast<size_t>(50), std::max(static_cast<size_t>(10), points.size() / 2));
+                std::min(static_cast<size_t>(20), std::max(static_cast<size_t>(10), points.size() / 2));
             // fit the 3d curve with BSpline curve
             auto &&curve = BSplineCurve3D::fit(points, 5, control_points_count);
             curve.control_points_.front() = points.front();
@@ -432,15 +457,27 @@ struct GeneralSurfaceSurfaceIntersection {
             ssi_result.inter_curve = curve_alloc;
 
             // fit the pcurves with BSpline curves
-            auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, control_points_count);
-            pcurve1.control_points_.front() = params1.front();
-            pcurve1.control_points_.back() = params1.back();
+            auto &&pcurve1 = BSplineCurve2D::fit(params1, 5, control_points_count);
+            // pcurve1.control_points_.front() = params1.front();
+            // pcurve1.control_points_.back() = params1.back();
+
+            spdlog::info("pcurve1 params");
+            // for (auto& ctrl_pt: pcurve1.control_points_) {
+            //     spdlog::info("{} {}", ctrl_pt.x, ctrl_pt.y);
+            // }
+            for (auto param: params1) {
+                auto proj = pcurve1.projection(param, 0.5).first;
+                double dist = glm::distance(param, proj);
+                spdlog::info("dist {}, pos {} {}", dist, param.x, param.y);
+            }
+            spdlog::info("pcurve1 param end");
+
             BSplineCurve2D *pcurve1_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve1));
             ssi_result.pcurve1 = pcurve1_alloc;
 
-            auto &&pcurve2 = BSplineCurve2D::fit(params2, 3, control_points_count);
-            pcurve2.control_points_.front() = params2.front();
-            pcurve2.control_points_.back() = params2.back();
+            auto &&pcurve2 = BSplineCurve2D::fit(params2, 5, control_points_count);
+            // pcurve2.control_points_.front() = params2.front();
+            // pcurve2.control_points_.back() = params2.back();
             auto pcurve2_alloc = allocator->alloc_param_pcurve<BSplineCurve2D>(std::move(pcurve2));
             ssi_result.pcurve2 = pcurve2_alloc;
 
