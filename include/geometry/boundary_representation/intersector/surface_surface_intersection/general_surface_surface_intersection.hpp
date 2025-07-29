@@ -179,14 +179,17 @@ struct GeneralSurfaceSurfaceIntersection {
             auto [proj, proj_param] = surf2->project(pos);
             auto [refine1, refine2] = refine_with_newton(surf1, surf2, param, proj_param);
 
-            double distance_before_refine = glm::distance(surf1->evaluate(param), surf2->evaluate(proj_param));
-            double distance_after_refine = glm::distance(surf1->evaluate(refine1), surf2->evaluate(refine2));
-            spdlog::debug("pos {} {} {}", pos.x, pos.y, pos.z);
-            spdlog::debug("Distance before refine: {}, distance after refine {}", distance_before_refine,
-                          distance_after_refine);
-            if (glm::distance(surf1->evaluate(refine1), surf2->evaluate(refine2)) < distance_threshold) {
-                result.push_back({refine1, refine2});
+            if (glm::distance(proj, pos) < distance_threshold) {
+                result.push_back(std::make_pair(param, proj_param));
             }
+            // double distance_before_refine = glm::distance(surf1->evaluate(param), surf2->evaluate(proj_param));
+            // double distance_after_refine = glm::distance(surf1->evaluate(refine1), surf2->evaluate(refine2));
+            // spdlog::debug("pos {} {} {}", pos.x, pos.y, pos.z);
+            // spdlog::debug("Distance before refine: {}, distance after refine {}", distance_before_refine,
+            //               distance_after_refine);
+            // if (glm::distance(surf1->evaluate(refine1), surf2->evaluate(refine2)) < distance_threshold) {
+            //     result.push_back({refine1, refine2});
+            // }
         }
 
         return result;
@@ -231,6 +234,8 @@ struct GeneralSurfaceSurfaceIntersection {
 
         BRepPoint2 param1 = begin_param1;
         BRepPoint2 param2 = begin_param2;
+
+        std::optional<BRepPoint2> last_tangent_u = std::nullopt, last_tangent_v = std::nullopt;
 
         auto check_out_boundary = [](const BRepPoint2 &param, const ParamSurface *surf) -> bool {
             if (not surf->u_periodic) {
@@ -278,6 +283,7 @@ struct GeneralSurfaceSurfaceIntersection {
             }
 
             auto F_refine = surf1->evaluate(param1) - surf2->evaluate(param2);
+            spdlog::debug("current param {}, {}; {}, {}", param1.x, param1.y, param2.x, param2.y);
             spdlog::debug("refined distance {}", glm::length(F_refine));
 
             if (check_out_boundary(param1, surf1) or check_out_boundary(param2, surf2)) {
@@ -291,6 +297,18 @@ struct GeneralSurfaceSurfaceIntersection {
             intersections.emplace_back(param1, param2, surf1->evaluate(param1));
 
             auto [param1_tangent, param2_tangent] = compute_tangent_direction(surf1, surf2, param1, param2);
+
+            if (last_tangent_u.has_value()) {
+                if (glm::dot(param1_tangent, last_tangent_u.value()) < 0)
+                    param1_tangent = -param1_tangent;
+            }
+            if (last_tangent_v.has_value()) {
+                if (glm::dot(param2_tangent, last_tangent_v.value()) < 0)
+                    param2_tangent = -param2_tangent;
+            }
+            last_tangent_u = param1_tangent;
+            last_tangent_v = param2_tangent;
+            spdlog::debug("tangent len {} {}", glm::length(param1_tangent), glm::length(param2_tangent));
 
             param1 = param1 + step_length * param1_tangent * static_cast<double>(sign);
             param2 = param2 + step_length * param2_tangent * static_cast<double>(sign);
@@ -342,8 +360,8 @@ struct GeneralSurfaceSurfaceIntersection {
                 break;
             }
 
-            if (glm::distance(surf1->move_param_to_std_domain(param1), begin_param1) < 1e-3 or
-                glm::distance(surf2->move_param_to_std_domain(param2), begin_param2) < 1e-3) {
+            if ((glm::distance(surf1->move_param_to_std_domain(param1), begin_param1) < 3 * 1e-3 or
+                glm::distance(surf2->move_param_to_std_domain(param2), begin_param2) < 3 * 1e-3) and step > 10) {
                 auto offset1 = begin_param1 - surf1->move_param_to_std_domain(param1);
                 auto offset2 = begin_param2 - surf2->move_param_to_std_domain(param2);
                 intersections.emplace_back(param1 + offset1, param2 + offset2, surf1->evaluate(begin_param1));
