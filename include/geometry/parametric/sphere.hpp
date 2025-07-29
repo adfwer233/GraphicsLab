@@ -68,12 +68,19 @@ struct Sphere : public ParamSurface {
 
         double phi = std::acos(p.z);
         double theta = 0;
+
+        double cos_phi = std::cos(phi);
+        double sin_phi = std::sin(phi);
+
         if (std::abs(std::sin(phi)) > 1e-10) {
             double sin_theta = p.y / std::sin(phi);
-            theta = std::asin(sin_theta);
+            double cos_theta = p.x / std::sin(phi);
+            theta = std::atan2(sin_theta, cos_theta);
         } else {
             theta = 0;
         }
+
+        auto eval = evaluate({theta / (2 * std::numbers::pi), phi / std::numbers::pi});
 
         return {projection, {theta / (2 * std::numbers::pi), phi / std::numbers::pi}};
     }

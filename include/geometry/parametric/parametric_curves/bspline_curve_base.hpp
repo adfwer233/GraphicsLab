@@ -263,8 +263,12 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         for (int i = 1; i < num_points; ++i)
             u[i] = u[i - 1] + glm::length(points[i] - points[i - 1]);
         double total_length = u.back();
-        for (double &val : u)
+        for (double &val : u) {
             val /= total_length;
+            if (val >= 1.0)
+                val = 1.0 - 1e-8; // Avoid boundary issues
+        }
+
 
         // 2. Normalized knot vector in [0, 1]
         int m = num_ctrl_points + k + 1;
@@ -286,7 +290,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
             }
         }
 
-        // 4. Build target data matrix D (num_points × 2)
+        // 4. Build target data matrix D (num_points × dim)
         MatrixXd D(num_points, dim);
         for (int i = 0; i < num_points; ++i) {
             for (int j = 0; j < dim; j++) {
@@ -296,6 +300,18 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
         // 5. Solve least squares: N * P = D
         MatrixXd P = N.colPivHouseholderQr().solve(D);
+
+        // Compute residual
+        MatrixXd residual = N * P - D;
+
+        MatrixXd res = N * P;
+        // Compute squared error (sum of squared residuals)
+        double squared_error = residual.squaredNorm();
+
+        // Optional: root mean square error (RMSE)
+        double rmse = std::sqrt(squared_error / residual.size());
+
+        spdlog::debug("BSpline fit rmse {}", rmse);
 
         // 6. Construct control points
         std::vector<PointType> control_points;
