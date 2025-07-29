@@ -234,14 +234,14 @@ struct TorusTorusIntersection1 : IntersectionTestBase {
     }
 
     void run_test() override {
-        Face* face1 = FaceConstructors::torus({1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
-        Face* face2 = FaceConstructors::torus({-1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
+        Face *face1 = FaceConstructors::torus({1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
+        Face *face2 = FaceConstructors::torus({-1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
 
         faces["Face1"] = face1;
         faces["Face2"] = face2;
 
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(face1->geometry()->param_geometry(),
-                                                             face2->geometry()->param_geometry());
+                                                                     face2->geometry()->param_geometry());
 
         save_ssi_results(inter_result);
     }

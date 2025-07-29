@@ -269,7 +269,6 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
                 val = 1.0 - 1e-8; // Avoid boundary issues
         }
 
-
         // 2. Normalized knot vector in [0, 1]
         int m = num_ctrl_points + k + 1;
         std::vector<double> knots(m);

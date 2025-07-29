@@ -287,29 +287,29 @@ struct TopologyUtils {
         return curve;
     }
 
-    static auto get_loop_homology(Loop* loop) -> std::pair<int, int> {
-        Coedge* start_coedge = loop->coedge();
-        Coedge* coedge_iter = start_coedge;
+    static auto get_loop_homology(Loop *loop) -> std::pair<int, int> {
+        Coedge *start_coedge = loop->coedge();
+        Coedge *coedge_iter = start_coedge;
         while (true) {
             if (coedge_iter->next() == nullptr)
                 break;
-                // throw cpptrace::runtime_error("coedges in Loop refer to null next.");
+            // throw cpptrace::runtime_error("coedges in Loop refer to null next.");
             if (coedge_iter->next() == start_coedge) {
                 break;
             }
             coedge_iter = coedge_iter->next();
         }
 
-        Coedge* end_coedge = coedge_iter;
-        PCurve* start_pc = start_coedge->geometry(), *end_pc = end_coedge->geometry();
+        Coedge *end_coedge = coedge_iter;
+        PCurve *start_pc = start_coedge->geometry(), *end_pc = end_coedge->geometry();
 
         BRepPoint2 start_pos = start_pc->is_forward()
-                            ? start_pc->param_geometry()->evaluate(start_coedge->param_range().start())
-                            : start_pc->param_geometry()->evaluate(start_coedge->param_range().end());
+                                   ? start_pc->param_geometry()->evaluate(start_coedge->param_range().start())
+                                   : start_pc->param_geometry()->evaluate(start_coedge->param_range().end());
 
         BRepPoint2 end_pos = end_pc->is_forward()
-                            ? end_pc->param_geometry()->evaluate(end_coedge->param_range().end())
-                            : end_pc->param_geometry()->evaluate(end_coedge->param_range().start());
+                                 ? end_pc->param_geometry()->evaluate(end_coedge->param_range().end())
+                                 : end_pc->param_geometry()->evaluate(end_coedge->param_range().start());
 
         return {std::round(end_pos.x - start_pos.x), std::round(end_pos.y - start_pos.y)};
     };

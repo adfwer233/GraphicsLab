@@ -26,7 +26,8 @@ struct CSIResult;
  */
 struct LineSphereIntersection {
 
-    static std::vector<CSIResult> solve(const StraightLine3D *line, const Sphere *sphere, bool check_line_range = true) {
+    static std::vector<CSIResult> solve(const StraightLine3D *line, const Sphere *sphere,
+                                        bool check_line_range = true) {
         BRepPoint3 p = line->start_point;
         BRepPoint3 d = line->end_point - line->start_point;
         BRepPoint3 o = sphere->center;
@@ -39,11 +40,9 @@ struct LineSphereIntersection {
         double det = b * b - 4 * a * c;
 
         auto get_csi = [line, sphere](double t) -> CSIResult {
-            return CSIResult {
-                .inter_position = line->evaluate(t),
-                .curve_parameter = t,
-                .surface_parameter = sphere->project(line->evaluate(t)).second
-            };
+            return CSIResult{.inter_position = line->evaluate(t),
+                             .curve_parameter = t,
+                             .surface_parameter = sphere->project(line->evaluate(t)).second};
         };
 
         if (det > 1e-10) {
@@ -55,22 +54,22 @@ struct LineSphereIntersection {
 
         std::vector<CSIResult> csi_results;
         if (std::abs(det) < 1e-10) {
-            CSIResult csi = get_csi(- b / (2 * a));
+            CSIResult csi = get_csi(-b / (2 * a));
             csi_results = {csi};
         } else {
             if (det < 0) {
-                csi_results =  {};
+                csi_results = {};
             } else {
                 double t1 = (-b - std::sqrt(det)) / (2 * a);
                 double t2 = (-b + std::sqrt(det)) / (2 * a);
 
-                csi_results =  {get_csi(t1), get_csi(t2)};
+                csi_results = {get_csi(t1), get_csi(t2)};
             }
         }
 
         if (check_line_range) {
             std::vector<CSIResult> csi_results2;
-            for (auto &res: csi_results) {
+            for (auto &res : csi_results) {
                 if (res.curve_parameter > 0 and res.curve_parameter < 1) {
                     csi_results2.push_back(res);
                 }
@@ -80,6 +79,5 @@ struct LineSphereIntersection {
             return csi_results;
         }
     }
-
 };
-}
+} // namespace GraphicsLab::Geometry::BRep

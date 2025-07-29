@@ -99,7 +99,7 @@ struct Boolean {
         std::vector<BRepPoint2> par_pos_of_vertices;
         std::vector<BRepPoint2> par_pos_offset;
 
-        auto is_par_pos_match = [face](const BRepPoint2& pos1, const BRepPoint2& pos2) -> bool {
+        auto is_par_pos_match = [face](const BRepPoint2 &pos1, const BRepPoint2 &pos2) -> bool {
             constexpr double inter_graph_tol = 0.05;
 
             bool found = false;
@@ -107,9 +107,11 @@ struct Boolean {
                 return true;
             }
 
-            if (face->geometry()->param_geometry()->u_periodic and not face->geometry()->param_geometry()->is_singular(pos1)) {
+            if (face->geometry()->param_geometry()->u_periodic and
+                not face->geometry()->param_geometry()->is_singular(pos1)) {
                 BRepPoint2 dx{1.0, 0.0};
-                if (glm::distance(pos1 + dx, pos2) < inter_graph_tol or glm::distance(pos1 - dx, pos2) < inter_graph_tol) {
+                if (glm::distance(pos1 + dx, pos2) < inter_graph_tol or
+                    glm::distance(pos1 - dx, pos2) < inter_graph_tol) {
                     return true;
                 }
             }
@@ -128,7 +130,7 @@ struct Boolean {
             // } else {
             //     return find_node.index;
             // }
-            for (size_t i = 0;i < par_pos_of_vertices.size();i++) {
+            for (size_t i = 0; i < par_pos_of_vertices.size(); i++) {
                 BRepPoint2 p = par_pos_of_vertices[i];
                 if (is_par_pos_match(pos, p)) {
                     return i;
@@ -270,7 +272,7 @@ struct Boolean {
 
         std::set<Face *> faces_set;
         std::vector<Loop *> hole_loops;
-        std::map<std::pair<int, int>, std::vector<Loop*>> non_contractible;
+        std::map<std::pair<int, int>, std::vector<Loop *>> non_contractible;
 
         for (auto &loop : loops) {
             if (not is_simply_connected) {
@@ -309,7 +311,7 @@ struct Boolean {
             }
 
             for (int i = 0; i < loop_vec1.size(); i++) {
-                Face* new_face = BRepAllocator::instance()->alloc_face();
+                Face *new_face = BRepAllocator::instance()->alloc_face();
                 new_face->set_geometry(face->geometry());
                 loop_vec1[i]->set_next(loop_vec2[i]);
                 loop_vec2[i]->set_next(loop_vec1[i]);
