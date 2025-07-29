@@ -11,11 +11,11 @@ struct BezierBezierIntersector2D {
         std::vector<std::pair<double, double>> intersections;
 
         if (is_point(curve1) or is_point(curve2)) {
-            if (glm::distance(curve1.evaluate(0), curve2.evaluate(0)) < 1e-3) {
-                return {PPIResult{.param1 = 0, .param2 = 0, .inter_position = curve1.start_position()}};
-            } else {
-                return {};
-            }
+            // if (glm::distance(curve1.evaluate(0), curve2.evaluate(0)) < 1e-3) {
+            //     return {PPIResult{.param1 = 0, .param2 = 0, .inter_position = curve1.start_position()}};
+            // } else {
+            //     return {};
+            // }
         }
         intersect_recursive(curve1, curve2, 0.0, 1.0, 0.0, 1.0, intersections);
 
@@ -38,6 +38,12 @@ struct BezierBezierIntersector2D {
     static bool bbox_overlap(const BezierCurve2D &a, const BezierCurve2D &b) {
         auto [minA, maxA] = a.boundingBox();
         auto [minB, maxB] = b.boundingBox();
+
+        minA -= 1e-5;
+        maxA += 1e-5;
+        minB -= 1e-5;
+        maxB += 1e-5;
+
         return (maxA.x >= minB.x && minA.x <= maxB.x && maxA.y >= minB.y && minA.y <= maxB.y);
     }
 
@@ -46,7 +52,7 @@ struct BezierBezierIntersector2D {
                                     int depth = 0) {
 
         constexpr int MAX_DEPTH = 30;
-        constexpr double EPSILON = 1e-6;
+        constexpr double EPSILON = 1e-4;
         if (depth > MAX_DEPTH || !bbox_overlap(c1, c2))
             return;
 

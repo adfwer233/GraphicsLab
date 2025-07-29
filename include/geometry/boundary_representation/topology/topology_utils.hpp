@@ -79,11 +79,15 @@ struct TopologyUtils {
     }
 
     static std::vector<Loop *> get_all_loops(const Face *face) {
+        Loop *loop_start = face->loop();
         Loop *loop_iter = face->loop();
         std::vector<Loop *> loops;
         while (loop_iter != nullptr) {
             loops.push_back(loop_iter);
             loop_iter = loop_iter->next();
+            if (loop_iter == loop_start) {
+                break;
+            }
         }
         return loops;
     }
@@ -282,6 +286,33 @@ struct TopologyUtils {
         auto curve = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve_temp));
         return curve;
     }
+
+    static auto get_loop_homology(Loop* loop) -> std::pair<int, int> {
+        Coedge* start_coedge = loop->coedge();
+        Coedge* coedge_iter = start_coedge;
+        while (true) {
+            if (coedge_iter->next() == nullptr)
+                break;
+                // throw cpptrace::runtime_error("coedges in Loop refer to null next.");
+            if (coedge_iter->next() == start_coedge) {
+                break;
+            }
+            coedge_iter = coedge_iter->next();
+        }
+
+        Coedge* end_coedge = coedge_iter;
+        PCurve* start_pc = start_coedge->geometry(), *end_pc = end_coedge->geometry();
+
+        BRepPoint2 start_pos = start_pc->is_forward()
+                            ? start_pc->param_geometry()->evaluate(start_coedge->param_range().start())
+                            : start_pc->param_geometry()->evaluate(start_coedge->param_range().end());
+
+        BRepPoint2 end_pos = end_pc->is_forward()
+                            ? end_pc->param_geometry()->evaluate(end_coedge->param_range().end())
+                            : end_pc->param_geometry()->evaluate(end_coedge->param_range().start());
+
+        return {std::round(end_pos.x - start_pos.x), std::round(end_pos.y - start_pos.y)};
+    };
 };
 
 } // namespace GraphicsLab::Geometry::BRep

@@ -6,6 +6,8 @@
 Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, int m) {
     using PointType = glm::vec<2, double>;
 
+    spdlog::set_level(spdlog::level::debug);
+
     std::vector<PointType> points;
     std::vector<std::pair<size_t, size_t>> edges;
 

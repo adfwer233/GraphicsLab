@@ -2,6 +2,7 @@
 
 #include "csi_results.hpp"
 #include "line_plane_intersection.hpp"
+#include "line_sphere_intersection.hpp"
 
 #include <Eigen/Eigen>
 
@@ -33,6 +34,10 @@ struct GeneralCurveSurfaceIntersection {
             if (auto plane = dynamic_cast<const Plane *>(surface)) {
                 return LinePlaneIntersection::solve(line, plane);
             }
+
+            if (auto sphere = dynamic_cast<const Sphere *>(surface)) {
+                return LineSphereIntersection::solve(line, sphere);
+            }
         }
 
         return intersect(curve, surface);
@@ -53,7 +58,7 @@ struct GeneralCurveSurfaceIntersection {
 
     static std::pair<BRepPoint2, double> refine_with_newton(const ParamSurface *surf, const ParamCurve3D *cur,
                                                             BRepPoint2 surf_param, double curve_param) {
-        constexpr int max_newton_iter = 10;
+        constexpr int max_newton_iter = 30;
         constexpr double tol = Tolerance::default_tolerance;
 
         for (int i = 0; i < max_newton_iter; i++) {

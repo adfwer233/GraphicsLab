@@ -90,25 +90,53 @@ struct Boolean {
         }
 
         // build the intersection graph
-        struct RTreeNode {
-            BRepPoint2 pos;
-            size_t index;
-        };
-        RTree<2, RTreeNode> rtree;
+        // struct RTreeNode {
+        //     BRepPoint2 pos;
+        //     size_t index;
+        // };
+        // RTree<2, RTreeNode> rtree;
 
         std::vector<BRepPoint2> par_pos_of_vertices;
+        std::vector<BRepPoint2> par_pos_offset;
+
+        auto is_par_pos_match = [face](const BRepPoint2& pos1, const BRepPoint2& pos2) -> bool {
+            constexpr double inter_graph_tol = 0.05;
+
+            bool found = false;
+            if (glm::distance(pos1, pos2) < inter_graph_tol) {
+                return true;
+            }
+
+            if (face->geometry()->param_geometry()->u_periodic and not face->geometry()->param_geometry()->is_singular(pos1)) {
+                BRepPoint2 dx{1.0, 0.0};
+                if (glm::distance(pos1 + dx, pos2) < inter_graph_tol or glm::distance(pos1 - dx, pos2) < inter_graph_tol) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
 
         auto add_to_rtree = [&](const BRepPoint2 &pos) -> size_t {
-            RTreeNode find_node{};
-            auto found = rtree.findPointInRange(pos, find_node, 0.05);
-            if (not found) {
-                rtree.insert(pos, {pos, par_pos_of_vertices.size()}, 0.05);
-                par_pos_of_vertices.push_back(pos);
-
-                return par_pos_of_vertices.size() - 1;
-            } else {
-                return find_node.index;
+            // RTreeNode find_node{};
+            // auto found = rtree.findPointInRange(pos, find_node, 0.05);
+            // if (not found) {
+            //     rtree.insert(pos, {pos, par_pos_of_vertices.size()}, 0.05);
+            //     par_pos_of_vertices.push_back(pos);
+            //
+            //     return par_pos_of_vertices.size() - 1;
+            // } else {
+            //     return find_node.index;
+            // }
+            for (size_t i = 0;i < par_pos_of_vertices.size();i++) {
+                BRepPoint2 p = par_pos_of_vertices[i];
+                if (is_par_pos_match(pos, p)) {
+                    return i;
+                }
             }
+
+            par_pos_of_vertices.push_back(pos);
+            return par_pos_of_vertices.size() - 1;
         };
 
         // put all endpoints to Rtree and record
@@ -242,8 +270,17 @@ struct Boolean {
 
         std::set<Face *> faces_set;
         std::vector<Loop *> hole_loops;
+        std::map<std::pair<int, int>, std::vector<Loop*>> non_contractible;
 
         for (auto &loop : loops) {
+            if (not is_simply_connected) {
+                auto [p, q] = TopologyUtils::get_loop_homology(loop);
+                if (p != 0 or q != 0) {
+                    non_contractible[std::make_pair(p, q)].push_back(loop);
+                    continue;
+                }
+            }
+
             bool is_hole = ContainmentQuery::is_hole(loop);
 
             if (not is_hole) {
@@ -260,10 +297,27 @@ struct Boolean {
         }
 
         if (not is_simply_connected) {
-            Face *f = BRepAllocator::instance()->alloc_face();
-            f->set_forward(face->is_forward());
-            f->set_geometry(face->geometry());
-            faces_set.insert(f);
+            if (non_contractible.size() % 2 != 0) {
+                throw cpptrace::runtime_error("can not pair non contractible loops.");
+            }
+
+            auto [coeff1, loop_vec1] = *non_contractible.begin();
+            auto [coeff2, loop_vec2] = *std::prev(non_contractible.end());
+
+            if (loop_vec1.size() != loop_vec2.size()) {
+                throw cpptrace::runtime_error("loop mismatch.");
+            }
+
+            for (int i = 0; i < loop_vec1.size(); i++) {
+                Face* new_face = BRepAllocator::instance()->alloc_face();
+                new_face->set_geometry(face->geometry());
+                loop_vec1[i]->set_next(loop_vec2[i]);
+                loop_vec2[i]->set_next(loop_vec1[i]);
+                loop_vec1[i]->set_face(new_face);
+                loop_vec2[i]->set_face(new_face);
+                new_face->set_loop(loop_vec1[i]);
+                faces_set.insert(new_face);
+            }
         }
 
         for (Loop *lp : hole_loops) {

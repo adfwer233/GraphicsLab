@@ -36,8 +36,11 @@ struct ContainmentQuery {
             wn += winding_number_loop(loop, test_point);
 
             if (face->geometry()->param_geometry()->u_periodic) {
-                wn += winding_number_loop(loop, test_point - BRepVector2{1.0, 0.0});
-                wn += winding_number_loop(loop, test_point + BRepVector2{1.0, 0.0});
+                auto loop_homo = TopologyUtils::get_loop_homology(loop);
+                if (loop_homo.first == 0 and loop_homo.second == 0) {
+                    wn += winding_number_loop(loop, test_point - BRepVector2{1.0, 0.0});
+                    wn += winding_number_loop(loop, test_point + BRepVector2{1.0, 0.0});
+                }
             }
         }
 

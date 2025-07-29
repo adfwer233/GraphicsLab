@@ -103,14 +103,14 @@ struct CubeBooleanUniteTest2 : BooleanTestBase {
 
 struct CubeSphereBreakTest : BooleanTestBase {
     [[nodiscard]] std::string test_case_name() const override {
-        return "CubeBooleanUniteTest2";
+        return "CubeSphereBreakTest";
     }
 
     void run_test() override {
-        Body *blank = BodyConstructors::sphere({0.1, 0.1, 0.1}, 1);
+        Body *blank = BodyConstructors::sphere({0.2, -0.2, 0.0}, 1);
         Body *tool = BodyConstructors::cube({0, 0, 0}, {2, 2, 2});
 
-        auto face_sphere = FaceConstructors::sphere({-0.2, -0.2, 0.0}, 1);
+        auto face_sphere = FaceConstructors::sphere({0.2, -0.2, 0.0}, 1);
 
         auto faces_list = Boolean::break_face_by_intersection(face_sphere, tool);
         for (int i = 0; auto f : faces_list) {
@@ -130,7 +130,7 @@ struct CubeSphereBooleanUniteTest1 : BooleanTestBase {
     }
 
     void run_test() override {
-        Body *blank = BodyConstructors::sphere({-0.2, -0.2, 0.0}, 1);
+        Body *blank = BodyConstructors::sphere({0.2, -0.2, 0.0}, 1);
         Body *tool = BodyConstructors::cube({0, 0, 0}, {2, 2, 2});
 
         Body *res = Boolean::boolean_operation(blank, tool, Boolean::Operation::Difference);
@@ -140,7 +140,7 @@ struct CubeSphereBooleanUniteTest1 : BooleanTestBase {
             i++;
         }
 
-        if (faces.size() != 9) {
+        if (faces.size() != 4) {
             result = TestResult::Fail;
         }
     }
@@ -153,6 +153,8 @@ META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::BreakFaceTest2)
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CubeSphereBreakTest)
+
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CubeSphereBooleanUniteTest1)
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CubeBooleanUniteTest1)
 
