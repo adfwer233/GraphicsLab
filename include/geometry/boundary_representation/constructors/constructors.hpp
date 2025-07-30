@@ -343,9 +343,9 @@ struct BodyConstructors {
         return create_body_from_list_of_faces({face});
     }
 
-    static Body* torus(const BRepPoint3 &center, const double major_radius, const double minor_radius,
+    static Body *torus(const BRepPoint3 &center, const double major_radius, const double minor_radius,
                        const BRepPoint3 &base_normal, const BRepPoint3 &direction1) {
-        Face* face = FaceConstructors::torus(center, major_radius, minor_radius, base_normal, direction1);
+        Face *face = FaceConstructors::torus(center, major_radius, minor_radius, base_normal, direction1);
         return create_body_from_list_of_faces({face});
     }
 

@@ -288,13 +288,13 @@ struct TopologyUtils {
         return curve;
     }
 
-    static std::pair<BRepPoint2, BRepPoint2> get_end_points_of_pcurve(const Coedge* coedge) {
+    static std::pair<BRepPoint2, BRepPoint2> get_end_points_of_pcurve(const Coedge *coedge) {
         double start_param = coedge->param_range().start();
         double end_param = coedge->param_range().end();
         if (not coedge->is_forward()) {
             std::swap(start_param, end_param);
         }
-        ParamCurve2D* param_pcurve = coedge->geometry()->param_geometry();
+        ParamCurve2D *param_pcurve = coedge->geometry()->param_geometry();
         return {param_pcurve->evaluate(start_param), param_pcurve->evaluate(end_param)};
     }
 

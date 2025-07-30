@@ -6,7 +6,8 @@
 namespace GraphicsLab::Geometry::BRep {
 
 struct BezierBezierIntersector2D {
-    static std::vector<PPIResult> intersect(const BezierCurve2D &curve1, const BezierCurve2D &curve2, const BRepPoint2 offset = BRepPoint2(0)) {
+    static std::vector<PPIResult> intersect(const BezierCurve2D &curve1, const BezierCurve2D &curve2,
+                                            const BRepPoint2 offset = BRepPoint2(0)) {
         std::vector<PPIResult> results;
         std::vector<std::pair<double, double>> intersections;
 
@@ -50,8 +51,8 @@ struct BezierBezierIntersector2D {
     }
 
     static void intersect_recursive(const BezierCurve2D &c1, const BezierCurve2D &c2, double t1a, double t1b,
-                                    double t2a, double t2b, std::vector<std::pair<double, double>> &intersections, const BRepPoint2 offset = BRepPoint2(0),
-                                    int depth = 0) {
+                                    double t2a, double t2b, std::vector<std::pair<double, double>> &intersections,
+                                    const BRepPoint2 offset = BRepPoint2(0), int depth = 0) {
 
         constexpr int MAX_DEPTH = 30;
         constexpr double EPSILON = 1e-4;

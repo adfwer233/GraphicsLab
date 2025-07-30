@@ -17,12 +17,14 @@ namespace GraphicsLab::Geometry::BRep {
  * We convert all pcurves to the Bezier curves and solve the intersection via bezier clipping
  */
 struct GeneralPCurvePCurveIntersection {
-    static std::vector<PPIResult> solve(const ParamCurve2D *pcurve1, const ParamCurve2D *pcurve2, BRepPoint2 offset = BRepPoint2(0)) {
+    static std::vector<PPIResult> solve(const ParamCurve2D *pcurve1, const ParamCurve2D *pcurve2,
+                                        BRepPoint2 offset = BRepPoint2(0)) {
         return param_curves_intersection(pcurve1, pcurve2, offset);
     }
 
   private:
-    static std::vector<PPIResult> param_curves_intersection(const ParamCurve2D *pcurve1, const ParamCurve2D *pcurve2, const BRepPoint2 offset) {
+    static std::vector<PPIResult> param_curves_intersection(const ParamCurve2D *pcurve1, const ParamCurve2D *pcurve2,
+                                                            const BRepPoint2 offset) {
         std::vector<BezierCurve2D> bezier_segments_of_curve1;
         std::vector<BezierCurve2D> bezier_segments_of_curve2;
 
@@ -50,8 +52,8 @@ struct GeneralPCurvePCurveIntersection {
 
         for (int i = 0; i < bezier_segments_of_curve1.size(); ++i) {
             for (int j = 0; j < bezier_segments_of_curve2.size(); ++j) {
-                auto segment_inter =
-                    BezierBezierIntersector2D::intersect(bezier_segments_of_curve1[i], bezier_segments_of_curve2[j], offset);
+                auto segment_inter = BezierBezierIntersector2D::intersect(bezier_segments_of_curve1[i],
+                                                                          bezier_segments_of_curve2[j], offset);
 
                 for (auto inter : segment_inter) {
                     PPIResult res;

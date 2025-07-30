@@ -35,7 +35,7 @@ struct ContainmentQuery {
         }
 
         std::set<Loop *> non_contractible;
-        for (Loop* loop: TopologyUtils::get_all_loops(face)) {
+        for (Loop *loop : TopologyUtils::get_all_loops(face)) {
             auto [p, q] = TopologyUtils::get_loop_homology(loop);
             if (p != 0 or q != 0) {
                 non_contractible.insert(loop);
@@ -43,7 +43,8 @@ struct ContainmentQuery {
         }
 
         for (Loop *loop : TopologyUtils::get_all_loops(face)) {
-            if (non_contractible.contains(loop)) continue;
+            if (non_contractible.contains(loop))
+                continue;
 
             wn += winding_number_loop(loop, test_point);
 
@@ -65,8 +66,8 @@ struct ContainmentQuery {
         }
 
         if (not non_contractible.empty()) {
-            Loop* lp1 = *non_contractible.begin();
-            Loop* lp2 = *std::prev(non_contractible.end());
+            Loop *lp1 = *non_contractible.begin();
+            Loop *lp2 = *std::prev(non_contractible.end());
 
             auto pt = lp1->coedge()->geometry()->param_geometry()->evaluate(lp1->coedge()->param_range().get_mid());
 
@@ -152,7 +153,7 @@ struct ContainmentQuery {
 
             last_end = pcurve_samples.back();
 
-            for (auto& s: pcurve_samples) {
+            for (auto &s : pcurve_samples) {
                 s -= offset;
             }
 
@@ -164,7 +165,8 @@ struct ContainmentQuery {
 
         BRepPoint2 dir = samples[sample_per_pcurve / 2] - samples[sample_per_pcurve / 2 - 1];
         BRepPoint2 in_dir{-dir.y, dir.x};
-        BRepPoint2 test_point = glm::mix(samples[sample_per_pcurve / 2 - 1], samples[sample_per_pcurve / 2], 0.5) + glm::normalize(in_dir) * 1e-3;
+        BRepPoint2 test_point = glm::mix(samples[sample_per_pcurve / 2 - 1], samples[sample_per_pcurve / 2], 0.5) +
+                                glm::normalize(in_dir) * 1e-3;
 
         if (test_point_given.has_value()) {
             test_point = test_point_given.value();
@@ -188,8 +190,10 @@ struct ContainmentQuery {
                 wn += compute_wn(test_point + BRepVector2{-p, -q});
 
                 auto wn_seg = winding_number_line_segment(test_point, samples.front(), samples.back());
-                auto wn_seg1 = winding_number_line_segment(test_point + BRepVector2{p, q}, samples.front(), samples.back());
-                auto wn_seg2 = winding_number_line_segment(test_point + BRepVector2{-p, -q}, samples.front(), samples.back());
+                auto wn_seg1 =
+                    winding_number_line_segment(test_point + BRepVector2{p, q}, samples.front(), samples.back());
+                auto wn_seg2 =
+                    winding_number_line_segment(test_point + BRepVector2{-p, -q}, samples.front(), samples.back());
 
                 if (wn_seg > 0)
                     wn += std::numbers::pi;
