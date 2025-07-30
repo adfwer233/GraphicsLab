@@ -27,24 +27,29 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
 
     int curve_sample_num = 25;
 
-    int u_repeat = 0;
+    int u_repeat = 0, v_repeat = 0;
     if (face->geometry()->param_geometry()->u_periodic)
         u_repeat = 1;
 
+    if (face->geometry()->param_geometry()->v_periodic)
+        v_repeat = 1;
+
     for (int u = -u_repeat; u <= u_repeat; u++) {
-        PointType offset{u, 0};
-        for (auto loop : TopologyUtils::get_all_loops(face)) {
-            for (auto coedge : TopologyUtils::get_all_coedges(loop)) {
-                auto param_curve = coedge->geometry()->param_geometry();
+        for (int v = -v_repeat; v <= v_repeat; v++) {
+            PointType offset{u, v};
+            for (auto loop : TopologyUtils::get_all_loops(face)) {
+                for (auto coedge : TopologyUtils::get_all_coedges(loop)) {
+                    auto param_curve = coedge->geometry()->param_geometry();
 
-                for (int i = 0; i <= curve_sample_num; i++) {
-                    double param = static_cast<double>(i) / static_cast<double>(curve_sample_num);
-                    auto par_pos = param_curve->evaluate(param) + offset;
+                    for (int i = 0; i <= curve_sample_num; i++) {
+                        double param = static_cast<double>(i) / static_cast<double>(curve_sample_num);
+                        auto par_pos = param_curve->evaluate(param) + offset;
 
-                    par_pos = glm::clamp(par_pos, 0.0, 1.0);
-                    points.push_back(par_pos);
-                    if (i > 0) {
-                        edges.emplace_back(points.size() - 2, points.size() - 1);
+                        par_pos = glm::clamp(par_pos, 0.0, 1.0);
+                        points.push_back(par_pos);
+                        if (i > 0) {
+                            edges.emplace_back(points.size() - 2, points.size() - 1);
+                        }
                     }
                 }
             }

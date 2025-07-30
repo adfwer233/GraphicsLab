@@ -186,6 +186,7 @@ struct TopologyUtils {
         coedge_reverse->set_forward(not coedge->is_forward());
         coedge_reverse->set_edge(coedge->edge());
         coedge_reverse->set_geometry(coedge->geometry());
+        coedge_reverse->set_param_range(coedge->param_range());
 
         PCurve *pcurve_reverse = create_pcurve_from_param_pcurve(coedge->geometry()->param_geometry());
         pcurve_reverse->set_forward(not coedge->geometry()->is_forward());
@@ -215,7 +216,7 @@ struct TopologyUtils {
             Edge *edge = create_edge_from_curve(curve, curve_params[i - 1], curve_params[i]);
             Coedge *coedge_new = create_coedge_from_edge(edge);
             coedge_new->set_param_range(ParamRange(pcurve_params[i - 1], pcurve_params[i]));
-
+            coedge_new->set_forward(coedge->is_forward());
             edge->set_coedge(coedge_new);
             coedge_new->set_geometry(pcurve);
 
@@ -287,16 +288,38 @@ struct TopologyUtils {
         return curve;
     }
 
+    static std::pair<BRepPoint2, BRepPoint2> get_end_points_of_pcurve(const Coedge* coedge) {
+        double start_param = coedge->param_range().start();
+        double end_param = coedge->param_range().end();
+        if (not coedge->is_forward()) {
+            std::swap(start_param, end_param);
+        }
+        ParamCurve2D* param_pcurve = coedge->geometry()->param_geometry();
+        return {param_pcurve->evaluate(start_param), param_pcurve->evaluate(end_param)};
+    }
+
     static auto get_loop_homology(Loop *loop) -> std::pair<int, int> {
         Coedge *start_coedge = loop->coedge();
         Coedge *coedge_iter = start_coedge;
+        std::optional<std::pair<BRepPoint2, BRepPoint2>> end_points_prev;
+
+        BRepVector2 offset(0);
+
         while (true) {
+            auto [s, t] = get_end_points_of_pcurve(coedge_iter);
+
+            if (end_points_prev.has_value()) {
+                offset += s - end_points_prev.value().second;
+            }
+            end_points_prev = {s, t};
+
             if (coedge_iter->next() == nullptr)
                 break;
             // throw cpptrace::runtime_error("coedges in Loop refer to null next.");
             if (coedge_iter->next() == start_coedge) {
                 break;
             }
+
             coedge_iter = coedge_iter->next();
         }
 
@@ -311,8 +334,11 @@ struct TopologyUtils {
                                  ? end_pc->param_geometry()->evaluate(end_coedge->param_range().end())
                                  : end_pc->param_geometry()->evaluate(end_coedge->param_range().start());
 
-        return {std::round(end_pos.x - start_pos.x), std::round(end_pos.y - start_pos.y)};
-    };
+        double offset_x = end_pos.x - start_pos.x - offset.x;
+        double offset_y = end_pos.y - start_pos.y - offset.y;
+
+        return {std::round(end_pos.x - start_pos.x - offset.x), std::round(end_pos.y - start_pos.y - offset.y)};
+    }
 };
 
 } // namespace GraphicsLab::Geometry::BRep

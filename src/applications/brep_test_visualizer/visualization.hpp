@@ -29,7 +29,7 @@ struct VisualizationProject : IGraphicsLabProject {
         using namespace GraphicsLab::Geometry::BRep;
         std::unique_ptr<TestBase> test_case = nullptr;
 
-        test_case = std::make_unique<TorusTorusIntersection1>();
+        test_case = std::make_unique<TorusBooleanTest>();
         // spdlog::set_level(spdlog::level::debug);
         test_case->run_test();
 
@@ -54,6 +54,12 @@ struct VisualizationProject : IGraphicsLabProject {
         for (const auto &[name, edge] : test_case->edges) {
             auto mesh = NaiveFaceter::naive_edge_facet(edge, 100);
             context.sceneTree->addGeometryNode<CurveMesh3D>(std::move(mesh), name);
+        }
+
+        // show all param pcurves
+        for (const auto &[name, curve] : test_case->param_pcurve) {
+            auto mesh = NaiveFaceter::naive_pcurve_facet(curve, 50);
+            context.sceneTree->addGeometryNode<CurveMesh2D>(std::move(mesh), name);
         }
     }
 

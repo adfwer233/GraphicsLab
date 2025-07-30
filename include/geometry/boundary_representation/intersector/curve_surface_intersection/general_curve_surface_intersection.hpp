@@ -114,6 +114,11 @@ struct GeneralCurveSurfaceIntersection {
 
             auto [refine_surface, refine_curve] = refine_with_newton(surface, curve, proj_param, param);
 
+            double dist_start = glm::distance(pos, proj);
+            double dist_refined = glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve));
+
+            // spdlog::info("[Curve intersector] dist {} -> {}", dist_start, dist_refined);
+
             if (glm::distance(surface->evaluate(refine_surface), curve->evaluate(refine_curve)) < 1e-3) {
                 initial_guess.emplace_back(refine_surface, refine_curve);
             }
@@ -138,7 +143,7 @@ struct GeneralCurveSurfaceIntersection {
             if (distance < Tolerance::default_tolerance) {
                 bool already_exists = false;
                 for (auto res : result) {
-                    if (glm::distance(res.inter_position, surf_pos) < Tolerance::default_tolerance) {
+                    if (glm::distance(res.inter_position, surf_pos) < Tolerance::default_tolerance * 10) {
                         already_exists = true;
                     }
                 }

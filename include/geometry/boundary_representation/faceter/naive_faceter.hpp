@@ -21,6 +21,11 @@ struct NaiveFaceter {
         return *face->geometry()->param_geometry()->mesh.get();
     }
 
+    static CurveMesh2D naive_pcurve_facet(ParamCurve2D* param_curve, int n = 50) {
+        Tessellator::tessellate(*param_curve, n);
+        return *param_curve->mesh.get();
+    }
+
     static CurveMesh3D naive_edge_facet(Edge *edge, int n) {
         if (edge->geometry() == nullptr) {
             throw cpptrace::logic_error("Edge has no geometry");

@@ -47,8 +47,8 @@ struct Boolean {
             original_coedges.insert(coedge);
         }
 
-        std::set<Coedge *> intersection_coedges;
-        std::set<Coedge *> intersection_coedges_one_dir;
+        std::vector<Coedge *> intersection_coedges;
+        std::vector<Coedge *> intersection_coedges_one_dir;
         /**
          * Enumerate all faces in body and intersect with the given face.
          */
@@ -58,10 +58,86 @@ struct Boolean {
                 auto [coedge1, coedge2] = ffi_result.create_face_coedges();
                 Coedge *coedge1_reverse = TopologyUtils::create_reverse_coedge(coedge1);
 
-                intersection_coedges.insert(coedge1);
-                intersection_coedges.insert(coedge1_reverse);
+                intersection_coedges.push_back(coedge1);
+                intersection_coedges.push_back(coedge1_reverse);
 
-                intersection_coedges_one_dir.insert(coedge1);
+                intersection_coedges_one_dir.push_back(coedge1);
+            }
+        }
+
+        // break intersection curves
+
+        std::vector<Coedge*> intersection_coedges_broken_one_dir;
+        for (int i = 0; i < intersection_coedges_one_dir.size(); i++) {
+            std::vector<double> inter_params;
+            inter_params.push_back(intersection_coedges_one_dir[i]->param_range().start());
+            inter_params.push_back(intersection_coedges_one_dir[i]->param_range().end());
+            for (int j = 0; j < intersection_coedges_one_dir.size(); j++) {
+                if (i == j) continue;
+
+                std::vector<PPIResult> ppi_results = GeneralPCurvePCurveIntersection::solve(
+                    intersection_coedges_one_dir[i]->geometry()->param_geometry(), intersection_coedges_one_dir[j]->geometry()->param_geometry());
+
+                if (face->geometry()->param_geometry()->u_periodic) {
+                    std::vector<PPIResult> u_offset_1 = GeneralPCurvePCurveIntersection::solve(
+                            intersection_coedges_one_dir[i]->geometry()->param_geometry(),
+                            intersection_coedges_one_dir[j]->geometry()->param_geometry(),
+                            {1.0, 0.0});
+
+                    std::vector<PPIResult> u_offset_2 = GeneralPCurvePCurveIntersection::solve(
+                            intersection_coedges_one_dir[i]->geometry()->param_geometry(),
+                            intersection_coedges_one_dir[j]->geometry()->param_geometry(),
+                            {-1.0, 0.0});
+
+                    for (const auto &ppi : u_offset_1) {
+                        inter_params.push_back(ppi.param1);
+                    }
+
+                    for (const auto &ppi : u_offset_2) {
+                        inter_params.push_back(ppi.param1);
+                    }
+                }
+
+                if (face->geometry()->param_geometry()->v_periodic) {
+                    std::vector<PPIResult> v_offset_1 = GeneralPCurvePCurveIntersection::solve(
+                            intersection_coedges_one_dir[i]->geometry()->param_geometry(),
+                            intersection_coedges_one_dir[j]->geometry()->param_geometry(),
+                            {0.0, 1.0});
+
+                    std::vector<PPIResult> v_offset_2 = GeneralPCurvePCurveIntersection::solve(
+                            intersection_coedges_one_dir[i]->geometry()->param_geometry(),
+                            intersection_coedges_one_dir[j]->geometry()->param_geometry(),
+                            {0.0, -1.0});
+
+                    for (const auto &ppi : v_offset_1) {
+                        inter_params.push_back(ppi.param1);
+                    }
+
+                    for (const auto &ppi : v_offset_2) {
+                        inter_params.push_back(ppi.param1);
+                    }
+                }
+
+                for (const auto &ppi : ppi_results) {
+                    inter_params.push_back(ppi.param1);
+                }
+            }
+
+            remove_duplicates(inter_params, 1e-3);
+            std::vector<Coedge *> coedges_broken =
+                TopologyUtils::break_coedge_with_pcurve_params(intersection_coedges_one_dir[i], face, inter_params);
+
+            std::ranges::copy(coedges_broken, std::back_inserter(intersection_coedges_broken_one_dir));
+        }
+
+        if (intersection_coedges_broken_one_dir.size() > intersection_coedges_one_dir.size()) {
+            intersection_coedges_one_dir = intersection_coedges_broken_one_dir;
+            intersection_coedges.clear();
+
+            for (Coedge* coedge: intersection_coedges_one_dir) {
+                Coedge *coedge1_reverse = TopologyUtils::create_reverse_coedge(coedge);
+                intersection_coedges.push_back(coedge);
+                intersection_coedges.push_back(coedge1_reverse);
             }
         }
 
@@ -112,6 +188,15 @@ struct Boolean {
                 BRepPoint2 dx{1.0, 0.0};
                 if (glm::distance(pos1 + dx, pos2) < inter_graph_tol or
                     glm::distance(pos1 - dx, pos2) < inter_graph_tol) {
+                    return true;
+                }
+            }
+
+            if (face->geometry()->param_geometry()->v_periodic and
+                not face->geometry()->param_geometry()->is_singular(pos1)) {
+                BRepPoint2 dy{0.0, 1.0};
+                if (glm::distance(pos1 + dy, pos2) < inter_graph_tol or
+                    glm::distance(pos1 - dy, pos2) < inter_graph_tol) {
                     return true;
                 }
             }
@@ -205,40 +290,88 @@ struct Boolean {
         }
 
         using G = decltype(face_intersection_graph);
-        auto planar_face_extraction = [](G &graph) -> std::vector<std::vector<G::Edge>> {
+        auto planar_face_extraction = [face](G &graph) -> std::vector<std::vector<G::Edge>> {
             int n = graph.nodes.size();
+
+            auto sort_comp = [face, graph](BRepVector3 last_tangent, G::Edge a, G::Edge b) -> bool{
+                Coedge* ce_a = a.data.coedge;
+                Edge* e_a = ce_a->edge();
+                double start_param_a = ce_a->is_forward() ? e_a->param_range().start() : e_a->param_range().end();
+                BRepVector3 dir1 = e_a->geometry()->param_geometry()->derivative(start_param_a);
+                if (not ce_a->is_forward()) dir1 *= -1;
+
+                Coedge* ce_b = b.data.coedge;
+                Edge* e_b = ce_b->edge();
+                double start_param_b = ce_b->is_forward() ? e_b->param_range().start(): e_b->param_range().end();
+                BRepVector3 dir2 = e_b->geometry()->param_geometry()->derivative(start_param_b);
+                if (not ce_b->is_forward()) dir2 *= -1;
+
+                auto par_pos = graph.nodes[a.from].data.par_pos;
+                BRepVector3 face_normal = face->geometry()->param_geometry()->normal(par_pos);
+                if (not face->is_forward()) face_normal *= -1;
+
+                // the frame
+                BRepVector3 x = glm::normalize(last_tangent);
+                BRepVector3 z = glm::normalize(face_normal);
+                BRepVector3 y = glm::cross(z, x);
+
+                double d1_x = glm::dot(dir1, x);
+                double d1_y = glm::dot(dir1, y);
+                double d2_x = glm::dot(dir2, x);
+                double d2_y = glm::dot(dir2, y);
+
+                return std::atan2(d1_y, d1_x) > std::atan2(d2_y, d2_x);
+            };
+
+
+            std::vector<G::Edge> edges;
             for (int i = 0; i < n; i++) {
-                std::ranges::sort(graph.G[i], [graph](G::Edge a, G::Edge b) -> bool {
-                    auto dira = graph.nodes[a.to].data.par_pos - graph.nodes[a.from].data.par_pos;
-                    auto dirb = graph.nodes[b.to].data.par_pos - graph.nodes[b.from].data.par_pos;
-                    double cross = dira.x * dirb.y - dira.y * dirb.x;
-                    return cross < 0;
-                });
+                for (auto e: graph.G[i]) {
+                    edges.push_back(e);
+                }
             }
 
-            std::set<std::pair<int, int>> visited;
-
+            std::set<Coedge*> visited;
             std::vector<std::vector<G::Edge>> result;
             std::vector<G::Edge> cur;
-            auto dfs = [&](auto &&dfs_func, int v, int prev, int start) -> void {
-                for (int i = 0; i < graph.G[v].size(); ++i) {
-                    decltype(visited)::value_type p = std::make_pair(graph.G[v][i].from, graph.G[v][i].to);
+            auto dfs = [&](auto &&dfs_func, int v, int start, Edge* prev_edge, BRepVector3 last_end_tangent) -> void {
+                if (v != start) {
+                    auto comp = std::bind(sort_comp, last_end_tangent, std::placeholders::_1, std::placeholders::_2);
+                    std::ranges::sort(graph.G[v], comp);
+                }
 
-                    if (p.second == prev)
-                        continue;
-                    if (not visited.contains(p)) {
-                        visited.insert(p);
-                        cur.push_back(graph.G[v][i]);
-                        if (graph.G[v][i].to != start)
-                            dfs_func(dfs_func, graph.G[v][i].to, v, start);
+                for (auto e: graph.G[v]) {
+                    if (prev_edge == e.data.coedge->edge()) continue;
+                    if (not visited.contains(e.data.coedge)) {
+                        visited.insert(e.data.coedge);
+                        cur.push_back(e);
+                        if (e.to == start) break;
+
+                        // compute tangent at the end;
+                        Coedge* ce = e.data.coedge;
+                        Edge* edge = ce->edge();
+                        double end_param = ce->is_forward() ? edge->param_range().end() : edge->param_range().start();
+                        BRepVector3 end_tangent = edge->geometry()->param_geometry()->derivative(end_param);
+                        if (not ce->is_forward()) end_tangent *= -1;
+
+                        dfs_func(dfs_func, e.to, start, edge, end_tangent);
+
                         break;
                     }
                 }
             };
 
-            for (int i = 0; i < n; i++) {
+            // for (int i = 0; i < n; i++) {
+            //     cur.clear();
+            //     dfs(dfs, i, i, -1, BRepVector3(0));
+            //     if (not cur.empty())
+            //         result.push_back(cur);
+            // }
+
+            for (auto e: edges) {
                 cur.clear();
-                dfs(dfs, i, -1, i);
+                dfs(dfs, e.from, e.from, nullptr, BRepVector3(0));
+
                 if (not cur.empty())
                     result.push_back(cur);
             }
@@ -395,10 +528,13 @@ struct Boolean {
             for (int i = 0; i < faces.size(); ++i) {
                 auto [sample_point, sample_par_pos] = get_point_in_face(faces[i]);
                 BRepPoint3 direction = Sampler::sampleUniformVec3();
-                StraightLine3D test_line{sample_point + direction * 1e-3, sample_point + direction * 100.0};
+                StraightLine3D test_line{sample_point + direction * 1e-3, sample_point + direction * 5.0};
 
                 int inter_num = 0;
+                int j = 0;
                 for (auto f : TopologyUtils::get_all_faces(another_body)) {
+                    spdlog::info("{} {}", i, j);
+                    j+=1;
                     auto inter = GeneralCurveSurfaceIntersection::solve(&test_line, f->geometry()->param_geometry());
 
                     for (auto csi : inter) {
@@ -406,7 +542,7 @@ struct Boolean {
                                      csi.surface_parameter.x, csi.surface_parameter.y, csi.inter_position.x,
                                      csi.inter_position.y, csi.inter_position.z);
                         if (ContainmentQuery::contained(f, csi.surface_parameter) ==
-                            ContainmentQuery::ContainmentResult::Inside) {
+                            ContainmentQuery::ContainmentResult::Inside and csi.curve_parameter > 0) {
                             inter_num++;
                         }
                     }

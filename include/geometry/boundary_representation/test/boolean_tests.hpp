@@ -126,7 +126,7 @@ struct CubeSphereBreakTest : BooleanTestBase {
 
 struct CubeSphereBooleanUniteTest1 : BooleanTestBase {
     [[nodiscard]] std::string test_case_name() const override {
-        return "CubeBooleanUniteTest2";
+        return "CubeSphereBooleanUniteTest1";
     }
 
     void run_test() override {
@@ -134,6 +134,28 @@ struct CubeSphereBooleanUniteTest1 : BooleanTestBase {
         Body *tool = BodyConstructors::cube({0, 0, 0}, {2, 2, 2});
 
         Body *res = Boolean::boolean_operation(blank, tool, Boolean::Operation::Difference);
+
+        for (int i = 0; auto f : TopologyUtils::get_all_faces(res)) {
+            faces[std::format("result_face_{}", i)] = f;
+            i++;
+        }
+
+        if (faces.size() != 4) {
+            result = TestResult::Fail;
+        }
+    }
+};
+
+struct TorusBooleanTest : BooleanTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "TorusBooleanTest";
+    }
+
+    void run_test() override {
+        Body *blank = BodyConstructors::torus({1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
+        Body *tool = BodyConstructors::torus({-1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
+
+        Body *res = Boolean::boolean_operation(blank, tool, Boolean::Operation::Union);
 
         for (int i = 0; auto f : TopologyUtils::get_all_faces(res)) {
             faces[std::format("result_face_{}", i)] = f;
@@ -160,3 +182,5 @@ META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CubeBooleanUniteTest1)
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CubeBooleanUniteTest2)
+
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TorusBooleanTest)

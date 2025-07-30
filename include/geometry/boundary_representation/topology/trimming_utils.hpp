@@ -5,6 +5,8 @@
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "topology_utils.hpp"
 
+#include <set>
+
 namespace GraphicsLab::Geometry::BRep {
 
 /**
@@ -32,7 +34,17 @@ struct ContainmentQuery {
             return ContainmentResult::Inside;
         }
 
+        std::set<Loop *> non_contractible;
+        for (Loop* loop: TopologyUtils::get_all_loops(face)) {
+            auto [p, q] = TopologyUtils::get_loop_homology(loop);
+            if (p != 0 or q != 0) {
+                non_contractible.insert(loop);
+            }
+        }
+
         for (Loop *loop : TopologyUtils::get_all_loops(face)) {
+            if (non_contractible.contains(loop)) continue;
+
             wn += winding_number_loop(loop, test_point);
 
             if (face->geometry()->param_geometry()->u_periodic) {
@@ -41,6 +53,47 @@ struct ContainmentQuery {
                     wn += winding_number_loop(loop, test_point - BRepVector2{1.0, 0.0});
                     wn += winding_number_loop(loop, test_point + BRepVector2{1.0, 0.0});
                 }
+            }
+
+            if (face->geometry()->param_geometry()->v_periodic) {
+                auto loop_homo = TopologyUtils::get_loop_homology(loop);
+                if (loop_homo.first == 0 and loop_homo.second == 0) {
+                    wn += winding_number_loop(loop, test_point - BRepVector2{0.0, 1.0});
+                    wn += winding_number_loop(loop, test_point + BRepVector2{0.0, 1.0});
+                }
+            }
+        }
+
+        if (not non_contractible.empty()) {
+            Loop* lp1 = *non_contractible.begin();
+            Loop* lp2 = *std::prev(non_contractible.end());
+
+            auto pt = lp1->coedge()->geometry()->param_geometry()->evaluate(lp1->coedge()->param_range().get_mid());
+
+            auto wn1 = winding_number_loop(lp2, pt);
+
+            BRepVector2 lp1_offset(0);
+            auto [p, q] = TopologyUtils::get_loop_homology(lp1);
+
+            if (wn1 < 0) {
+                if (p == 0) {
+                    lp1_offset = {-1.0, 0.0};
+                    if (winding_number_loop(lp2, pt + lp1_offset) < 0) {
+                        lp1_offset = -lp1_offset;
+                    }
+                } else if (q == 0) {
+                    lp1_offset = {0.0, 1.0};
+                }
+            }
+
+            wn += winding_number_loop(lp1, test_point - lp1_offset);
+            wn += winding_number_loop(lp2, test_point);
+
+            if (face->geometry()->param_geometry()->u_periodic) {
+                wn += winding_number_loop(lp1, test_point + BRepVector2{1.0, 0.0} - lp1_offset);
+                wn += winding_number_loop(lp2, test_point + BRepVector2{1.0, 0.0});
+                wn += winding_number_loop(lp1, test_point + BRepVector2{-1.0, 0.0} - lp1_offset);
+                wn += winding_number_loop(lp2, test_point + BRepVector2{-1.0, 0.0});
             }
         }
 
@@ -68,6 +121,9 @@ struct ContainmentQuery {
 
         constexpr int sample_per_pcurve = 25;
 
+        std::optional<BRepPoint2> last_end;
+        BRepVector2 offset(0);
+
         while (coedge_iter != nullptr) {
             if (coedge_iter->geometry() == nullptr) {
                 throw cpptrace::logic_error("coedge has no pcurve");
@@ -87,35 +143,59 @@ struct ContainmentQuery {
                 std::ranges::reverse(pcurve_samples);
             }
 
+            if (last_end.has_value()) {
+                double offset_x = pcurve_samples.front().x - last_end->x;
+                double offset_y = pcurve_samples.front().y - last_end->y;
+
+                offset += BRepVector2{std::round(offset_x), std::round(offset_y)};
+            }
+
+            last_end = pcurve_samples.back();
+
+            for (auto& s: pcurve_samples) {
+                s -= offset;
+            }
+
             std::ranges::copy(pcurve_samples, std::back_inserter(samples));
             coedge_iter = coedge_iter->next();
             if (coedge_iter == coedge_start)
                 break;
         }
 
-        BRepPoint2 dir = samples[1] - samples[0];
+        BRepPoint2 dir = samples[sample_per_pcurve / 2] - samples[sample_per_pcurve / 2 - 1];
         BRepPoint2 in_dir{-dir.y, dir.x};
-        BRepPoint2 test_point = glm::mix(samples[0], samples[1], 0.5) + glm::normalize(in_dir) * 1e-2;
+        BRepPoint2 test_point = glm::mix(samples[sample_per_pcurve / 2 - 1], samples[sample_per_pcurve / 2], 0.5) + glm::normalize(in_dir) * 1e-3;
 
         if (test_point_given.has_value()) {
             test_point = test_point_given.value();
         }
 
-        double wn = 0;
-        for (int i = 1; i < samples.size(); i++) {
-            wn += winding_number_line_segment(test_point, samples[i - 1], samples[i]);
-        }
+        auto compute_wn = [&](BRepPoint2 p) -> double {
+            double wn = 0;
+            for (int i = 1; i < samples.size(); i++) {
+                wn += winding_number_line_segment(p, samples[i - 1], samples[i]);
+            }
+            return wn;
+        };
+
+        double wn = compute_wn(test_point);
 
         if (loop->face() != nullptr) {
-            if (loop->face()->geometry()->param_geometry()->u_periodic) {
-                if (glm::distance(samples.front(), samples.back()) > 0.5) {
-                    auto wn_seg = winding_number_line_segment(test_point, samples.front(), samples.back());
-                    if (wn_seg > 0)
-                        wn += std::numbers::pi;
-                    if (wn_seg < 0)
-                        wn -= std::numbers::pi;
-                    wn -= wn_seg;
-                }
+            auto [p, q] = TopologyUtils::get_loop_homology(loop);
+
+            if (p != 0 or q != 0) {
+                wn += compute_wn(test_point + BRepVector2{p, q});
+                wn += compute_wn(test_point + BRepVector2{-p, -q});
+
+                auto wn_seg = winding_number_line_segment(test_point, samples.front(), samples.back());
+                auto wn_seg1 = winding_number_line_segment(test_point + BRepVector2{p, q}, samples.front(), samples.back());
+                auto wn_seg2 = winding_number_line_segment(test_point + BRepVector2{-p, -q}, samples.front(), samples.back());
+
+                if (wn_seg > 0)
+                    wn += std::numbers::pi;
+                if (wn_seg < 0)
+                    wn -= std::numbers::pi;
+                wn -= wn_seg + wn_seg1 + wn_seg2;
             }
         }
 
