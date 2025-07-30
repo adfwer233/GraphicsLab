@@ -243,7 +243,7 @@ struct FaceConstructors {
             coedge_bottom->set_geometry(pcurve_bottom);
             coedge_top->set_geometry(pcurve_top);
             coedge_right->set_geometry(pcurve_right);
-            coedge_left->set_geometry(pcurve_bottom);
+            coedge_left->set_geometry(pcurve_left);
 
             Loop *lp = TopologyUtils::create_loop_from_coedge(coedge_bottom);
             lp->set_face(face);
@@ -340,6 +340,12 @@ struct BodyConstructors {
 
     static Body *sphere(BRepPoint3 center, double radius) {
         Face *face = FaceConstructors::sphere(center, radius);
+        return create_body_from_list_of_faces({face});
+    }
+
+    static Body* torus(const BRepPoint3 &center, const double major_radius, const double minor_radius,
+                       const BRepPoint3 &base_normal, const BRepPoint3 &direction1) {
+        Face* face = FaceConstructors::torus(center, major_radius, minor_radius, base_normal, direction1);
         return create_body_from_list_of_faces({face});
     }
 
