@@ -90,7 +90,7 @@ struct ContainmentQuery {
             wn += winding_number_loop(lp1, test_point - lp1_offset);
             wn += winding_number_loop(lp2, test_point);
 
-            if (face->geometry()->param_geometry()->u_periodic) {
+            if (face->geometry()->param_geometry()->u_periodic and p == 0) {
                 wn += winding_number_loop(lp1, test_point + BRepVector2{1.0, 0.0} - lp1_offset);
                 wn += winding_number_loop(lp2, test_point + BRepVector2{1.0, 0.0});
                 wn += winding_number_loop(lp1, test_point + BRepVector2{-1.0, 0.0} - lp1_offset);
