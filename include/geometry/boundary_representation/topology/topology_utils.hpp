@@ -16,6 +16,9 @@ struct TopologyUtils {
         Coedge *coedge_iter = start_coedge;
 
         while (coedge_iter != nullptr) {
+            if (coedge_iter->loop() == nullptr) {
+                throw cpptrace::runtime_error("coedge loop is null");
+            }
             if (coedge_iter->loop()->face() == face) {
                 return coedge_iter;
             }

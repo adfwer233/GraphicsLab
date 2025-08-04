@@ -29,7 +29,7 @@ struct VisualizationProject : IGraphicsLabProject {
         using namespace GraphicsLab::Geometry::BRep;
         std::unique_ptr<TestBase> test_case = nullptr;
 
-        test_case = std::make_unique<CubeSphereBooleanUniteTest1>();
+        test_case = std::make_unique<ExplicitEightIntersection>();
         // spdlog::set_level(spdlog::level::debug);
         test_case->run_test();
 

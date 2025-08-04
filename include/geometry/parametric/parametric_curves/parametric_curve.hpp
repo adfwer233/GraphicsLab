@@ -22,6 +22,12 @@ template <size_t dim> struct ParamCurveBase {
     virtual PointType derivative(double t) const = 0;
     virtual PointType second_derivative(double t) const = 0;
 
+    virtual bool is_closed() const {
+        auto start = evaluate(0);
+        auto end = evaluate(1);
+
+        return glm::distance(start, end) < 1e-6;
+    }
     /**
      * @brief A simple Newton for general curve projection.
      * @param test_point
@@ -40,42 +46,67 @@ template <size_t dim> struct ParamCurveBase {
      */
     virtual std::pair<PointType, double> projection(PointType test_point, std::optional<double> param_guess) const {
         // @todo
-        double t = 0.5;
+        double t0 = 0.5;
         if (param_guess.has_value())
-            t = param_guess.value();
+            t0 = param_guess.value();
 
         constexpr int max_iter = 10;
 
-        for (int i = 0; i < max_iter; i++) {
-            PointType c = evaluate(t);
-            PointType cp = derivative(t);
-            PointType cpp = second_derivative(t);
+        auto closest_in_range = [&](double start, double end, double t) -> double {
+            for (int i = 0; i < max_iter; i++) {
+                PointType c = evaluate(t);
+                PointType cp = derivative(t);
+                PointType cpp = second_derivative(t);
 
-            double f_prime = 2 * glm::dot(c - test_point, cp);
-            double f_prime_prime = 2 * (glm::dot(c - test_point, cpp) + glm::dot(cp, cp));
+                double f_prime = 2 * glm::dot(c - test_point, cp);
+                double f_prime_prime = 2 * (glm::dot(c - test_point, cpp) + glm::dot(cp, cp));
 
-            if (std::abs(f_prime_prime) < 1e-10) {
-                break;
+                if (std::abs(f_prime_prime) < 1e-10) {
+                    break;
+                }
+
+                double delta = f_prime / f_prime_prime;
+
+                delta = std::clamp(delta, -0.3, 0.3);
+
+                double t_next = t - delta;
+                t_next = std::clamp(t_next, start, end);
+
+                t = t_next;
+
+                if (std::abs(delta) < 1e-8) {
+                    break;
+                }
             }
 
-            double delta = f_prime / f_prime_prime;
-            double t_next = t - delta;
-            t_next = std::clamp(t_next, 0.0, 1.0);
+            return t;
+        };
 
-            t = t_next;
+        std::vector<std::pair<double, double>> ranges{{0.0, 0.5}, {0.5, 1.0}};
 
-            if (std::abs(delta) < 1e-8) {
-                break;
+        double res = -1;
+        double distance = std::numeric_limits<double>::max();
+        for (auto [s, t]: ranges) {
+            auto t1 = (s + t) / 2;
+            if (t0 > s and t0 < t) {
+                t1 = t0;
+            }
+
+            auto t_newton = closest_in_range(s, t, t1);
+            PointType cur = evaluate(t_newton);
+
+            if (glm::distance(cur, test_point) < distance) {
+                distance = glm::distance(cur, test_point);
+                res = t_newton;
             }
         }
-
-        PointType pos = evaluate(t);
-        auto dis = glm::distance(pos, test_point);
+        // PointType pos = evaluate(t);
+        // auto dis = glm::distance(pos, test_point);
         // if (glm::dot(test_point - pos, derivative(t)) > 1e-3) {
         //     throw cpptrace::logic_error("Curve projection failed.");
         // }
 
-        return {evaluate(t), t};
+        return {evaluate(res), res};
     }
 
     [[nodiscard]] virtual std::vector<std::pair<PointType, double>> sample(int n) const {

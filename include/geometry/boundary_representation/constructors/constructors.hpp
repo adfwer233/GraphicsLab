@@ -247,6 +247,11 @@ struct FaceConstructors {
 
             Loop *lp = TopologyUtils::create_loop_from_coedge(coedge_bottom);
             lp->set_face(face);
+
+            auto coedges = TopologyUtils::get_all_coedges(lp);
+            for (auto coedge : coedges) {
+                coedge->set_loop(lp);
+            }
             face->set_loop(lp);
         } else if (is_u_periodic and not is_v_periodic) {
             coedge_top->set_geometry(pcurve_top);

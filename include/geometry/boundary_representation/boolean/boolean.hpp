@@ -57,7 +57,8 @@ struct Boolean {
             for (auto ffi_result : ffi_results) {
                 auto [coedge1, coedge2] = ffi_result.create_face_coedges();
                 Coedge *coedge1_reverse = TopologyUtils::create_reverse_coedge(coedge1);
-
+                coedge1->set_partner(coedge1_reverse);
+                coedge1_reverse->set_partner(coedge1);
                 intersection_coedges.push_back(coedge1);
                 intersection_coedges.push_back(coedge1_reverse);
 
@@ -134,6 +135,8 @@ struct Boolean {
 
             for (Coedge *coedge : intersection_coedges_one_dir) {
                 Coedge *coedge1_reverse = TopologyUtils::create_reverse_coedge(coedge);
+                coedge->set_partner(coedge1_reverse);
+                coedge1_reverse->set_partner(coedge);
                 intersection_coedges.push_back(coedge);
                 intersection_coedges.push_back(coedge1_reverse);
             }
@@ -397,6 +400,10 @@ struct Boolean {
             iter->set_next(graph_circuits.front().data.coedge);
 
             Loop *loop = TopologyUtils::create_loop_from_coedge(iter);
+
+            for (int i = 0; i < graph_circuits.size(); ++i) {
+                graph_circuits[i].data.coedge->set_loop(loop);
+            }
 
             // @todo: handle domains that not simply connected.
             loops.push_back(loop);

@@ -308,6 +308,52 @@ struct FaceFaceIntersectionTest1 : IntersectionTestBase {
     }
 };
 
+struct ExplicitEightIntersection : IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "ExplicitEightIntersection";
+    }
+
+    void run_test() override {
+
+        Body *blank = BodyConstructors::torus({1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
+        Body *tool = BodyConstructors::torus({-1, 0, 0}, 1.5, 0.6, {0, 1, 0}, {0, 0, 1});
+
+        Body *res = Boolean::boolean_operation(blank, tool, Boolean::Operation::Union);
+
+        auto f = [](GraphicsLab::Geometry::autodiff_vec2 param) -> GraphicsLab::Geometry::autodiff_vec3 {
+            GraphicsLab::Geometry::autodiff_vec3 result;
+
+            BRepPoint3 base{-4, 0, -4};
+            BRepPoint3 dir1{8, 0, 0};
+            BRepPoint3 dir2{0, 0, 8};
+
+            auto u = 2 * 2 * std::numbers::pi * param.x();
+            auto v = 2 * 2 * std::numbers::pi * param.y();
+            result.x() = base.x + dir1.x * param.x();
+            result.y() = 0.3 * sin(u) * sin(v);
+            result.z() = base.z + dir2.z * param.y();
+
+            return result;
+        };
+
+        Face *wave = FaceConstructors::explicit_surface(f);
+
+        auto res_faces = TopologyUtils::get_all_faces(res);
+
+        for (int i = 0; i < res_faces.size(); i++) {
+            auto ffi = FaceFaceIntersection::solve(wave, res_faces[i]);
+            save_ffi_results(ffi);
+        }
+
+        for (int i = 0; auto face : TopologyUtils::get_all_faces(res)) {
+            faces[std::format("result_face_{}", i)] = face;
+            i++;
+        }
+
+        faces["wave"] = wave;
+    }
+};
+
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::PlaneIntersection1)
@@ -325,3 +371,5 @@ META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::TorusExplicitIntersection)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::FaceFaceIntersectionTest1)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::ExplicitEightIntersection)

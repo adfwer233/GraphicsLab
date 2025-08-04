@@ -4,7 +4,7 @@
 namespace MetaProgramming {
 
 enum {
-    MaxRegisterTypes = 15
+    MaxRegisterTypes = 64
 };
 
 namespace RegisterDetails {
