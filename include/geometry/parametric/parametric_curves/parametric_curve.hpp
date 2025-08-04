@@ -86,7 +86,7 @@ template <size_t dim> struct ParamCurveBase {
 
         double res = -1;
         double distance = std::numeric_limits<double>::max();
-        for (auto [s, t]: ranges) {
+        for (auto [s, t] : ranges) {
             auto t1 = (s + t) / 2;
             if (t0 > s and t0 < t) {
                 t1 = t0;

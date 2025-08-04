@@ -91,15 +91,14 @@ struct FaceFaceIntersection {
                     dy_values.emplace_back(-1.0);
                 }
 
-                for (auto dx: dx_values) {
-                    for (auto dy: dy_values) {
+                for (auto dx : dx_values) {
+                    for (auto dy : dy_values) {
                         BRepVector2 offset = {dx, dy};
 
                         Coedge *coedge = TopologyUtils::get_coedge_of_given_face(edge, face1);
                         PCurve *pcurve = coedge->geometry();
-                        auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve1, pcurve->param_geometry(), offset);
-
-
+                        auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve1,
+                                                                                  pcurve->param_geometry(), offset);
 
                         for (auto &ppi_result : ppi_results) {
                             if (not coedge->param_range().contains(ppi_result.param2))
@@ -113,7 +112,10 @@ struct FaceFaceIntersection {
 
                             // guess with pcurve1 param
                             double pcurve2_param = ssi_result.pcurve2->projection(surface2_param, pcurve1_param).second;
-                            spdlog::debug("dist proj {}", glm::distance(surface2_param, ssi_result.pcurve2->projection(surface2_param, pcurve1_param).first));
+                            spdlog::debug(
+                                "dist proj {}",
+                                glm::distance(surface2_param,
+                                              ssi_result.pcurve2->projection(surface2_param, pcurve1_param).first));
                             inter_info.push_back(std::make_tuple(curve_param, pcurve1_param, pcurve2_param));
                         }
                     }
@@ -135,12 +137,13 @@ struct FaceFaceIntersection {
                     dy_values.emplace_back(-1.0);
                 }
 
-                for (auto dx: dx_values) {
-                    for (auto dy: dy_values) {
+                for (auto dx : dx_values) {
+                    for (auto dy : dy_values) {
                         BRepVector2 offset = {dx, dy};
                         Coedge *coedge = TopologyUtils::get_coedge_of_given_face(edge, face2);
                         PCurve *pcurve = coedge->geometry();
-                        auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve2, pcurve->param_geometry(), offset);
+                        auto ppi_results = GeneralPCurvePCurveIntersection::solve(ssi_result.pcurve2,
+                                                                                  pcurve->param_geometry(), offset);
 
                         for (auto &ppi_result : ppi_results) {
                             if (not coedge->param_range().contains(ppi_result.param2))
@@ -150,14 +153,18 @@ struct FaceFaceIntersection {
                             auto pos_guess = ssi_result.inter_curve->evaluate(ppi_result.param1);
                             spdlog::debug("guess dist {}", glm::distance(pos_3d, pos_guess));
                             auto curve_param = ssi_result.inter_curve->projection(pos_3d, ppi_result.param1).second;
-                            spdlog::debug("curve proj dist {}", glm::distance(pos_3d, ssi_result.inter_curve->evaluate(curve_param)));
+                            spdlog::debug("curve proj dist {}",
+                                          glm::distance(pos_3d, ssi_result.inter_curve->evaluate(curve_param)));
                             auto pcurve2_param = ppi_result.param1;
 
                             BRepPoint2 surface1_param = surface1->project(pos_3d).second;
 
                             // guess with pcurve1 param
                             double pcurve1_param = ssi_result.pcurve1->projection(surface1_param, pcurve2_param).second;
-                            spdlog::debug("dist proj {}", glm::distance(surface1_param, ssi_result.pcurve1->projection(surface1_param, pcurve1_param).first));
+                            spdlog::debug(
+                                "dist proj {}",
+                                glm::distance(surface1_param,
+                                              ssi_result.pcurve1->projection(surface1_param, pcurve1_param).first));
 
                             inter_info.push_back(std::make_tuple(curve_param, pcurve1_param, pcurve2_param));
                         }
