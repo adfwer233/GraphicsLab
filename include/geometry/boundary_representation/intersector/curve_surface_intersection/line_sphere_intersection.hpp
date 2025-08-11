@@ -4,11 +4,7 @@
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "geometry/parametric/sphere.hpp"
 
-namespace GraphicsLab::Geometry {
-struct Plane;
-}
 namespace GraphicsLab::Geometry::BRep {
-struct CSIResult;
 
 /**
  * @brief Intersect line with sphere

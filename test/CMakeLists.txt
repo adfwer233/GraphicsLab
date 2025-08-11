@@ -18,6 +18,7 @@ set(SRC_FILE
         geometry/brep_constructor_test.cpp
         geometry/brep_curve_surface_intersector_test.cpp
         numeric/polynomial_test.cpp
+        numeric/polynomial_solver_test.cpp
         crtp/crtp_test.cpp
         parallel/thread_pool_test.cpp
         main.cpp
