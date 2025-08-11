@@ -1,5 +1,4 @@
 #pragma once
-#include "../../../../../cmake-build-relwithdebinfo/_deps/spdlog-src/include/spdlog/spdlog.h"
 #include "csi_results.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "geometry/parametric/torus.hpp"
