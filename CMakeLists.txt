@@ -73,7 +73,6 @@ set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 include(fetch-glfw)
 include(fetch-glm)
 include(fetch-assimp)
-include(fetch-boost)
 include(fetch-eigen)
 include(fetch-stb)
 include(fetch-imgui)
@@ -107,14 +106,12 @@ INCLUDE_DIRECTORIES(${tinyobjloader_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${random_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${imgui_fetch_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${imgui_fetch_SOURCE_DIR}/backends)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${boost_di_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${spirv_cross_SOURCE_DIRS})
 INCLUDE_DIRECTORIES(${RENDERDOC_INSTALL_PATH})
 INCLUDE_DIRECTORIES(${tinycolormap_SOURCE_DIR}/include)
 
 message(STATUS ${gtest_SOURCE_DIR})
-message(STATUS ${Boost_INCLUDE_DIRS})
 message(STATUS ${boost_di_SOURCE_DIR}/include)
 
 find_package(Vulkan REQUIRED)
@@ -141,7 +138,6 @@ if(MSVC)
 endif()
 
 message(STATUS "Build documentation open")
-message(STATUS ${Boost_LIBRARIES})
 include(build-doxygen)
 build_doxygen()
 
@@ -175,7 +171,6 @@ if (GRAPHICS_LAB_INSTALL)
             ${imgui_fetch_SOURCE_DIR}/imconfig.h
             ${imgui_fetch_SOURCE_DIR}/backends/imgui_impl_vulkan.h
             DESTINATION include)
-    install(DIRECTORY ${Boost_INCLUDE_DIRS} DESTINATION include/boost)
     install(FILES ${stb_SOURCE_DIR}/stb_image.h DESTINATION include)
 
     install(DIRECTORY configs/ DESTINATION bin/)
