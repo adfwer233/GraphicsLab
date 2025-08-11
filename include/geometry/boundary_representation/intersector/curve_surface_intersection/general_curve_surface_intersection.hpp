@@ -3,6 +3,7 @@
 #include "csi_results.hpp"
 #include "line_plane_intersection.hpp"
 #include "line_sphere_intersection.hpp"
+#include "line_torus_intersection.hpp"
 
 #include <Eigen/Eigen>
 
@@ -10,6 +11,7 @@
 #include "geometry/boundary_representation/base/vec_def.hpp"
 #include "geometry/parametric/parametric_curves/parametric_curve.hpp"
 #include "geometry/parametric/parametric_surface.hpp"
+#include "geometry/parametric/torus.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 struct CSIResult;
@@ -37,6 +39,10 @@ struct GeneralCurveSurfaceIntersection {
 
             if (auto sphere = dynamic_cast<const Sphere *>(surface)) {
                 return LineSphereIntersection::solve(line, sphere);
+            }
+
+            if (auto torus = dynamic_cast<const Torus *>(surface)) {
+                return LineTorusIntersection::solve(line, torus);
             }
         }
 

@@ -18,8 +18,8 @@ struct PolynomialSolver {
      */
     static std::vector<std::complex<double>> find_complex_roots(const RealPolynomial& polynomial) {
         int degree = polynomial.degree();
-        auto&& coeff = polynomial.get_coefficients();
-
+        std::vector<double> coeff = polynomial.get_coefficients();
+        std::ranges::reverse(coeff);
         // Convert to Eigen vector
         Eigen::VectorXd c(degree + 1);
         for (int i = 0; i <= degree; ++i) c(i) = coeff[i];

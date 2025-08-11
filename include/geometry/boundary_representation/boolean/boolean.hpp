@@ -537,8 +537,8 @@ struct Boolean {
             faces_inside_flag.resize(faces.size());
             for (int i = 0; i < faces.size(); ++i) {
                 auto [sample_point, sample_par_pos] = get_point_in_face(faces[i]);
-                BRepPoint3 direction = Sampler::sampleUniformVec3();
-                StraightLine3D test_line{sample_point + direction * 1e-3, sample_point + direction * 5.0};
+                BRepPoint3 direction = Sampler::sampleUnitSphere<3>();
+                StraightLine3D test_line{sample_point + direction * 1e-3, sample_point + direction * 15.0};
 
                 int inter_num = 0;
                 int j = 0;

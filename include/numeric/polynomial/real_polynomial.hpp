@@ -87,6 +87,54 @@ struct RealPolynomial {
         return coefficients_;
     }
 
+
+    // Addition with scalar (p + scalar)
+    RealPolynomial operator+(double scalar) const {
+        std::vector<double> result = coefficients_;
+        if (result.empty()) result.push_back(scalar);
+        else result[0] += scalar;
+        return RealPolynomial(result);
+    }
+
+    // Subtraction with scalar (p - scalar)
+    RealPolynomial operator-(double scalar) const {
+        std::vector<double> result = coefficients_;
+        if (result.empty()) result.push_back(-scalar);
+        else result[0] -= scalar;
+        return RealPolynomial(result);
+    }
+
+    // Multiplication with scalar (p * scalar)
+    RealPolynomial operator*(double scalar) const {
+        std::vector<double> result = coefficients_;
+        for (double &c : result) c *= scalar;
+        return RealPolynomial(result);
+    }
+
+    // Division by scalar (p / scalar)
+    RealPolynomial operator/(double scalar) const {
+        std::vector<double> result = coefficients_;
+        for (double &c : result) c /= scalar;
+        return RealPolynomial(result);
+    }
+
+    friend RealPolynomial operator+(double scalar, const RealPolynomial &poly) {
+        return poly + scalar;
+    }
+
+    friend RealPolynomial operator-(double scalar, const RealPolynomial &poly) {
+        std::vector<double> result = poly.coefficients_;
+        if (result.empty()) result.push_back(scalar);
+        else result[0] = scalar - result[0];
+        for (size_t i = 1; i < result.size(); ++i)
+            result[i] = -result[i];
+        return RealPolynomial(result);
+    }
+
+    friend RealPolynomial operator*(double scalar, const RealPolynomial &poly) {
+        return poly * scalar;
+    }
+
   private:
     std::vector<double> coefficients_;
 };

@@ -19,5 +19,4 @@ TEST(PolynomialSolverTest, QuadraticTest) {
     EXPECT_EQ(r1.size(), 1);
     EXPECT_NEAR(r1.front().first, -1.0, 1e-9);
     EXPECT_EQ(r1.front().second, 2.0);
-    int x = 0;
 }
