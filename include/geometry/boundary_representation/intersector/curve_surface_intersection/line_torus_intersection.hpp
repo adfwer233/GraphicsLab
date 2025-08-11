@@ -42,14 +42,11 @@ struct LineTorusIntersection {
 
         std::vector<double> line_params;
 
-        double det = glm::determinant(trans);
-
         auto roots = Numeric::PolynomialSolver::find_real_roots_with_multiplicity(f);
 
         for (auto [root, m]: roots) {
-            spdlog::info(" root eval {}", f.evaluate(root));
             if (check_line_range) {
-                if (root > 0 and root < seg_len) {
+                if (root > 0) {
                     line_params.push_back(root);
                 }
             } else {
@@ -58,15 +55,13 @@ struct LineTorusIntersection {
         }
 
         for (auto param: line_params) {
-            CSIResult csi_result;
+            CSIResult csi_result{};
 
             csi_result.curve_parameter = param / seg_len;
             csi_result.inter_position = line->evaluate(csi_result.curve_parameter);
 
             auto [proj, surf_param] = torus->project(csi_result.inter_position);
             csi_result.surface_parameter = surf_param;
-
-            spdlog::info("line torus inter {}", glm::distance(proj, line->evaluate(csi_result.curve_parameter)));
 
             csi_results.push_back(csi_result);
         }

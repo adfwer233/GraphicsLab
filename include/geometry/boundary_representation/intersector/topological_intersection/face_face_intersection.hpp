@@ -193,11 +193,13 @@ struct FaceFaceIntersection {
                 BRepPoint2 pc1_mid_pos = ssi_result.pcurve1->evaluate(pcurve1_segment_mid_param);
                 BRepPoint2 pc2_mid_pos = ssi_result.pcurve2->evaluate(pcurve2_segment_mid_param);
 
-                if (ContainmentQuery::contained(face1, pc1_mid_pos) == ContainmentQuery::ContainmentResult::Outside) {
+                auto param1 = surface1->move_param_to_std_domain(pc1_mid_pos);
+                auto param2 = surface2->move_param_to_std_domain(pc2_mid_pos);
+                if (ContainmentQuery::contained(face1, param1) == ContainmentQuery::ContainmentResult::Outside) {
                     continue;
                 }
 
-                if (ContainmentQuery::contained(face2, pc2_mid_pos) == ContainmentQuery::ContainmentResult::Outside) {
+                if (ContainmentQuery::contained(face2, param2) == ContainmentQuery::ContainmentResult::Outside) {
                     continue;
                 }
 
