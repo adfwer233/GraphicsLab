@@ -16,13 +16,14 @@ struct PolynomialSolver {
      * @note we find the root with the companion matrix method.
      * @return
      */
-    static std::vector<std::complex<double>> find_complex_roots(const RealPolynomial& polynomial) {
+    static std::vector<std::complex<double>> find_complex_roots(const RealPolynomial &polynomial) {
         int degree = polynomial.degree();
         std::vector<double> coeff = polynomial.get_coefficients();
         std::ranges::reverse(coeff);
         // Convert to Eigen vector
         Eigen::VectorXd c(degree + 1);
-        for (int i = 0; i <= degree; ++i) c(i) = coeff[i];
+        for (int i = 0; i <= degree; ++i)
+            c(i) = coeff[i];
 
         Eigen::MatrixXd companion = Eigen::MatrixXd::Zero(degree, degree);
         companion.block(1, 0, degree - 1, degree - 1) = Eigen::MatrixXd::Identity(degree - 1, degree - 1);
@@ -43,7 +44,7 @@ struct PolynomialSolver {
      * @param tol tolerance value to determine if a complex root is a real root.
      * @return real roots
      */
-    static std::vector<double> find_real_roots(const RealPolynomial& polynomial, double tol = 1e-9) {
+    static std::vector<double> find_real_roots(const RealPolynomial &polynomial, double tol = 1e-9) {
         std::vector<std::complex<double>> rootsC = find_complex_roots(polynomial);
         std::vector<double> roots;
         roots.reserve(rootsC.size());
@@ -55,7 +56,9 @@ struct PolynomialSolver {
         return roots;
     }
 
-    static std::vector<std::pair<double, int>> find_real_roots_with_multiplicity(const RealPolynomial& polynomial, double real_tol = 1e-9, double equal_tol = 1e-8) {
+    static std::vector<std::pair<double, int>> find_real_roots_with_multiplicity(const RealPolynomial &polynomial,
+                                                                                 double real_tol = 1e-9,
+                                                                                 double equal_tol = 1e-8) {
         std::vector<std::complex<double>> rootsC = find_complex_roots(polynomial);
         std::vector<double> realRoots;
 
@@ -86,4 +89,4 @@ struct PolynomialSolver {
     }
 };
 
-}
+} // namespace GraphicsLab::Numeric

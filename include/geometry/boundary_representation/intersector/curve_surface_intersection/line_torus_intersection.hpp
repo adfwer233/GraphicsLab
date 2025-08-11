@@ -34,8 +34,8 @@ struct LineTorusIntersection {
 
         double seg_len = glm::length(line->end_point - line->start_point);
 
-        RealPolynomial s({ glm::dot(p, p) + R * R - r * r, glm::dot(d, p) * 2, glm::dot(d, d) });
-        RealPolynomial b({ p.x * p.x + p.y * p.y, 2 * (p.x * d.x + p.y * d.y), d.x * d.x + d.y * d.y });
+        RealPolynomial s({glm::dot(p, p) + R * R - r * r, glm::dot(d, p) * 2, glm::dot(d, d)});
+        RealPolynomial b({p.x * p.x + p.y * p.y, 2 * (p.x * d.x + p.y * d.y), d.x * d.x + d.y * d.y});
 
         RealPolynomial f = s * s - b * 4 * R * R;
 
@@ -43,7 +43,7 @@ struct LineTorusIntersection {
 
         auto roots = Numeric::PolynomialSolver::find_real_roots_with_multiplicity(f);
 
-        for (auto [root, m]: roots) {
+        for (auto [root, m] : roots) {
             if (check_line_range) {
                 if (root > 0) {
                     line_params.push_back(root);
@@ -53,7 +53,7 @@ struct LineTorusIntersection {
             }
         }
 
-        for (auto param: line_params) {
+        for (auto param : line_params) {
             CSIResult csi_result{};
 
             csi_result.curve_parameter = param / seg_len;
@@ -67,7 +67,6 @@ struct LineTorusIntersection {
 
         return csi_results;
     }
-
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep
