@@ -24,8 +24,11 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Update apt
+      run: sudo apt update
+
     - name: Install Dependency
-      run: sudo apt install libwayland-dev libxkbcommon-dev xorg-dev ninja-build
+      run: sudo apt install -y libwayland-dev libxkbcommon-dev xorg-dev ninja-build
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v4
