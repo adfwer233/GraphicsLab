@@ -25,7 +25,7 @@ void BaseComputeSystem<UniformBufferType, ComputeModelType>::createComputeDescri
 
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
 
-    for (int i = 0; i < uniformBufferDescriptors_.size(); i++) {
+    for (size_t i = 0; i < uniformBufferDescriptors_.size(); i++) {
         VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
         descriptorSetLayoutBinding.binding = layoutBindings.size();
         descriptorSetLayoutBinding.descriptorCount = 1;
@@ -35,7 +35,7 @@ void BaseComputeSystem<UniformBufferType, ComputeModelType>::createComputeDescri
         layoutBindings.push_back(descriptorSetLayoutBinding);
     }
 
-    for (int i = 0; i < imageDescriptors_.size(); i++) {
+    for (size_t i = 0; i < imageDescriptors_.size(); i++) {
         VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
         descriptorSetLayoutBinding.binding = layoutBindings.size();
         descriptorSetLayoutBinding.descriptorCount = 1;
@@ -45,7 +45,7 @@ void BaseComputeSystem<UniformBufferType, ComputeModelType>::createComputeDescri
         layoutBindings.push_back(descriptorSetLayoutBinding);
     }
 
-    for (int i = 0; i < storageBufferDescriptors_.size(); i++) {
+    for (size_t i = 0; i < storageBufferDescriptors_.size(); i++) {
         VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
         descriptorSetLayoutBinding.binding = layoutBindings.size();
         descriptorSetLayoutBinding.descriptorCount = 1;
@@ -177,7 +177,7 @@ void BaseComputeSystem<UniformBufferType, ComputeModelType>::createComputeDescri
         std::vector<VkWriteDescriptorSet> descriptorWrites(n);
 
         std::vector<VkDescriptorBufferInfo> uniformBufferDescriptorInfo(uniformBufferDescriptors_.size());
-        for (int j = 0; j < uniformBufferDescriptors_.size(); j++) {
+        for (size_t j = 0; j < uniformBufferDescriptors_.size(); j++) {
             uniformBufferDescriptorInfo[j].buffer = uniformBuffers_[j]->getBuffer();
             uniformBufferDescriptorInfo[j].offset = 0;
             uniformBufferDescriptorInfo[j].range = sizeof(UniformBufferType);
@@ -192,8 +192,8 @@ void BaseComputeSystem<UniformBufferType, ComputeModelType>::createComputeDescri
         }
 
         std::vector<VkDescriptorImageInfo> imageDescriptorInfo(imageDescriptors_.size());
-        for (int j = 0; j < imageDescriptors_.size(); j++) {
-            int k = j + uniformBufferDescriptors_.size();
+        for (size_t j = 0; j < imageDescriptors_.size(); j++) {
+            size_t k = j + uniformBufferDescriptors_.size();
             imageDescriptorInfo[j] = imageDescriptors_[j].data->descriptorInfo(VK_IMAGE_LAYOUT_GENERAL);
 
             descriptorWrites[k].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -206,8 +206,8 @@ void BaseComputeSystem<UniformBufferType, ComputeModelType>::createComputeDescri
         }
 
         std::vector<VkDescriptorBufferInfo> storageBufferDescriptorsInfo(storageBufferDescriptors_.size());
-        for (int j = 0; j < storageBufferDescriptors_.size(); j++) {
-            int k = j + uniformBufferDescriptors_.size() + imageDescriptors_.size();
+        for (size_t j = 0; j < storageBufferDescriptors_.size(); j++) {
+            size_t k = j + uniformBufferDescriptors_.size() + imageDescriptors_.size();
             storageBufferDescriptorsInfo[j] = storageBufferDescriptors_[j].data->descriptorInfo();
 
             descriptorWrites[k].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

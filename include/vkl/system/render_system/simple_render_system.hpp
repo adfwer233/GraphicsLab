@@ -18,7 +18,7 @@ concept VklPipelineModifierType =
     requires(PipelineConfigInfo &pipelineConfigInfo) { T::modifyPipeline(pipelineConfigInfo); };
 
 struct NullPipelineModifier {
-    static void modifyPipeline(PipelineConfigInfo &configInfo) {
+    static void modifyPipeline(PipelineConfigInfo &) {
     }
 };
 

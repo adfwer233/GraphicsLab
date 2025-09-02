@@ -42,7 +42,7 @@ class RenderGraphCompiler {
     }
 
     explicit RenderGraphCompiler(RenderGraph &render_graph, VklDevice &device)
-        : render_graph_(render_graph), device_(device) {
+        : device_(device), render_graph_(render_graph) {
     }
 
   private:

@@ -152,7 +152,7 @@ struct RenderContext {
 
     bool is_frame_started_ = false;
 
-    friend class SwapChainPass;
+    friend struct SwapChainPass;
 };
 } // namespace RenderGraph
 } // namespace GraphicsLab

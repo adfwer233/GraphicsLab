@@ -11,8 +11,8 @@ struct RectangleConstructor {
 
         auto norm = glm::normalize(glm::cross(dir1, dir2));
 
-        for (int i = 0; i <= n; i++) {
-            for (int j = 0; j <= m; j++) {
+        for (uint32_t i = 0; i <= n; i++) {
+            for (uint32_t j = 0; j <= m; j++) {
                 Mesh3D::vertex_type vertex;
                 vertex.position = pos + dir1 * float(i) + dir2 * float(j);
                 vertex.color = {0, 1, 0};
@@ -21,8 +21,8 @@ struct RectangleConstructor {
             }
         }
 
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
+        for (uint32_t i = 0; i < n; i++) {
+            for (uint32_t j = 0; j < m; j++) {
                 auto idx1 = i * (n + 1) + j;
                 auto idx2 = i * (n + 1) + j + 1;
                 auto idx3 = (i + 1) * (n + 1) + j;

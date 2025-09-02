@@ -358,10 +358,8 @@ class AssimpImporter {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
         }
 
-        for (int i = 0; i < scene->mNumMaterials; i++) {
+        for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             auto material = scene->mMaterials[i];
-
-            int count = material->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
 
             Material current_material;
 
@@ -373,7 +371,7 @@ class AssimpImporter {
             current_material.meta.name = material->GetName().C_Str();
 
             for (auto type : {aiTextureType::aiTextureType_DIFFUSE}) {
-                for (int j = 0; j < material->GetTextureCount(type); j++) {
+                for (unsigned int j = 0; j < material->GetTextureCount(type); j++) {
                     aiString str;
                     material->GetTexture(type, j, &str);
 

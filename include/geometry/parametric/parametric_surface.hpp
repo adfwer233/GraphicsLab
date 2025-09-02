@@ -25,7 +25,7 @@ struct ParamSurface {
     virtual std::pair<PointType, ParamType> project(const PointType point) const = 0;
     virtual bool test_point(const PointType point) const = 0;
 
-    virtual bool is_singular(ParamType param) const {
+    virtual bool is_singular(ParamType) const {
         return false;
     }
 

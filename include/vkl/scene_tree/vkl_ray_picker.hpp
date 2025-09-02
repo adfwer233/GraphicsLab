@@ -29,8 +29,6 @@ class Ray {
 
         ray_triangle_intersection_result result{false, 0, 0, 0, 0};
 
-        using T = decltype(result);
-
         // compute the normal of triangle
         constexpr float eps = 1e-8;
 

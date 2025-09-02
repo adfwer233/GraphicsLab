@@ -138,7 +138,7 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
         }
     }
 
-    void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) {
+    void mouse_button_callback(GLFWwindow *window, int button, int state, int mod) override {
         if (not uiState_.isMouseInRegion) {
             return;
         }
@@ -170,7 +170,7 @@ struct Controller : GraphicsLab::IGraphicsLabProjectController {
         }
     }
 
-    void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+    void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) override {
         auto *controller = static_cast<Controller *>(glfwGetWindowUserPointer(window));
         auto &uiState = uiState_;
 

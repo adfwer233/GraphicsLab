@@ -9,7 +9,7 @@ template <size_t dim, typename T> struct Box {
     point_type min, max;
 
     Box() {
-        for (int i = 0; i < dim; i++) {
+        for (size_t i = 0; i < dim; i++) {
             min[i] = std::numeric_limits<T>::max();
             max[i] = -std::numeric_limits<T>::max();
         }

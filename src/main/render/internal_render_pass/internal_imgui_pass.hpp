@@ -30,7 +30,7 @@ struct InternalImguiPass : public SwapChainPass {
         }
 
         auto swapChain = get_current_swap_chain(render_context);
-        for (int i = 0; i < swapChain->imageCount(); i++) {
+        for (size_t i = 0; i < swapChain->imageCount(); i++) {
             device_.transitionImageLayout(swapChain->getImage(i), swapChain->getSwapChainImageFormat(),
                                           VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         }

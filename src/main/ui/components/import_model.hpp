@@ -20,7 +20,7 @@ class ImportModelWidget : public UIComponent {
 
         if (not uiState_.recent_models.models.empty()) {
             if (ImGui::BeginCombo("Recent", uiState_.recent_models.models[current_item].name.c_str())) {
-                for (int i = 0; i < uiState_.recent_models.models.size(); ++i) {
+                for (size_t i = 0; i < uiState_.recent_models.models.size(); ++i) {
                     const bool is_selected = (current_item == i);
                     if (ImGui::Selectable(uiState_.recent_models.models[i].name.c_str(), is_selected)) {
                         current_item = i;

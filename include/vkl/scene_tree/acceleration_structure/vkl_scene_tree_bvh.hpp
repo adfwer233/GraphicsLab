@@ -106,7 +106,6 @@ struct SceneTreeBvh {
 
         glm::vec3 filp(1.0, -1.0, 1.0);
         MetaProgramming::ForEachType(RenderableTypeList{}, [&]<typename T>() {
-            auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
             for (auto [mesh3d_nodes, trans] : scene_.traverse_geometry_nodes_with_trans<T>()) {
                 Mesh3D *mesh = nullptr;
                 if constexpr (std::is_same_v<T, GraphicsLab::Geometry::Sphere> or

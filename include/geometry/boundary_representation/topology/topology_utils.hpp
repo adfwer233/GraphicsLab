@@ -215,7 +215,7 @@ struct TopologyUtils {
             curve_params.push_back(curve->param_geometry()->projection(pos, pcurve_param).second);
         }
 
-        for (int i = 1; i < pcurve_params.size(); ++i) {
+        for (size_t i = 1; i < pcurve_params.size(); ++i) {
             Edge *edge = create_edge_from_curve(curve, curve_params[i - 1], curve_params[i]);
             Coedge *coedge_new = create_coedge_from_edge(edge);
             coedge_new->set_param_range(ParamRange(pcurve_params[i - 1], pcurve_params[i]));
@@ -230,7 +230,7 @@ struct TopologyUtils {
             std::ranges::reverse(coedges);
         }
 
-        for (int i = 1; i < coedges.size(); ++i) {
+        for (size_t i = 1; i < coedges.size(); ++i) {
             coedges[i - 1]->set_next(coedges[i]);
         }
 
@@ -250,7 +250,7 @@ struct TopologyUtils {
         auto shell = allocator->alloc_shell();
         shell->set_face(faces.front());
         faces.front()->set_shell(shell);
-        for (int i = 1; i < faces.size(); ++i) {
+        for (size_t i = 1; i < faces.size(); ++i) {
             faces[i - 1]->set_next(faces[i]);
             faces[i]->set_shell(shell);
         }
@@ -336,9 +336,6 @@ struct TopologyUtils {
         BRepPoint2 end_pos = end_pc->is_forward()
                                  ? end_pc->param_geometry()->evaluate(end_coedge->param_range().end())
                                  : end_pc->param_geometry()->evaluate(end_coedge->param_range().start());
-
-        double offset_x = end_pos.x - start_pos.x - offset.x;
-        double offset_y = end_pos.y - start_pos.y - offset.y;
 
         return {std::round(end_pos.x - start_pos.x - offset.x), std::round(end_pos.y - start_pos.y - offset.y)};
     }

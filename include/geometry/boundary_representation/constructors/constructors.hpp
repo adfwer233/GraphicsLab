@@ -297,8 +297,6 @@ struct FaceConstructors {
 struct BodyConstructors {
 
     static Body *cube(BRepPoint3 min_pos, BRepPoint3 max_pos) {
-        auto allocator = BRepAllocator::instance();
-
         auto dx = (max_pos - min_pos) * BRepPoint3{1.0, 0.0, 0.0};
         auto dy = (max_pos - min_pos) * BRepPoint3{0.0, 1.0, 0.0};
         auto dz = (max_pos - min_pos) * BRepPoint3{0.0, 0.0, 1.0};

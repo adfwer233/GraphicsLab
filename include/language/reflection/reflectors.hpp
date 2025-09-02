@@ -60,7 +60,7 @@ struct TypeErasedValue {
 
     // Constructor for data members
     template <typename T> TypeErasedValue(T *value) {
-        type_info_func = [value]() -> const std::type_info & { return typeid(T); };
+        type_info_func = []() -> const std::type_info & { return typeid(T); };
         get_ptr_func = [value]() -> void * { return static_cast<void *>(value); };
 
         isReflectable = isObjectReflectable<T>();
@@ -70,7 +70,7 @@ struct TypeErasedValue {
 
     // Constructor for member functions
     template <typename R, typename C> TypeErasedValue(R (C::*func)(void), C *obj) {
-        type_info_func = [func]() -> const std::type_info & { return typeid(func); };
+        type_info_func = []() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = [func, obj]() { (obj->*func)(); };
     }
@@ -78,7 +78,7 @@ struct TypeErasedValue {
     template <typename R, typename C, typename... Args>
     TypeErasedValue(R (C::*func)(Args...), C *obj, std::tuple<std::decay_t<Args>...> default_values,
                     std::vector<std::string> names) {
-        type_info_func = [func]() -> const std::type_info & { return typeid(func); };
+        type_info_func = []() -> const std::type_info & { return typeid(func); };
         get_ptr_func = nullptr; // Not a data member
         call_func = nullptr;
 

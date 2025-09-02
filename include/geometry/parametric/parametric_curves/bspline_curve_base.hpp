@@ -249,10 +249,10 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         // control_points_.size());
     }
 
-    static BSplineCurveBase fit(const std::vector<PointType> &points, int degree, int num_ctrl_points) {
+    static BSplineCurveBase fit(const std::vector<PointType> &points, const size_t degree, const size_t num_ctrl_points) {
         using namespace Eigen;
-        const int num_points = static_cast<int>(points.size());
-        const int k = degree;
+        const size_t num_points = points.size();
+        const size_t k = degree;
 
         assert(num_ctrl_points >= k + 1);
         assert(num_points > num_ctrl_points); // Overdetermined
@@ -260,7 +260,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         // 1. Chord-length parameterization in [0, 1]
         std::vector<double> u(num_points);
         u[0] = 0.0;
-        for (int i = 1; i < num_points; ++i)
+        for (size_t i = 1; i < num_points; ++i)
             u[i] = u[i - 1] + glm::length(points[i] - points[i - 1]);
         double total_length = u.back();
         for (double &val : u) {
@@ -270,29 +270,29 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         }
 
         // 2. Normalized knot vector in [0, 1]
-        int m = num_ctrl_points + k + 1;
+        size_t m = num_ctrl_points + k + 1;
         std::vector<double> knots(m);
 
         // Clamped: first and last k+1 knots = 0 and 1
-        for (int i = 0; i <= k; ++i)
+        for (size_t i = 0; i <= k; ++i)
             knots[i] = 0.0;
-        for (int i = 1; i <= num_ctrl_points - k - 1; ++i)
+        for (size_t i = 1; i <= num_ctrl_points - k - 1; ++i)
             knots[k + i] = double(i) / (num_ctrl_points - k);
-        for (int i = m - k - 1; i < m; ++i)
+        for (size_t i = m - k - 1; i < m; ++i)
             knots[i] = 1.0;
 
         // 3. Build basis matrix N (num_points × num_ctrl_points)
         MatrixXd N(num_points, num_ctrl_points);
-        for (int i = 0; i < num_points; ++i) {
-            for (int j = 0; j < num_ctrl_points; ++j) {
+        for (size_t i = 0; i < num_points; ++i) {
+            for (size_t j = 0; j < num_ctrl_points; ++j) {
                 N(i, j) = basis_function(j, k, u[i], knots);
             }
         }
 
         // 4. Build target data matrix D (num_points × dim)
         MatrixXd D(num_points, dim);
-        for (int i = 0; i < num_points; ++i) {
-            for (int j = 0; j < dim; j++) {
+        for (size_t i = 0; i < num_points; ++i) {
+            for (size_t j = 0; j < dim; j++) {
                 D(i, j) = points[i][j];
             }
         }
@@ -314,7 +314,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
         // 6. Construct control points
         std::vector<PointType> control_points;
-        for (int i = 0; i < num_ctrl_points; ++i) {
+        for (size_t i = 0; i < num_ctrl_points; ++i) {
             if constexpr (dim == 2) {
                 control_points.emplace_back(P(i, 0), P(i, 1));
             } else {
@@ -325,7 +325,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         return BSplineCurveBase(std::move(control_points), std::move(knots), k); // knots saved separately below
     }
 
-    static double basis_function(int i, int k, double u, const std::vector<double> &knots) {
+    static double basis_function(const size_t i, const size_t k, const double u, const std::vector<double> &knots) {
         if (k == 0) {
             // Handle the special case at u = 1
             if (u == 1.0 && i == knots.size() - 2)

@@ -5,7 +5,7 @@
 
 class DummyComponent : public UIComponent {
   public:
-    DummyComponent(GraphicsLab::GraphicsLabInternalContext &context, Controller &controller) : UIComponent(context) {
+    DummyComponent(GraphicsLab::GraphicsLabInternalContext &context, Controller &) : UIComponent(context) {
     }
 
     void render() final {

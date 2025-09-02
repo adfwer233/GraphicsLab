@@ -121,7 +121,6 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
             uint32_t bindingIndex = compiler.get_decoration(buffer.id, spv::DecorationBinding);
 
             auto &type = compiler.get_type(buffer.type_id);
-            auto &type2 = compiler.get_type(buffer.base_type_id);
             auto declaredSize = static_cast<uint32_t>(compiler.get_declared_struct_size(type));
 
             spdlog::debug("Uniform Buffer {}, shader id {}, binding {}, declared size {}\n", buffer.name, setShaderId,

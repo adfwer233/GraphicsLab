@@ -1,11 +1,13 @@
 #pragma once
 
+#include <numbers>
+#include <set>
+
 #include "cpptrace/exceptions.hpp"
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "topology_utils.hpp"
 
-#include <set>
 
 namespace GraphicsLab::Geometry::BRep {
 
@@ -174,7 +176,7 @@ struct ContainmentQuery {
 
         auto compute_wn = [&](BRepPoint2 p) -> double {
             double wn = 0;
-            for (int i = 1; i < samples.size(); i++) {
+            for (size_t i = 1; i < samples.size(); i++) {
                 wn += winding_number_line_segment(p, samples[i - 1], samples[i]);
             }
             return wn;
@@ -207,9 +209,6 @@ struct ContainmentQuery {
     }
 
     static double winding_number_line_segment(BRepPoint2 test_point, BRepPoint2 start_pos, BRepPoint2 end_pos) {
-        auto d1 = glm::length(start_pos - test_point);
-        auto d2 = glm::length(end_pos - test_point);
-
         auto v1 = glm::normalize(start_pos - test_point);
         auto v2 = glm::normalize(end_pos - test_point);
         auto outer = v1.x * v2.y - v1.y * v2.x;
@@ -246,7 +245,7 @@ struct TrimmingUtils {
             PCurve *first_pcurve = curve.pcurves.front();
             BRepPoint2 test_point = first_pcurve->param_geometry()->evaluate(0.5);
 
-            for (int j = 0; j < faces.size(); j++) {
+            for (size_t j = 0; j < faces.size(); j++) {
                 if (ContainmentQuery::contained(faces[j], test_point) == ContainmentQuery::ContainmentResult::Inside) {
                     Face *new_face = split_face_with_trimming_loop(faces[j], curve);
                     faces.push_back(new_face);
@@ -285,7 +284,7 @@ struct TrimmingUtils {
     static std::pair<Loop *, Loop *> create_loops_from_trimming_loop(Face *face, TrimmingLoop trimming_loop) {
         std::vector<BRepPoint2> pcurve_start, pcurve_end;
 
-        for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
+        for (size_t i = 0; i < trimming_loop.pcurves.size(); i++) {
             auto param_pcurve = trimming_loop.pcurves[i]->param_geometry();
             ParamRange param_range{0, 1};
             pcurve_start.emplace_back(param_pcurve->evaluate(param_range.start()));
@@ -320,7 +319,7 @@ struct TrimmingUtils {
             reverse_coedges.emplace_back(reverse_coedge);
         }
 
-        for (int i = 1; i < trimming_loop.pcurves.size(); i++) {
+        for (size_t i = 1; i < trimming_loop.pcurves.size(); i++) {
             coedges[i - 1]->set_next(coedges[i]);
             reverse_coedges[i]->set_next(reverse_coedges[i - 1]);
         }
@@ -330,7 +329,7 @@ struct TrimmingUtils {
         Loop *loop = TopologyUtils::create_loop_from_coedge(coedges.front());
         Loop *reverse_loop = TopologyUtils::create_loop_from_coedge(reverse_coedges.back());
 
-        for (int i = 0; i < trimming_loop.pcurves.size(); i++) {
+        for (size_t i = 0; i < trimming_loop.pcurves.size(); i++) {
             coedges[i]->set_loop(loop);
             reverse_coedges[i]->set_loop(reverse_loop);
         }

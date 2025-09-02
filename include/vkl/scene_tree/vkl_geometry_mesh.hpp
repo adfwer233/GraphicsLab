@@ -74,10 +74,7 @@ class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
                 builder.textures.emplace_back(vkl_texture);
             }
             // std::ranges::copy(material.textures, std::back_inserter(builder.textures));
-        } else {
-            int x = 0;
         }
-
         mesh = std::make_unique<render_type>(device_, builder);
     }
 
@@ -89,7 +86,7 @@ class VklNodeMesh<MeshGeometry<VertexType, IndexType, dimension>> {
         createMesh();
     }
 
-    VklNodeMesh(VklDevice &device, decltype(node_) node) : device_(device), node_(node) {
+    VklNodeMesh(VklDevice &device, decltype(node_) node) : node_(node), device_(device) {
         createMesh();
     }
 };

@@ -42,7 +42,7 @@ class UIManager {
             di::bind<UIState>().to(uiState), di::bind<GraphicsLab::GraphicsLabInternalContext>().to(context));
         create_component_instances(injector, ComponentTypeList{});
 
-        for (int i = 0; i < component_ptrs.size(); ++i) {
+        for (size_t i = 0; i < component_ptrs.size(); ++i) {
             component_map[i] = i;
         }
 
@@ -59,7 +59,7 @@ class UIManager {
 
         std::map<UIComponent *, int> components_priority;
 
-        for (int i = 0; i < component_ptrs.size(); ++i) {
+        for (size_t i = 0; i < component_ptrs.size(); ++i) {
             components_priority[component_ptrs[i]] = component_map[i];
         }
 
