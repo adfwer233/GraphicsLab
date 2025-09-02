@@ -64,22 +64,22 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
 
         spirv_cross::Compiler compiler(bytecode.data(), bytecode.size());
 
-        spdlog::info("compiling ", shaderInfo.shaderPath_);
+        spdlog::debug("compiling ", shaderInfo.shaderPath_);
 
         auto entryPoints = compiler.get_entry_points_and_stages();
 
         switch (entryPoints[0].execution_model) {
         case spv::ExecutionModel::ExecutionModelVertex:
-            spdlog::info("Vertex Shader");
+            spdlog::debug("Vertex Shader");
             break;
         case spv::ExecutionModel::ExecutionModelGeometry:
-            spdlog::info("Geometry Shader");
+            spdlog::debug("Geometry Shader");
             break;
         case spv::ExecutionModel::ExecutionModelFragment:
-            spdlog::info("Fragment Shader");
+            spdlog::debug("Fragment Shader");
             break;
         case spv::ExecutionModel::ExecutionModelGLCompute:
-            spdlog::info("Compute Shader");
+            spdlog::debug("Compute Shader");
         default:
             break;
         }
@@ -95,7 +95,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
                 uint32_t size = GetTypeSize(compiler, base_type);
 
                 this->attributeDescriptions.push_back({location, 0, VK_FORMAT_R32G32B32_SFLOAT, size});
-                spdlog::info("{} {} {}", input.name, location, size);
+                spdlog::debug("{} {} {}", input.name, location, size);
             }
 
             uint32_t offset = 0;
@@ -124,7 +124,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
             auto &type2 = compiler.get_type(buffer.base_type_id);
             auto declaredSize = static_cast<uint32_t>(compiler.get_declared_struct_size(type));
 
-            spdlog::info("Uniform Buffer {}, shader id {}, binding {}, declared size {}\n", buffer.name, setShaderId,
+            spdlog::debug("Uniform Buffer {}, shader id {}, binding {}, declared size {}\n", buffer.name, setShaderId,
                          bindingIndex, declaredSize);
             if (setShaderId >= setResources.size())
                 setResources.resize(setShaderId + 1);
@@ -134,13 +134,13 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
         for (const auto &image : resources.sampled_images) {
             uint32_t setShaderId = compiler.get_decoration(image.id, spv::DecorationDescriptorSet);
             uint32_t bindingIndex = compiler.get_decoration(image.id, spv::DecorationBinding);
-            spdlog::info("Sampled Images {}, shader id {}, binding {}\n", image.name, setShaderId, bindingIndex);
+            spdlog::debug("Sampled Images {}, shader id {}, binding {}\n", image.name, setShaderId, bindingIndex);
         }
 
         for (const auto &buffer : resources.storage_buffers) {
             uint32_t setShaderId = compiler.get_decoration(buffer.id, spv::DecorationDescriptorSet);
             uint32_t bindingIndex = compiler.get_decoration(buffer.id, spv::DecorationBinding);
-            spdlog::info("Storage Buffer {}, shader id {}, binding {} \n", buffer.name, setShaderId, bindingIndex);
+            spdlog::debug("Storage Buffer {}, shader id {}, binding {} \n", buffer.name, setShaderId, bindingIndex);
         }
 
         descriptorSetLayoutBuilder.addBindingsFromResource(compiler, resources);
