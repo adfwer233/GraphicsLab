@@ -1,4 +1,4 @@
-project(LAB_vkl VERSION 1.0 DESCRIPTION "Vulkan Learning Project Engine" LANGUAGES CXX)
+project(GraphicsLab_VKL VERSION 1.0 DESCRIPTION "Vulkan Learning Project Engine" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -52,11 +52,11 @@ target_include_directories(${PROJECT_NAME}
 
 if(OpenCV_FOUND)
     message(STATUS "found opencv")
-    target_link_libraries(LAB_vkl PUBLIC glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry ${OpenCV_LIBS})
+    target_link_libraries(GraphicsLab_VKL PUBLIC glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX GraphicsLab_Geometry ${OpenCV_LIBS})
 else()
-    target_link_libraries(LAB_vkl PUBLIC glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX LAB_geometry)
+    target_link_libraries(GraphicsLab_VKL PUBLIC glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX GraphicsLab_Geometry)
 endif()
-target_link_libraries(LAB_vkl PUBLIC Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
+target_link_libraries(GraphicsLab_VKL PUBLIC Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
 
 ############## Build SHADERS #######################
 

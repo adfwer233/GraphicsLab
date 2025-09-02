@@ -1,4 +1,4 @@
-project(LAB_geometry VERSION 1.0 DESCRIPTION "Geometry Kernel" LANGUAGES CXX)
+project(GraphicsLab_Geometry VERSION 1.0 DESCRIPTION "Geometry Kernel" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 

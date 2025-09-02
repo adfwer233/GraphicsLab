@@ -77,7 +77,6 @@ include(fetch-eigen)
 include(fetch-stb)
 include(fetch-imgui)
 include(fetch-jsoncpp)
-#include(fetch-libigl)
 include(fetch-googletest)
 include(fetch-tinyobjloader)
 include(fetch-autodiff)
@@ -90,7 +89,8 @@ include(fetch-argparse)
 include(fetch-vma)
 include(fetch-tinycolormap)
 include(fetch-cpptrace)
-#include(fetch-cdt)
+include(fetch-lua)
+include(fetch-sol2)
 
 cmake_policy(SET CMP0077 NEW)
 
@@ -110,7 +110,7 @@ INCLUDE_DIRECTORIES(${boost_di_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${spirv_cross_SOURCE_DIRS})
 INCLUDE_DIRECTORIES(${RENDERDOC_INSTALL_PATH})
 INCLUDE_DIRECTORIES(${tinycolormap_SOURCE_DIR}/include)
-
+INCLUDE_DIRECTORIES(${lua_SOURCE_DIR})
 message(STATUS ${gtest_SOURCE_DIR})
 message(STATUS ${boost_di_SOURCE_DIR}/include)
 
@@ -144,10 +144,10 @@ build_doxygen()
 include(clang-format)
 
 add_custom_target(BUILD_ALL)
-add_dependencies(BUILD_ALL LAB_vkl LAB_geometry LAB_test GraphicsLab_main)
+add_dependencies(BUILD_ALL GraphicsLab_VKL GraphicsLab_Geometry LAB_test GraphicsLab_main)
 
 add_library(GraphicsLabLib INTERFACE)
-target_link_libraries(GraphicsLabLib INTERFACE LAB_vkl LAB_geometry)
+target_link_libraries(GraphicsLabLib INTERFACE GraphicsLab_VKL GraphicsLab_Geometry)
 
 if (GRAPHICS_LAB_INSTALL)
     set(GLM_BUILD_INSTALL ON)
@@ -158,7 +158,7 @@ if (GRAPHICS_LAB_INSTALL)
     )
 
     # Install the library, include files, and CMake package configuration
-    install(TARGETS GraphicsLab_main GraphicsLabLib LAB_vkl LAB_geometry
+    install(TARGETS GraphicsLab_main GraphicsLabLib GraphicsLab_VKL GraphicsLab_Geometry
             EXPORT GraphicsLabTargets
             ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib

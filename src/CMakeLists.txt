@@ -4,3 +4,5 @@ add_subdirectory(vkl)
 add_subdirectory(geometry)
 add_subdirectory(main)
 add_subdirectory(applications)
+
+add_subdirectory(lua)
