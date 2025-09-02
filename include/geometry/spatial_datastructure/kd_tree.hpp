@@ -103,7 +103,7 @@ template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
             }
         }
 
-        KDTreeNode<dim, T> *node = new KDTreeNode<dim, T>{ overlapping, { mid_pos } };
+        KDTreeNode<dim, T> *node = new KDTreeNode<dim, T>{overlapping, {mid_pos}};
 
         node->left = build(left, depth + 1);
         node->right = build(right, depth + 1);

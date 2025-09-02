@@ -4,8 +4,8 @@
 #include "lua/lua_binding.hpp"
 
 class Scene {
-public:
-    void add_light(const std::string& name) {
+  public:
+    void add_light(const std::string &name) {
         std::cout << "Added light: " << name << "\n";
     }
 };
@@ -17,9 +17,7 @@ int main() {
     GraphicsLab::LuaBinding::bind(lua);
 
     // Bind the Scene class
-    lua.new_usertype<Scene>("Scene",
-        "add_light", &Scene::add_light
-    );
+    lua.new_usertype<Scene>("Scene", "add_light", &Scene::add_light);
 
     // Create an instance in C++
     Scene scene;

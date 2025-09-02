@@ -124,7 +124,7 @@ SimpleRenderSystem<Subpass, PushConstantInfoList, PipelineModifierType>::SimpleR
             auto declaredSize = static_cast<uint32_t>(compiler.get_declared_struct_size(type));
 
             spdlog::debug("Uniform Buffer {}, shader id {}, binding {}, declared size {}\n", buffer.name, setShaderId,
-                         bindingIndex, declaredSize);
+                          bindingIndex, declaredSize);
             if (setShaderId >= setResources.size())
                 setResources.resize(setShaderId + 1);
             setResources[setShaderId].uniformBuffers.push_back(buffer);

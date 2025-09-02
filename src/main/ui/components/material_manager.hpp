@@ -6,8 +6,7 @@
 
 class MaterialManagerWidget : public UIComponent {
   public:
-    MaterialManagerWidget(GraphicsLab::GraphicsLabInternalContext &context)
-        : UIComponent(context) {
+    MaterialManagerWidget(GraphicsLab::GraphicsLabInternalContext &context) : UIComponent(context) {
     }
 
     void render() final {

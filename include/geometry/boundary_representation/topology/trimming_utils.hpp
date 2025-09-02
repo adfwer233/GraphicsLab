@@ -8,7 +8,6 @@
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "topology_utils.hpp"
 
-
 namespace GraphicsLab::Geometry::BRep {
 
 /**

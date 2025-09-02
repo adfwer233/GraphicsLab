@@ -249,7 +249,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         // control_points_.size());
     }
 
-    static BSplineCurveBase fit(const std::vector<PointType> &points, const size_t degree, const size_t num_ctrl_points) {
+    static BSplineCurveBase fit(const std::vector<PointType> &points, const size_t degree,
+                                const size_t num_ctrl_points) {
         using namespace Eigen;
         const size_t num_points = points.size();
         const size_t k = degree;

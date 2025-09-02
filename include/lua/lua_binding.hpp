@@ -5,7 +5,7 @@
 namespace GraphicsLab {
 
 struct LuaBinding {
-    static void bind(sol::state& lua);
+    static void bind(sol::state &lua);
 };
 
-}
+} // namespace GraphicsLab
