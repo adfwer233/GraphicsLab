@@ -11,6 +11,8 @@
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_passes/simple_pass.hpp"
+#include "lua/lua_binding.hpp"
+#include "lua/scene_binding.hpp"
 
 #include "render/internal_render_pass/2d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/3d_scene_internal_pass.hpp"
@@ -39,8 +41,34 @@ void GraphicsLabApplication::run() {
     GLFWwindow *window = appContext.window_.getGLFWwindow();
 
     appContext.sceneTree = std::make_unique<SceneTree::VklSceneTree>(appContext.device_);
-
     appContext.sceneTree->root->name = "test";
+
+    // initialize lua context
+    appContext.lua.open_libraries(sol::lib::base);
+    GraphicsLab::LuaBinding::bind(appContext.lua);
+    GraphicsLab::LuaSceneInterface::bind(appContext.lua);
+
+    GraphicsLab::LuaSceneInterface sceneInterface(appContext.sceneTree.get());
+
+    // Pass it into Lua as a global
+    appContext.lua["scene"] = appContext.sceneTree.get();
+    appContext.lua["sceneInterface"] = &sceneInterface;
+
+    appContext.lua.script(R"(
+        local points = {
+            vec2.new(0.0, 0.0),
+            vec2.new(0.0, 0.1),
+            vec2.new(0.0, 0.2)
+        }
+
+        local v3 = vec3.new(1,2,3)
+        print("vec3:", v3.x, v3.y, v3.z)
+
+        local v4 = vec4.new(1,2,3,4)
+        print("vec4:", v4.x, v4.y, v4.z, v4.w)
+
+        sceneInterface:add_point_cloud_2d(points)
+    )");
 
     if (appOption.load_obj_path.has_value()) {
         appContext.sceneTree->importFromPath(appOption.load_obj_path.value());

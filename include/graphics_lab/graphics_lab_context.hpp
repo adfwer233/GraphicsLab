@@ -7,6 +7,7 @@
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_graph/render_graph_instance.hpp"
+#include "sol/sol.hpp"
 
 namespace GraphicsLab {
 struct GraphicsLabInternalContext {
@@ -19,6 +20,7 @@ struct GraphicsLabInternalContext {
     std::unique_ptr<RenderGraph::RenderGraphInstance> renderGraphInstance;
     std::unique_ptr<RenderGraph::RenderGraphInstance> newRenderGraphInstance;
 
+    sol::state lua;
     /**
      * @brief mutex lock protecting render graph (i.e. the descriptor)
      */

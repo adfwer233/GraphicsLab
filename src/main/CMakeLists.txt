@@ -25,6 +25,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC GraphicsLab_VKL GraphicsLab_Geometry GraphicsLab_Platform)
 target_link_libraries(${PROJECT_NAME} PUBLIC argparse assimp glm glfw spdlog Vulkan::Vulkan spirv-cross-core spirv-cross-cpp nlohmann_json cpptrace::cpptrace)
+target_link_libraries(${PROJECT_NAME} PUBLIC GraphicsLab_LuaBinding lua_static sol2)
 
 # Needed for shared library builds on windows:  copy cpptrace.dll to the same directory as the
 # executable for your_target
