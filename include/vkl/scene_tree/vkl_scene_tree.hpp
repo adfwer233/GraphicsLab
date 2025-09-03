@@ -626,8 +626,8 @@ struct VklSceneTree : Reflectable {
     }
 
     template <SupportedGeometryType GeometryType>
-    GraphicsLab::Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans_internal(
-        TreeNode *node, glm::mat4 currentTransformation) {
+    GraphicsLab::Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>>
+    traverse_geometry_nodes_with_trans_internal(TreeNode *node, glm::mat4 currentTransformation) {
         glm::mat4 trans = currentTransformation;
 
         if (auto internal_node = dynamic_cast<InternalNode *>(node)) {

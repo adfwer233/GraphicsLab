@@ -8,7 +8,8 @@ namespace GraphicsLab {
 
 struct LuaSceneInterface {
 
-    explicit LuaSceneInterface(SceneTree::VklSceneTree* scene): scene_(scene) {}
+    explicit LuaSceneInterface(SceneTree::VklSceneTree *scene) : scene_(scene) {
+    }
 
     void add_point_cloud_2d(sol::table tbl) {
         std::vector<glm::vec2> points;
@@ -18,7 +19,7 @@ struct LuaSceneInterface {
         }
 
         PointCloud2D pointcloud;
-        for (auto& p : points) {
+        for (auto &p : points) {
             PointCloud2D::vertex_type vertex;
             vertex.position = p;
             vertex.color = glm::vec3(1.0, 0.0, 0.0);
@@ -29,13 +30,13 @@ struct LuaSceneInterface {
         auto pc = scene_->addGeometryNode<PointCloud2D>(std::move(pointcloud), "pointcloud");
     }
 
-    static void bind(sol::state& lua) {
-        lua.new_usertype<LuaSceneInterface>("LuaSceneInterface",
-            "add_point_cloud_2d", &LuaSceneInterface::add_point_cloud_2d);
+    static void bind(sol::state &lua) {
+        lua.new_usertype<LuaSceneInterface>("LuaSceneInterface", "add_point_cloud_2d",
+                                            &LuaSceneInterface::add_point_cloud_2d);
     }
 
-private:
+  private:
     SceneTree::VklSceneTree *scene_ = nullptr;
 };
 
-}
+} // namespace GraphicsLab

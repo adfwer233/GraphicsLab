@@ -3,8 +3,8 @@
 #include <cpptrace/cpptrace.hpp>
 #include <thread>
 
-#include "vkl/imgui/imgui_context.hpp"
 #include "vkl/core/vkl_window.hpp"
+#include "vkl/imgui/imgui_context.hpp"
 
 #include "geometry/constructor/directional_field_constructor.hpp"
 

@@ -12,10 +12,10 @@
 #include "vkl/core/vkl_buffer.hpp"
 #include "vkl/core/vkl_descriptor.hpp"
 #include "vkl/core/vkl_device.hpp"
-#include "vkl/core/vkl_texture.hpp"
 #include "vkl/core/vkl_swap_chain.hpp"
-#include "vkl/utils/vkl_box.hpp"
+#include "vkl/core/vkl_texture.hpp"
 #include "vkl/templates/vkl_concept.hpp"
+#include "vkl/utils/vkl_box.hpp"
 
 #include "geometry/mesh/mesh.hpp"
 #include "geometry/vertex/null_index.hpp"
