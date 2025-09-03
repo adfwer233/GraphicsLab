@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(GRAPHICS_LAB_ENABLE_TEST ON CACHE BOOL "whether enable graphcis lab test")
 set(CUDA_ENABLE OFF CACHE BOOL "Whether enable cuda kernel")
 set(RENDERDOC_ENABLE OFF CACHE BOOL "Whether enable render doc")
 set(GRAPHICS_LAB_INSTALL OFF CACHE BOOL "Whether enable graphics lab install")
@@ -77,7 +78,6 @@ include(fetch-eigen)
 include(fetch-stb)
 include(fetch-imgui)
 include(fetch-jsoncpp)
-include(fetch-googletest)
 include(fetch-tinyobjloader)
 include(fetch-autodiff)
 include(fetch-random)
@@ -91,6 +91,10 @@ include(fetch-tinycolormap)
 include(fetch-cpptrace)
 include(fetch-lua)
 include(fetch-sol2)
+
+if (GRAPHICS_LAB_ENABLE_TEST)
+    include(fetch-googletest)
+endif ()
 
 cmake_policy(SET CMP0077 NEW)
 
@@ -125,17 +129,20 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4)
 endif()
 
-add_subdirectory(3rd_party/CDT/CDT CDT)
-
-add_subdirectory(src)
-add_subdirectory(test)
-
-#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
     add_compile_options("/source-charset:utf-8")
+    add_compile_options("/bigobj")
 endif()
+
+add_subdirectory(3rd_party/CDT/CDT CDT)
+
+add_subdirectory(src)
+
+if (GRAPHICS_LAB_ENABLE_TEST)
+    add_subdirectory(test)
+endif ()
 
 message(STATUS "Build documentation open")
 include(build-doxygen)
@@ -144,7 +151,11 @@ build_doxygen()
 include(clang-format)
 
 add_custom_target(BUILD_ALL)
-add_dependencies(BUILD_ALL GraphicsLab_VKL GraphicsLab_Geometry LAB_test GraphicsLab_main)
+add_dependencies(BUILD_ALL GraphicsLab_VKL GraphicsLab_Geometry GraphicsLab_main)
+
+if (GRAPHICS_LAB_ENABLE_TEST)
+    add_dependencies(BUILD_ALL LAB_test)
+endif ()
 
 add_library(GraphicsLabLib INTERFACE)
 target_link_libraries(GraphicsLabLib INTERFACE GraphicsLab_VKL GraphicsLab_Geometry)

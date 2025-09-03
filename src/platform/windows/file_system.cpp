@@ -8,13 +8,13 @@
 
 std::string FileSystem::chooseDirectory() {
     BROWSEINFO bi = {0};
-    bi.lpszTitle = "Select a folder";
+    bi.lpszTitle = TEXT("Select a folder");
     LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
     char path[MAX_PATH];
 
     if (pidl != nullptr) {
         // Get the name of the folder
-        if (SHGetPathFromIDList(pidl, path)) {
+        if (SHGetPathFromIDListA(pidl, path)) {
             return {path};
         }
         CoTaskMemFree(pidl); // Free memory allocated by the dialog
@@ -24,14 +24,14 @@ std::string FileSystem::chooseDirectory() {
 
 std::string FileSystem::chooseFile() {
     BROWSEINFO bi = {0};
-    bi.lpszTitle = "Select a file";
+    bi.lpszTitle = TEXT("Select a file");
     bi.ulFlags = BIF_BROWSEINCLUDEFILES;
     LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
     char path[MAX_PATH];
 
     if (pidl != nullptr) {
         // Get the name of the folder
-        if (SHGetPathFromIDList(pidl, path)) {
+        if (SHGetPathFromIDListA(pidl, path)) {
             return {path};
         }
         CoTaskMemFree(pidl); // Free memory allocated by the dialog
