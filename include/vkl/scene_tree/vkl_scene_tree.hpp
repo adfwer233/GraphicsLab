@@ -568,20 +568,21 @@ struct VklSceneTree : Reflectable {
         return nullptr;
     }
 
-    Generator<GeometryNodeBase *> traverse_all_type_geometry_nodes() {
+    GraphicsLab::Generator<GeometryNodeBase *> traverse_all_type_geometry_nodes() {
         for (auto node : traverse_all_type_geometry_nodes_internel(root.get())) {
             co_yield node;
         }
     }
 
-    template <SupportedGeometryType GeometryType> Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes() {
+    template <SupportedGeometryType GeometryType>
+    GraphicsLab::Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes() {
         for (auto node : traverse_geometry_nodes_internal<GeometryType>(root.get())) {
             co_yield node;
         }
     }
 
     template <SupportedGeometryType GeometryType>
-    Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans() {
+    GraphicsLab::Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans() {
         for (auto [node, trans] :
              traverse_geometry_nodes_with_trans_internal<GeometryType>(root.get(), glm::mat4(1.0f))) {
             co_yield {node, trans};
@@ -599,7 +600,7 @@ struct VklSceneTree : Reflectable {
     }
 
   private:
-    Generator<GeometryNodeBase *> traverse_all_type_geometry_nodes_internel(TreeNode *node) {
+    GraphicsLab::Generator<GeometryNodeBase *> traverse_all_type_geometry_nodes_internel(TreeNode *node) {
         if (node->type() == NodeType::GeometryNode) {
             co_yield static_cast<GeometryNodeBase *>(node);
         }
@@ -612,7 +613,7 @@ struct VklSceneTree : Reflectable {
     }
 
     template <SupportedGeometryType GeometryType>
-    Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes_internal(TreeNode *node) {
+    GraphicsLab::Generator<GeometryNode<GeometryType> *> traverse_geometry_nodes_internal(TreeNode *node) {
         if (auto geometryNode = dynamic_cast<GeometryNode<GeometryType> *>(node)) {
             co_yield geometryNode;
         }
@@ -625,7 +626,7 @@ struct VklSceneTree : Reflectable {
     }
 
     template <SupportedGeometryType GeometryType>
-    Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans_internal(
+    GraphicsLab::Generator<std::pair<GeometryNode<GeometryType> *, glm::mat4>> traverse_geometry_nodes_with_trans_internal(
         TreeNode *node, glm::mat4 currentTransformation) {
         glm::mat4 trans = currentTransformation;
 

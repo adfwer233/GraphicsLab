@@ -6,6 +6,7 @@
 #include <iterator>
 #include <utility>
 
+namespace GraphicsLab {
 template <typename Ty> struct Generator {
     struct promise_type {
         Generator get_return_object() {
@@ -110,8 +111,9 @@ template <typename Ty> struct Generator {
             coro_handle_.destroy();
     }
 
-  private:
+private:
     explicit Generator(handle h) : coro_handle_(h) {
     }
     handle coro_handle_ = nullptr;
 };
+}
