@@ -4,14 +4,13 @@
 #include <thread>
 
 #include "vkl/imgui/imgui_context.hpp"
+#include "vkl/core/vkl_window.hpp"
 
 #include "geometry/constructor/directional_field_constructor.hpp"
 
 #include "graphics_lab/render_graph/render_graph.hpp"
 #include "graphics_lab/render_graph/render_graph_compiler.hpp"
 #include "graphics_lab/render_passes/simple_pass.hpp"
-
-#include "vkl/core/vkl_window.hpp"
 
 #include "render/internal_render_pass/2d_scene_internal_pass.hpp"
 #include "render/internal_render_pass/3d_scene_internal_pass.hpp"

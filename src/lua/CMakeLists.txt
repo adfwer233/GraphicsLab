@@ -5,12 +5,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(SRC_FILE
         main.cpp
         lua_binding.cpp
+        scene_binding.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 # set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC GraphicsLab_Geometry lua_static sol2)
+target_link_libraries(${PROJECT_NAME} PUBLIC GraphicsLab_Geometry GraphicsLab_VKL lua_static sol2)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
