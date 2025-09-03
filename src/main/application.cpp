@@ -23,12 +23,11 @@
 GraphicsLabApplication::~GraphicsLabApplication() {
 }
 
-void GraphicsLabApplication::run() {
+void GraphicsLabApplication::initialize() {
     using namespace GraphicsLab::RenderGraph;
     using namespace std::chrono_literals;
 
     // hook std::terminate
-
     std::set_terminate([] {
         spdlog::critical("Unhandled exception! Dumping stacktrace:");
         cpptrace::from_current_exception().print();
@@ -37,8 +36,6 @@ void GraphicsLabApplication::run() {
 
     // customize the log manager
     auto &logManager = LogManager::getInstance();
-
-    GLFWwindow *window = appContext.window_.getGLFWwindow();
 
     appContext.sceneTree = std::make_unique<SceneTree::VklSceneTree>(appContext.device_);
     appContext.sceneTree->root->name = "test";
@@ -76,18 +73,21 @@ void GraphicsLabApplication::run() {
 
     appContext.sceneTree->addCameraNode("Camera 1", Camera({0, 0, 50}, {0, 1, 0}));
     appContext.sceneTree->addCameraNode("Camera 2", Camera({0, -10, 30}, {0, 1, 0}, {0, -10, 0}));
+}
 
-    // auto directional_field = GraphicsLab::Geometry::SimpleDirectionalFieldConstructor::create();
-    // appContext.sceneTree->addGeometryNode(std::move(directional_field), "dir");
+void GraphicsLabApplication::run() {
+    using namespace GraphicsLab::RenderGraph;
+    using namespace std::chrono_literals;
 
-    UIState &state = AutoSerializeSingleton<UIState, "UIState">::instance();
-    Controller controller(state, *appContext.sceneTree);
-    ControllerCallbackHandler::internal_controller = &controller;
+    GLFWwindow *window = appContext.window_.getGLFWwindow();
 
     glfwSetCursorPosCallback(window, ControllerCallbackHandler::mouse_callback);
     glfwSetScrollCallback(window, ControllerCallbackHandler::scroll_callback);
     glfwSetMouseButtonCallback(window, ControllerCallbackHandler::mouse_button_callback);
 
+    UIState &state = AutoSerializeSingleton<UIState, "UIState">::instance();
+    Controller controller(state, *appContext.sceneTree);
+    ControllerCallbackHandler::internal_controller = &controller;
     UIManager uiManager(controller, state, appContext);
 
     InternalSceneRenderPass internalSceneRenderPass(appContext.device_, *appContext.sceneTree, state,

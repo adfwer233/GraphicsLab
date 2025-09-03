@@ -19,7 +19,10 @@ struct GraphicsLabApplication {
   public:
     std::function<IGraphicsLabProject *()> projectFactory = nullptr;
 
-    GraphicsLabApplication() : appContext(WIDTH, HEIGHT) {};
+    GraphicsLabApplication() : appContext(WIDTH, HEIGHT) {
+        initialize();
+    }
+
     ~GraphicsLabApplication();
 
     GraphicsLabApplication(const GraphicsLabApplication &) = delete;
@@ -35,6 +38,8 @@ struct GraphicsLabApplication {
         if (args.is_used("--font_size")) {
             ImguiContext::font_size = args.get<int>("--font_size");
         }
+
+        initialize();
     }
 
     static void set_args(argparse::ArgumentParser &args) {
@@ -45,5 +50,7 @@ struct GraphicsLabApplication {
 
     ApplicationOption appOption;
     std::string imgui_style;
+
+    void initialize();
     void run();
 };
