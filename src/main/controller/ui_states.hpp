@@ -90,6 +90,12 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
     bool showBox = false;
 
     /**
+     * 2D scene data
+     */
+
+    bool show_param_boundary = true;
+
+    /**
      * Python scripts supporting
      */
 
@@ -112,9 +118,9 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
 
     explicit UIState() {
         initialize();
-    };
+    }
 
     ~UIState() {
         finalize();
-    };
+    }
 };

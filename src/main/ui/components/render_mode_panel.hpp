@@ -55,6 +55,9 @@ class RenderModelPanel : public UIComponent {
         ImGui::SameLine();
         ImGui::Checkbox("Show Box", &uiState_.showBox);
 
+        ImGui::SeparatorText("2D domain options");
+        ImGui::Checkbox("Show parameter domain boundary", &uiState_.show_param_boundary);
+
         if (context_.sceneTree->active_camera != nullptr) {
             ImGui::SeparatorText("Camera Projection Mode");
             ImGui::RadioButton(

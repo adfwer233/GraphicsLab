@@ -82,6 +82,13 @@ struct InternalScene2DRenderPass : public RenderPass {
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto meshKey = tessellation2d_wireframe_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
+        if (uiState_.show_param_boundary) {
+            PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
+            VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
+            push_constant_data_list.data[0] = push_constant_data;
+            rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
+        }
+
         /**
          * Render point cloud in 2d
          */
@@ -170,10 +177,6 @@ struct InternalScene2DRenderPass : public RenderPass {
             tessellation2d_wireframe_render_system->renderObject(frameInfo);
         }
 
-        PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
-        VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
-        push_constant_data_list.data[0] = push_constant_data;
-        rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
         end_render_pass(commandBuffer);
     }
 
