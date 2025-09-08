@@ -47,8 +47,8 @@ struct LuaSceneInterface {
 
     static void bind(sol::state &lua) {
         lua.new_usertype<LuaSceneInterface>("LuaSceneInterface", "add_point_cloud_2d",
-                                            &LuaSceneInterface::add_point_cloud_2d,
-                                            "add_bezier_curve_2d", &LuaSceneInterface::add_bezier_curve_2d);
+                                            &LuaSceneInterface::add_point_cloud_2d, "add_bezier_curve_2d",
+                                            &LuaSceneInterface::add_bezier_curve_2d);
     }
 
   private:
