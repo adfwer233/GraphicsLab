@@ -19,6 +19,9 @@ struct FFIResult {
 
     ParamRange curve_range;
 
+    bool in_face1 = true;
+    bool in_face2 = true;
+
     [[nodiscard]] std::pair<Coedge *, Coedge *> create_face_coedges() const {
         Curve *curve1 = TopologyUtils::create_curve_from_param_curve(curve);
         Edge *edge = TopologyUtils::create_edge_from_curve(curve1);
@@ -57,12 +60,12 @@ struct FFIResult {
  */
 struct FaceFaceIntersection {
 
-    static std::vector<FFIResult> solve(const Face *face1, const Face *face2) {
-        return intersect(face1, face2);
+    static std::vector<FFIResult> solve(const Face *face1, const Face *face2, bool drop_trimmed = true) {
+        return intersect(face1, face2, drop_trimmed);
     }
 
   private:
-    static std::vector<FFIResult> intersect(const Face *face1, const Face *face2) {
+    static std::vector<FFIResult> intersect(const Face *face1, const Face *face2, bool drop_trimmed = true) {
         std::vector<FFIResult> ffi_results;
 
         ParamSurface *surface1 = face1->geometry()->param_geometry();
@@ -195,20 +198,26 @@ struct FaceFaceIntersection {
 
                 auto param1 = surface1->move_param_to_std_domain(pc1_mid_pos);
                 auto param2 = surface2->move_param_to_std_domain(pc2_mid_pos);
-                if (ContainmentQuery::contained(face1, param1) == ContainmentQuery::ContainmentResult::Outside) {
-                    continue;
-                }
-
-                if (ContainmentQuery::contained(face2, param2) == ContainmentQuery::ContainmentResult::Outside) {
-                    continue;
-                }
-
                 FFIResult ffi{.curve = ssi_result.inter_curve,
                               .pcurve1 = ssi_result.pcurve1,
                               .pcurve2 = ssi_result.pcurve2,
                               .pcurve_range1 = ParamRange{pc1_start, pc1_end},
                               .pcurve_range2 = ParamRange{pc2_start, pc2_end},
                               .curve_range = ParamRange{curve_start, curve_end}};
+
+                if (ContainmentQuery::contained(face1, param1) == ContainmentQuery::ContainmentResult::Outside) {
+                    ffi.in_face1 = false;
+                }
+
+                if (ContainmentQuery::contained(face2, param2) == ContainmentQuery::ContainmentResult::Outside) {
+                    ffi.in_face2 = false;
+                }
+
+                if (drop_trimmed) {
+                    if (not ffi.in_face1 or not ffi.in_face2) {
+                        continue;
+                    }
+                }
 
                 ffi_results.push_back(ffi);
             }

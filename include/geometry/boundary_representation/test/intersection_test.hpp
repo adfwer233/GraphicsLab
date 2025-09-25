@@ -23,7 +23,8 @@ struct IntersectionTestBase : TestBase {
             Curve *curve = TopologyUtils::create_curve_from_param_curve(inter_results[i].curve);
             Edge *edge = TopologyUtils::create_edge_from_curve(curve);
             edge->set_param_range(ParamRange{inter_results[i].curve_range});
-            edges[std::format("ffi{}_edge_{}", ffi_counter, i)] = edge;
+            bool valid = inter_results[i].in_face1 and inter_results[i].in_face2;
+            edges[std::format("ffi{}_edge_{}_{}", ffi_counter, i, valid ? "valid": "dropped")] = edge;
         }
         ffi_counter++;
     }
@@ -341,7 +342,7 @@ struct ExplicitEightIntersection : IntersectionTestBase {
         auto res_faces = TopologyUtils::get_all_faces(res);
 
         for (int i = 0; i < res_faces.size(); i++) {
-            auto ffi = FaceFaceIntersection::solve(wave, res_faces[i]);
+            auto ffi = FaceFaceIntersection::solve(wave, res_faces[i], false);
             save_ffi_results(ffi);
         }
 

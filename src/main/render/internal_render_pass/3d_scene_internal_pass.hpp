@@ -81,7 +81,7 @@ struct InternalSceneRenderPass : public RenderPass {
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
                 {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
-                {(DEFAULT_SHADER_PATH / "point_light_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
+                {(DEFAULT_SHADER_PATH / "simple_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
         normal_render_system = std::make_unique<NormalRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
