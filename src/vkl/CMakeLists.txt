@@ -58,6 +58,11 @@ else()
 endif()
 target_link_libraries(GraphicsLab_VKL PUBLIC Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
 
+if(UNIX AND NOT APPLE) # Linux/Unix only, not macOS
+    find_package(X11 REQUIRED)
+    target_link_libraries(GraphicsLab_VKL PRIVATE X11::X11)
+endif()
+
 ############## Build SHADERS #######################
 
 # Find all vertex and fragment sources within shaders directory
