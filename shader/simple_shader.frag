@@ -29,20 +29,24 @@ void main() {
 
     // ambient lighting
     float ambientStrength = 0.2;
-    vec3 ambient = ambientStrength * ubo.pointLight.color.rgb;
-
-    // diffuse lighting
-    vec3 norm = normalize(fragNormalWorld);
-    vec3 lightDirection = normalize(lightPosition - fragPosWorld);
-    float diff = max(dot(norm, lightDirection), 0.0);
-    vec3 diffuse = diff * lightColor;
-
-    // specular lighting
     float specularStrength = 0.5;
-    vec3 viewDir = normalize(ubo.cameraPos - fragPosWorld);
-    vec3 reflectDir = reflect(-lightDirection, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+
+    // ambient
+    vec3 ambient = ambientStrength * lightColor * fragColor;
+
+    // diffuse
+    vec3 norm = normalize(fragNormalWorld);
+    vec3 lightDir = normalize(lightPosition - fragPosWorld);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor * fragColor;
+
+    // specular
+    vec3 viewDir = normalize(ubo.cameraPos.xyz - fragPosWorld);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
     vec3 specular = specularStrength * spec * lightColor;
 
-    outColor = vec4((ambient + diffuse + specular) * fragColor, 1.0f);
+    // combine
+    vec3 lighting = ambient + diffuse + specular;
+    outColor = vec4(lighting, 1.0);
 }
