@@ -2,11 +2,11 @@
 
 #include "cpptrace/cpptrace.hpp"
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
+#include "geometry/boundary_representation/base/tor_def.hpp"
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "geometry/parametric/bspline_curve_3d.hpp"
 #include "geometry/parametric/parametric_curves/degenerated_curve.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
-#include "geometry/boundary_representation/base/tor_def.hpp"
 
 #include "spdlog/spdlog.h"
 
@@ -268,7 +268,7 @@ struct TopologyUtils {
         return body;
     }
 
-    static bool is_single_point(std::vector<BRepPoint3>& points) {
+    static bool is_single_point(std::vector<BRepPoint3> &points) {
         double total_variation = 0;
         for (size_t i = 0; i < points.size(); i++) {
             double dist = glm::distance(points[i], points[0]);

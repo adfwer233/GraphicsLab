@@ -16,12 +16,11 @@ struct SphereConstructorTest : ConstructorTestBase {
     }
 
     void run_test() override {
-        auto sphere = BRep::FaceConstructors::sphere({0, 0 ,0}, 1);
+        auto sphere = BRep::FaceConstructors::sphere({0, 0, 0}, 1);
         faces["sphere"] = sphere;
     }
 };
 
-
-}
+} // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::SphereConstructorTest)

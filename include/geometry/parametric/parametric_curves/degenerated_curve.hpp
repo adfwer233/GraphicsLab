@@ -8,8 +8,7 @@ namespace GraphicsLab::Geometry {
  * @brief Curve degenerating to a simple point.
  * @tparam dim
  */
-template <size_t dim>
-struct DegeneratedCurve: ParamCurveBase<dim> {
+template <size_t dim> struct DegeneratedCurve : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
     PointType point_;
 
@@ -44,4 +43,4 @@ struct DegeneratedCurve: ParamCurveBase<dim> {
 using DegeneratedCurve3D = DegeneratedCurve<3>;
 using DegeneratedCurve2D = DegeneratedCurve<2>;
 
-}
+} // namespace GraphicsLab::Geometry

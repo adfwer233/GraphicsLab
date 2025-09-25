@@ -24,7 +24,7 @@ struct IntersectionTestBase : TestBase {
             Edge *edge = TopologyUtils::create_edge_from_curve(curve);
             edge->set_param_range(ParamRange{inter_results[i].curve_range});
             bool valid = inter_results[i].in_face1 and inter_results[i].in_face2;
-            edges[std::format("ffi{}_edge_{}_{}", ffi_counter, i, valid ? "valid": "dropped")] = edge;
+            edges[std::format("ffi{}_edge_{}_{}", ffi_counter, i, valid ? "valid" : "dropped")] = edge;
         }
         ffi_counter++;
     }

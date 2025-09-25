@@ -30,8 +30,8 @@ struct VisualizationProject : IGraphicsLabProject {
         // spdlog::set_level(spdlog::level::debug);
         test_case->run_test();
 
-        auto update_color = []<typename MeshType>(MeshType& mesh, glm::vec3 color) {
-            for (auto &vert: mesh.vertices) {
+        auto update_color = []<typename MeshType>(MeshType &mesh, glm::vec3 color) {
+            for (auto &vert : mesh.vertices) {
                 vert.color = color;
             }
         };
