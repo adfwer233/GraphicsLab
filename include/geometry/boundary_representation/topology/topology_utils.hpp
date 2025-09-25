@@ -4,7 +4,10 @@
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "geometry/parametric/bspline_curve_3d.hpp"
+#include "geometry/parametric/parametric_curves/degenerated_curve.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
+#include "geometry/boundary_representation/base/tor_def.hpp"
+
 #include "spdlog/spdlog.h"
 
 namespace GraphicsLab::Geometry::BRep {
@@ -265,6 +268,20 @@ struct TopologyUtils {
         return body;
     }
 
+    static bool is_single_point(std::vector<BRepPoint3>& points) {
+        double total_variation = 0;
+        for (size_t i = 0; i < points.size(); i++) {
+            double dist = glm::distance(points[i], points[0]);
+            total_variation += dist;
+
+            if (total_variation > Tolerance::default_tolerance) {
+                return false;
+            }
+        }
+
+        return total_variation < Tolerance::default_tolerance;
+    }
+
     /**
      * @brief Create a curve from then pcurve. Sample some points and fit by BSplineCurve3D
      * @param surface
@@ -284,6 +301,12 @@ struct TopologyUtils {
             auto param_point = pcurve->evaluate(param);
             param_points.push_back(param_point);
             points.emplace_back(surface->evaluate(param_point));
+        }
+
+        if (is_single_point(points)) {
+            auto pos = points.front();
+            auto curve = allocator->alloc_param_curve<DegeneratedCurve3D>(pos);
+            return curve;
         }
 
         auto &&curve_temp = BSplineCurve3D::fit(points, 3, 10);
