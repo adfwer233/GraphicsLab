@@ -36,7 +36,7 @@ struct Cone : public ParamSurface {
         return {dx, dy};
     }
 
-    bool is_singular(ParamType param) const override {
+    [[nodiscard]] bool is_singular(ParamType param) const override {
         if (std::abs(param.y - 1.0) < 1e-6) {
             return true;
         }
@@ -44,7 +44,7 @@ struct Cone : public ParamSurface {
         return false;
     }
 
-    PointType normal(const ParamType param) const override {
+    [[nodiscard]] PointType normal(const ParamType param) const override {
         auto [dx, dy] = derivative(param);
         return glm::normalize(glm::cross(dx, dy));
     }

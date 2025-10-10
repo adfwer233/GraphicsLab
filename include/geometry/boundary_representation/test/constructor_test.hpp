@@ -21,6 +21,22 @@ struct CylinderFaceConstructorTest : ConstructorTestBase {
     }
 };
 
+struct CylinderBodyConstructorTest : ConstructorTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "CylinderBodyConstructorTest";
+    }
+
+    void run_test() override {
+        auto cylinder = BRep::BodyConstructors::cylinder({0, 0, 0}, {0, 1, 0}, {0.5, 0, 0}, 2);
+
+        auto cylinder_faces = BRep::TopologyUtils::get_all_faces(cylinder);
+
+        for (size_t i = 0; i < cylinder_faces.size(); i++) {
+            faces[std::format("cylinder_{}", i)] = cylinder_faces[i];
+        }
+    }
+};
+
 struct SphereConstructorTest : ConstructorTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "SphereConstructorTest";
@@ -35,4 +51,5 @@ struct SphereConstructorTest : ConstructorTestBase {
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CylinderFaceConstructorTest)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CylinderBodyConstructorTest)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::SphereConstructorTest)
