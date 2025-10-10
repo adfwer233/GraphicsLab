@@ -6,8 +6,9 @@
 namespace GraphicsLab::Geometry {
 struct Cone : public ParamSurface {
     explicit Cone() = delete;
-    explicit Cone(const PointType& base_point, const VectorType& direction, const VectorType& radius, double length, double radius_ratio = 1.0)
-            : base_point_(base_point), direction_(direction), radius_(radius), length_(length) {
+    explicit Cone(const PointType &base_point, const VectorType &direction, const VectorType &radius, double length,
+                  double radius_ratio = 1.0)
+        : base_point_(base_point), direction_(direction), radius_(radius), length_(length) {
         minor_radius_ = glm::cross(direction, radius) * radius_ratio;
     }
 
@@ -31,8 +32,9 @@ struct Cone : public ParamSurface {
 
     std::pair<PointType, PointType> derivative(const ParamType param) const override {
         const double theta = 2 * std::numbers::pi * param.x;
-        VectorType dx = 2 * std::numbers::pi * (1 - param.y) * (-radius_ * std::sin(theta) + minor_radius_ * std::cos(theta));
-        VectorType dy = - (radius_ * std::cos(theta) + minor_radius_ * std::sin(theta)) + direction_ * length_;
+        VectorType dx =
+            2 * std::numbers::pi * (1 - param.y) * (-radius_ * std::sin(theta) + minor_radius_ * std::cos(theta));
+        VectorType dy = -(radius_ * std::cos(theta) + minor_radius_ * std::sin(theta)) + direction_ * length_;
         return {dx, dy};
     }
 

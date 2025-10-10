@@ -3,11 +3,11 @@
 #include "language/meta_programming/type_list.hpp"
 
 #include "cone.hpp"
+#include "cylinder.hpp"
 #include "explicit_surface.hpp"
 #include "plane.hpp"
 #include "sphere.hpp"
 #include "torus.hpp"
-#include "cylinder.hpp"
 
 #include "nurbs_surface.hpp"
 #include "tensor_product_bezier.hpp"

@@ -2,8 +2,8 @@
 
 #include "geometry/boundary_representation/allocator/brep_allocator.hpp"
 #include "geometry/boundary_representation/brep_definition.hpp"
-#include "geometry/boundary_representation/topology/trimming_utils.hpp"
 #include "geometry/boundary_representation/topology/topology_modifiers.hpp"
+#include "geometry/boundary_representation/topology/trimming_utils.hpp"
 #include "geometry/parametric/bspline_curve_3d.hpp"
 #include "geometry/parametric/cone.hpp"
 #include "geometry/parametric/cylinder.hpp"
@@ -73,7 +73,8 @@ struct FaceConstructors {
         return face;
     }
 
-    static Face *cylinder(const BRepPoint3& base_point, const BRepVector3& direction, const BRepVector3& radius, double length) {
+    static Face *cylinder(const BRepPoint3 &base_point, const BRepVector3 &direction, const BRepVector3 &radius,
+                          double length) {
         auto allocator = BRepAllocator::instance();
 
         auto param_geometry = allocator->alloc_param_surface<Cylinder>(base_point, direction, radius, length, 1.0);
@@ -358,18 +359,23 @@ struct BodyConstructors {
         return create_body_from_list_of_faces({front, right, back, left, top, bottom});
     }
 
-    static Body *cylinder(const BRepPoint3& base_point, const BRepVector3& direction, const BRepVector3& radius, double length) {
+    static Body *cylinder(const BRepPoint3 &base_point, const BRepVector3 &direction, const BRepVector3 &radius,
+                          double length) {
         auto allocator = BRepAllocator::instance();
 
-        auto param_pcurve = allocator->alloc_param_pcurve<Ellipse2D>(BRepVector2{0.5, 0.5}, BRepVector2{0.5, 0.0}, BRepVector2{0.0, 0.5});
+        auto param_pcurve = allocator->alloc_param_pcurve<Ellipse2D>(BRepVector2{0.5, 0.5}, BRepVector2{0.5, 0.0},
+                                                                     BRepVector2{0.0, 0.5});
 
         auto cylinder_face = FaceConstructors::cylinder(base_point, direction, radius, length);
 
         auto minor_radius = glm::cross(direction, radius);
-        auto top_face = FaceConstructors::plane(base_point + direction * length - radius - minor_radius, 2.0 * radius, 2.0 * minor_radius);
-        auto bottom_face = FaceConstructors::plane(base_point - radius + minor_radius, 2.0 * radius, -2.0 * minor_radius);
+        auto top_face = FaceConstructors::plane(base_point + direction * length - radius - minor_radius, 2.0 * radius,
+                                                2.0 * minor_radius);
+        auto bottom_face =
+            FaceConstructors::plane(base_point - radius + minor_radius, 2.0 * radius, -2.0 * minor_radius);
         auto top_ellipse = allocator->alloc_param_curve<Ellipse3D>(base_point, radius, minor_radius);
-        auto bottom_ellipse = allocator->alloc_param_curve<Ellipse3D>(base_point + direction * length, radius, -minor_radius);
+        auto bottom_ellipse =
+            allocator->alloc_param_curve<Ellipse3D>(base_point + direction * length, radius, -minor_radius);
 
         auto pcurve = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve);
         auto top_curve = TopologyUtils::create_curve_from_param_curve(top_ellipse);

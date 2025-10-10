@@ -50,6 +50,8 @@ struct SphereConstructorTest : ConstructorTestBase {
 
 } // namespace GraphicsLab::Geometry::BRep
 
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CylinderFaceConstructorTest)
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::CylinderBodyConstructorTest)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::CylinderFaceConstructorTest)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::CylinderBodyConstructorTest)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::SphereConstructorTest)

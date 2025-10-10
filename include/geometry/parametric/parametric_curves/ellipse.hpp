@@ -5,11 +5,12 @@
 
 namespace GraphicsLab::Geometry {
 
-template<size_t dim> struct Ellipse: ParamCurveBase<dim> {
+template <size_t dim> struct Ellipse : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
 
     explicit Ellipse(PointType center, PointType major_radius, PointType minor_radius)
-        : center(center), major_radius(major_radius), minor_radius(minor_radius) {}
+        : center(center), major_radius(major_radius), minor_radius(minor_radius) {
+    }
 
     [[nodiscard]] PointType evaluate(double t) const override {
         const double theta = 2 * std::numbers::pi * t;
@@ -37,4 +38,4 @@ template<size_t dim> struct Ellipse: ParamCurveBase<dim> {
 using Ellipse2D = Ellipse<2>;
 using Ellipse3D = Ellipse<3>;
 
-}
+} // namespace GraphicsLab::Geometry
