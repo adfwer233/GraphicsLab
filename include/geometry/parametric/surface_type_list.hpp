@@ -7,6 +7,7 @@
 #include "plane.hpp"
 #include "sphere.hpp"
 #include "torus.hpp"
+#include "cylinder.hpp"
 
 #include "nurbs_surface.hpp"
 #include "tensor_product_bezier.hpp"

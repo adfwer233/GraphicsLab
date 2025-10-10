@@ -5,6 +5,7 @@
 #include "geometry/boundary_representation/topology/topology_modifiers.hpp"
 #include "geometry/parametric/bspline_curve_3d.hpp"
 #include "geometry/parametric/cone.hpp"
+#include "geometry/parametric/cylinder.hpp"
 #include "geometry/parametric/explicit_surface.hpp"
 #include "geometry/parametric/parametric_curves/straight_line.hpp"
 #include "geometry/parametric/plane.hpp"
@@ -60,6 +61,20 @@ struct FaceConstructors {
         auto allocator = BRepAllocator::instance();
 
         auto param_geometry = allocator->alloc_param_surface<Sphere>(center, radius);
+        auto surface = allocator->alloc_surface();
+        surface->set_param_geometry(param_geometry);
+
+        auto face = allocator->alloc_face();
+        face->set_geometry(surface);
+
+        create_basic_topology(param_geometry, face);
+        return face;
+    }
+
+    static Face *cylinder(const BRepPoint3& base_point, const BRepVector3& direction, const BRepVector3& radius, double length) {
+        auto allocator = BRepAllocator::instance();
+
+        auto param_geometry = allocator->alloc_param_surface<Cylinder>(base_point, direction, radius, length, 1.0);
         auto surface = allocator->alloc_surface();
         surface->set_param_geometry(param_geometry);
 
