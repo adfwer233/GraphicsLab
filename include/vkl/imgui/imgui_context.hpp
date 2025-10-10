@@ -56,11 +56,13 @@ class ImguiContext {
         ImGui_ImplVulkan_InitInfo init_info = {};
         device_.fillImGuiInitInfo(init_info);
         init_info.DescriptorPool = imguiPool;
-        init_info.RenderPass = renderPass;
-        init_info.Subpass = 0;
+
         init_info.MinImageCount = 2;
         init_info.ImageCount = 2;
-        init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+        init_info.PipelineInfoMain.RenderPass = renderPass;
+        init_info.PipelineInfoMain.Subpass = 0;
+        init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
         ImGui_ImplVulkan_Init(&init_info);
 
