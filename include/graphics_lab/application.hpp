@@ -53,4 +53,6 @@ struct GraphicsLabApplication {
 
     void initialize();
     void run();
+
+    friend struct GraphicsLabApplicationExtension;
 };

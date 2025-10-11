@@ -52,9 +52,9 @@ target_include_directories(${PROJECT_NAME}
 
 if(OpenCV_FOUND)
     message(STATUS "found opencv")
-    target_link_libraries(GraphicsLab_VKL PUBLIC glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX GraphicsLab_Geometry ${OpenCV_LIBS})
+    target_link_libraries(GraphicsLab_VKL PUBLIC glfw glm spdlog::spdlog_header_only assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX GraphicsLab_Geometry ${OpenCV_LIBS})
 else()
-    target_link_libraries(GraphicsLab_VKL PUBLIC glfw glm spdlog assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX GraphicsLab_Geometry)
+    target_link_libraries(GraphicsLab_VKL PUBLIC glfw glm spdlog::spdlog_header_only assimp spirv-cross-core spirv-cross-cpp OpenMP::OpenMP_CXX GraphicsLab_Geometry)
 endif()
 target_link_libraries(GraphicsLab_VKL PUBLIC Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
 

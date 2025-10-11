@@ -10,7 +10,7 @@ set(SRC_FILE
 add_library(${PROJECT_NAME} ${SRC_FILE})
 # set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC glm spdlog eigen nlohmann_json autodiff CDT cpptrace::cpptrace)
+target_link_libraries(${PROJECT_NAME} PUBLIC glm spdlog::spdlog_header_only eigen nlohmann_json autodiff CDT cpptrace::cpptrace)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC

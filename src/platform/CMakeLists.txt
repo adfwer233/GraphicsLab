@@ -10,4 +10,4 @@ add_library(${PROJECT_NAME} ${SRC_FILE})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GRAPHICS_LAB_SOURCE_DIR}/include)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC spdlog)
+target_link_libraries(${PROJECT_NAME} PUBLIC spdlog::spdlog_header_only)
