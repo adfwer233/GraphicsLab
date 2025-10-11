@@ -9,16 +9,9 @@ struct NewtonSolver {
 
     using OneVariableFunction = std::function<double(double)>;
 
-
-    static std::vector<double> find_root(
-        OneVariableFunction f,
-        OneVariableFunction f_prime,
-        double x_min,
-        double x_max,
-        std::optional<double> x_guess = std::nullopt,
-        double tol = 1e-8,
-        int max_iter = 100)
-    {
+    static std::vector<double> find_root(OneVariableFunction f, OneVariableFunction f_prime, double x_min, double x_max,
+                                         std::optional<double> x_guess = std::nullopt, double tol = 1e-8,
+                                         int max_iter = 100) {
         // Choose initial guess
         double x = x_guess.value_or((x_min + x_max) * 0.5);
 
@@ -50,4 +43,4 @@ struct NewtonSolver {
     }
 };
 
-}
+} // namespace GraphicsLab::Numeric
