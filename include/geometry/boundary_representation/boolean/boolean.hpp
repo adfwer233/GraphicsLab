@@ -586,18 +586,18 @@ struct Boolean {
         };
 
         std::vector<Face *> faces_set;
-        for (int i = 0; i < body1_faces.size(); ++i) {
+        for (size_t i = 0; i < body1_faces.size(); ++i) {
             if (auto reserve = rebuild_topology_preprocess(body1_faces[i], body1_faces_inside_flag[i], true, op)) {
                 faces_set.push_back(body1_faces[i]);
             }
         }
-        for (int i = 0; i < body2_faces.size(); ++i) {
+        for (size_t i = 0; i < body2_faces.size(); ++i) {
             if (auto reserve = rebuild_topology_preprocess(body2_faces[i], body2_faces_inside_flag[i], false, op)) {
                 faces_set.push_back(body2_faces[i]);
             }
         }
 
-        for (int i = 1; i < faces_set.size(); ++i) {
+        for (size_t i = 1; i < faces_set.size(); ++i) {
             faces_set[i - 1]->set_next(faces_set[i]);
         }
 
