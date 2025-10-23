@@ -8,8 +8,8 @@
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "topology_utils.hpp"
 
-#include "periodic_wn.hpp"
 #include "geometry/parametric/torus.hpp"
+#include "wn_trim.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 
