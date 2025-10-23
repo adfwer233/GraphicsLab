@@ -365,6 +365,8 @@ struct GeneralSurfaceSurfaceIntersection {
                 step > 10) {
                 auto offset1 = begin_param1 - surf1->move_param_to_std_domain(param1);
                 auto offset2 = begin_param2 - surf2->move_param_to_std_domain(param2);
+
+                if (offset1.y > 0.5) offset1.y = 1 - offset1.y;
                 intersections.emplace_back(param1 + offset1, param2 + offset2, surf1->evaluate(begin_param1));
                 spdlog::debug("start end distance {}",
                               glm::distance(surf1->move_param_to_std_domain(param1 + offset1), begin_param1));
@@ -480,10 +482,15 @@ struct GeneralSurfaceSurfaceIntersection {
             ssi_result.inter_curve = curve_alloc;
 
             // fit the pcurves with BSpline curves
-            auto &&pcurve1 = BSplineCurve2D::fit(params1, 3, control_points_count);
+            auto &&pcurve1 = BSplineCurve2D::fit(params1, 5, control_points_count);
             // pcurve1.control_points_.front() = params1.front();
             // pcurve1.control_points_.back() = params1.back();
 
+            int t = 10;
+            for (int i = 0; i <= t; i++) {
+                double p = 1.0 * i / t;
+                spdlog::critical("{}, {}", pcurve1.evaluate(p).x, pcurve1.evaluate(p).y);
+            }
             // spdlog::info("pcurve1 params");
             // // for (auto& ctrl_pt: pcurve1.control_points_) {
             // //     spdlog::info("{} {}", ctrl_pt.x, ctrl_pt.y);

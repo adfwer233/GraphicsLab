@@ -25,14 +25,24 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
         }
     }
 
-    int curve_sample_num = 25;
+    int curve_sample_num = 125;
 
     int u_repeat = 0, v_repeat = 0;
+
+    auto loops = TopologyUtils::get_all_loops(face);
+
     if (face->geometry()->param_geometry()->u_periodic)
         u_repeat = 1;
 
     if (face->geometry()->param_geometry()->v_periodic)
         v_repeat = 1;
+
+    for (auto& l: loops) {
+        auto [p, q] = TopologyUtils::get_loop_homology(l);
+
+        u_repeat = std::max(u_repeat, std::abs(p) + 1);
+        v_repeat = std::max(v_repeat, std::abs(q) + 1);
+    }
 
     for (int u = -u_repeat; u <= u_repeat; u++) {
         for (int v = -v_repeat; v <= v_repeat; v++) {

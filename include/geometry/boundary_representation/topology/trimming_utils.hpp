@@ -8,6 +8,9 @@
 #include "geometry/boundary_representation/brep_definition.hpp"
 #include "topology_utils.hpp"
 
+#include "periodic_wn.hpp"
+#include "geometry/parametric/torus.hpp"
+
 namespace GraphicsLab::Geometry::BRep {
 
 /**
@@ -43,14 +46,23 @@ struct ContainmentQuery {
             }
         }
 
+        // if (auto torus = dynamic_cast<Torus*>(face->geometry()->param_geometry())) {
+        //     auto test_point_std = torus->move_param_to_std_domain(test_point);
+        //
+        //     auto [wn, bd] = WNTrim::torus_winding_number(face, test_point_std, std::nullopt);
+        //     if (bd) return ContainmentResult::Boundary;
+        //
+        //     return wn > std::numbers::pi ? ContainmentResult::Inside : ContainmentResult::Outside;
+        // }
+
         for (Loop *loop : TopologyUtils::get_all_loops(face)) {
             if (non_contractible.contains(loop))
                 continue;
 
             wn += winding_number_loop(loop, test_point);
+            auto loop_homo = TopologyUtils::get_loop_homology(loop);
 
             if (face->geometry()->param_geometry()->u_periodic) {
-                auto loop_homo = TopologyUtils::get_loop_homology(loop);
                 if (loop_homo.first == 0 and loop_homo.second == 0) {
                     wn += winding_number_loop(loop, test_point - BRepVector2{1.0, 0.0});
                     wn += winding_number_loop(loop, test_point + BRepVector2{1.0, 0.0});
@@ -58,7 +70,6 @@ struct ContainmentQuery {
             }
 
             if (face->geometry()->param_geometry()->v_periodic) {
-                auto loop_homo = TopologyUtils::get_loop_homology(loop);
                 if (loop_homo.first == 0 and loop_homo.second == 0) {
                     wn += winding_number_loop(loop, test_point - BRepVector2{0.0, 1.0});
                     wn += winding_number_loop(loop, test_point + BRepVector2{0.0, 1.0});
@@ -244,10 +255,12 @@ struct TrimmingUtils {
             PCurve *first_pcurve = curve.pcurves.front();
             BRepPoint2 test_point = first_pcurve->param_geometry()->evaluate(0.5);
 
+            // int cur_faces = faces.size();
             for (size_t j = 0; j < faces.size(); j++) {
                 if (ContainmentQuery::contained(faces[j], test_point) == ContainmentQuery::ContainmentResult::Inside) {
                     Face *new_face = split_face_with_trimming_loop(faces[j], curve);
                     faces.push_back(new_face);
+                    break;
                 }
             }
         }

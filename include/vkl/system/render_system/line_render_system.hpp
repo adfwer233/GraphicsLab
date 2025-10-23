@@ -6,6 +6,7 @@ struct LinePipelineModifier {
     static void modifyPipeline(PipelineConfigInfo &configInfo) {
         configInfo.inputAssemblyInfo.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
         configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
+        configInfo.rasterizationInfo.lineWidth = 8.0f;
     }
 };
 

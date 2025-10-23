@@ -311,7 +311,7 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
         // Optional: root mean square error (RMSE)
         double rmse = std::sqrt(squared_error / residual.size());
 
-        spdlog::debug("BSpline fit rmse {}", rmse);
+        spdlog::info("BSpline fit rmse {}", rmse);
 
         // 6. Construct control points
         std::vector<PointType> control_points;

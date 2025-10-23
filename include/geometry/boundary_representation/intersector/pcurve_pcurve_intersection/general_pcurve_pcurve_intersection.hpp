@@ -37,6 +37,7 @@ struct GeneralPCurvePCurveIntersection {
                 segments.emplace_back(std::move(bezier_line));
             } else if (auto bspline = dynamic_cast<const BSplineCurve2D *>(curve)) {
                 BSplineCurve2D bspline_copy = *bspline;
+                bool is_bezier = bspline_copy.is_in_bezier_form();
                 bspline_copy.insert_all_knots_to_bezier_form();
                 auto bezier_segments = bspline_copy.convert_to_bezier();
                 std::ranges::copy(bezier_segments, std::back_inserter(segments));

@@ -16,6 +16,10 @@ struct TopologyUtils {
 
     static Coedge *get_coedge_of_given_face(const Edge *edge, const Face *face) {
         Coedge *start_coedge = edge->coedge();
+
+        if (start_coedge == nullptr) {
+                throw cpptrace::runtime_error("edge has no coedge");
+        }
         Coedge *coedge_iter = start_coedge;
 
         while (coedge_iter != nullptr) {
@@ -127,6 +131,7 @@ struct TopologyUtils {
         auto allocator = BRepAllocator::instance();
         Loop *loop = allocator->alloc_loop();
         loop->set_coedge(coedge);
+        coedge->set_loop(loop);
         return loop;
     }
 
@@ -134,6 +139,7 @@ struct TopologyUtils {
         auto allocator = BRepAllocator::instance();
         Coedge *coedge = allocator->alloc_coedge();
         coedge->set_edge(edge);
+        edge->set_coedge(coedge);
         return coedge;
     }
 
@@ -283,14 +289,14 @@ struct TopologyUtils {
     }
 
     /**
-     * @brief Create a curve from then pcurve. Sample some points and fit by BSplineCurve3D
+     * @brief Create a curve from the p-curve. Sample some points and fit by BSplineCurve3D
      * @param surface
      * @param pcurve
      * @param n
      * @return
      */
     static ParamCurve3D *create_param_curve_from_pcurve(const ParamSurface *surface, const ParamCurve2D *pcurve,
-                                                        int n = 50) {
+                                                        int n = 50, int num_ctrl_points = 10) {
         auto allocator = BRepAllocator::instance();
 
         std::vector<BRepPoint3> points;
@@ -309,7 +315,7 @@ struct TopologyUtils {
             return curve;
         }
 
-        auto &&curve_temp = BSplineCurve3D::fit(points, 3, 10);
+        auto &&curve_temp = BSplineCurve3D::fit(points, 3, num_ctrl_points);
         auto curve = allocator->alloc_param_curve<BSplineCurve3D>(std::move(curve_temp));
         return curve;
     }

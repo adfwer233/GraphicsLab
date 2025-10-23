@@ -4,6 +4,7 @@
 #include "language/reflection/static_reflector.hpp"
 #include "parametric_curve.hpp"
 #include <vector>
+#include <stack>
 
 namespace GraphicsLab::Geometry {
 
@@ -254,6 +255,30 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         weights_[index] = weight;
     }
 
+    /**
+    * @brief Compute 2D winding number, if the test point is on boundary (distance to boundary lower than tolerance),
+    * the second flag will be marked as true.
+    */
+    std::pair<double, bool> winding_number(PointType test_point, double winding_number_tolerance = 1e-6, double winding_number_epsilon = 1e-8) {
+        double winding_number = 0.0;
+        bool flag = false;
+        if (test_point.x > min_x - winding_number_epsilon
+            and test_point.x < max_x + winding_number_epsilon
+            and test_point.y > min_y - winding_number_epsilon
+            and test_point.y < max_y + winding_number_epsilon) {
+            auto result = winding_number_internal(test_point, control_points_.front(), control_points_.back(), winding_number_tolerance, winding_number_epsilon);
+            winding_number = result.first;
+            flag = result.second;
+            }
+        else {
+            auto [wn, bd] = winding_number_line_segment(test_point, control_points_.front(), control_points_.back(), winding_number_tolerance, winding_number_epsilon);
+            winding_number = wn;
+            flag = bd;
+        }
+        return {winding_number, flag};
+    }
+
+
   private:
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
@@ -285,6 +310,110 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
             }
         }
         return result;
+    }
+
+    /**
+    * @brief Compute 2D winding number, if the test point is on boundary (distance to boundary lower than tolerance),
+    * the second flag will be marked as true.
+    */
+    std::pair<double, bool> winding_number_with_boundary_flag(PointType test_point, double winding_number_tolerance, double winding_number_epsilon) {
+        double winding_number = 0.0;
+        bool flag = false;
+        if (test_point.x > min_x - winding_number_epsilon
+            and test_point.x < max_x + winding_number_epsilon
+            and test_point.y > min_y - winding_number_epsilon
+            and test_point.y < max_y + winding_number_epsilon) {
+            auto result = winding_number_internal(test_point, control_points_.front(), control_points_.back(), winding_number_tolerance, winding_number_epsilon);
+            winding_number = result.first;
+            flag = result.second;
+            }
+        else {
+            auto [wn, bd] = winding_number_line_segment(test_point, control_points_.front(), control_points_.back(), winding_number_tolerance, winding_number_epsilon);
+            winding_number = wn;
+            flag = bd;
+        }
+        return {winding_number, flag};
+    }
+
+    /**
+    * @brief winding number respect to a line segment
+    */
+    std::pair<double, bool> winding_number_line_segment(PointType test_point, PointType start_pos, PointType end_pos, double winding_number_tolerance = 1e-6, double winding_number_epsilon = 1e-8) const {
+        auto d1 = glm::length(start_pos - test_point);
+        auto d2 = glm::length(end_pos - test_point);
+
+        if (d1 < winding_number_tolerance or d2 < winding_number_tolerance)
+            return {0, true};
+
+        auto v1 = glm::normalize(start_pos - test_point);
+        auto v2 = glm::normalize(end_pos - test_point);
+        auto outer = v1.x * v2.y - v1.y * v2.x;
+        auto inner = glm::dot(v1, v2);
+
+        auto acos_value = std::acos(inner);
+
+        return {outer > 0 ? acos_value : -acos_value, false};
+    }
+
+    std::tuple<double, double, bool> is_contained(const PointType test_point, const PointType& start, const PointType& end, double param_start, double param_end, double winding_number_tolerance = 1e-6, double winding_number_epsilon = 1e-8) const {
+        auto d1 = glm::length(start - test_point);
+        auto d2 = glm::length(end - test_point);
+
+        return {d1, d2, d1 + d2 < (derivative_bound + winding_number_epsilon) * (param_end - param_start)};
+    }
+
+    /**
+    * @brief Compute winding number with ellipse bound
+    */
+    std::pair<double, bool> winding_number_internal(const PointType test_point, PointType& start_pos, PointType& end_pos, double winding_number_tolerance = 1e-6, double winding_number_epsilon = 1e-8) const {
+        // Initialize the stack with the initial segment
+        struct StackEntry {
+            PointType start_pos;
+            PointType end_pos;
+            double start;
+            double end;
+        };
+
+        std::stack<StackEntry> stack;
+        stack.push({start_pos, end_pos, 0, 1});
+
+        double total_wn = 0.0;
+        bool boundary_flag = false;
+
+        while (!stack.empty()) {
+
+            auto current = stack.top();
+            stack.pop();
+
+            auto [d1, d2, contain] = is_contained(test_point, current.start_pos, current.end_pos, current.start, current.end);
+
+            // Early exit if the distances are too small
+            if (d1 < winding_number_tolerance || d2 < winding_number_tolerance) {
+                boundary_flag = true;
+                break;
+            }
+
+            // If the sum of the distances is larger than a threshold or there are not enough control points, compute the winding number
+            if (not contain || control_points_.size() <= 2) {
+                auto [wn, bd] = winding_number_line_segment(test_point, current.start_pos, current.end_pos, winding_number_tolerance, winding_number_epsilon);
+                total_wn += wn;
+
+                if (bd) {
+                    boundary_flag = true;
+                    break;
+                }
+            } else {
+                // Compute the mid-point parameter and position
+                auto mid_param = (current.start + current.end) / 2;
+                PointType mid_pos = evaluate(mid_param);
+
+                // Push left and right subsegments onto the stack
+                stack.push({current.start_pos, mid_pos, current.start, mid_param});
+                stack.push({mid_pos, current.end_pos, mid_param, current.end});
+            }
+        }
+
+        return {total_wn, boundary_flag};
     }
 };
 

@@ -84,14 +84,18 @@ struct FaceFaceIntersection {
                 std::vector<double> dx_values = {0};
                 std::vector<double> dy_values = {0};
 
-                if (face1->geometry()->param_geometry()->u_periodic) {
-                    dx_values.emplace_back(1.0);
-                    dx_values.emplace_back(-1.0);
+                int u_repeat = 0, v_repeat = 0;
+                auto loops = TopologyUtils::get_all_loops(face1);
+                for (auto& l: loops) {
+                    auto [p, q] = TopologyUtils::get_loop_homology(l);
+
+                    u_repeat = std::max(u_repeat, std::abs(p) + 1);
+                    v_repeat = std::max(v_repeat, std::abs(q) + 1);
                 }
 
-                if (face1->geometry()->param_geometry()->v_periodic) {
-                    dy_values.emplace_back(1.0);
-                    dy_values.emplace_back(-1.0);
+                if (u_repeat > 0 or v_repeat > 0) {
+                    for (int i = -u_repeat; i <= u_repeat; i++) dx_values.push_back(i);
+                    for (int i = -v_repeat; i <= v_repeat; i++) dy_values.push_back(i);
                 }
 
                 for (auto dx : dx_values) {
@@ -138,6 +142,20 @@ struct FaceFaceIntersection {
                 if (face2->geometry()->param_geometry()->v_periodic) {
                     dy_values.emplace_back(1.0);
                     dy_values.emplace_back(-1.0);
+                }
+
+                int u_repeat = 0, v_repeat = 0;
+                auto loops = TopologyUtils::get_all_loops(face2);
+                for (auto& l: loops) {
+                    auto [p, q] = TopologyUtils::get_loop_homology(l);
+
+                    u_repeat = std::max(u_repeat, std::abs(p) + 1);
+                    v_repeat = std::max(v_repeat, std::abs(q) + 1);
+                }
+
+                if (u_repeat > 0 or v_repeat > 0) {
+                    for (int i = -u_repeat; i < u_repeat; i++) dx_values.push_back(i);
+                    for (int i = -v_repeat; i < v_repeat; i++) dy_values.push_back(i);
                 }
 
                 for (auto dx : dx_values) {
@@ -188,8 +206,14 @@ struct FaceFaceIntersection {
             inter_info.erase(last, inter_info.end());
 
             for (int i = 1; i < inter_info.size(); i++) {
+                if (i == 12) {
+                    int x = 0;
+                }
                 auto [curve_start, pc1_start, pc2_start] = inter_info[i - 1];
                 auto [curve_end, pc1_end, pc2_end] = inter_info[i];
+
+                if (pc1_end < pc1_start) pc1_end = pc1_end + 1;
+
                 auto pcurve1_segment_mid_param = (pc1_start + pc1_end) / 2;
                 auto pcurve2_segment_mid_param = (pc2_start + pc2_end) / 2;
 
@@ -208,6 +232,8 @@ struct FaceFaceIntersection {
                 if (ContainmentQuery::contained(face1, param1) == ContainmentQuery::ContainmentResult::Outside) {
                     ffi.in_face1 = false;
                 }
+
+                spdlog::info("containment position {}: {} {}, {}", i, param1.x, param1.y, ffi.in_face1);
 
                 if (ContainmentQuery::contained(face2, param2) == ContainmentQuery::ContainmentResult::Outside) {
                     ffi.in_face2 = false;
