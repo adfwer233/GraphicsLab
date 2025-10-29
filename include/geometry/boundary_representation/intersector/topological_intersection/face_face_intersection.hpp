@@ -86,7 +86,7 @@ struct FaceFaceIntersection {
 
                 int u_repeat = 0, v_repeat = 0;
                 auto loops = TopologyUtils::get_all_loops(face1);
-                for (auto& l: loops) {
+                for (auto &l : loops) {
                     auto [p, q] = TopologyUtils::get_loop_homology(l);
 
                     u_repeat = std::max(u_repeat, std::abs(p) + 1);
@@ -94,8 +94,10 @@ struct FaceFaceIntersection {
                 }
 
                 if (u_repeat > 0 or v_repeat > 0) {
-                    for (int i = -u_repeat; i <= u_repeat; i++) dx_values.push_back(i);
-                    for (int i = -v_repeat; i <= v_repeat; i++) dy_values.push_back(i);
+                    for (int i = -u_repeat; i <= u_repeat; i++)
+                        dx_values.push_back(i);
+                    for (int i = -v_repeat; i <= v_repeat; i++)
+                        dy_values.push_back(i);
                 }
 
                 for (auto dx : dx_values) {
@@ -146,7 +148,7 @@ struct FaceFaceIntersection {
 
                 int u_repeat = 0, v_repeat = 0;
                 auto loops = TopologyUtils::get_all_loops(face2);
-                for (auto& l: loops) {
+                for (auto &l : loops) {
                     auto [p, q] = TopologyUtils::get_loop_homology(l);
 
                     u_repeat = std::max(u_repeat, std::abs(p) + 1);
@@ -154,8 +156,10 @@ struct FaceFaceIntersection {
                 }
 
                 if (u_repeat > 0 or v_repeat > 0) {
-                    for (int i = -u_repeat; i < u_repeat; i++) dx_values.push_back(i);
-                    for (int i = -v_repeat; i < v_repeat; i++) dy_values.push_back(i);
+                    for (int i = -u_repeat; i < u_repeat; i++)
+                        dx_values.push_back(i);
+                    for (int i = -v_repeat; i < v_repeat; i++)
+                        dy_values.push_back(i);
                 }
 
                 for (auto dx : dx_values) {
@@ -212,7 +216,8 @@ struct FaceFaceIntersection {
                 auto [curve_start, pc1_start, pc2_start] = inter_info[i - 1];
                 auto [curve_end, pc1_end, pc2_end] = inter_info[i];
 
-                if (pc1_end < pc1_start) pc1_end = pc1_end + 1;
+                if (pc1_end < pc1_start)
+                    pc1_end = pc1_end + 1;
 
                 auto pcurve1_segment_mid_param = (pc1_start + pc1_end) / 2;
                 auto pcurve2_segment_mid_param = (pc2_start + pc2_end) / 2;

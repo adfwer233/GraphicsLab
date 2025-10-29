@@ -18,7 +18,7 @@ struct TopologyUtils {
         Coedge *start_coedge = edge->coedge();
 
         if (start_coedge == nullptr) {
-                throw cpptrace::runtime_error("edge has no coedge");
+            throw cpptrace::runtime_error("edge has no coedge");
         }
         Coedge *coedge_iter = start_coedge;
 

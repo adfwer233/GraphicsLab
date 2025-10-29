@@ -37,7 +37,7 @@ Mesh3D GraphicsLab::Geometry::BRep::CDTFaceter::naive_facet(Face *face, int n, i
     if (face->geometry()->param_geometry()->v_periodic)
         v_repeat = 1;
 
-    for (auto& l: loops) {
+    for (auto &l : loops) {
         auto [p, q] = TopologyUtils::get_loop_homology(l);
 
         u_repeat = std::max(u_repeat, std::abs(p) + 1);

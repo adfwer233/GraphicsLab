@@ -117,14 +117,16 @@ template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
 
         std::vector<T> left, right, overlapping;
 
-        std::sort(primitives.begin(), primitives.end(),
-                  [axis](const T &a, const T &b) { return (a.min_pos() + a.max_pos())[axis] < (b.min_pos() + b.max_pos())[axis]; });
+        std::sort(primitives.begin(), primitives.end(), [axis](const T &a, const T &b) {
+            return (a.min_pos() + a.max_pos())[axis] < (b.min_pos() + b.max_pos())[axis];
+        });
 
         auto mid_pos = (primitives[median].max_pos() + primitives[median].min_pos()) / 2.0f;
 
         // if constexpr (std::is_same_v<T, BallPrimitive<3>>) {
-        //     spdlog::info("mid center {}, {}, {}", primitives[median].center.x, primitives[median].center.y, primitives[median].center.z);
-        //     spdlog::info("mid min {}, {}, {}", primitives[median].min_pos().x, primitives[median].min_pos().y, primitives[median].min_pos().z);
+        //     spdlog::info("mid center {}, {}, {}", primitives[median].center.x, primitives[median].center.y,
+        //     primitives[median].center.z); spdlog::info("mid min {}, {}, {}", primitives[median].min_pos().x,
+        //     primitives[median].min_pos().y, primitives[median].min_pos().z);
         // }
 
         for (auto &p : primitives) {
@@ -145,12 +147,14 @@ template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
         return node;
     }
 
-    void query(KDTreeNode<dim, T> *node, const glm::vec<dim, float> &query_point, double radius, std::vector<T>& results, size_t depth = 0, int max_report = -1) {
-        if (node == nullptr) return;
+    void query(KDTreeNode<dim, T> *node, const glm::vec<dim, float> &query_point, double radius,
+               std::vector<T> &results, size_t depth = 0, int max_report = -1) {
+        if (node == nullptr)
+            return;
 
         size_t axis = depth % dim;
 
-        for (auto& element: node->data) {
+        for (auto &element : node->data) {
             if (element.distance_to(query_point) < radius) {
                 results.push_back(element);
             }

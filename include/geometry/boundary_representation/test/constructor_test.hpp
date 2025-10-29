@@ -37,7 +37,7 @@ struct CylinderBodyConstructorTest : ConstructorTestBase {
     }
 };
 
-struct TrimmedTorusConstructorTest: ConstructorTestBase {
+struct TrimmedTorusConstructorTest : ConstructorTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TrimmedTorusConstructorTest";
     }
@@ -51,8 +51,10 @@ struct TrimmedTorusConstructorTest: ConstructorTestBase {
         auto pc1 = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve1);
         auto pc2 = TopologyUtils::create_pcurve_from_param_pcurve(param_pcurve2);
 
-        auto param_curve1 = TopologyUtils::create_param_curve_from_pcurve(torus->geometry()->param_geometry(), param_pcurve1, 256, 32);
-        auto parma_curve2 = TopologyUtils::create_param_curve_from_pcurve(torus->geometry()->param_geometry(), param_pcurve2, 256, 32);
+        auto param_curve1 =
+            TopologyUtils::create_param_curve_from_pcurve(torus->geometry()->param_geometry(), param_pcurve1, 256, 32);
+        auto parma_curve2 =
+            TopologyUtils::create_param_curve_from_pcurve(torus->geometry()->param_geometry(), param_pcurve2, 256, 32);
 
         auto curve1 = TopologyUtils::create_curve_from_param_curve(param_curve1);
         auto curve2 = TopologyUtils::create_curve_from_param_curve(parma_curve2);
@@ -108,7 +110,8 @@ struct TrimmedTorusConstructorTest: ConstructorTestBase {
             Edge *edge = TopologyUtils::create_edge_from_curve(curve);
             edge->set_param_range(ParamRange{inter_results[i].curve_range});
             bool valid = inter_results[i].in_face1 and inter_results[i].in_face2;
-            param_pcurve[std::format("ffi{}_pcurve1_{}_{}", ffi_counter, i, valid ? "valid" : "dropped")] = inter_results[i].pcurve1;
+            param_pcurve[std::format("ffi{}_pcurve1_{}_{}", ffi_counter, i, valid ? "valid" : "dropped")] =
+                inter_results[i].pcurve1;
 
             // if (i == 2) {
             //     if (auto bspline = dynamic_cast<BSplineCurve2D*>(inter_results[i].pcurve1)) {
@@ -147,4 +150,5 @@ META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::CylinderBodyConstructorTest)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::SphereConstructorTest)
-META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::TrimmedTorusConstructorTest)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::TrimmedTorusConstructorTest)

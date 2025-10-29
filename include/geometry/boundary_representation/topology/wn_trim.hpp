@@ -24,9 +24,9 @@ struct WNTrim {
      * @brief  A Loop converted to the parameter domain.
      */
     struct ParameterDomainLoop {
-        Loop* loop;
+        Loop *loop;
 
-        std::vector<ParamCurve2D*> pcurves;
+        std::vector<ParamCurve2D *> pcurves;
         std::vector<std::pair<double, double>> param_ranges;
         std::vector<bool> is_forward;
         std::vector<BRepVector2> offsets;
@@ -36,11 +36,10 @@ struct WNTrim {
 
         std::pair<int, int> homology_coefficients;
 
-        explicit ParameterDomainLoop(Loop* t_loop) {
+        explicit ParameterDomainLoop(Loop *t_loop) {
             loop = t_loop;
             Coedge *coedge_start = loop->coedge();
             Coedge *coedge_iter = loop->coedge();
-
 
             std::optional<BRepPoint2> last_end;
             BRepVector2 offset(0);
@@ -61,7 +60,6 @@ struct WNTrim {
 
                 auto pcurve_start_pos = pcurve->param_geometry()->evaluate(pcurve_param_start);
                 auto pcurve_end_pos = pcurve->param_geometry()->evaluate(pcurve_param_end);
-
 
                 if (not pcurve->is_forward()) {
                     std::swap(pcurve_start_pos, pcurve_end_pos);
@@ -101,21 +99,22 @@ struct WNTrim {
     using LoopPair = std::pair<ParameterDomainLoop, ParameterDomainLoop>;
     using LoopPairVector = std::vector<LoopPair>;
 
-    static WNResult winding_number(ParamCurve2D* pcurve, const BRepPoint2& test_point) {
-        if (auto line = dynamic_cast<StraightLine2D*>(pcurve)) {
+    static WNResult winding_number(ParamCurve2D *pcurve, const BRepPoint2 &test_point) {
+        if (auto line = dynamic_cast<StraightLine2D *>(pcurve)) {
             BezierCurve2D bezier({line->start_point, line->end_point});
             return bezier.winding_number(test_point, 1e-6);
-        } else if (auto bezier = dynamic_cast<BezierCurve2D*>(pcurve)) {
+        } else if (auto bezier = dynamic_cast<BezierCurve2D *>(pcurve)) {
             return bezier->winding_number(test_point, 1e-6);
-        } else if (auto bspline = dynamic_cast<BSplineCurve2D*>(pcurve)) {
+        } else if (auto bspline = dynamic_cast<BSplineCurve2D *>(pcurve)) {
             BSplineCurve2D bs = *bspline;
             bs.insert_all_knots_to_bezier_form();
             auto bezier_curves = bspline->convert_to_bezier();
             double total_wn = 0;
-            for (auto& c: bezier_curves) {
+            for (auto &c : bezier_curves) {
                 auto [wn, bd] = c.winding_number(test_point, 1e-6);
                 total_wn += wn;
-                if (bd) return{wn, true};
+                if (bd)
+                    return {wn, true};
             }
             return {total_wn, false};
         }
@@ -130,14 +129,14 @@ struct WNTrim {
      * @param loops
      * @return
      */
-    static auto create_classification_result(LoopVector& loops) -> LoopClassificationResult {
+    static auto create_classification_result(LoopVector &loops) -> LoopClassificationResult {
         int p = 0, q = 0;
 
         bool found = false;
 
         std::vector<int> type_a_loops, type_b_loops, type_c_loops;
 
-        for (auto& l: loops) {
+        for (auto &l : loops) {
             if (l.homology_coefficients.first != 0 or l.homology_coefficients.second != 0) {
                 p = l.homology_coefficients.first;
                 q = l.homology_coefficients.second;
@@ -148,10 +147,11 @@ struct WNTrim {
         }
 
         if (not found) {
-            for (int i = 0; i < loops.size(); ++i) type_c_loops.push_back(i);
+            for (int i = 0; i < loops.size(); ++i)
+                type_c_loops.push_back(i);
         } else {
             for (int i = 0; i < loops.size(); ++i) {
-                auto& l = loops[i];
+                auto &l = loops[i];
 
                 if (l.homology_coefficients.first == p and l.homology_coefficients.second == q) {
                     type_a_loops.push_back(i);
@@ -163,7 +163,8 @@ struct WNTrim {
             }
 
             if (type_a_loops.size() != type_b_loops.size()) {
-                throw cpptrace::runtime_error("Topology incorrect since there are different numbers of type A loop and type B loop");
+                throw cpptrace::runtime_error(
+                    "Topology incorrect since there are different numbers of type A loop and type B loop");
             }
         }
 
@@ -176,14 +177,13 @@ struct WNTrim {
      * @param test_point
      * @return
      */
-    static WNResult winding_number(ParameterDomainLoop& loop, const BRepPoint2& test_point) {
+    static WNResult winding_number(ParameterDomainLoop &loop, const BRepPoint2 &test_point) {
         // if (loop->coedge() == nullptr) {
         //     throw cpptrace::logic_error("Loop has no coedge");
         // }
 
         Coedge *coedge_start = loop.loop->coedge();
         Coedge *coedge_iter = loop.loop->coedge();
-
 
         std::optional<BRepPoint2> last_end;
         BRepVector2 offset(0);
@@ -206,7 +206,8 @@ struct WNTrim {
 
             WNResult wn = winding_number(pcurve->param_geometry(), test_point + offset);
 
-            if (wn.second) return {0, true};
+            if (wn.second)
+                return {0, true};
             if (not pcurve->is_forward()) {
                 wn.first = -wn.first;
 
@@ -234,13 +235,14 @@ struct WNTrim {
     static double winding_number_line(BRepPoint2 test_param, BRepPoint2 base_point, BRepPoint2 direction) {
         BRepVector2 base_to_test = test_param - base_point;
         double cross = direction.x * base_to_test.y - direction.y * base_to_test.x;
-        double result = direction.x * base_to_test.y - direction.y * base_to_test.x > 0 ? std::numbers::pi : -std::numbers::pi;
+        double result =
+            direction.x * base_to_test.y - direction.y * base_to_test.x > 0 ? std::numbers::pi : -std::numbers::pi;
         return result;
     }
 
     /**
-    * @brief winding number respect to a line segment
-    */
+     * @brief winding number respect to a line segment
+     */
     static WNResult winding_number_line_segment(BRepPoint2 test_point, BRepPoint2 start_pos, BRepPoint2 end_pos) {
         auto d1 = glm::length(start_pos - test_point);
         auto d2 = glm::length(end_pos - test_point);
@@ -264,7 +266,7 @@ struct WNTrim {
      * @param test_point
      * @return
      */
-    static WNResult periodically_extended_winding_number(ParameterDomainLoop& loop, const BRepPoint2& test_point) {
+    static WNResult periodically_extended_winding_number(ParameterDomainLoop &loop, const BRepPoint2 &test_point) {
 
         // temporally, use 3 replica
         double total_wn = 0.0;
@@ -275,10 +277,13 @@ struct WNTrim {
 
         for (int i = -1; i <= 1; i++) {
             auto [wn, bd] = winding_number(loop, test_point + BRepVector2{p * i, q * i});
-            if (bd) return {0, true};
+            if (bd)
+                return {0, true};
             total_wn += wn;
 
-            double wn_seg = winding_number_line_segment(test_point + BRepVector2{p * i, q * i}, loop.start_position, loop.end_position).first;
+            double wn_seg = winding_number_line_segment(test_point + BRepVector2{p * i, q * i}, loop.start_position,
+                                                        loop.end_position)
+                                .first;
 
             total_wn -= wn_seg;
         }
@@ -292,12 +297,14 @@ struct WNTrim {
      * @param test_point
      * @return
      */
-    static WNResult periodically_extended_winding_number(LoopPair& loop_pair, const BRepPoint2& test_point) {
+    static WNResult periodically_extended_winding_number(LoopPair &loop_pair, const BRepPoint2 &test_point) {
         auto [wn1, bd1] = periodically_extended_winding_number(loop_pair.first, test_point);
-        if (bd1) return {0, true};
+        if (bd1)
+            return {0, true};
 
         auto [wn2, bd2] = periodically_extended_winding_number(loop_pair.second, test_point);
-        if (bd2) return {0, true};
+        if (bd2)
+            return {0, true};
 
         if (wn1 + wn2 > 1.0) {
             int x = 0;
@@ -310,7 +317,7 @@ struct WNTrim {
         return {wn1 + wn2, false};
     }
 
-    static WNResult sphere_covering_space_winding_number(LoopVector& loops, const BRepPoint2& test_point) {
+    static WNResult sphere_covering_space_winding_number(LoopVector &loops, const BRepPoint2 &test_point) {
         if (loops.empty()) {
             throw cpptrace::runtime_error("Empty loop vector");
         }
@@ -319,7 +326,7 @@ struct WNTrim {
 
         int homology_p = 0, homology_q = 0;
 
-        for (auto& loop: loops) {
+        for (auto &loop : loops) {
             homology_p += loop.homology_coefficients.first;
             homology_q += loop.homology_coefficients.second;
         }
@@ -333,21 +340,23 @@ struct WNTrim {
         }
 
         auto [wn, bd] = cylinder_covering_space_winding_number(loops, test_point);
-        if (bd) return {0, true};
+        if (bd)
+            return {0, true};
         total_wn += wn;
 
         return {total_wn, false};
     }
 
-    static WNResult cylinder_covering_space_winding_number(LoopVector& loops, const BRepPoint2& test_point) {
+    static WNResult cylinder_covering_space_winding_number(LoopVector &loops, const BRepPoint2 &test_point) {
         if (loops.empty()) {
             throw cpptrace::runtime_error("Empty loop vector");
         }
 
         double total_wn = 0.0;
-        for (auto& loop: loops) {
+        for (auto &loop : loops) {
             auto [wn, bd] = periodically_extended_winding_number(loop, test_point);
-            if (bd) return {0, true};
+            if (bd)
+                return {0, true};
             total_wn += wn;
         }
 
@@ -360,7 +369,7 @@ struct WNTrim {
      * @param test_point
      * @return
      */
-    static WNResult torus_covering_space_winding_number(LoopPairVector& loop_pairs, const BRepPoint2& test_point) {
+    static WNResult torus_covering_space_winding_number(LoopPairVector &loop_pairs, const BRepPoint2 &test_point) {
         if (loop_pairs.empty()) {
             throw cpptrace::runtime_error("Empty loop pair vector");
         }
@@ -368,11 +377,12 @@ struct WNTrim {
         auto [p, q] = loop_pairs.front().first.homology_coefficients;
 
         double total_wn = 0.0;
-        for (auto & loop_pair : loop_pairs) {
+        for (auto &loop_pair : loop_pairs) {
             for (int i = 0; i < std::abs(p); i++) {
                 for (int j = -std::abs(q); j < std::abs(q); j++) {
                     auto [wn, bd] = periodically_extended_winding_number(loop_pair, test_point - BRepVector2{i, j});
-                    if (bd) return {0, true};
+                    if (bd)
+                        return {0, true};
                     total_wn += wn;
                 }
             }
@@ -381,14 +391,15 @@ struct WNTrim {
         return {total_wn, false};
     }
 
-    static WNResult torus_winding_number(const Face* face, const BRepPoint2& test_point, std::optional<LoopPairVector> loop_pair_vec) {
+    static WNResult torus_winding_number(const Face *face, const BRepPoint2 &test_point,
+                                         std::optional<LoopPairVector> loop_pair_vec) {
 
         if (loop_pair_vec.has_value()) {
             return torus_covering_space_winding_number(loop_pair_vec.value(), test_point);
         } else {
             auto loops = TopologyUtils::get_all_loops(face);
             LoopVector domain_loops;
-            for (auto l: loops) {
+            for (auto l : loops) {
                 domain_loops.emplace_back(l);
             }
 
@@ -410,4 +421,4 @@ struct WNTrim {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep
