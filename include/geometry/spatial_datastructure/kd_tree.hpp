@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "glm/glm.hpp"
+#include "spdlog/spdlog.h"
 
 namespace GraphicsLab::Geometry::KDTree {
 
@@ -29,6 +30,34 @@ template <size_t dim> struct PointPrimitive {
 
     float distance_to(PointType p) const {
         return glm::distance(p, position);
+    }
+};
+
+template <size_t dim> struct BallPrimitive {
+    using PointType = glm::vec<dim, float>;
+    PointType center;
+    double radius;
+
+    PointType min_pos() const {
+        PointType res = center;
+        for (int i = 0; i < dim; i++) {
+            res[i] -= radius;
+        }
+        return res;
+    }
+
+    PointType max_pos() const {
+        PointType res = center;
+        for (int i = 0; i < dim; i++) {
+            res[i] += radius;
+        }
+        return res;
+    }
+
+    float distance_to(PointType p) const {
+        double dis = glm::distance(p, center);
+
+        return dis - radius;
     }
 };
 
@@ -89,9 +118,14 @@ template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
         std::vector<T> left, right, overlapping;
 
         std::sort(primitives.begin(), primitives.end(),
-                  [axis](const T &a, const T &b) { return a.min_pos()[axis] < b.min_pos()[axis]; });
+                  [axis](const T &a, const T &b) { return (a.min_pos() + a.max_pos())[axis] < (b.min_pos() + b.max_pos())[axis]; });
 
         auto mid_pos = (primitives[median].max_pos() + primitives[median].min_pos()) / 2.0f;
+
+        // if constexpr (std::is_same_v<T, BallPrimitive<3>>) {
+        //     spdlog::info("mid center {}, {}, {}", primitives[median].center.x, primitives[median].center.y, primitives[median].center.z);
+        //     spdlog::info("mid min {}, {}, {}", primitives[median].min_pos().x, primitives[median].min_pos().y, primitives[median].min_pos().z);
+        // }
 
         for (auto &p : primitives) {
             if (p.max_pos()[axis] < mid_pos[axis]) {
@@ -109,6 +143,37 @@ template <size_t dim, KDTreePrimitive<dim> T> struct KDTree {
         node->right = build(right, depth + 1);
 
         return node;
+    }
+
+    void query(KDTreeNode<dim, T> *node, const glm::vec<dim, float> &query_point, double radius, std::vector<T>& results, size_t depth = 0, int max_report = -1) {
+        if (node == nullptr) return;
+
+        size_t axis = depth % dim;
+
+        for (auto& element: node->data) {
+            if (element.distance_to(query_point) < radius) {
+                results.push_back(element);
+            }
+
+            // if (max_report > 0 and results.size() >= max_report) {
+            //     return;
+            // }
+        }
+        float mid_value = ((node->median.max_pos() + node->median.min_pos()) / 2.0f)[axis];
+        float dist_to_plane = std::abs(query_point[axis] - mid_value);
+
+        spdlog::info("depth {}, data {}, mid value {}", depth, node->data.size(), mid_value);
+
+        if (dist_to_plane < radius) {
+            query(node->left, query_point, radius, results, depth + 1);
+            query(node->right, query_point, radius, results, depth + 1);
+        } else {
+            if (query_point[axis] < mid_value) {
+                query(node->left, query_point, radius, results, depth + 1);
+            } else {
+                query(node->right, query_point, radius, results, depth + 1);
+            }
+        }
     }
 
     // Nearest neighbor search

@@ -1,3 +1,5 @@
+#include "geometry/spatial_datastructure/hash_grid.hpp"
+
 #include "gtest/gtest.h"
 
 #include "geometry/spatial_datastructure/kd_tree.hpp"
@@ -49,6 +51,76 @@ TEST(SpatialDataStructureTest, KDTreePointFuzzyTest) {
     float distance_kd_tree = nearest_by_kd_tree.distance_to(test_point);
 
     EXPECT_FLOAT_EQ(distance_kd_tree, distance_brute_force);
+}
+
+TEST(SpatialDataStructureTest, KDTreeBallFuzzyTest) {
+    using namespace GraphicsLab::Geometry::KDTree;
+    using namespace GraphicsLab;
+
+    std::vector<BallPrimitive<3>> balls;
+
+    int sample_num = 512 * 512 * 16;
+    for (int i = 0; i < sample_num; i++) {
+        balls.emplace_back(glm::vec3{Sampler::sampleUniform(), Sampler::sampleUniform(), Sampler::sampleUniform()}, Sampler::sampleUniform(0.1, 0.2));
+    }
+
+    glm::vec3 test_point{Sampler::sampleUniform(), Sampler::sampleUniform(), Sampler::sampleUniform()};
+
+    KDTree<3, BallPrimitive<3>> tree(balls);
+    std::vector<BallPrimitive<3>> covering_balls;
+
+    spdlog::critical("start 1");
+    tree.query(tree.root, test_point, -1e-3, covering_balls, 0, 128);
+
+    spdlog::critical("start 2");
+
+    std::vector<BallPrimitive<3>> covering_balls_brute_force;
+
+    for (auto& b: balls) {
+        if (b.distance_to(test_point) < -1e-3) {
+            covering_balls_brute_force.push_back(b);
+        }
+    }
+
+    spdlog::critical("# covering balls: {}", covering_balls.size());
+    EXPECT_EQ(covering_balls.size(), covering_balls_brute_force.size());
+}
+
+TEST(SpatialDataStructureTest, HashGridTest) {
+    using namespace GraphicsLab::Geometry::KDTree;
+    using namespace GraphicsLab;
+
+    std::vector<BallPrimitive<3>> balls;
+
+    int sample_num = 512 * 512;
+    for (int i = 0; i < sample_num; i++) {
+        balls.emplace_back(glm::vec3{Sampler::sampleUniform(), Sampler::sampleUniform(), Sampler::sampleUniform()}, Sampler::sampleUniform(0.1, 0.2));
+    }
+
+    glm::vec3 test_point{Sampler::sampleUniform(), Sampler::sampleUniform(), Sampler::sampleUniform()};
+
+    GraphicsLab::Geometry::HashGrid::HashGrid hash_grid(0.1);
+
+    spdlog::info("start 0");
+    for (int i = 0; i < sample_num; i++) {
+        hash_grid.addBall({balls[i].center, balls[i].radius});
+    }
+
+    spdlog::info("start 1");
+    auto covering_balls = hash_grid.query(test_point);
+
+    spdlog::info("start 2");
+
+    std::vector<BallPrimitive<3>> covering_balls_brute_force;
+
+    for (auto& b: balls) {
+        if (b.distance_to(test_point) <= 0) {
+            covering_balls_brute_force.push_back(b);
+        }
+    }
+
+    spdlog::critical("# covering balls: {}", covering_balls.size());
+    EXPECT_EQ(covering_balls.size(), covering_balls_brute_force.size());
 }
 
 TEST(SpatialDataStructureTest, KDTreeLineSegmentFuzzyTest) {
