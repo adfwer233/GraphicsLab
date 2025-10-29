@@ -14,17 +14,17 @@ struct Sampler {
     }
 
     static float sampleUniform(float min = 0.0, float max = 1.0) {
-        thread_local std::uniform_real_distribution<float> dist(min, max);
+        std::uniform_real_distribution<float> dist(min, max);
         return dist(rng());
     }
 
     static glm::vec2 sampleUniformVec2(float min = 0.0, float max = 1.0) {
-        thread_local std::uniform_real_distribution<float> dist(min, max);
+        std::uniform_real_distribution<float> dist(min, max);
         return {dist(rng()), dist(rng())};
     }
 
     static glm::vec3 sampleUniformVec3(float min = 0.0, float max = 1.0) {
-        thread_local std::uniform_real_distribution<float> dist(min, max);
+        std::uniform_real_distribution<float> dist(min, max);
         return {dist(rng()), dist(rng()), dist(rng())};
     }
 
