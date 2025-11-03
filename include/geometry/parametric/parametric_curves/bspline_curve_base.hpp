@@ -198,8 +198,8 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
     void insert_knot(double u) {
         const int d = degree_;
-        int n = static_cast<int>(control_points_.size()) - 1;
-        int m = static_cast<int>(knots_.size()) - 1;
+        int n = static_cast<int>(control_points_.size());
+        int m = static_cast<int>(knots_.size());
 
         // Find the span index s where u is to be inserted: knots_[s] <= u < knots_[s+1]
         int s = -1;
@@ -225,28 +225,23 @@ template <size_t dim> struct BSplineCurveBase : ParamCurveBase<dim> {
 
         // Compute new control points
         std::vector<PointType> new_ctrl_pts;
-        for (int i = 0; i <= s - d + 1; ++i) {
+        for (int i = 0; i <= s - d; ++i) {
             new_ctrl_pts.push_back(control_points_[i]);
         }
 
-        for (int i = s - d + 2; i <= s; ++i) {
+        for (int i = s - d + 1; i <= s; ++i) {
             double alpha = (u - knots_[i]) / (knots_[i + d] - knots_[i]);
             PointType pt = (1.0 - alpha) * control_points_[i - 1] + alpha * control_points_[i];
             new_ctrl_pts.push_back(pt);
         }
 
-        for (int i = s + 1; i <= n + 1; ++i) {
+        for (int i = s + 1; i <= n; ++i) {
             new_ctrl_pts.push_back(control_points_[i - 1]);
         }
-
-        // spdlog::info("n {}, {}", n, new_ctrl_pts.size());
 
         // Insert the knot into the knot vector
         knots_.insert(knots_.begin() + s + 1, u);
         control_points_ = std::move(new_ctrl_pts);
-
-        // spdlog::info("knot {}, ctrl_pts: {}, size diff {}", knots_.size(), control_points_.size(), knots_.size() -
-        // control_points_.size());
     }
 
     static BSplineCurveBase fit(const std::vector<PointType> &points, const size_t degree,

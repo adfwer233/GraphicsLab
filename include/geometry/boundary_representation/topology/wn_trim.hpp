@@ -107,8 +107,9 @@ struct WNTrim {
             return bezier->winding_number(test_point, 1e-6);
         } else if (auto bspline = dynamic_cast<BSplineCurve2D *>(pcurve)) {
             BSplineCurve2D bs = *bspline;
-            bs.insert_all_knots_to_bezier_form();
-            auto bezier_curves = bspline->convert_to_bezier();
+            if (not bs.is_in_bezier_form())
+                bs.insert_all_knots_to_bezier_form();
+            auto bezier_curves = bs.convert_to_bezier();
             double total_wn = 0;
             for (auto &c : bezier_curves) {
                 auto [wn, bd] = c.winding_number(test_point, 1e-6);
@@ -118,7 +119,33 @@ struct WNTrim {
             }
             return {total_wn, false};
         }
+        return {0, false};
+    }
 
+    static WNResult turning_number(ParamCurve2D* pcurve) {
+        BRepPoint2 origin{0, 0};
+
+        if (auto line = dynamic_cast<StraightLine2D*>(pcurve)) {
+            BezierCurve2D bezier({line->start_point, line->end_point});
+            return bezier.derivative_curve().winding_number(origin, 1e-6);
+        } else if (auto bezier = dynamic_cast<BezierCurve2D*>(pcurve)) {
+            return bezier->derivative_curve().winding_number(origin, 1e-6);
+        } else if (auto bspline = dynamic_cast<BSplineCurve2D*>(pcurve)) {
+            BSplineCurve2D bs = *bspline;
+            if (not bs.is_in_bezier_form())
+                bs.insert_all_knots_to_bezier_form();
+            auto bezier_curves = bs.convert_to_bezier();
+
+            bool isbezier = bs.is_in_bezier_form();
+
+            double total_wn = 0;
+            for (auto& c: bezier_curves) {
+                auto [wn, bd] = c.derivative_curve().winding_number(origin, 1e-6);
+                total_wn += wn;
+                if (bd) return{wn, true};
+            }
+            return {total_wn, false};
+        }
         return {0, false};
     }
 
@@ -306,14 +333,6 @@ struct WNTrim {
         if (bd2)
             return {0, true};
 
-        if (wn1 + wn2 > 1.0) {
-            int x = 0;
-        }
-
-        if (wn1 + wn2 < -1.0) {
-            int x = 0;
-        }
-
         return {wn1 + wn2, false};
     }
 
@@ -412,12 +431,25 @@ struct WNTrim {
                 loop_pairs.emplace_back(loops[indices_a[i]], loops[indices_b[i]]);
             }
 
-            if (loop_pairs.size() == 0) {
+            if (loop_pairs.empty()) {
                 return {6.28, false};
             }
 
             return torus_covering_space_winding_number(loop_pairs, test_point);
         }
+    }
+
+    static WNResult loop_turning_number(Loop* loop) {
+        ParameterDomainLoop loop_domain(loop);
+
+        double result = 0.0;
+
+        for (size_t i = 0; i < loop_domain.pcurves.size(); i++) {
+            auto [tn, bd] = turning_number(loop_domain.pcurves[i]);
+            result += tn;
+        }
+
+        return {result, false};
     }
 };
 
