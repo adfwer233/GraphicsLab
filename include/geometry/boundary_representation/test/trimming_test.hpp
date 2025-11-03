@@ -66,11 +66,11 @@ struct TurningTest1 : TrimmingTestBase {
         auto inter_result = GeneralSurfaceSurfaceIntersection::solve(face1->geometry()->param_geometry(),
                                                                      face2->geometry()->param_geometry());
 
-        for (int i = 0; auto inter: inter_result) {
+        for (int i = 0; auto inter : inter_result) {
             auto [tn, bd] = WNTrim::turning_number(inter.pcurve1);
 
             auto [wn, bd2] = WNTrim::winding_number(inter.pcurve1, BRepPoint2{0, 0});
-            if (auto bspline = dynamic_cast<BSplineCurve2D*>(inter.pcurve1)) {
+            if (auto bspline = dynamic_cast<BSplineCurve2D *>(inter.pcurve1)) {
                 if (not bspline->is_in_bezier_form())
                     bspline->insert_all_knots_to_bezier_form();
                 auto bezier_curves = bspline->convert_to_bezier();
