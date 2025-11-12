@@ -54,8 +54,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         update_bounds();
     }
 
-    explicit BezierCurveBase(const std::vector<PointType> &control_points)
-        : control_points_(control_points) {
+    explicit BezierCurveBase(const std::vector<PointType> &control_points) : control_points_(control_points) {
         int n = control_points_.size() - 1;
         for (int i = 1; i < control_points_.size(); i++) {
             derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
