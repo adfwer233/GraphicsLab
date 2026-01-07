@@ -117,6 +117,21 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "directional_field_3d.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT},
                 {(DEFAULT_SHADER_PATH / "directional_field_3d.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT}});
 
+        deferred_position_render_system = std::make_unique<SimpleRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                    {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                    {(DEFAULT_SHADER_PATH / "deferred_shading_position.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}
+            }
+        );
+
+        deferred_normal_render_system = std::make_unique<SimpleRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                    {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                    {(DEFAULT_SHADER_PATH / "deferred_shading_normal.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}
+            });
+
         software_rasterizer = std::make_unique<vkl::SoftwareRasterizer>(device_, sceneTree_.material_manager, 512, 512);
 
         /**
@@ -200,6 +215,9 @@ struct InternalSceneRenderPass : public RenderPass {
         auto directionalfieldKey = directional_filed_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto pointcloudKey = point_cloud_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
+        auto deferred_position_key = deferred_position_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto deferred_normal_key = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+
         using RenderableTypeList =
             MetaProgramming::TypeListFunctions::Append<Geometry::ParamSurfaceTypeList, Mesh3D>::type;
 
@@ -239,6 +257,43 @@ struct InternalSceneRenderPass : public RenderPass {
             }
             begin_render_pass(commandBuffer);
 
+        } else if (uiState_.renderMode == UIState::RenderMode::deferred_position or uiState_.renderMode == UIState::RenderMode::deferred_normal) {
+            begin_render_pass(commandBuffer);
+            MetaProgramming::ForEachType(RenderableTypeList{}, [&]<typename T>() {
+                    auto mesh3d_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
+                    for (auto [mesh3d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<T>()) {
+
+                        if (not mesh3d_nodes->visible)
+                            continue;
+
+                        ubo.model = trans;
+
+                        auto node_mesh = mesh3d_buffer->getGeometryModel(device_, mesh3d_nodes);
+
+                        if (mesh3d_nodes->updated) {
+                            node_mesh->recreateMeshes();
+                            mesh3d_nodes->updated = false;
+                        }
+
+                        if (node_mesh->mesh->uniformBuffers.contains(deferred_position_key)) {
+                            node_mesh->mesh->uniformBuffers[deferred_position_key][frame_index]->writeToBuffer(&ubo);
+                            node_mesh->mesh->uniformBuffers[deferred_position_key][frame_index]->flush();
+                        }
+
+                        FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                            .frameIndex = static_cast<int>(frame_index) % 2,
+                            .frameTime = 0,
+                            .commandBuffer = commandBuffer,
+                            .model = *node_mesh->mesh,
+                        };
+
+                        if (uiState_.renderMode == UIState::RenderMode::deferred_position) {
+                            deferred_position_render_system->renderObject(frameInfo);
+                        } else {
+                            deferred_normal_render_system->renderObject(frameInfo);
+                        }
+                    }
+                });
         } else {
             begin_render_pass(commandBuffer);
             try {
@@ -458,6 +513,10 @@ struct InternalSceneRenderPass : public RenderPass {
     std::unique_ptr<WorldAxisRenderSystem> axis_render_system = nullptr;
     std::unique_ptr<PointCloud3DRenderSystem> directional_filed_render_system = nullptr;
     std::unique_ptr<PointCloud3DRenderSystem> point_cloud_render_system = nullptr;
+
+    // for deferred shading
+    std::unique_ptr<SimpleRenderSystem<>> deferred_position_render_system = nullptr;
+    std::unique_ptr<SimpleRenderSystem<>> deferred_normal_render_system = nullptr;
 
     std::unique_ptr<vkl::PathTracingComputeModel> path_tracing_compute_model = nullptr;
     std::unique_ptr<vkl::PathTracingComputeSystem> path_tracing_compute_system = nullptr;

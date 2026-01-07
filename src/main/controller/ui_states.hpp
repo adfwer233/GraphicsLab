@@ -20,7 +20,9 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
         wireframe,
         material,
         path_tracing,
-        soft_rasterizer
+        soft_rasterizer,
+        deferred_position,
+        deferred_normal,
     };
 
     enum class LightingMode {
