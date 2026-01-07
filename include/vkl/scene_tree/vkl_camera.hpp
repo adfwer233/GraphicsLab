@@ -127,4 +127,6 @@ class Camera {
      * @brief process keyboard with given direction and delta time
      */
     void process_keyboard();
+
+    void handle_perspective_zoom(float zoom_factor, float min_distance);
 };
