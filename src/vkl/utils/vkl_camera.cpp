@@ -31,9 +31,9 @@ glm::mat4 Camera::get_proj_transformation() const {
  */
 void Camera::process_mouse_scroll(float offset) {
     // Configuration parameters
-    const float base_speed = 1.0f;      // Maximum movement speed (at infinite distance)
-    const float min_distance = 0.5f;    // Minimum distance from camera to target (prevents passing through)
-    const float damping = 2.0f;         // Damping coefficient, controls deceleration sensitivity
+    const float base_speed = 1.0f;   // Maximum movement speed (at infinite distance)
+    const float min_distance = 0.5f; // Minimum distance from camera to target (prevents passing through)
+    const float damping = 2.0f;      // Damping coefficient, controls deceleration sensitivity
 
     // Calculate direction and distance from camera to target
     glm::vec3 to_target = camera_target - position;

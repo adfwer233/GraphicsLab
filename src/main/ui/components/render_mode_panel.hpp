@@ -50,9 +50,11 @@ class RenderModelPanel : public UIComponent {
                            static_cast<ShadeModelType>(UIState::LightingMode::solid));
 
         ImGui::SeparatorText("GBuffer Mode");
-        ImGui::RadioButton("Position", reinterpret_cast<int *>(&uiState_.renderMode), static_cast<RenderModeType>(UIState::RenderMode::deferred_position));
+        ImGui::RadioButton("Position", reinterpret_cast<int *>(&uiState_.renderMode),
+                           static_cast<RenderModeType>(UIState::RenderMode::deferred_position));
         ImGui::SameLine();
-        ImGui::RadioButton("Normal", reinterpret_cast<int *>(&uiState_.renderMode), static_cast<RenderModeType>(UIState::RenderMode::deferred_normal));
+        ImGui::RadioButton("Normal", reinterpret_cast<int *>(&uiState_.renderMode),
+                           static_cast<RenderModeType>(UIState::RenderMode::deferred_normal));
 
         ImGui::Checkbox("Show Normal", &uiState_.showNormal);
         ImGui::SameLine();

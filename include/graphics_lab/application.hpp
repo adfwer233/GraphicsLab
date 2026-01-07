@@ -14,7 +14,6 @@ struct ApplicationOption {
 
 struct GraphicsLabApplication {
   private:
-
     // extent of the main window
 
     static constexpr int WIDTH = 1024 + 768;
