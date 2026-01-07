@@ -80,7 +80,7 @@ void GraphicsLabApplication::run() {
     InternalScene2DRenderPass internalScene2DRenderPass(appContext.device_, *appContext.sceneTree, state,
                                                         uiManager.renderResources);
 
-    internalSceneRenderPass.set_extent(2048, 2048);
+    internalSceneRenderPass.set_extent(appOption.render_resolution.first, appOption.render_resolution.second);
     internalImguiPass.set_extent(WIDTH, HEIGHT);
 
     appContext.renderGraph->add_pass(&internalScene2DRenderPass, "internal_scene_2d_render_pass");

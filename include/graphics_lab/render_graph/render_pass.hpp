@@ -328,7 +328,7 @@ struct RenderPass {
         renderPassInfo.framebuffer = vkl_frame_buffer->framebuffer;
 
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = {2048, 2048};
+        renderPassInfo.renderArea.extent = {width_, height_};
 
         /**
          * @todo: auto generate clear values
@@ -345,11 +345,11 @@ struct RenderPass {
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(2048);
-        viewport.height = static_cast<float>(2048);
+        viewport.width = static_cast<float>(width_);
+        viewport.height = static_cast<float>(height_);
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, {2048, 2048}};
+        VkRect2D scissor{{0, 0}, {width_, height_}};
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }

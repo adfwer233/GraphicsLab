@@ -7,10 +7,16 @@
 
 struct ApplicationOption {
     std::optional<std::string> load_obj_path = std::nullopt;
+
+    // resolution of main render viewport
+    std::pair<int, int> render_resolution = {1024, 1024};
 };
 
 struct GraphicsLabApplication {
   private:
+
+    // extent of the main window
+
     static constexpr int WIDTH = 1024 + 768;
     static constexpr int HEIGHT = 1280;
 
@@ -38,6 +44,12 @@ struct GraphicsLabApplication {
         if (args.is_used("--font_size")) {
             ImguiContext::font_size = args.get<int>("--font_size");
         }
+        if (args.is_used("--resolution_width")) {
+            appOption.render_resolution.first = args.get<int>("--resolution_width");
+        }
+        if (args.is_used("--resolution_height")) {
+            appOption.render_resolution.second = args.get<int>("--resolution_height");
+        }
 
         initialize();
     }
@@ -46,6 +58,8 @@ struct GraphicsLabApplication {
         args.add_argument("-i", "--input").default_value(std::string("path"));
         args.add_argument("--style").default_value(std::string("Light"));
         args.add_argument("--font_size").default_value(30).scan<'i', int>();
+        args.add_argument("--resolution_width").default_value(1024);
+        args.add_argument("--resolution_height").default_value(1024);
     }
 
     ApplicationOption appOption;

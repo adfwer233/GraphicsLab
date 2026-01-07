@@ -40,13 +40,13 @@ struct InternalSceneRenderPass : public RenderPass {
             .type(RenderPassReflection::Field::Type::Texture2D)
             .sample_count(8)
             .format(VK_FORMAT_R8G8B8A8_SRGB)
-            .extent(2048, 2048)
+            .extent(width_, height_)
             .set_annotation("imgui_show", true);
 
         reflection.add_output("scene_render_depth", "depth texture of built in 3d scene rendering")
             .type(RenderPassReflection::Field::Type::TextureDepth)
             .sample_count(8)
-            .extent(2048, 2048);
+            .extent(width_, height_);
 
         return reflection;
     }
