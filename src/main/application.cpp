@@ -51,29 +51,6 @@ void GraphicsLabApplication::initialize() {
     appContext.lua["scene"] = appContext.sceneTree.get();
     appContext.lua["sceneInterface"] = &sceneInterface;
 
-    appContext.lua.script(R"(
-        local points = {
-            vec2.new(0.0, 0.0),
-            vec2.new(0.0, 0.1),
-            vec2.new(0.0, 0.2)
-        }
-
-        local points2 = {
-            vec2.new(0.0, 0.0),
-            vec2.new(0.1, 0.1),
-            vec2.new(0.2, 0.2)
-        }
-
-        local v3 = vec3.new(1,2,3)
-        print("vec3:", v3.x, v3.y, v3.z)
-
-        local v4 = vec4.new(1,2,3,4)
-        print("vec4:", v4.x, v4.y, v4.z, v4.w)
-
-        sceneInterface:add_point_cloud_2d(points)
-        sceneInterface:add_bezier_curve_2d(points2)
-    )");
-
     if (appOption.load_obj_path.has_value()) {
         appContext.sceneTree->importFromPath(appOption.load_obj_path.value());
     }
