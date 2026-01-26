@@ -1,4 +1,4 @@
-project(LAB_test VERSION 1.0 DESCRIPTION "Test Project" LANGUAGES CXX)
+project(GraphicsLab_Test VERSION 1.0 DESCRIPTION "Test Project" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 

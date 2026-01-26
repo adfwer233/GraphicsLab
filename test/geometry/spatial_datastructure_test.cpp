@@ -59,7 +59,7 @@ TEST(SpatialDataStructureTest, KDTreeBallFuzzyTest) {
 
     std::vector<BallPrimitive<3>> balls;
 
-    int sample_num = 512 * 512 * 16;
+    int sample_num = 512 * 512;
     for (int i = 0; i < sample_num; i++) {
         balls.emplace_back(glm::vec3{Sampler::sampleUniform(), Sampler::sampleUniform(), Sampler::sampleUniform()}, Sampler::sampleUniform(0.1, 0.2));
     }

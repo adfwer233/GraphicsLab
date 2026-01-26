@@ -41,22 +41,23 @@ struct ThreadPool {
   private:
     std::vector<std::jthread> workers;
     std::queue<std::function<void()>> tasks;
+    bool stopping = false;
 
     std::mutex queueMutex;
     std::condition_variable task_available_condition, all_stopped_condition;
 
-    void worker_loop(const std::stop_token &stoken) {
+    void worker_loop(std::stop_token stoken) {
         while (true) {
             std::function<void()> task;
+
             {
                 std::unique_lock lock(queueMutex);
-                task_available_condition.wait(lock,
-                                              [this, stoken] { return !tasks.empty() or stoken.stop_requested(); });
+                task_available_condition.wait(lock, [this, &stoken] {
+                    return stopping || !tasks.empty();
+                });
 
-                if (stoken.stop_requested() or tasks.empty()) {
-                    all_stopped_condition.notify_one();
+                if (stopping && tasks.empty())
                     return;
-                }
 
                 task = std::move(tasks.front());
                 tasks.pop();
@@ -68,17 +69,14 @@ struct ThreadPool {
 
     void stop() {
         {
-            std::unique_lock lock(queueMutex);
-            all_stopped_condition.wait(lock, [this] { return tasks.empty(); });
-
-            if (not workers.empty()) {
-                for (auto &worker : workers) {
-                    worker.request_stop();
-                }
-            }
+            std::lock_guard lock(queueMutex);
+            stopping = true;
         }
 
         task_available_condition.notify_all();
+
+        // jthread destructor will now safely join
     }
+
 };
 } // namespace Parallel

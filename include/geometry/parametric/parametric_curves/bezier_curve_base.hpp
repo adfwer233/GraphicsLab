@@ -22,6 +22,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     BezierCurveBase(const BezierCurveBase<dim> &other) noexcept {
         control_points_ = other.control_points_;
+        derivative_points_ = other.derivative_points_;
         derivative_bound = other.derivative_bound;
         weights_ = other.weights_;
         this->mesh = nullptr;
@@ -34,6 +35,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     BezierCurveBase(BezierCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
+        derivative_points_ = std::move(other.derivative_points_);
         derivative_bound = other.derivative_bound;
         weights_ = std::move(other.weights_);
         this->mesh = std::move(other.mesh);

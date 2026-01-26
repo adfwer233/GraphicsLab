@@ -154,7 +154,7 @@ add_custom_target(BUILD_ALL)
 add_dependencies(BUILD_ALL GraphicsLab_VKL GraphicsLab_Geometry GraphicsLab_main)
 
 if (GRAPHICS_LAB_ENABLE_TEST)
-    add_dependencies(BUILD_ALL LAB_test)
+    add_dependencies(BUILD_ALL GraphicsLab_Test)
 endif ()
 
 add_library(GraphicsLabLib INTERFACE)

@@ -265,31 +265,6 @@ struct Boolean {
             face_intersection_graph.add_directed_edge(u, v, {coedge});
         }
 
-        auto simple_circuits = face_intersection_graph.find_all_simple_circuits();
-
-        decltype(simple_circuits) circuits;
-
-        // (edge) -> index in simple_circuits
-        std::map<std::pair<int, int>, size_t> index_map;
-        std::set<size_t> visited_index;
-        for (int i = 0; i < simple_circuits.size(); ++i) {
-            const auto &circuit = simple_circuits[i];
-            size_t n = circuit.size();
-            for (const auto &edge : circuit) {
-                std::pair<int, int> e{edge.from, edge.to};
-                if (not index_map.contains(e) or simple_circuits[index_map[e]].size() < n) {
-                    index_map[e] = i;
-                }
-            }
-        }
-
-        for (auto [e, i] : index_map) {
-            visited_index.insert(i);
-        }
-        for (auto i : visited_index) {
-            circuits.push_back(simple_circuits[i]);
-        }
-
         using G = decltype(face_intersection_graph);
         auto planar_face_extraction = [face](G &graph) -> std::vector<std::vector<G::Edge>> {
             int n = graph.nodes.size();
