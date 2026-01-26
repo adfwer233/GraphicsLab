@@ -25,8 +25,8 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
     PointType normal(double t) const
         requires(dim == 2)
     {
-        auto derivative = derivative(t);
-        return {-derivative.y, derivative.x};
+        auto deriv = derivative(t);
+        return {-deriv.y, deriv.x};
     }
     StraightLineBase() = default;
 
