@@ -22,6 +22,14 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
         return PointType(0);
     }
 
+    virtual bool is_closed() const {
+        return false;
+    }
+
+    virtual std::pair<PointType, double> projection(PointType test_point, std::optional<double> param_guess) const {
+
+    }
+
     PointType normal(double t) const
         requires(dim == 2)
     {
