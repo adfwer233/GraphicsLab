@@ -3,8 +3,8 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-#include <vector>
 #include <numbers>
+#include <vector>
 
 namespace GraphicsLab::Numeric {
 
@@ -25,7 +25,7 @@ inline bool nearly_zero(double x, double eps = 1e-12) {
 struct CubicPolynomialSolver {
 
     // Solve a3 x^3 + a2 x^2 + a1 x + a0 = 0
-    static std::vector<double> solve(const RealPolynomial& p) {
+    static std::vector<double> solve(const RealPolynomial &p) {
         auto c = p.get_coefficients();
         if (c.size() < 4)
             return {};
@@ -52,13 +52,11 @@ struct CubicPolynomialSolver {
             double u = detail::cbrt_real(-q_ / 2.0 + std::sqrt(D));
             double v = detail::cbrt_real(-q_ / 2.0 - std::sqrt(D));
             roots.push_back(u + v - A / 3.0);
-        }
-        else if (detail::nearly_zero(D)) {
+        } else if (detail::nearly_zero(D)) {
             double u = detail::cbrt_real(-q_ / 2.0);
             roots.push_back(2.0 * u - A / 3.0);
             roots.push_back(-u - A / 3.0);
-        }
-        else {
+        } else {
             double r = std::sqrt(-p_ * p_ * p_ / 27.0);
             double phi = std::acos(-q_ / (2.0 * r));
             double t = 2.0 * std::sqrt(-p_ / 3.0);
@@ -76,7 +74,7 @@ struct CubicPolynomialSolver {
 struct QuarticPolynomialSolver {
 
     // Solve a4 x^4 + a3 x^3 + a2 x^2 + a1 x + a0 = 0
-    static std::vector<double> solve(const RealPolynomial& p) {
+    static std::vector<double> solve(const RealPolynomial &p) {
         auto c = p.get_coefficients();
         if (c.size() < 5)
             return {};
@@ -96,18 +94,10 @@ struct QuarticPolynomialSolver {
         // Depressed quartic: y^4 + p y^2 + q y + r = 0
         double p_ = B - 3.0 * A * A / 8.0;
         double q_ = A * A * A / 8.0 - A * B / 2.0 + C;
-        double r_ = -3.0 * A * A * A * A / 256.0
-                    + A * A * B / 16.0
-                    - A * C / 4.0
-                    + D;
+        double r_ = -3.0 * A * A * A * A / 256.0 + A * A * B / 16.0 - A * C / 4.0 + D;
 
         // Resolvent cubic
-        RealPolynomial resolvent({
-            -(q_ * q_) / 8.0,
-            p_ * p_ / 4.0 - r_,
-            p_,
-            1.0
-        });
+        RealPolynomial resolvent({-(q_ * q_) / 8.0, p_ * p_ / 4.0 - r_, p_, 1.0});
 
         auto z_roots = CubicPolynomialSolver::solve(resolvent);
 
@@ -135,7 +125,7 @@ struct QuarticPolynomialSolver {
             solve_quadratic(a, b, cc);
             auto tmp_roots = roots;
             roots.clear();
-            for (auto r: tmp_roots) {
+            for (auto r : tmp_roots) {
                 if (detail::nearly_zero(r)) {
                     roots.push_back(0);
                 } else if (r > 0) {
@@ -150,11 +140,11 @@ struct QuarticPolynomialSolver {
 
             double v = q_ / (2 * u);
 
-            solve_quadratic(1.0,  u, p_ / 2.0 + z - v);
+            solve_quadratic(1.0, u, p_ / 2.0 + z - v);
             solve_quadratic(1.0, -u, p_ / 2.0 + z + v);
         }
         // Back substitution
-        for (double& x : roots)
+        for (double &x : roots)
             x -= A / 4.0;
 
         return roots;

@@ -50,7 +50,7 @@ template <size_t dim> struct Ellipse final : ParamCurveBase<dim> {
         double B = 2 * (a * x - (b * b - a * a));
         double C = 0;
         double D = 2 * (a * x + (b * b - a * a));
-        double E = - b * y;
+        double E = -b * y;
 
         RealPolynomial poly{E, D, C, B, A};
         auto roots = Numeric::QuarticPolynomialSolver::solve(poly);
@@ -58,18 +58,18 @@ template <size_t dim> struct Ellipse final : ParamCurveBase<dim> {
         double best_dist2 = std::numeric_limits<double>::infinity();
         double best_theta = 0.0;
 
-        auto eval_theta = [&](double theta)
-        {
+        auto eval_theta = [&](double theta) {
             // normalize to [0, 2π)
             theta = std::fmod(theta, 2.0 * std::numbers::pi);
-            if (theta < 0.0) theta += 2.0 * std::numbers::pi;
+            if (theta < 0.0)
+                theta += 2.0 * std::numbers::pi;
 
             double cx = a * std::cos(theta);
             double cy = b * std::sin(theta);
 
             double dx = cx - x;
             double dy = cy - y;
-            double d2 = dx*dx + dy*dy;
+            double d2 = dx * dx + dy * dy;
 
             if (d2 < best_dist2) {
                 best_dist2 = d2;
@@ -78,7 +78,7 @@ template <size_t dim> struct Ellipse final : ParamCurveBase<dim> {
         };
 
         // evaluate quartic roots
-        for (const auto& r : roots) {
+        for (const auto &r : roots) {
             double theta = 2.0 * std::atan(r);
             eval_theta(theta);
         }
@@ -89,10 +89,7 @@ template <size_t dim> struct Ellipse final : ParamCurveBase<dim> {
         eval_theta(std::numbers::pi);
         eval_theta(3.0 * std::numbers::pi / 2);
 
-        PointType proj =
-            center +
-            (a * std::cos(best_theta)) * xaxis +
-            (b * std::sin(best_theta)) * yaxis;
+        PointType proj = center + (a * std::cos(best_theta)) * xaxis + (b * std::sin(best_theta)) * yaxis;
 
         return {proj, best_theta / (2 * std::numbers::pi)};
     }

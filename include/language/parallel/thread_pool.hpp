@@ -52,9 +52,7 @@ struct ThreadPool {
 
             {
                 std::unique_lock lock(queueMutex);
-                task_available_condition.wait(lock, [this, &stoken] {
-                    return stopping || !tasks.empty();
-                });
+                task_available_condition.wait(lock, [this, &stoken] { return stopping || !tasks.empty(); });
 
                 if (stopping && tasks.empty())
                     return;
@@ -77,6 +75,5 @@ struct ThreadPool {
 
         // jthread destructor will now safely join
     }
-
 };
 } // namespace Parallel

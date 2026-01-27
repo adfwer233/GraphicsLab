@@ -2,12 +2,8 @@
 
 namespace vkl {
 
-struct PBRUniformBufferObject {
+struct PBRUniformBufferObject {};
 
-};
+struct PBRComputeModel {};
 
-struct PBRComputeModel {
-
-};
-
-}
+} // namespace vkl

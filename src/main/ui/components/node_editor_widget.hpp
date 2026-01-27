@@ -7,7 +7,9 @@
 
 class NodeEditorWidget : public UIComponent {
   public:
-    NodeEditorWidget(SceneTree::VklSceneTree &sceneTree, Controller &controller, GraphicsLab::GraphicsLabInternalContext &appContext) : UIComponent(sceneTree), appContext_(appContext) {
+    NodeEditorWidget(SceneTree::VklSceneTree &sceneTree, Controller &controller,
+                     GraphicsLab::GraphicsLabInternalContext &appContext)
+        : UIComponent(sceneTree), appContext_(appContext) {
         namespace ed = ax::NodeEditor;
         ed::Config config;
         config.SettingsFile = "node_editor_config.json";
@@ -34,7 +36,7 @@ class NodeEditorWidget : public UIComponent {
         ed::EndPin();
         ed::EndNode();
 
-        for (auto& pass: appContext_.renderGraph->get_all_passes_generator()) {
+        for (auto &pass : appContext_.renderGraph->get_all_passes_generator()) {
             ed::BeginNode(uniqueId++);
 
             // Set a custom color for the node header
@@ -45,12 +47,14 @@ class NodeEditorWidget : public UIComponent {
 
             // Create a horizontal layout for pins
             ImGui::BeginGroup();
-            for (auto field: pass->render_pass_reflect()) {
-                if (field.get_visibility() == GraphicsLab::RenderGraph::RenderPassReflection::Field::Visibility::Input) {
+            for (auto field : pass->render_pass_reflect()) {
+                if (field.get_visibility() ==
+                    GraphicsLab::RenderGraph::RenderPassReflection::Field::Visibility::Input) {
                     ed::BeginPin(uniqueId++, ed::PinKind::Input);
                     ImGui::Text("%s", field.get_name().c_str());
                     ed::EndPin();
-                } else if (field.get_visibility() == GraphicsLab::RenderGraph::RenderPassReflection::Field::Visibility::Output) {
+                } else if (field.get_visibility() ==
+                           GraphicsLab::RenderGraph::RenderPassReflection::Field::Visibility::Output) {
                     ed::BeginPin(uniqueId++, ed::PinKind::Output);
                     ImGui::Text("%s", field.get_name().c_str());
                     ed::EndPin();
@@ -72,7 +76,7 @@ class NodeEditorWidget : public UIComponent {
 
   private:
     GraphicsLab::GraphicsLabInternalContext &appContext_;
-    ax::NodeEditor::EditorContext* m_Context = nullptr;
+    ax::NodeEditor::EditorContext *m_Context = nullptr;
 };
 
 META_REGISTER_TYPE(MainComponentRegisterTag, NodeEditorWidget)
