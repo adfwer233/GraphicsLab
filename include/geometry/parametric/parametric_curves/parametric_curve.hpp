@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cpptrace/cpptrace.hpp"
+#include "spdlog/spdlog.h"
 
 #include <geometry/box/box.hpp>
 #include <geometry/mesh/mesh.hpp>

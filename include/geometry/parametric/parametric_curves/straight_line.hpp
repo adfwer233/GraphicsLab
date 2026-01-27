@@ -6,7 +6,7 @@
 namespace GraphicsLab::Geometry {
 
 template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
-    using PointType = glm::vec<dim, double>;
+    using PointType = std::conditional_t<dim == 2, glm::dvec2, glm::dvec3>;
 
     PointType start_point, end_point;
 
@@ -27,7 +27,11 @@ template <size_t dim> struct StraightLineBase : ParamCurveBase<dim> {
     }
 
     virtual std::pair<PointType, double> projection(PointType test_point, std::optional<double> param_guess) const {
-
+        auto start_to_test = test_point - start_point;
+        auto start_to_end = end_point - start_point;
+        double param = glm::dot(start_to_test, start_to_end) / glm::length(start_to_end);
+        param = glm::clamp(param / glm::length(start_to_end), 0.0, 1.0);
+        return {evaluate(param), param};
     }
 
     PointType normal(double t) const
