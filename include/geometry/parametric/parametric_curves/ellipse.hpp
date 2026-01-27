@@ -5,11 +5,14 @@
 
 namespace GraphicsLab::Geometry {
 
-template <size_t dim> struct Ellipse : ParamCurveBase<dim> {
+template <size_t dim> struct Ellipse final : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
 
     explicit Ellipse(PointType center, PointType major_radius, PointType minor_radius)
         : center(center), major_radius(major_radius), minor_radius(minor_radius) {
+        if (glm::length(major_radius) < glm::length(minor_radius)) {
+            spdlog::warn("[Ellipse constructor]: the length of major axis is smaller than the minor axis");
+        }
     }
 
     [[nodiscard]] PointType evaluate(double t) const override {
@@ -30,6 +33,10 @@ template <size_t dim> struct Ellipse : ParamCurveBase<dim> {
     [[nodiscard]] PointType normal(double t) const {
         return glm::normalize(center - evaluate(t));
     }
+
+    // std::pair<PointType, double> projection(PointType test_point, std::optional<double> param_guess) const override {
+    //
+    // }
 
     PointType center;
     PointType major_radius, minor_radius;
