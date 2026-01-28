@@ -7,11 +7,11 @@
 
 namespace GraphicsLab::Numeric {
 
-template<typename ValueType>
-struct BezierPolynomial {
+template <typename ValueType> struct BezierPolynomial {
     using ParamType = double;
 
-    explicit BezierPolynomial(const std::vector<ValueType>& coefficients): coefficients_(coefficients) {}
+    explicit BezierPolynomial(const std::vector<ValueType> &coefficients) : coefficients_(coefficients) {
+    }
 
     ValueType evaluate(ParamType param) {
         double h = 1.0;
@@ -50,7 +50,7 @@ struct BezierPolynomial {
         return BezierPolynomial{coefficients};
     }
 
-    BezierPolynomial operator+(const BezierPolynomial& rhs) const {
+    BezierPolynomial operator+(const BezierPolynomial &rhs) const {
         if (coefficients_.size() != rhs.coefficients_.size()) {
             throw cpptrace::runtime_error("[BezierPolynomial '+'] different degrees");
         }
@@ -61,7 +61,7 @@ struct BezierPolynomial {
         return BezierPolynomial{result};
     }
 
-    BezierPolynomial operator-(const BezierPolynomial& rhs) const {
+    BezierPolynomial operator-(const BezierPolynomial &rhs) const {
         if (coefficients_.size() != rhs.coefficients_.size()) {
             throw cpptrace::runtime_error("[BezierPolynomial '-'] different degrees");
         }
@@ -72,8 +72,8 @@ struct BezierPolynomial {
         return BezierPolynomial{result};
     }
 
-private:
+  private:
     std::vector<ValueType> coefficients_;
 };
 
-}
+} // namespace GraphicsLab::Numeric

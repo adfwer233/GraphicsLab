@@ -308,7 +308,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
   private:
-
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
      * @param param
@@ -367,9 +366,10 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     /**
      * @brief winding number respect to a line segment
      */
-    [[nodiscard]] std::pair<double, bool> winding_number_line_segment(PointType test_point, PointType start_pos, PointType end_pos,
-                                                        double winding_number_tolerance = 1e-6,
-                                                        double winding_number_epsilon = 1e-8) const {
+    [[nodiscard]] std::pair<double, bool> winding_number_line_segment(PointType test_point, PointType start_pos,
+                                                                      PointType end_pos,
+                                                                      double winding_number_tolerance = 1e-6,
+                                                                      double winding_number_epsilon = 1e-8) const {
         auto d1 = glm::length(start_pos - test_point);
         auto d2 = glm::length(end_pos - test_point);
 
@@ -387,9 +387,10 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
     [[nodiscard]] std::tuple<double, double, bool> is_contained(const PointType test_point, const PointType &start,
-                                                  const PointType &end, double param_start, double param_end,
-                                                  double winding_number_tolerance = 1e-6,
-                                                  double winding_number_epsilon = 1e-8) const {
+                                                                const PointType &end, double param_start,
+                                                                double param_end,
+                                                                double winding_number_tolerance = 1e-6,
+                                                                double winding_number_epsilon = 1e-8) const {
         auto d1 = glm::length(start - test_point);
         auto d2 = glm::length(end - test_point);
 
