@@ -63,7 +63,7 @@ struct BezierPolynomial {
 
     BezierPolynomial operator-(const BezierPolynomial& rhs) const {
         if (coefficients_.size() != rhs.coefficients_.size()) {
-            throw cpptrace::runtime_error("[BezierPolynomial '+'] different degrees");
+            throw cpptrace::runtime_error("[BezierPolynomial '-'] different degrees");
         }
         std::vector<ValueType> result(coefficients_.size());
         for (int i = 0; i < coefficients_.size(); ++i) {

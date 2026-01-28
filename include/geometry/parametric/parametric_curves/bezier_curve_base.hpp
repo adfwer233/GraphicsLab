@@ -239,7 +239,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
     // Bounding box
-    std::pair<PointType, PointType> boundingBox() const {
+    [[nodiscard]] std::pair<PointType, PointType> boundingBox() const {
         PointType minPt = control_points_[0];
         PointType maxPt = control_points_[0];
         for (const auto &pt : control_points_) {
@@ -265,20 +265,11 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return new_curve;
     }
 
-    // [[nodiscard]] std::vector<glm::dvec2> sample(const int resolution) const {
-    //     std::vector<glm::dvec2> pts;
-    //     for (int i = 0; i <= resolution; ++i) {
-    //         const double t = static_cast<double>(i) / resolution;
-    //         pts.push_back(evaluate_linear(t));
-    //     }
-    //     return pts;
-    // }
-
-    PointType start_position() const {
+    [[nodiscard]] PointType start_position() const {
         return control_points_.front();
     }
 
-    PointType end_position() const {
+    [[nodiscard]] PointType end_position() const {
         return control_points_.back();
     }
 
@@ -317,15 +308,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     }
 
   private:
-    /**
-     * @brief compute the control points and weights vectors of the derivative curve.
-     * @param ctrl_pts
-     * @param weights
-     * @return {new control points, new weights}
-     */
-    std::pair<PointVector, WeightVector> compute_derivative_control_points_and_weights(const std::vector<PointType> &ctrl_pts, const std::vector<PointType> &weights) {
-
-    }
 
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
@@ -385,7 +367,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     /**
      * @brief winding number respect to a line segment
      */
-    std::pair<double, bool> winding_number_line_segment(PointType test_point, PointType start_pos, PointType end_pos,
+    [[nodiscard]] std::pair<double, bool> winding_number_line_segment(PointType test_point, PointType start_pos, PointType end_pos,
                                                         double winding_number_tolerance = 1e-6,
                                                         double winding_number_epsilon = 1e-8) const {
         auto d1 = glm::length(start_pos - test_point);
@@ -404,7 +386,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return {outer > 0 ? acos_value : -acos_value, false};
     }
 
-    std::tuple<double, double, bool> is_contained(const PointType test_point, const PointType &start,
+    [[nodiscard]] std::tuple<double, double, bool> is_contained(const PointType test_point, const PointType &start,
                                                   const PointType &end, double param_start, double param_end,
                                                   double winding_number_tolerance = 1e-6,
                                                   double winding_number_epsilon = 1e-8) const {
