@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../cmake-build-relwithdebinfo/_deps/cpptrace-src/include/cpptrace/cpptrace.hpp"
+#include "cpptrace/exceptions.hpp"
 #include "real_polynomial.hpp"
 #include "spdlog/spdlog.h"
 
