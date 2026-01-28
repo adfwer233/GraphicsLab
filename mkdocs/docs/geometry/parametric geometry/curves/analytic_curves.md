@@ -43,7 +43,7 @@ $$
 Let $t = \tan \theta / 2$, we have
 
 $$
-\sin \theta = \frac{2t}{1 + t^2} \quad \cos \theta = \frac{1 - t^2}{1 + t^2},
+\sin \theta = \frac{2t}{1 + t^2} \quad \cos  \theta = \frac{1 - t^2}{1 + t^2},
 $$
 
 substitute to the previous formula, $f'(\theta) = 0$ is equivalent to 

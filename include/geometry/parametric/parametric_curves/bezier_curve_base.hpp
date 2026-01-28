@@ -2,7 +2,9 @@
 
 #include "glm/glm.hpp"
 #include "language/reflection/static_reflector.hpp"
+#include "numeric/polynomial/bezier_polynomial.hpp"
 #include "parametric_curve.hpp"
+
 #include <stack>
 #include <vector>
 
@@ -13,16 +15,19 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     using MeshType = std::conditional_t<dim == 3, CurveMesh3D, CurveMesh2D>;
     using PointType = glm::vec<dim, double>;
-    std::vector<PointType> control_points_;
-    std::vector<PointType> derivative_points_;
-    std::vector<double> weights_;
+    using WeightType = double;
+    using PointVector = std::vector<PointType>;
+    using WeightVector = std::vector<double>;
+
+    PointVector control_points_{};
+    WeightVector weights_{};
+
     double derivative_bound = -1.0;
 
     REFLECT(Property{"control_points", &BezierCurveBase::control_points_})
 
     BezierCurveBase(const BezierCurveBase<dim> &other) noexcept {
         control_points_ = other.control_points_;
-        derivative_points_ = other.derivative_points_;
         derivative_bound = other.derivative_bound;
         weights_ = other.weights_;
         this->mesh = nullptr;
@@ -35,7 +40,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     BezierCurveBase(BezierCurveBase<dim> &&other) noexcept {
         control_points_ = std::move(other.control_points_);
-        derivative_points_ = std::move(other.derivative_points_);
         derivative_bound = other.derivative_bound;
         weights_ = std::move(other.weights_);
         this->mesh = std::move(other.mesh);
@@ -48,9 +52,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     explicit BezierCurveBase(decltype(control_points_) &&control_points) : control_points_(control_points) {
         int n = control_points_.size() - 1;
-        for (int i = 1; i < control_points_.size(); i++) {
-            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
-        }
         weights_.resize(control_points_.size());
         std::ranges::fill(weights_, 1.0);
         update_bounds();
@@ -58,9 +59,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
 
     explicit BezierCurveBase(const std::vector<PointType> &control_points) : control_points_(control_points) {
         int n = control_points_.size() - 1;
-        for (int i = 1; i < control_points_.size(); i++) {
-            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
-        }
         weights_.resize(control_points_.size());
         std::ranges::fill(weights_, 1.0);
         update_bounds();
@@ -69,9 +67,6 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
     explicit BezierCurveBase(const std::vector<PointType> &control_points, const std::vector<double> &weights)
         : control_points_(control_points), weights_(weights) {
         int n = control_points_.size() - 1;
-        for (int i = 1; i < control_points_.size(); i++) {
-            derivative_points_.push_back((control_points_[i] - control_points_[i - 1]) * static_cast<double>(n));
-        }
         update_bounds();
     }
 
@@ -80,23 +75,54 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
      * @param param
      * @return
      */
-    PointType evaluate(double param) const override {
-        return evaluate_linear(param, control_points_);
+    [[nodiscard]] PointType evaluate(double param) const override {
+        return evaluate_linear(param, control_points_, weights_);
     }
 
-    PointType derivative(double param) const override {
-        return evaluate_linear(param, derivative_points_);
-    }
-
-    PointType second_derivative(double param) const override {
-        std::vector<PointType> second_derivative_points;
-        int n = derivative_points_.size() - 1;
-        for (int i = 1; i < derivative_points_.size(); i++) {
-            second_derivative_points.push_back((derivative_points_[i] - derivative_points_[i - 1]) *
-                                               static_cast<double>(n));
+    [[nodiscard]] PointType derivative(double param) const override {
+        PointVector ctrl_pts_with_weights = control_points_;
+        for (int i = 0; i < control_points_.size(); ++i) {
+            ctrl_pts_with_weights[i] *= weights_[i];
         }
 
-        return evaluate_linear(param, second_derivative_points);
+        Numeric::BezierPolynomial<PointType> f(ctrl_pts_with_weights);
+        Numeric::BezierPolynomial<WeightType> g(weights_);
+
+        auto f_prime = f.derivative();
+        auto g_prime = g.derivative();
+
+        PointType f_prime_t = f_prime.evaluate(param);
+        PointType c_t = evaluate(param);
+        WeightType g_prime_t = g_prime.evaluate(param);
+        WeightType g_t = g.evaluate(param);
+
+        return (f_prime_t - g_prime_t * c_t) / g_t;
+    }
+
+    [[nodiscard]] PointType second_derivative(double param) const override {
+        PointVector ctrl_pts_with_weights = control_points_;
+        for (int i = 0; i < control_points_.size(); ++i) {
+            ctrl_pts_with_weights[i] *= weights_[i];
+        }
+
+        Numeric::BezierPolynomial<PointType> f(ctrl_pts_with_weights);
+        Numeric::BezierPolynomial<WeightType> g(weights_);
+
+        auto f_prime_prime = f.derivative().derivative();
+        auto g_prime = g.derivative();
+        auto g_prime_prime = g_prime.derivative();
+
+        auto c_t = evaluate(param);
+        auto c_prime_t = derivative(param);
+
+        PointType f_prime_prime_t = f_prime_prime.evaluate(param);
+        WeightType g_prime_t = g_prime.evaluate(param);
+        WeightType g_prime_prime_t = g_prime_prime.evaluate(param);
+
+        PointType numerator = f_prime_prime_t - g_prime_prime_t * c_t - 2 * g_prime_t * c_prime_t;
+        WeightType g_t = g.evaluate(param);
+
+        return numerator / g_t;
     }
 
     double min_x = 100, min_y = 100, max_x = -100, max_y = -100;
@@ -290,18 +316,23 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         return {winding_number, flag};
     }
 
-    BezierCurveBase<dim> derivative_curve() const {
-        BezierCurveBase<dim> c(derivative_points_);
-        return c;
+  private:
+    /**
+     * @brief compute the control points and weights vectors of the derivative curve.
+     * @param ctrl_pts
+     * @param weights
+     * @return {new control points, new weights}
+     */
+    std::pair<PointVector, WeightVector> compute_derivative_control_points_and_weights(const std::vector<PointType> &ctrl_pts, const std::vector<PointType> &weights) {
+
     }
 
-  private:
     /**
      * evaluate the Bézier curve with linear method [Woźny and Chudy 2020]
      * @param param
      * @return
      */
-    PointType evaluate_linear(double param, const std::vector<PointType> &ctrl_pts) const {
+    PointType evaluate_linear(double param, const PointVector &ctrl_pts, const WeightVector &weights) const {
         double h = 1.0;
         PointType result = ctrl_pts[0];
         double t = param;
@@ -311,16 +342,16 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         if (param <= 0.5) {
             u = t / u;
             for (uint32_t k = 1; k <= n; k++) {
-                h = h * u * (n1 - k) * weights_[k];
-                h = h / (k * weights_[k - 1] + h);
+                h = h * u * (n1 - k) * weights[k];
+                h = h / (k * weights[k - 1] + h);
                 double h1 = 1 - h;
                 result = result * h1 + ctrl_pts[k] * h;
             }
         } else {
             u = u / t;
             for (uint32_t k = 1; k <= n; k++) {
-                h = h * (n1 - k) * weights_[k];
-                h = h / (k * u * weights_[k - 1] + h);
+                h = h * (n1 - k) * weights[k];
+                h = h / (k * u * weights[k - 1] + h);
                 double h1 = 1 - h;
                 result = result * h1 + ctrl_pts[k] * h;
             }
