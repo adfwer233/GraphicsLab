@@ -1,12 +1,13 @@
-project(GraphicsLab_DelaunayDemo VERSION 1.0 DESCRIPTION "Delaunay Triangulation Demo" LANGUAGES CXX)
+project(GraphicsLab_SurfaceIntersectionDemo VERSION 1.0 DESCRIPTION "BRep Test Visualization" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SRC_FILE main.cpp project.cpp)
+set(SRC_FILE main.cpp)
 
 add_executable(${PROJECT_NAME} ${SRC_FILE})
 
 add_definitions(-DDATA_DIR="${GRAPHICS_LAB_SOURCE_DIR}/data")
+add_definitions(-DSHADER_DIR="${GRAPHICS_LAB_SOURCE_DIR}/src/vkl/shader")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GRAPHICS_LAB_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VK_SDK_INCLUDE})
@@ -31,11 +32,3 @@ add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${GRAPHICS_LAB_SOURCE_DIR}/shader" $<TARGET_FILE_DIR:${PROJECT_NAME}>/shader
 )
-
-add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shader" $<TARGET_FILE_DIR:${PROJECT_NAME}>/custom_shader
-)
-
-add_subdirectory(shader)
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_shaders)

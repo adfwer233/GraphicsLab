@@ -1,11 +1,13 @@
-#include "application.hpp"
+#include "graphics_lab/application.hpp"
 #include "iostream"
 
 #include "argparse/argparse.hpp"
 
+#include "visualization.hpp"
+
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser args;
-    args.add_argument("-i", "--input").default_value(std::string("path"));
+    GraphicsLabApplication::set_args(args);
 
     try {
         args.parse_args(argc, argv);
@@ -15,7 +17,13 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
-    IntersectorDemoApplication app{};
+    GraphicsLabApplication app(args);
+
+    app.projectFactory = []() { return new VisualizationProject(); };
+
+    if (args.is_used("--input")) {
+        app.appOption.load_obj_path = args.get<std::string>("--input");
+    }
 
     try {
         app.run();
