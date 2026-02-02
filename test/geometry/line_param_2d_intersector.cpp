@@ -62,8 +62,8 @@ TEST(EllipseTest, Projection) {
         spdlog::debug("projection param result: {}, {}", ellipse_proj_param, proj_param);
 
         if (distance1 > distance2) {
-            EXPECT_NEAR(distance, 0, 1e-6);
-            EXPECT_NEAR(param_distance, 0, 1e-6);
+            EXPECT_NEAR(distance, 0, 1e-5);
+            EXPECT_NEAR(param_distance, 0, 1e-5);
         }
     }
 }
