@@ -26,8 +26,8 @@ struct LineSphereIntersection {
                                         bool check_line_range = true) {
         BRepPoint3 p = line->start_point;
         BRepPoint3 d = line->end_point - line->start_point;
-        BRepPoint3 o = sphere->center;
-        double r = sphere->radius;
+        BRepPoint3 o = sphere->center();
+        double r = sphere->radius();
 
         double a = glm::dot(d, d);
         double b = 2 * glm::dot(d, p) - 2 * glm::dot(o, d);

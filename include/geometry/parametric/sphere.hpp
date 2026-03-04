@@ -8,20 +8,17 @@
 #include "configuration.hpp"
 
 namespace GraphicsLab::Geometry {
-struct Sphere : public ParamSurface {
-    PointType center{};
-    double radius{};
-
+struct Sphere final : public ParamSurface {
     explicit Sphere() = delete;
-    explicit Sphere(const PointType &center, const double radius) : center(center), radius(radius) {
+    explicit Sphere(const PointType &center, const double radius) : center_(center), radius_(radius) {
         u_periodic = true;
         v_periodic = false;
     }
     Sphere(Sphere &&rhs) noexcept {
         u_periodic = true;
         v_periodic = false;
-        center = rhs.center;
-        radius = rhs.radius;
+        center_ = rhs.center_;
+        radius_ = rhs.radius_;
         mesh = std::move(rhs.mesh);
     }
 
@@ -29,8 +26,8 @@ struct Sphere : public ParamSurface {
         const double theta = 2 * std::numbers::pi * param.x; // Azimuthal angle (0 to 2π)
         const double phi = std::numbers::pi * param.y;       // Polar angle (0 to π)
 
-        return center +
-               radius * PointType(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
+        return center_ +
+               radius_ * PointType(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
     }
 
     [[nodiscard]] std::pair<PointType, PointType> derivative(const ParamType param) const override {
@@ -54,17 +51,17 @@ struct Sphere : public ParamSurface {
 
     PointType normal(const ParamType param) const override {
         auto pos = evaluate(param);
-        return glm::normalize(pos - center);
+        return glm::normalize(pos - center_);
     }
 
     bool test_point(const PointType point) const override {
-        return std::abs(glm::distance(point, center) - radius) < ParametricConfiguration::system_tolerance;
+        return std::abs(glm::distance(point, center_) - radius_) < ParametricConfiguration::system_tolerance;
     }
 
     std::pair<PointType, ParamType> project(const PointType point) const override {
-        auto projection = glm::normalize(point - center) * radius + center;
+        auto projection = glm::normalize(point - center_) * radius_ + center_;
 
-        auto p = glm::normalize(point - center);
+        auto p = glm::normalize(point - center_);
 
         double phi = std::acos(p.z);
         double theta = 0;
@@ -84,5 +81,12 @@ struct Sphere : public ParamSurface {
 
         return {projection, {theta / (2 * std::numbers::pi), phi / std::numbers::pi}};
     }
+
+    [[nodiscard]] PointType center() const { return center_; }
+    [[nodiscard]] double radius() const { return radius_; }
+
+private:
+    PointType center_{};
+    double radius_{};
 };
 } // namespace GraphicsLab::Geometry

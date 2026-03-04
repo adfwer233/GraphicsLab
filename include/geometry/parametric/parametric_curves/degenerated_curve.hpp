@@ -10,7 +10,6 @@ namespace GraphicsLab::Geometry {
  */
 template <size_t dim> struct DegeneratedCurve : ParamCurveBase<dim> {
     using PointType = glm::vec<dim, double>;
-    PointType point_;
 
     PointType evaluate(double t) const override {
         return point_;
@@ -38,6 +37,11 @@ template <size_t dim> struct DegeneratedCurve : ParamCurveBase<dim> {
     std::pair<PointType, double> projection(PointType test_point, std::optional<double> param_guess) const override {
         return {point_, 0};
     }
+
+    [[nodiscard]] PointType point() const { return point_; }
+
+private:
+    PointType point_;
 };
 
 using DegeneratedCurve3D = DegeneratedCurve<3>;

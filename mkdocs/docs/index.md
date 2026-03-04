@@ -1,9 +1,11 @@
 # GraphicsLab Documentation
 
-GraphicsLab is my codebase for computer graphics and geometric modeling research. GraphicsLab has following modules:
+GraphicsLab is a C++20 playground for graphics rendering and geometric modeling.
 
+This documentation focuses on how the project is organized and where to find core systems:
 
-- **Rendering**: A tiny rendering engine `vkl` based on vulkan.
-- **Geometry Kernel**: A tiny geometry kernel for mesh, point cloud and boundary representation.
+- Rendering backend (`vkl`) based on Vulkan
+- Geometry kernel for curves, surfaces, and B-Rep
+- Numeric and language utilities used by geometry and rendering modules
 
-GraphicsLab can be used to create prototypes for graphics applications.
+Use the left navigation to start with setup, then explore modules by domain.

@@ -355,6 +355,16 @@ struct ExplicitEightIntersection : IntersectionTestBase {
     }
 };
 
+struct PlaneSphereIntersection1 : IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "PlaneSphereIntersection1";
+    }
+
+    void run_test() override {
+
+    }
+};
+
 } // namespace GraphicsLab::Geometry::BRep
 
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag, GraphicsLab::Geometry::BRep::PlaneIntersection1)
@@ -374,3 +384,5 @@ META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::FaceFaceIntersectionTest1)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::ExplicitEightIntersection)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::PlaneSphereIntersection1)

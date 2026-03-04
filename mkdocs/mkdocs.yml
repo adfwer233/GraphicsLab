@@ -2,6 +2,34 @@ site_name: GraphicsLab Documentation
 theme:
   name: material
 
+nav:
+  - Home: index.md
+  - GraphicsLab:
+      - Get Started: graphicslab/get_started.md
+  - Language:
+      - Overview: language/language.md
+      - Reflection: language/refelction.md
+      - Parallel: language/parallel.md
+  - Rendering:
+      - Scene: rendering/scene.md
+  - Numeric:
+      - Polynomial Solver: numeric/polynomial_solver.md
+  - Geometry:
+      - Introduction: geometry/introduction.md
+      - Parametric Geometry:
+          - Curves:
+              - Base Curves: geometry/parametric geometry/curves/base_curves.md
+              - Analytic Curves: geometry/parametric geometry/curves/analytic_curves.md
+              - Bezier Curves: geometry/parametric geometry/curves/bezier_curves.md
+          - Surfaces:
+              - Base Surface: geometry/parametric geometry/surfaces/base_surface.md
+              - Analytic Surfaces: geometry/parametric geometry/surfaces/analytic_surfaces.md
+              - Explicit Surfaces: geometry/parametric geometry/surfaces/explicit_surfaces.md
+      - Boundary Representation:
+          - Topology Definition: geometry/boundary representation/topology_definition.md
+          - Intersectors: geometry/boundary representation/intersector/intersectors.md
+          - Surface-Surface Intersection: geometry/boundary representation/intersector/surface_surface_intersection.md
+
 markdown_extensions:
   - admonition
   - pymdownx.arithmatex:
