@@ -361,7 +361,23 @@ struct PlaneSphereIntersection1 : IntersectionTestBase {
     }
 
     void run_test() override {
+        Face *plane = FaceConstructors::plane({-2, 0, -2}, {4, 0, 0}, {0, 0, 4});
+        Face *sphere = FaceConstructors::sphere({0, 0.2, 0}, 0.9);
 
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane->geometry()->param_geometry(),
+                                                                     sphere->geometry()->param_geometry());
+
+        faces["plane"] = plane;
+        faces["sphere"] = sphere;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.size() != 1) {
+            result = TestResult::Fail;
+            return;
+        }
+
+        result = TestResult::Success;
     }
 };
 

@@ -5,6 +5,9 @@
 struct ParamLinePipelineModifier {
     static void modifyPipeline(PipelineConfigInfo &configInfo) {
         configInfo.inputAssemblyInfo.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        // 2D param-curve overlay should not be rejected by depth from other 2D draws.
+        configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+        configInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     }
 };
 

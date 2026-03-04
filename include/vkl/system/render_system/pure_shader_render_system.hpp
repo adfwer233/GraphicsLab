@@ -6,6 +6,8 @@ struct PureShaderRenderSystemModifier {
     static constexpr const int poolSize = 20000;
     static void modifyPipeline(PipelineConfigInfo &configInfo) {
         configInfo.inputAssemblyInfo.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+        configInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     }
 };
 

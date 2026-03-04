@@ -10,7 +10,8 @@ layout(push_constant) uniform PushConstants {
 } pushConstants;
 
 vec4 transform(vec2 v) {
-    return vec4((v.x - 0.5 + pushConstants.offset_x) * 2 * pushConstants.zoom, (v.y - 0.5 + pushConstants.offset_x) * 2 * pushConstants.zoom, 0.0, 1.0);
+    return vec4((v.x - 0.5 + pushConstants.offset_x) * 2 * pushConstants.zoom,
+                (v.y - 0.5 + pushConstants.offset_y) * 2 * pushConstants.zoom, 0.0, 1.0);
 }
 
 void main() {

@@ -29,8 +29,13 @@ struct InternalScene2DRenderPass : public RenderPass {
             .type(RenderPassReflection::Field::Type::Texture2D)
             .sample_count(8)
             .format(VK_FORMAT_R8G8B8A8_SRGB)
-            .extent(2048, 2048)
+            .extent(width_, height_)
             .set_annotation("imgui_show", true);
+
+        // reflection.add_output("scene_render_depth_2d", "depth texture of built in 3d scene rendering")
+        //     .type(RenderPassReflection::Field::Type::TextureDepth)
+        //     .sample_count(8)
+        //     .extent(width_, height_);
 
         return reflection;
     }
@@ -82,13 +87,6 @@ struct InternalScene2DRenderPass : public RenderPass {
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto meshKey = tessellation2d_wireframe_render_system->descriptorSetLayout->descriptorSetLayoutKey;
 
-        if (uiState_.show_param_boundary) {
-            PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
-            VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
-            push_constant_data_list.data[0] = push_constant_data;
-            rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
-        }
-
         /**
          * Render point cloud in 2d
          */
@@ -121,7 +119,34 @@ struct InternalScene2DRenderPass : public RenderPass {
         }
 
         /**
-         * Render Curves in 2D
+         * Render Mesh in 2D
+         */
+        auto mesh2d_buffer = SceneTree::VklNodeMeshBuffer<Mesh2D>::instance();
+        for (auto [mesh2d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh2D>()) {
+            if (not mesh2d_nodes->visible)
+                continue;
+            auto node_mesh = mesh2d_buffer->getGeometryModel(device_, mesh2d_nodes);
+
+            if (node_mesh->mesh->uniformBuffers.contains(meshKey)) {
+                node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->writeToBuffer(&ubo2D);
+                node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->flush();
+            }
+
+            static_assert(std::same_as<SceneTree::VklMesh<Vertex2D, TriangleIndex, VklBox2D>,
+                                       std::decay_t<decltype(*node_mesh)>::render_type>);
+
+            FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
+                .frameIndex = static_cast<int>(frameIndex) % 2,
+                .frameTime = 0,
+                .commandBuffer = commandBuffer,
+                .model = *node_mesh->mesh,
+            };
+
+            tessellation2d_wireframe_render_system->renderObject(frameInfo);
+        }
+
+        /**
+         * Render Curves in 2D (draw last as overlay).
          */
         MetaProgramming::ForEachType(Geometry::ParametricCurve2DTypeList::append<CurveMesh2D>{}, [&]<typename T>() {
             auto mesh_buffer = SceneTree::VklNodeMeshBuffer<T>::instance();
@@ -150,31 +175,11 @@ struct InternalScene2DRenderPass : public RenderPass {
             }
         });
 
-        /**
-         * Render Mesh in 2D
-         */
-        auto mesh2d_buffer = SceneTree::VklNodeMeshBuffer<Mesh2D>::instance();
-        for (auto [mesh2d_nodes, trans] : sceneTree_.traverse_geometry_nodes_with_trans<Mesh2D>()) {
-            if (not mesh2d_nodes->visible)
-                continue;
-            auto node_mesh = mesh2d_buffer->getGeometryModel(device_, mesh2d_nodes);
-
-            if (node_mesh->mesh->uniformBuffers.contains(meshKey)) {
-                node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->writeToBuffer(&ubo2D);
-                node_mesh->mesh->uniformBuffers[meshKey][frameIndex]->flush();
-            }
-
-            static_assert(std::same_as<SceneTree::VklMesh<Vertex2D, TriangleIndex, VklBox2D>,
-                                       std::decay_t<decltype(*node_mesh)>::render_type>);
-
-            FrameInfo<typename std::decay_t<decltype(*node_mesh)>::render_type> frameInfo{
-                .frameIndex = static_cast<int>(frameIndex) % 2,
-                .frameTime = 0,
-                .commandBuffer = commandBuffer,
-                .model = *node_mesh->mesh,
-            };
-
-            tessellation2d_wireframe_render_system->renderObject(frameInfo);
+        if (uiState_.show_param_boundary) {
+            PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
+            VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
+            push_constant_data_list.data[0] = push_constant_data;
+            rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
         }
 
         end_render_pass(commandBuffer);
