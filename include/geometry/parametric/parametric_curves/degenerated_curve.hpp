@@ -38,9 +38,11 @@ template <size_t dim> struct DegeneratedCurve : ParamCurveBase<dim> {
         return {point_, 0};
     }
 
-    [[nodiscard]] PointType point() const { return point_; }
+    [[nodiscard]] PointType point() const {
+        return point_;
+    }
 
-private:
+  private:
     PointType point_;
 };
 

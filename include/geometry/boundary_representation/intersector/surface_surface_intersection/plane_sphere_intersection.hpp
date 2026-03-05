@@ -81,4 +81,4 @@ struct PlaneSphereIntersection {
     }
 };
 
-}
+} // namespace GraphicsLab::Geometry::BRep

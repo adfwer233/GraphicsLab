@@ -82,10 +82,14 @@ struct Sphere final : public ParamSurface {
         return {projection, {theta / (2 * std::numbers::pi), phi / std::numbers::pi}};
     }
 
-    [[nodiscard]] PointType center() const { return center_; }
-    [[nodiscard]] double radius() const { return radius_; }
+    [[nodiscard]] PointType center() const {
+        return center_;
+    }
+    [[nodiscard]] double radius() const {
+        return radius_;
+    }
 
-private:
+  private:
     PointType center_{};
     double radius_{};
 };
