@@ -29,6 +29,7 @@ nav:
           - Topology Definition: geometry/boundary representation/topology_definition.md
           - Intersectors: geometry/boundary representation/intersector/intersectors.md
           - Surface-Surface Intersection: geometry/boundary representation/intersector/surface_surface_intersection.md
+          - Plane-Torus Intersection: geometry/boundary representation/intersector/plane_torus_intersection.md
           - Boolean Operations: geometry/boundary representation/boolean_operations.md
 
 markdown_extensions:

@@ -7,6 +7,7 @@
 #include "geometry/spatial_datastructure/kd_tree.hpp"
 #include "plane_plane_intersection.hpp"
 #include "plane_sphere_intersection.hpp"
+#include "plane_torus_intersection.hpp"
 #include "ssi_results.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
@@ -39,11 +40,25 @@ struct GeneralSurfaceSurfaceIntersection {
             if (auto sphere2 = dynamic_cast<const Sphere *>(surf2)) {
                 return PlaneSphereIntersection::solve(plane1, sphere2);
             }
+            if (auto torus2 = dynamic_cast<const Torus *>(surf2)) {
+                return PlaneTorusIntersection::solve(plane1, torus2);
+            }
         }
 
         if (auto sphere1 = dynamic_cast<const Sphere *>(surf1)) {
             if (auto plane2 = dynamic_cast<const Plane *>(surf2)) {
                 auto result = PlaneSphereIntersection::solve(plane2, sphere1);
+                for (auto &r : result) {
+                    std::swap(r.pcurve1, r.pcurve2);
+                }
+                return result;
+            }
+            
+        }
+
+        if (auto torus1 = dynamic_cast<const Torus *>(surf1)) {
+            if (auto plane2 = dynamic_cast<const Plane *>(surf2)) {
+                auto result = PlaneTorusIntersection::solve(plane2, torus1);
                 for (auto &r : result) {
                     std::swap(r.pcurve1, r.pcurve2);
                 }

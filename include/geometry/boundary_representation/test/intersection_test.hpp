@@ -166,6 +166,32 @@ struct TorusPlaneIntersection2 : IntersectionTestBase {
     }
 };
 
+struct PlaneTorusIntersectionNew : IntersectionTestBase {
+    [[nodiscard]] std::string test_case_name() const override {
+        return "PlaneTorusIntersectionNew";
+    }
+
+    void run_test() override {
+        Face *plane = FaceConstructors::plane({-1, 0, -1}, {2, 0, 0}, {0, 0, 2});
+        Face *torus = FaceConstructors::torus({0, 0, 0}, 2, 0.5, {0, 1, 0}, {1, 0, 0});
+
+        auto inter_result = GeneralSurfaceSurfaceIntersection::solve(plane->geometry()->param_geometry(),
+                                                                     torus->geometry()->param_geometry());
+
+        faces["plane"] = plane;
+        faces["torus"] = torus;
+
+        save_ssi_results(inter_result);
+
+        if (inter_result.empty()) {
+            result = TestResult::Fail;
+            return;
+        }
+
+        result = TestResult::Success;
+    }
+};
+
 struct TorusSplineIntersection : IntersectionTestBase {
     [[nodiscard]] std::string test_case_name() const override {
         return "TorusSplineIntersection";
@@ -392,6 +418,8 @@ META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::TorusPlaneIntersection1)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::TorusPlaneIntersection2)
+META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
+                   GraphicsLab::Geometry::BRep::PlaneTorusIntersectionNew)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
                    GraphicsLab::Geometry::BRep::TorusSplineIntersection)
 META_REGISTER_TYPE(GraphicsLab::Geometry::BRep::BRepTestRegisterTag,
