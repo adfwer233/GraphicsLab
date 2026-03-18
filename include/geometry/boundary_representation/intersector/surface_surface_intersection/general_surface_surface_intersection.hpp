@@ -53,7 +53,6 @@ struct GeneralSurfaceSurfaceIntersection {
                 }
                 return result;
             }
-            
         }
 
         if (auto torus1 = dynamic_cast<const Torus *>(surf1)) {

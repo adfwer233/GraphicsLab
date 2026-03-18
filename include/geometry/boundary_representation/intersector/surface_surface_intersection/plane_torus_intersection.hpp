@@ -199,7 +199,8 @@ struct PlaneTorusIntersection {
                 continue;
 
             // fit 3D curve
-            int control_points_count = std::min(static_cast<size_t>(40), std::max(static_cast<size_t>(10), branch.points.size() / 2));
+            int control_points_count =
+                std::min(static_cast<size_t>(40), std::max(static_cast<size_t>(10), branch.points.size() / 2));
             auto &&curve = BSplineCurve3D::fit(branch.points, 5, control_points_count);
             curve.control_points_.front() = branch.points.front();
             curve.control_points_.back() = branch.points.back();
@@ -215,8 +216,8 @@ struct PlaneTorusIntersection {
 
             SSIResult res;
             res.inter_curve = curve_alloc;
-            res.pcurve1 = pcurve_p_alloc;   // plane pcurve
-            res.pcurve2 = pcurve_t_alloc;   // torus pcurve
+            res.pcurve1 = pcurve_p_alloc; // plane pcurve
+            res.pcurve2 = pcurve_t_alloc; // torus pcurve
             results.push_back(res);
         }
 
