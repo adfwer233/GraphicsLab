@@ -2,6 +2,13 @@
 
 GraphicsLab parallel helpers provide simple task execution primitives for CPU-side workloads.
 
+## Prerequisites
+
+Before applying parallel helpers:
+
+- Read [Language Utilities](language.md)
+- Ensure your build/test flow works from [Get Started](../graphicslab/get_started.md)
+
 ## Components
 
 - `ThreadPool`: fixed worker pool for queue-based tasks
@@ -24,3 +31,17 @@ GraphicsLab parallel helpers provide simple task execution primitives for CPU-si
 Parallel behavior is validated in:
 
 - `test/parallel/thread_pool_test.cpp`
+
+## Expected Output
+
+After this page, you should be able to:
+
+- Choose between direct `ThreadPool` usage and higher-level task orchestration
+- Apply basic CPU parallelism patterns safely in GraphicsLab
+- Locate tests to validate concurrency behavior during changes
+
+## Verify
+
+- You can find and read `thread_pool.hpp` and `task_runner.hpp`
+- You can run/locate `test/parallel/thread_pool_test.cpp`
+- You can identify at least one coarse-grained task split in your own workflow

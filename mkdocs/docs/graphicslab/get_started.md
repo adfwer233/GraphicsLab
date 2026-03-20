@@ -75,3 +75,19 @@ ctest --output-on-failure
 - `test/`: unit tests
 - `shader/`: shader sources
 - `mkdocs/`: this documentation site
+
+## Documentation Preview (MkDocs)
+
+If `mkdocs serve` is not recognized, install MkDocs and Material theme first:
+
+```bash
+python -m pip install mkdocs mkdocs-material
+```
+
+Then run docs locally from the `mkdocs/` directory:
+
+```bash
+python -m mkdocs serve
+```
+
+Using `python -m mkdocs` avoids PATH issues on systems where the `mkdocs` executable is not globally available.

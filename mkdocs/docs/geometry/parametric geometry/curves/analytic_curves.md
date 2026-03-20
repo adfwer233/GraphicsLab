@@ -2,7 +2,7 @@
 
 ## Straight Line
 
-Our striaght line is defined in `StraightLine<dim>`. Each instance is specified by two points $p$ and $q$. The parameterization is 
+Our straight line is defined in `StraightLine<dim>`. Each instance is specified by two points $p$ and $q$. The parameterization is:
 $$
 c(t) = tp + (1 - t)q
 $$
@@ -46,7 +46,7 @@ $$
 \sin \theta = \frac{2t}{1 + t^2} \quad \cos  \theta = \frac{1 - t^2}{1 + t^2},
 $$
 
-substitute to the previous formula, $f'(\theta) = 0$ is equivalent to 
+Substituting into the previous formula, $f'(\theta) = 0$ is equivalent to:
 
 $$
 4(b^2 - a^2)t(1 - t^2) - 2by_0(1 - t^4) + 4ax_0t(1 + t^2) = 0

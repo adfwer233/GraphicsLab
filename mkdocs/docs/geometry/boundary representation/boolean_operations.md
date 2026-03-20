@@ -1,4 +1,4 @@
-**Boolean Operations**
+# Boolean Operations
 
 This page summarizes the boolean implementation in `include/geometry/boundary_representation/boolean/boolean.hpp`.
 

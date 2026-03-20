@@ -6,9 +6,10 @@ nav:
   - Home: index.md
   - GraphicsLab:
       - Get Started: graphicslab/get_started.md
+      - Create Application: graphicslab/create_application.md
   - Language:
       - Overview: language/language.md
-      - Reflection: language/refelction.md
+      - Reflection: language/reflection.md
       - Parallel: language/parallel.md
   - Rendering:
       - Scene: rendering/scene.md
