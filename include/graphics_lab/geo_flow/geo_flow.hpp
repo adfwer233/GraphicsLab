@@ -5,8 +5,8 @@
 
 #include "Eigen/Eigen"
 #include "geometry/mesh/mesh.hpp"
-#include "language/reflection/static_reflector.hpp"
 #include "glm/glm.hpp"
+#include "language/reflection/static_reflector.hpp"
 #include <string>
 
 template <typename T, typename MeshType, typename... Args>
