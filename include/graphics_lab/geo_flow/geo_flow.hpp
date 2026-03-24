@@ -4,7 +4,9 @@
 // #include "igl/per_vertex_normals.h"
 
 #include "Eigen/Eigen"
+#include "geometry/mesh/mesh.hpp"
 #include "language/reflection/static_reflector.hpp"
+#include "glm/glm.hpp"
 #include <string>
 
 template <typename T, typename MeshType, typename... Args>
@@ -78,4 +80,3 @@ template <GeoFlowMeshType MeshType> struct SetColor {
 };
 
 // using test = GeoFlowPerVertexMap<Mesh3D, NormalVector>;
-using test2 = GeoFlowPerVertexMap<Mesh3D, SetColor<Mesh3D>, glm::vec3>;

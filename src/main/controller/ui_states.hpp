@@ -23,6 +23,8 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
         soft_rasterizer,
         deferred_position,
         deferred_normal,
+        shade_auto_smooth,
+        shade_flat,
     };
 
     enum class LightingMode {
@@ -30,7 +32,7 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
         simple
     };
 
-    RenderMode renderMode = RenderMode::raw;
+    RenderMode renderMode = RenderMode::shade_auto_smooth;
     LightingMode lightingMode = LightingMode::simple;
     bool showNormal = false;
     bool showAxis = false;

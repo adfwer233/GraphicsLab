@@ -65,6 +65,19 @@ struct InternalSceneRenderPass : public RenderPass {
                 {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
                 {(DEFAULT_SHADER_PATH / "point_light_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
 
+        auto_smooth_render_system = std::make_unique<SimpleRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "auto_smooth_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
+        flat_render_system = std::make_unique<SimpleRenderSystem<>>(
+            device_, vkl_render_pass->renderPass,
+            std::vector<VklShaderModuleInfo>{
+                {(DEFAULT_SHADER_PATH / "simple_shader.vert.spv").string(), VK_SHADER_STAGE_VERTEX_BIT},
+                {(DEFAULT_SHADER_PATH / "shade_flat_shader.geom.spv").string(), VK_SHADER_STAGE_GEOMETRY_BIT},
+                {(DEFAULT_SHADER_PATH / "auto_smooth_shader.frag.spv").string(), VK_SHADER_STAGE_FRAGMENT_BIT}});
+
         color_render_system = std::make_unique<SimpleRenderSystem<>>(
             device_, vkl_render_pass->renderPass,
             std::vector<VklShaderModuleInfo>{
@@ -207,6 +220,8 @@ struct InternalSceneRenderPass : public RenderPass {
         auto textureKey = simple_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto colorKey = color_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto rawKey = raw_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto autoSmoothKey = auto_smooth_render_system->descriptorSetLayout->descriptorSetLayoutKey;
+        auto flatKey = flat_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto normalKey = normal_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto directionalfieldKey = directional_filed_render_system->descriptorSetLayout->descriptorSetLayoutKey;
@@ -326,6 +341,16 @@ struct InternalSceneRenderPass : public RenderPass {
                             node_mesh->mesh->uniformBuffers[rawKey][frame_index]->flush();
                         }
 
+                        if (node_mesh->mesh->uniformBuffers.contains(autoSmoothKey)) {
+                            node_mesh->mesh->uniformBuffers[autoSmoothKey][frame_index]->writeToBuffer(&ubo);
+                            node_mesh->mesh->uniformBuffers[autoSmoothKey][frame_index]->flush();
+                        }
+
+                        if (node_mesh->mesh->uniformBuffers.contains(flatKey)) {
+                            node_mesh->mesh->uniformBuffers[flatKey][frame_index]->writeToBuffer(&ubo);
+                            node_mesh->mesh->uniformBuffers[flatKey][frame_index]->flush();
+                        }
+
                         if (node_mesh->mesh->uniformBuffers.contains(normalKey)) {
                             node_mesh->mesh->uniformBuffers[normalKey][frame_index]->writeToBuffer(&ubo);
                             node_mesh->mesh->uniformBuffers[normalKey][frame_index]->flush();
@@ -340,6 +365,10 @@ struct InternalSceneRenderPass : public RenderPass {
 
                         if (uiState_.renderMode == UIState::RenderMode::raw) {
                             raw_render_system->renderObject(frameInfo);
+                        } else if (uiState_.renderMode == UIState::RenderMode::shade_auto_smooth) {
+                            auto_smooth_render_system->renderObject(frameInfo);
+                        } else if (uiState_.renderMode == UIState::RenderMode::shade_flat) {
+                            flat_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::wireframe) {
                             wireframe_render_system->renderObject(frameInfo);
                         } else if (uiState_.renderMode == UIState::RenderMode::color) {
@@ -356,7 +385,7 @@ struct InternalSceneRenderPass : public RenderPass {
 
                         if (uiState_.showNormal) {
                             NormalRenderSystemPushConstantData normalRenderSystemPushConstantData{};
-                            normalRenderSystemPushConstantData.normalStrength = 0.005;
+                            normalRenderSystemPushConstantData.normalStrength = 0.015;
                             normalRenderSystemPushConstantData.normalColor = {0.0f, 0.0f, 1.0f};
                             NormalRenderSystemPushConstantDataList list;
                             list.data[0] = normalRenderSystemPushConstantData;
@@ -503,6 +532,8 @@ struct InternalSceneRenderPass : public RenderPass {
 
     std::unique_ptr<SimpleRenderSystem<>> simple_render_system = nullptr;
     std::unique_ptr<SimpleRenderSystem<>> color_render_system = nullptr;
+    std::unique_ptr<SimpleRenderSystem<>> auto_smooth_render_system = nullptr;
+    std::unique_ptr<SimpleRenderSystem<>> flat_render_system = nullptr;
     std::unique_ptr<SimpleRenderSystem<>> raw_render_system = nullptr;
     std::unique_ptr<LineRenderSystem<>> line_render_system = nullptr;
     std::unique_ptr<SimpleWireFrameRenderSystem<>> wireframe_render_system = nullptr;

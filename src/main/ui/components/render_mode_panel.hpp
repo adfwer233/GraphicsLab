@@ -27,17 +27,28 @@ class RenderModelPanel : public UIComponent {
         ImGui::RadioButton("Color", reinterpret_cast<RenderModeType *>(&uiState_.renderMode),
                            static_cast<RenderModeType>(UIState::RenderMode::color));
         ImGui::SameLine();
-        ImGui::RadioButton("Material", reinterpret_cast<RenderModeType *>(&uiState_.renderMode),
+        ImGui::RadioButton("Material", reinterpret_cast<int *>(&uiState_.renderMode),
                            static_cast<RenderModeType>(UIState::RenderMode::material));
-
-        // ImGui::SameLine();
-        ImGui::RadioButton("Path Tracing", reinterpret_cast<RenderModeType *>(&uiState_.renderMode),
+        ImGui::SameLine();
+        ImGui::RadioButton("Path Tracing", reinterpret_cast<int *>(&uiState_.renderMode),
                            static_cast<RenderModeType>(UIState::RenderMode::path_tracing));
 
-        ImGui::SameLine();
-
-        ImGui::RadioButton("Soft Rasterizer", reinterpret_cast<RenderModeType *>(&uiState_.renderMode),
+        ImGui::RadioButton("Soft Rasterizer", reinterpret_cast<int *>(&uiState_.renderMode),
                            static_cast<RenderModeType>(UIState::RenderMode::soft_rasterizer));
+
+        ImGui::RadioButton("Shade Smooth", reinterpret_cast<int *>(&uiState_.renderMode),
+                           static_cast<RenderModeType>(UIState::RenderMode::shade_auto_smooth));
+        ImGui::SameLine();
+        ImGui::RadioButton("Shade Flat", reinterpret_cast<int *>(&uiState_.renderMode),
+                           static_cast<RenderModeType>(UIState::RenderMode::shade_flat));
+
+        if (uiState_.renderMode == UIState::RenderMode::soft_rasterizer) {
+            ImGui::Checkbox("Show Normal", &uiState_.showNormal);
+            ImGui::SameLine();
+            ImGui::Checkbox("Show Axis", &uiState_.showAxis);
+            ImGui::SameLine();
+            ImGui::Checkbox("Show Box", &uiState_.showBox);
+        }
 
         ImGui::SeparatorText("Shading Mode");
 

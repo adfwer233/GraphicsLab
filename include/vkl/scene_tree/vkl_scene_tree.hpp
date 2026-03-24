@@ -329,7 +329,7 @@ class AssimpImporter {
   public:
     AssimpImporter(VklDevice &device, const std::string &filePath) : device_(device), path(filePath) {
         Assimp::Importer importer;
-        auto scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+        auto scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals);
         // this->directory = path.substr(0, path.find_last_of('/'));
         std::filesystem::path assets_path(path);
         this->directory = assets_path.remove_filename().string();
@@ -341,7 +341,7 @@ class AssimpImporter {
     std::unique_ptr<TreeNode> importScene() {
         Assimp::Importer importer;
         auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
-                                                 aiProcess_JoinIdenticalVertices | aiProcess_GenNormals);
+                                                 aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw std::runtime_error("Failed to load model: " + std::string(importer.GetErrorString()));
