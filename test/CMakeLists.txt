@@ -12,6 +12,8 @@ set(SRC_FILE
         geometry/explicit_surface_test.cpp
         geometry/spatial_datastructure_test.cpp
         geometry/rational_curves_test.cpp
+        geometry/nurbs_curve_test.cpp
+        geometry/nurbs_surface_test.cpp
         geometry/brep_constructor_test.cpp
         numeric/polynomial_test.cpp
         numeric/polynomial_solver_test.cpp

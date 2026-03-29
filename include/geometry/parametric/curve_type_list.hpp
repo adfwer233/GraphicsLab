@@ -6,11 +6,13 @@
 #include "bezier_curve_3d.hpp"
 #include "bspline_curve_2d.hpp"
 #include "bspline_curve_3d.hpp"
+#include "nurbs_curve_2d.hpp"
+#include "nurbs_curve_3d.hpp"
 
 #include "parametric_curves/straight_line.hpp"
 
 namespace GraphicsLab::Geometry {
 
-using ParametricCurve2DTypeList = MetaProgramming::TypeList<BezierCurve2D, BSplineCurve2D>;
-using ParametricCurve3DTypeList = MetaProgramming::TypeList<BezierCurve3D, BSplineCurve3D>;
+using ParametricCurve2DTypeList = MetaProgramming::TypeList<BezierCurve2D, BSplineCurve2D, NURBSCurve2D>;
+using ParametricCurve3DTypeList = MetaProgramming::TypeList<BezierCurve3D, BSplineCurve3D, NURBSCurve3D>;
 } // namespace GraphicsLab::Geometry

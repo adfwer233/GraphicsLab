@@ -13,5 +13,5 @@
 #include "tensor_product_bezier.hpp"
 
 namespace GraphicsLab::Geometry {
-using ParamSurfaceTypeList = MetaProgramming::TypeList<Sphere, Torus, TensorProductBezier, ExplicitSurface>;
+using ParamSurfaceTypeList = MetaProgramming::TypeList<Sphere, Torus, TensorProductBezier, ExplicitSurface, NURBSSurface>;
 }

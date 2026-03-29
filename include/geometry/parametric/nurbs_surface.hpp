@@ -1,6 +1,13 @@
 #pragma once
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <limits>
+#include <stdexcept>
+
 #include "glm/glm.hpp"
+#include "geometry/parametric/configuration.hpp"
 #include "parametric_space.hpp"
 #include "parametric_surface.hpp"
 
@@ -27,47 +34,66 @@ struct NURBSSurface : public ParamSurface {
                  std::vector<std::vector<T>> wts, const int degree_u, const int degree_v)
         : control_points(std::move(ctrl_pts)), knot_vector_u(std::move(knots_u)), knot_vector_v(std::move(knots_v)),
           weights(std::move(wts)), degree_u(degree_u), degree_v(degree_v) {
+        order_u = degree_u + 1;
+        order_v = degree_v + 1;
         assert(is_valid());
     }
 
-    PointType evaluate(ParamType param) const override {
-        T u = param.x * knot_vector_u.back();
-        T v = param.y * knot_vector_v.back();
-        assert(is_valid());
-        assert(u >= knot_vector_u[degree_u - 1] && u <= knot_vector_u[knot_vector_u.size() - degree_u]);
-        assert(v >= knot_vector_v[degree_v - 1] && v <= knot_vector_v[knot_vector_v.size() - degree_v]);
-
-        T denominator = 0;
-        PointType numerator(0);
-
-        for (size_t i = 0; i < control_points.size(); ++i) {
-            for (size_t j = 0; j < control_points[i].size(); ++j) {
-                T basis_u = basis_function(i, degree_u, u, knot_vector_u);
-                T basis_v = basis_function(j, degree_v, v, knot_vector_v);
-                T weight = weights[i][j];
-
-                T combined_weight = basis_u * basis_v * weight;
-                numerator += combined_weight * control_points[i][j];
-                denominator += combined_weight;
-            }
-        }
-
+    [[nodiscard]] PointType evaluate(ParamType param) const override {
+        const auto [numerator, denominator] = evaluate_weighted(param);
         return numerator / denominator;
     }
 
-    PointType normal(ParamType param) const override {
-        T u = param.x * knot_vector_u.back();
-        T v = param.y * knot_vector_v.back();
+    [[nodiscard]] PointType normal(ParamType param) const override {
+        auto [du, dv] = derivative(param);
+        const PointType n = glm::cross(du, dv);
+        const T length = glm::length(n);
+        if (length <= kTolerance) {
+            return PointType(0.0);
+        }
+        return n / length;
+    }
 
-        // Compute partial derivatives
-        PointType du = partial_derivative_u(u, v);
-        PointType dv = partial_derivative_v(u, v);
+    [[nodiscard]] std::pair<VectorType, VectorType> derivative(const ParamType param) const override {
+        const auto [u, v] = map_to_knot_domain(param);
 
-        // Compute the normal as the cross product of the partial derivatives
-        PointType n = glm::cross(du, dv);
+        PointType a(0.0);
+        PointType a_u(0.0);
+        PointType a_v(0.0);
+        T w = 0.0;
+        T w_u = 0.0;
+        T w_v = 0.0;
 
-        // Normalize the resulting normal vector
-        return glm::normalize(n);
+        for (size_t i = 0; i < control_points.size(); ++i) {
+            const T nu = basis_function(i, degree_u, u, knot_vector_u);
+            const T dnu = basis_function_derivative(i, degree_u, u, knot_vector_u);
+
+            for (size_t j = 0; j < control_points[i].size(); ++j) {
+                const T nv = basis_function(j, degree_v, v, knot_vector_v);
+                const T dnv = basis_function_derivative(j, degree_v, v, knot_vector_v);
+                const T wij = weights[i][j];
+
+                const T base = wij * nu * nv;
+                const T base_u = wij * dnu * nv;
+                const T base_v = wij * nu * dnv;
+
+                a += base * control_points[i][j];
+                a_u += base_u * control_points[i][j];
+                a_v += base_v * control_points[i][j];
+
+                w += base;
+                w_u += base_u;
+                w_v += base_v;
+            }
+        }
+
+        if (std::abs(w) <= kTolerance) {
+            throw std::runtime_error("NURBS surface derivative encountered near-zero weight denominator.");
+        }
+
+        const PointType s_u = (a_u * w - a * w_u) / (w * w);
+        const PointType s_v = (a_v * w - a * w_v) / (w * w);
+        return {s_u, s_v};
     }
 
     std::pair<PointType, ParamType> project(const PointType point) const override {
@@ -81,112 +107,130 @@ struct NURBSSurface : public ParamSurface {
     }
 
   private:
-    PointType partial_derivative_u(T u, T v) const {
-        assert(is_valid());
-        T denominator = 0;
-        PointType numerator(0);
-        T denominator_derivative = 0;
-        PointType numerator_derivative(0);
+    static constexpr T kTolerance = ParametricConfiguration::system_tolerance;
+
+    [[nodiscard]] std::pair<PointType, T> evaluate_weighted(const ParamType param) const {
+        const auto [u, v] = map_to_knot_domain(param);
+
+        PointType numerator(0.0);
+        T denominator = 0.0;
 
         for (size_t i = 0; i < control_points.size(); ++i) {
+            const T nu = basis_function(i, degree_u, u, knot_vector_u);
             for (size_t j = 0; j < control_points[i].size(); ++j) {
-                T basis_u = basis_function(i, degree_u, u, knot_vector_u);
-                T basis_v = basis_function(j, degree_v, v, knot_vector_v);
-                T basis_u_derivative = basis_function_derivative(i, degree_u, u, knot_vector_u);
-                T weight = weights[i][j];
-
-                T combined_weight = basis_u * basis_v * weight;
-                T combined_weight_derivative = basis_u_derivative * basis_v * weight;
+                const T nv = basis_function(j, degree_v, v, knot_vector_v);
+                const T combined_weight = nu * nv * weights[i][j];
 
                 numerator += combined_weight * control_points[i][j];
                 denominator += combined_weight;
-
-                numerator_derivative += combined_weight_derivative * control_points[i][j];
-                denominator_derivative += combined_weight_derivative;
             }
         }
 
-        return (numerator_derivative * denominator - numerator * denominator_derivative) / (denominator * denominator);
+        if (std::abs(denominator) <= kTolerance) {
+            throw std::runtime_error("NURBS surface evaluation encountered near-zero weight denominator.");
+        }
+
+        return {numerator, denominator};
     }
 
-    PointType partial_derivative_v(T u, T v) const {
-        assert(is_valid());
-        T denominator = 0;
-        PointType numerator(0);
-        T denominator_derivative = 0;
-        PointType numerator_derivative(0);
+    [[nodiscard]] std::pair<T, T> map_to_knot_domain(ParamType param) const {
+        param = move_param_to_std_domain(param);
+        const T u_start = knot_vector_u[static_cast<size_t>(degree_u)];
+        const T u_end = knot_vector_u[knot_vector_u.size() - static_cast<size_t>(degree_u) - 1];
+        const T v_start = knot_vector_v[static_cast<size_t>(degree_v)];
+        const T v_end = knot_vector_v[knot_vector_v.size() - static_cast<size_t>(degree_v) - 1];
 
-        for (size_t i = 0; i < control_points.size(); ++i) {
-            for (size_t j = 0; j < control_points[i].size(); ++j) {
-                T basis_u = basis_function(i, degree_u, u, knot_vector_u);
-                T basis_v = basis_function(j, degree_v, v, knot_vector_v);
-                T basis_v_derivative = basis_function_derivative(j, degree_v, v, knot_vector_v);
-                T weight = weights[i][j];
+        T u = u_start + std::clamp(param.x, T(0.0), T(1.0)) * (u_end - u_start);
+        T v = v_start + std::clamp(param.y, T(0.0), T(1.0)) * (v_end - v_start);
 
-                T combined_weight = basis_u * basis_v * weight;
-                T combined_weight_derivative = basis_u * basis_v_derivative * weight;
-
-                numerator += combined_weight * control_points[i][j];
-                denominator += combined_weight;
-
-                numerator_derivative += combined_weight_derivative * control_points[i][j];
-                denominator_derivative += combined_weight_derivative;
-            }
+        if (std::abs(u - u_end) <= kTolerance) {
+            u = std::nextafter(u_end, u_start);
+        }
+        if (std::abs(v - v_end) <= kTolerance) {
+            v = std::nextafter(v_end, v_start);
         }
 
-        return (numerator_derivative * denominator - numerator * denominator_derivative) / (denominator * denominator);
+        return {u, v};
     }
 
     // Derivative of the basis function
     T basis_function_derivative(size_t i, int d, T t, const std::vector<T> &knot_vector) const {
         if (d == 0) {
-            return 0;
+            return 0.0;
         }
 
-        T left = (t - knot_vector[i]);
-        T right = (knot_vector[i + d] - knot_vector[i]);
-        T left_term = (right == 0) ? 0 : basis_function(i, d - 1, t, knot_vector) / right;
+        const T left_denom = knot_vector[i + static_cast<size_t>(d)] - knot_vector[i];
+        const T right_denom = knot_vector[i + static_cast<size_t>(d) + 1] - knot_vector[i + 1];
 
-        left = (knot_vector[i + d + 1] - t);
-        right = (knot_vector[i + d + 1] - knot_vector[i + 1]);
-        T right_term = (right == 0) ? 0 : basis_function(i + 1, d - 1, t, knot_vector) / right;
+        T left = 0.0;
+        T right = 0.0;
+        if (std::abs(left_denom) > kTolerance) {
+            left = static_cast<T>(d) * basis_function(i, d - 1, t, knot_vector) / left_denom;
+        }
+        if (std::abs(right_denom) > kTolerance) {
+            right = static_cast<T>(d) * basis_function(i + 1, d - 1, t, knot_vector) / right_denom;
+        }
 
-        return d * (left_term - right_term);
+        return left - right;
     }
 
     T basis_function(size_t i, int d, T t, const std::vector<T> &knot_vector) const {
         if (d == 0) {
-            return (t >= knot_vector[i] && t <= knot_vector[i + 1]) ? 1.0 : 0.0;
+            return (t >= knot_vector[i] && t < knot_vector[i + 1]) ? 1.0 : 0.0;
         }
 
-        T left = (t - knot_vector[i]);
-        T right = (knot_vector[i + d] - knot_vector[i]);
-        T left_term = (std::abs(right) <= 1e-6) ? 0 : left / right * basis_function(i, d - 1, t, knot_vector);
+        const T left_denom = knot_vector[i + static_cast<size_t>(d)] - knot_vector[i];
+        const T right_denom = knot_vector[i + static_cast<size_t>(d) + 1] - knot_vector[i + 1];
 
-        left = (knot_vector[i + d + 1] - t);
-        right = (knot_vector[i + d + 1] - knot_vector[i + 1]);
-        T right_term = (std::abs(right) <= 1e-6) ? 0 : left / right * basis_function(i + 1, d - 1, t, knot_vector);
-        // spdlog::info("N {} {} = {}", i, d, left_term + right_term);
-
+        T left_term = 0.0;
+        T right_term = 0.0;
+        if (std::abs(left_denom) > kTolerance) {
+            left_term = (t - knot_vector[i]) / left_denom * basis_function(i, d - 1, t, knot_vector);
+        }
+        if (std::abs(right_denom) > kTolerance) {
+            right_term =
+                (knot_vector[i + static_cast<size_t>(d) + 1] - t) / right_denom * basis_function(i + 1, d - 1, t, knot_vector);
+        }
         return left_term + right_term;
     }
 
     bool is_valid() const {
-        size_t num_control_points_u = control_points.size();
-        size_t num_weights_u = weights.size();
-
-        if (num_control_points_u == 0 || num_weights_u == 0 || control_points[0].size() != weights[0].size()) {
+        if (degree_u < 0 || degree_v < 0) {
+            return false;
+        }
+        const size_t num_control_points_u = control_points.size();
+        if (num_control_points_u == 0 || weights.size() != num_control_points_u) {
             return false;
         }
 
-        size_t num_control_points_v = control_points[0].size();
-        size_t num_weights_v = weights[0].size();
-        size_t num_knots_u = knot_vector_u.size();
-        size_t num_knots_v = knot_vector_v.size();
+        const size_t num_control_points_v = control_points[0].size();
+        if (num_control_points_v == 0 || num_control_points_u <= static_cast<size_t>(degree_u) ||
+            num_control_points_v <= static_cast<size_t>(degree_v)) {
+            return false;
+        }
 
-        return num_control_points_u > degree_u && num_control_points_v > degree_v &&
-               num_weights_u == num_control_points_u && num_weights_v == num_control_points_v &&
-               num_knots_u == num_control_points_u + degree_u + 1 && num_knots_v == num_control_points_v + degree_v + 1;
+        for (size_t i = 0; i < num_control_points_u; ++i) {
+            if (control_points[i].size() != num_control_points_v || weights[i].size() != num_control_points_v) {
+                return false;
+            }
+            for (const T w : weights[i]) {
+                if (w <= 0.0) {
+                    return false;
+                }
+            }
+        }
+
+        const size_t expected_knots_u = num_control_points_u + static_cast<size_t>(degree_u) + 1;
+        const size_t expected_knots_v = num_control_points_v + static_cast<size_t>(degree_v) + 1;
+        if (knot_vector_u.size() != expected_knots_u || knot_vector_v.size() != expected_knots_v) {
+            return false;
+        }
+        if (!std::is_sorted(knot_vector_u.begin(), knot_vector_u.end()) ||
+            !std::is_sorted(knot_vector_v.begin(), knot_vector_v.end())) {
+            return false;
+        }
+
+        return true;
     }
 };
 
