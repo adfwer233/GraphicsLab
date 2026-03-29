@@ -10,7 +10,6 @@
 #include "geometry/parametric/sphere.hpp"
 #include "geometry/parametric/tessellator.hpp"
 #include "geometry/parametric/torus.hpp"
-#include "geometry/parametric_topology/brep_face.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 #include <geometry/constructor/explicit_surface_constructors.hpp>
@@ -18,7 +17,6 @@
 #include <geometry/constructor/tensor_product_bezier_example.hpp>
 #include <geometry/parametric/explicit_surface.hpp>
 #include <geometry/parametric/tensor_product_bezier.hpp>
-#include <geometry/parametric_intersector/surface_surface_intersector.hpp>
 
 namespace GraphicsLab::Geometry::BRep {
 struct Body;
@@ -77,21 +75,6 @@ class ConstructorWidget : public UIComponent {
 
             for (int i = 0; i < 100; i++) {
                 point_cloud.vertices.emplace_back(GraphicsLab::Sampler::sampleUnitSphere<3>());
-            }
-            context_.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), "point cloud");
-        }
-
-        if (ImGui::Button("Add intersection example")) {
-            auto surf1 = GraphicsLab::Geometry::ExplicitSurfaceConstructor::createHyperboloid();
-            GraphicsLab::Geometry::Torus torus({0.0, 0.0, 0.0}, 2.0, 0.5, {0.0, 1.0, 0.0}, {1.0, 0.0, 0.0});
-            auto result = GraphicsLab::Geometry::SurfaceSurfaceIntersector::intersect_all(torus, surf1);
-
-            PointCloud3D point_cloud;
-
-            for (auto &trace : result.traces) {
-                for (auto &p : trace) {
-                    point_cloud.vertices.emplace_back(p.position);
-                }
             }
             context_.sceneTree->addGeometryNode<PointCloud3D>(std::move(point_cloud), "point cloud");
         }

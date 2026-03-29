@@ -10,13 +10,9 @@ set(SRC_FILE
         reflection/dynamic_reflector_test.cpp
         geometry/tensor_product_bezier_test.cpp
         geometry/explicit_surface_test.cpp
-        geometry/explicit_torus_intersector_test.cpp
         geometry/spatial_datastructure_test.cpp
-        geometry/brep_face_test.cpp
-        geometry/line_param_2d_intersector.cpp
         geometry/rational_curves_test.cpp
         geometry/brep_constructor_test.cpp
-        geometry/brep_curve_surface_intersector_test.cpp
         numeric/polynomial_test.cpp
         numeric/polynomial_solver_test.cpp
         crtp/crtp_test.cpp
