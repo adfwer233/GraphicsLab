@@ -15,6 +15,9 @@ set(SRC_FILE
         geometry/nurbs_curve_test.cpp
         geometry/nurbs_surface_test.cpp
         geometry/brep_constructor_test.cpp
+        geometry/intersector/csi_intersector_table_test.cpp
+        geometry/intersector/ppi_intersector_table_test.cpp
+        geometry/intersector/ssi_intersector_table_test.cpp
         numeric/polynomial_test.cpp
         numeric/polynomial_solver_test.cpp
         crtp/crtp_test.cpp
