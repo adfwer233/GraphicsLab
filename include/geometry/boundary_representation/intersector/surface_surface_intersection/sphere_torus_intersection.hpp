@@ -35,7 +35,8 @@ struct SphereTorusIntersection {
 
     static std::vector<SSIResult> solve_concentric_coaxial(const Sphere *sphere, const Torus *torus) {
         if (sphere == nullptr || torus == nullptr) {
-            throw cpptrace::runtime_error("[SphereTorusIntersection::solve_concentric_coaxial] sphere or torus is null");
+            throw cpptrace::runtime_error(
+                "[SphereTorusIntersection::solve_concentric_coaxial] sphere or torus is null");
         }
 
         constexpr double eps = Tolerance::default_tolerance;
@@ -159,8 +160,8 @@ struct SphereTorusIntersection {
             ParamCurve3D *inter_curve = allocator->alloc_param_curve<Ellipse3D>(c, axis1, axis2);
 
             ParamCurve2D *sphere_pcurve = build_sphere_pcurve(inter_curve);
-            ParamCurve2D *torus_pcurve = allocator->alloc_param_pcurve<StraightLine2D>(
-                BRepPoint2{0.0, v / two_pi}, BRepPoint2{1.0, v / two_pi});
+            ParamCurve2D *torus_pcurve =
+                allocator->alloc_param_pcurve<StraightLine2D>(BRepPoint2{0.0, v / two_pi}, BRepPoint2{1.0, v / two_pi});
 
             results.push_back(SSIResult{inter_curve, sphere_pcurve, torus_pcurve});
         }
@@ -170,7 +171,3 @@ struct SphereTorusIntersection {
 };
 
 } // namespace GraphicsLab::Geometry::BRep
-
-
-
-

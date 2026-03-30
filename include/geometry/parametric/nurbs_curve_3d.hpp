@@ -7,4 +7,3 @@ namespace GraphicsLab::Geometry {
 using NURBSCurve3D = NURBSCurveBase<3>;
 
 } // namespace GraphicsLab::Geometry
-

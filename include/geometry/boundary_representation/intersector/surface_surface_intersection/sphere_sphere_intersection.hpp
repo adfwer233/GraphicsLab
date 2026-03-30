@@ -122,6 +122,3 @@ struct SphereSphereIntersection {
 };
 
 } // namespace GraphicsLab::Geometry::BRep
-
-
-

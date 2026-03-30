@@ -6,8 +6,8 @@
 #include <limits>
 #include <stdexcept>
 
-#include "glm/glm.hpp"
 #include "geometry/parametric/configuration.hpp"
+#include "glm/glm.hpp"
 #include "parametric_space.hpp"
 #include "parametric_surface.hpp"
 
@@ -188,8 +188,8 @@ struct NURBSSurface : public ParamSurface {
             left_term = (t - knot_vector[i]) / left_denom * basis_function(i, d - 1, t, knot_vector);
         }
         if (std::abs(right_denom) > kTolerance) {
-            right_term =
-                (knot_vector[i + static_cast<size_t>(d) + 1] - t) / right_denom * basis_function(i + 1, d - 1, t, knot_vector);
+            right_term = (knot_vector[i + static_cast<size_t>(d) + 1] - t) / right_denom *
+                         basis_function(i + 1, d - 1, t, knot_vector);
         }
         return left_term + right_term;
     }

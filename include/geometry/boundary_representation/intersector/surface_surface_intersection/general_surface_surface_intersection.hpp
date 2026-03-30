@@ -10,8 +10,8 @@
 #include "plane_torus_intersection.hpp"
 #include "sphere_sphere_intersection.hpp"
 #include "sphere_torus_intersection.hpp"
-#include "torus_torus_intersection.hpp"
 #include "ssi_results.hpp"
+#include "torus_torus_intersection.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
 

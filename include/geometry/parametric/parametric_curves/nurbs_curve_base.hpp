@@ -129,7 +129,8 @@ template <size_t dim> struct NURBSCurveBase : ParamCurveBase<dim> {
 
         second_weighted_control_points_ =
             derivative_control_points(first_weighted_control_points_, first_knots_, degree_ - 1);
-        second_weight_control_points_ = derivative_control_points(first_weight_control_points_, first_knots_, degree_ - 1);
+        second_weight_control_points_ =
+            derivative_control_points(first_weight_control_points_, first_knots_, degree_ - 1);
         second_knots_ = trimmed_knots(first_knots_);
     }
 
@@ -168,9 +169,9 @@ template <size_t dim> struct NURBSCurveBase : ParamCurveBase<dim> {
             if (std::abs(denom) <= kTolerance) {
                 result.emplace_back(ValueType(0.0));
             } else {
-                result.emplace_back(static_cast<double>(degree) * (control_points[static_cast<size_t>(i + 1)] -
-                                                                    control_points[static_cast<size_t>(i)]) /
-                                    denom);
+                result.emplace_back(
+                    static_cast<double>(degree) *
+                    (control_points[static_cast<size_t>(i + 1)] - control_points[static_cast<size_t>(i)]) / denom);
             }
         }
         return result;
@@ -184,8 +185,8 @@ template <size_t dim> struct NURBSCurveBase : ParamCurveBase<dim> {
     }
 
     template <typename ValueType>
-    static ValueType bspline_evaluate(double u, const std::vector<ValueType> &control_points, const std::vector<double> &knots,
-                                      int degree) {
+    static ValueType bspline_evaluate(double u, const std::vector<ValueType> &control_points,
+                                      const std::vector<double> &knots, int degree) {
         if (control_points.empty()) {
             throw std::runtime_error("B-spline evaluation received empty control points.");
         }
@@ -222,6 +223,3 @@ template <size_t dim> struct NURBSCurveBase : ParamCurveBase<dim> {
 };
 
 } // namespace GraphicsLab::Geometry
-
-
-

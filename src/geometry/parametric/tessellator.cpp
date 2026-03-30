@@ -36,5 +36,4 @@ void Tessellator::tessellate(ParamCurve2D &curve, const int n) {
     }
 }
 
-
 } // namespace GraphicsLab::Geometry

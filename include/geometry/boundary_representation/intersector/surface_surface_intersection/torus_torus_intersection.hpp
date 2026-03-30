@@ -40,7 +40,8 @@ struct TorusTorusIntersection {
 
     static std::vector<SSIResult> solve_concentric_coaxial(const Torus *torus1, const Torus *torus2) {
         if (torus1 == nullptr || torus2 == nullptr) {
-            throw cpptrace::runtime_error("[TorusTorusIntersection::solve_concentric_coaxial] torus1 or torus2 is null");
+            throw cpptrace::runtime_error(
+                "[TorusTorusIntersection::solve_concentric_coaxial] torus1 or torus2 is null");
         }
 
         constexpr double eps = Tolerance::default_tolerance;
@@ -170,7 +171,3 @@ struct TorusTorusIntersection {
 };
 
 } // namespace GraphicsLab::Geometry::BRep
-
-
-
-

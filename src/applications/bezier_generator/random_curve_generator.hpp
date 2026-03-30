@@ -1,9 +1,9 @@
 #pragma once
 
-#include <geometry/parametric/bezier_curve_2d.hpp>
 #include <algorithm>
-#include <cstddef>
 #include <cmath>
+#include <cstddef>
+#include <geometry/parametric/bezier_curve_2d.hpp>
 #include <random>
 #include <utility>
 #include <vector>
@@ -59,7 +59,7 @@ struct RandomCurveGenerator {
     }
 
     static std::vector<std::pair<double, double>> intersect_bezier(const Geometry::BezierCurve2D &curve1,
-                                                                    const Geometry::BezierCurve2D &curve2) {
+                                                                   const Geometry::BezierCurve2D &curve2) {
         std::vector<std::pair<double, double>> intersections;
         intersect_recursive(curve1, curve2, 0.0, 1.0, 0.0, 1.0, intersections);
         return intersections;
