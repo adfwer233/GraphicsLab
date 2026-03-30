@@ -14,6 +14,8 @@ set(SRC_FILE
         geometry/rational_curves_test.cpp
         geometry/nurbs_curve_test.cpp
         geometry/nurbs_surface_test.cpp
+        geometry/parametric_surface_primitives_test.cpp
+        geometry/parametric_curve_primitives_test.cpp
         geometry/brep_constructor_test.cpp
         geometry/intersector/csi_intersector_table_test.cpp
         geometry/intersector/ppi_intersector_table_test.cpp
