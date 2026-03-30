@@ -67,11 +67,15 @@ Accepted input pcurve classes in conversion:
 - plane-plane (`PlanePlaneIntersection`)
 - plane-sphere (`PlaneSphereIntersection`)
 - plane-torus (`PlaneTorusIntersection`)
+- sphere-sphere (`SphereSphereIntersection`)
+- sphere-torus (`SphereTorusIntersection`, coaxial closed-form branch including axial center offsets)
+- torus-torus (`TorusTorusIntersection`, coaxial closed-form branch including axial center offsets)
 
 Plus mirrored handling for:
 
 - sphere-plane (by calling plane-sphere and swapping pcurves)
 - torus-plane (by calling plane-torus and swapping pcurves)
+- torus-sphere (by calling sphere-torus and swapping pcurves)
 
 All other pairs go to the generic marching path `intersect_all(...)`.
 
@@ -79,9 +83,6 @@ All other pairs go to the generic marching path `intersect_all(...)`.
 
 No dedicated SSI intersector headers/dispatch branches exist for common analytic pairs such as:
 
-- sphere-sphere
-- sphere-torus
-- torus-torus
 - cylinder-* / cone-* / NURBS-* / tensor-product-* pairings
 
 ### Notes
@@ -128,8 +129,8 @@ Rows/columns use surface geometry list.
 | Surface1 \\ Surface2 | Plane | Sphere | Torus | TensorProductBezier | ExplicitSurface | NURBSSurface |
 |---|---:|---:|---:|---:|---:|---:|
 | Plane | D | D | D | T | T | T |
-| Sphere | D | T | T | T | T | T |
-| Torus | D | T | T | T | T | T |
+| Sphere | D | D | D | T | T | T |
+| Torus | D | D | D | T | T | T |
 | TensorProductBezier | T | T | T | T | T | T |
 | ExplicitSurface | T | T | T | T | T | T |
 | NURBSSurface | T | T | T | T | T | T |
@@ -142,7 +143,7 @@ Rows/columns use surface geometry list.
 
 ## Priority candidates to add next
 
-1. SSI: `sphere-sphere` and `sphere-torus` (high-value analytic pairs)
+1. SSI: extend dedicated kernels beyond coaxial assumptions (sphere/torus family)
 2. CSI: non-line curve with analytic surfaces (at least Bezier/BSpline vs plane/sphere)
 3. PPI: NURBS2D conversion/support path, then type-pair-specific fast paths if needed
 

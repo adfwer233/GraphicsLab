@@ -8,6 +8,9 @@
 #include "plane_plane_intersection.hpp"
 #include "plane_sphere_intersection.hpp"
 #include "plane_torus_intersection.hpp"
+#include "sphere_sphere_intersection.hpp"
+#include "sphere_torus_intersection.hpp"
+#include "torus_torus_intersection.hpp"
 #include "ssi_results.hpp"
 
 namespace GraphicsLab::Geometry::BRep {
@@ -53,6 +56,14 @@ struct GeneralSurfaceSurfaceIntersection {
                 }
                 return result;
             }
+            if (auto sphere2 = dynamic_cast<const Sphere *>(surf2)) {
+                return SphereSphereIntersection::solve(sphere1, sphere2);
+            }
+            if (auto torus2 = dynamic_cast<const Torus *>(surf2)) {
+                if (SphereTorusIntersection::is_concentric_coaxial(sphere1, torus2)) {
+                    return SphereTorusIntersection::solve_concentric_coaxial(sphere1, torus2);
+                }
+            }
         }
 
         if (auto torus1 = dynamic_cast<const Torus *>(surf1)) {
@@ -62,6 +73,20 @@ struct GeneralSurfaceSurfaceIntersection {
                     std::swap(r.pcurve1, r.pcurve2);
                 }
                 return result;
+            }
+            if (auto sphere2 = dynamic_cast<const Sphere *>(surf2)) {
+                if (SphereTorusIntersection::is_concentric_coaxial(sphere2, torus1)) {
+                    auto result = SphereTorusIntersection::solve_concentric_coaxial(sphere2, torus1);
+                    for (auto &r : result) {
+                        std::swap(r.pcurve1, r.pcurve2);
+                    }
+                    return result;
+                }
+            }
+            if (auto torus2 = dynamic_cast<const Torus *>(surf2)) {
+                if (TorusTorusIntersection::is_concentric_coaxial(torus1, torus2)) {
+                    return TorusTorusIntersection::solve_concentric_coaxial(torus1, torus2);
+                }
             }
         }
 
@@ -144,14 +169,14 @@ struct GeneralSurfaceSurfaceIntersection {
         Eigen::Vector2d b1;
         b1 << glm::dot(tangent, tangent), 0;
 
-        Eigen::Vector2d d_param1 = A1.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b1);
+        Eigen::Vector2d d_param1 = A1.jacobiSvd<Eigen::ComputeThinU | Eigen::ComputeThinV>().solve(b1);
 
         Eigen::Matrix2d A2;
         A2 << glm::dot(du2, tangent), glm::dot(dv2, tangent), 0, 0;
         Eigen::Vector2d b2;
         b2 << glm::dot(tangent, tangent), 0;
 
-        Eigen::Vector2d d_param2 = A2.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b2);
+        Eigen::Vector2d d_param2 = A2.jacobiSvd<Eigen::ComputeThinU | Eigen::ComputeThinV>().solve(b2);
 
         return {BRepPoint2(d_param1[0], d_param1[1]), BRepPoint2(d_param2[0], d_param2[1])};
     }
@@ -205,7 +230,6 @@ struct GeneralSurfaceSurfaceIntersection {
 
         for (auto [pos, param] : surf1_sample) {
             auto [proj, proj_param] = surf2->project(pos);
-            auto [refine1, refine2] = refine_with_newton(surf1, surf2, param, proj_param);
 
             if (glm::distance(proj, pos) < distance_threshold) {
                 result.push_back(std::make_pair(param, proj_param));
@@ -347,42 +371,34 @@ struct GeneralSurfaceSurfaceIntersection {
 
                 auto res1 = interpolate_boundary(param1_old, param1, surf1);
                 auto res2 = interpolate_boundary(param2_old, param2, surf2);
-                auto eval1 = surf1->evaluate(res1);
-                auto eval2 = surf2->evaluate(res2);
 
                 if (check_out_boundary(param1, surf1)) {
                     BRepPoint3 pos = surf1->evaluate(res1);
-                    auto [proj, res2] = surf2->project(pos);
-                    double dist = glm::distance(pos, proj);
+                    auto [proj, proj_param2] = surf2->project(pos);
 
                     if (glm::distance(pos, proj) < Tolerance::default_tolerance * 10000) {
-                        intersections.emplace_back(res1, res2, pos);
-                    } else {
-                        int x = 0;
+                        intersections.emplace_back(res1, proj_param2, pos);
                     }
                 }
 
                 if (check_out_boundary(param2, surf2)) {
                     BRepPoint3 pos = surf2->evaluate(res2);
-                    auto [proj, res1] = surf1->project(pos);
-                    double dist = glm::distance(pos, proj);
-                    if (glm::distance(res1, param1) > 0.5) {
-                        auto res1_left = res1 + BRepVector2{-1.0, 0};
-                        auto res1_right = res1 + BRepVector2{1.0, 0};
+                    auto [proj, proj_param1] = surf1->project(pos);
+                    if (glm::distance(proj_param1, param1) > 0.5) {
+                        auto res1_left = proj_param1 + BRepVector2{-1.0, 0};
+                        auto res1_right = proj_param1 + BRepVector2{1.0, 0};
 
                         double dist_left = glm::distance(res1_left, param1);
                         double dist_right = glm::distance(res1_right, param1);
 
                         if (dist_left < dist_right) {
-                            res1 = res1_left;
+                            proj_param1 = res1_left;
                         } else {
-                            res1 = res1_right;
+                            proj_param1 = res1_right;
                         }
                     }
                     if (glm::distance(pos, proj) < Tolerance::default_tolerance * 10000) {
-                        intersections.emplace_back(res1, res2, pos);
-                    } else {
-                        int x = 0;
+                        intersections.emplace_back(proj_param1, res2, pos);
                     }
                 }
                 break;
@@ -460,7 +476,7 @@ struct GeneralSurfaceSurfaceIntersection {
             spdlog::debug("min dis {}", min_dis_pos);
 
             auto trace = trace_pcurve(surf1, surf2, refine_param1, refine_param2);
-            if (trace.size() > 0) {
+            if (!trace.empty()) {
                 trace_results.push_back(trace);
 
                 std::vector<KDTree::PointPrimitive<3>> points;
@@ -500,7 +516,6 @@ struct GeneralSurfaceSurfaceIntersection {
             if (replicated)
                 continue;
 
-            spdlog::info("trace len {}", trace.size());
             int control_points_count =
                 std::min(static_cast<size_t>(40), std::max(static_cast<size_t>(10), points.size() / 2));
             // fit the 3d curve with BSpline curve
@@ -515,11 +530,6 @@ struct GeneralSurfaceSurfaceIntersection {
             // pcurve1.control_points_.front() = params1.front();
             // pcurve1.control_points_.back() = params1.back();
 
-            int t = 10;
-            for (int i = 0; i <= t; i++) {
-                double p = 1.0 * i / t;
-                spdlog::critical("{}, {}", pcurve1.evaluate(p).x, pcurve1.evaluate(p).y);
-            }
             // spdlog::info("pcurve1 params");
             // // for (auto& ctrl_pt: pcurve1.control_points_) {
             // //     spdlog::info("{} {}", ctrl_pt.x, ctrl_pt.y);
