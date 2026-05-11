@@ -76,6 +76,10 @@ class RenderModelPanel : public UIComponent {
         ImGui::SeparatorText("2D domain options");
         ImGui::Checkbox("Show parameter domain boundary", &uiState_.show_param_boundary);
 
+        ImGui::SliderFloat("2D Zoom", &uiState_.view_2d_zoom, 0.01f, 10.0f);
+        ImGui::SliderFloat("2D Offset X", &uiState_.view_2d_offset_x, -10.0f, 10.0f);
+        ImGui::SliderFloat("2D Offset Y", &uiState_.view_2d_offset_y, -10.0f, 10.0f);
+
         if (context_.sceneTree->active_camera != nullptr) {
             ImGui::SeparatorText("Camera Projection Mode");
             ImGui::RadioButton(

@@ -105,6 +105,11 @@ struct UIState : Reflectable, AutoSerializeSingleton<UIState, "UIState"> {
 
     std::string python_interpreter_path;
 
+    // 2d camera state
+    float view_2d_zoom = 0.5f;
+    float view_2d_offset_x = 0.0f;
+    float view_2d_offset_y = 0.0f;
+
     ReflectDataType reflect() override {
         return {{"python_interpreter_path", TypeErasedValue(&python_interpreter_path)},
                 {"scope_min", TypeErasedValue(&scope_min)},

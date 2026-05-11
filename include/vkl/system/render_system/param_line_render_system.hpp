@@ -8,6 +8,7 @@ struct ParamLinePipelineModifier {
         // 2D param-curve overlay should not be rejected by depth from other 2D draws.
         configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
         configInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+        configInfo.rasterizationInfo.lineWidth = 23.0f;
     }
 };
 

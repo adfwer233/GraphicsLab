@@ -80,9 +80,9 @@ struct InternalScene2DRenderPass : public RenderPass {
 
         Ubo2D ubo2D{};
 
-        ubo2D.zoom = 0.5f;
-        ubo2D.offset_x = 0.0f;
-        ubo2D.offset_y = 0.0f;
+        ubo2D.zoom = uiState_.view_2d_zoom;
+        ubo2D.offset_x = uiState_.view_2d_offset_x;
+        ubo2D.offset_y = uiState_.view_2d_offset_y;
 
         auto lineKey = line_render_system->descriptorSetLayout->descriptorSetLayoutKey;
         auto meshKey = tessellation2d_wireframe_render_system->descriptorSetLayout->descriptorSetLayoutKey;
@@ -112,7 +112,9 @@ struct InternalScene2DRenderPass : public RenderPass {
             };
 
             PointCloud2DRenderSystemPushConstantData pointCloud2DRenderSystemPushConstantData{};
-            pointCloud2DRenderSystemPushConstantData.zoom = 0.5;
+            pointCloud2DRenderSystemPushConstantData.zoom = ubo2D.zoom;
+            pointCloud2DRenderSystemPushConstantData.shift_x = ubo2D.offset_x;
+            pointCloud2DRenderSystemPushConstantData.shift_y = ubo2D.offset_y;
             PointCloud2DRenderSystemPushConstantList list;
             list.data[0] = pointCloud2DRenderSystemPushConstantData;
             point_cloud_2d_render_system->renderObject(frameInfo, list);
@@ -168,7 +170,9 @@ struct InternalScene2DRenderPass : public RenderPass {
                 };
 
                 ParamLineRenderSystemPushConstantData paramLineRenderSystemPushConstantData{};
-                paramLineRenderSystemPushConstantData.zoom = 0.5;
+                paramLineRenderSystemPushConstantData.zoom = uiState_.view_2d_zoom;
+                paramLineRenderSystemPushConstantData.shift_x = uiState_.view_2d_offset_x;
+                paramLineRenderSystemPushConstantData.shift_y = uiState_.view_2d_offset_y;
                 ParamLineRenderSystemPushConstantList list;
                 list.data[0] = paramLineRenderSystemPushConstantData;
                 line_render_system->renderObject(frameInfo, list);
@@ -176,7 +180,7 @@ struct InternalScene2DRenderPass : public RenderPass {
         });
 
         if (uiState_.show_param_boundary) {
-            PureShaderRenderSystemPushConstantData push_constant_data{0.5, 0.0, 0.0};
+            PureShaderRenderSystemPushConstantData push_constant_data{uiState_.view_2d_zoom, uiState_.view_2d_offset_x, uiState_.view_2d_offset_y};
             VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
             push_constant_data_list.data[0] = push_constant_data;
             rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);

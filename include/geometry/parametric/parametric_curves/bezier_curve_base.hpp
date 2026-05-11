@@ -136,7 +136,7 @@ template <size_t dim> struct BezierCurveBase : ParamCurveBase<dim> {
         }
 
         auto [min_it, max_it] = std::ranges::minmax_element(weights_);
-        derivative_bound = std::pow(*max_it / *min_it, 2);
+        derivative_bound *= std::pow(*max_it / *min_it, 2);
 
         for (auto &pt : control_points_) {
             min_x = std::min(min_x, pt.x);
