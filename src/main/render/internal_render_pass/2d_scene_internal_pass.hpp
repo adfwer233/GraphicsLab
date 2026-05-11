@@ -180,7 +180,8 @@ struct InternalScene2DRenderPass : public RenderPass {
         });
 
         if (uiState_.show_param_boundary) {
-            PureShaderRenderSystemPushConstantData push_constant_data{uiState_.view_2d_zoom, uiState_.view_2d_offset_x, uiState_.view_2d_offset_y};
+            PureShaderRenderSystemPushConstantData push_constant_data{uiState_.view_2d_zoom, uiState_.view_2d_offset_x,
+                                                                      uiState_.view_2d_offset_y};
             VklPushConstantInfoList<PureShaderRenderSystemPushConstantData> push_constant_data_list;
             push_constant_data_list.data[0] = push_constant_data;
             rectangle_line_render_system->renderPipeline(commandBuffer, push_constant_data_list);
